@@ -17,12 +17,13 @@ import {
   type ProvenanceStage,
 } from "../../provenance";
 import { Item } from "./item";
+import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { Relation } from "./relation";
+import { compileHrgSchema } from "./schema";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import { HrgTransaction } from "./transaction";
 import type {
   AssociationWrite,
-  FeatureSchema,
   FeatureValue,
   FeatureWrite,
   FeatureWriteInput,
@@ -42,86 +43,8 @@ import type {
 } from "./types";
 import { UndoLog } from "./undo-log";
 
-function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
-  switch (schema.kind) {
-    case "string":
-      return Object.freeze({
-        kind: "string",
-        ...(schema.values ? { values: Object.freeze([...schema.values]) } : {}),
-      });
-    case "number":
-    case "boolean":
-    case "null":
-      return Object.freeze({ kind: schema.kind });
-    case "literal":
-      return Object.freeze({ kind: "literal", value: schema.value });
-    case "array":
-      return Object.freeze({ kind: "array", items: cloneFeatureSchema(schema.items) });
-    case "object": {
-      const fields: Record<string, FeatureSchema> = {};
-      for (const [name, fieldSchema] of Object.entries(schema.fields)) {
-        fields[name] = cloneFeatureSchema(fieldSchema);
-      }
-      const optional = schema.optional ? Object.freeze([...schema.optional]) : undefined;
-      if (optional?.some((name) => !Object.hasOwn(fields, name))) {
-        throw new Error(
-          "E_HRG_SCHEMA_OPTIONAL_FIELD: optional fields must be declared object fields",
-        );
-      }
-      return Object.freeze({
-        kind: "object",
-        fields: Object.freeze(fields),
-        ...(optional ? { optional } : {}),
-        ...(schema.additional ? { additional: cloneFeatureSchema(schema.additional) } : {}),
-      });
-    }
-    case "union":
-      if (schema.variants.length === 0) {
-        throw new Error("E_HRG_SCHEMA_UNION_EMPTY: a feature union requires at least one variant");
-      }
-      return Object.freeze({
-        kind: "union",
-        variants: Object.freeze(schema.variants.map(cloneFeatureSchema)),
-      });
-  }
-}
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function compileHrgSchema(input: HrgSchema): HrgSchema {
-  const itemTypes: Record<string, { features: Readonly<Record<string, FeatureSchema>> }> = {};
-  for (const [itemType, itemSchema] of Object.entries(input.itemTypes)) {
-    const features: Record<string, FeatureSchema> = {};
-    for (const [feature, featureSchema] of Object.entries(itemSchema.features)) {
-      features[feature] = cloneFeatureSchema(featureSchema);
-    }
-    itemTypes[itemType] = Object.freeze({ features: Object.freeze(features) });
-  }
-
-  const relations: Record<string, { kind: "list" | "tree"; itemTypes: readonly string[] }> = {};
-  for (const [relationName, relationSchema] of Object.entries(input.relations)) {
-    if (relationSchema.itemTypes.length === 0) {
-      throw new Error(
-        `E_HRG_SCHEMA_RELATION_EMPTY: relation '${relationName}' requires an allowed item type`,
-      );
-    }
-    const allowed = Object.freeze([...new Set(relationSchema.itemTypes)]);
-    for (const itemType of allowed) {
-      if (!Object.hasOwn(itemTypes, itemType)) {
-        throw new Error(
-          `E_HRG_SCHEMA_RELATION_ITEM_TYPE: relation '${relationName}' references undeclared item type '${itemType}'`,
-        );
-      }
-    }
-    relations[relationName] = Object.freeze({ kind: relationSchema.kind, itemTypes: allowed });
-  }
-
-  return Object.freeze({
-    itemTypes: Object.freeze(itemTypes),
-    relations: Object.freeze(relations),
-  });
 }
 
 export class Utterance {
@@ -132,7 +55,11 @@ export class Utterance {
    * field initializers run in order and the axis records its inverses here.
    */
   private readonly undo = new UndoLog();
-  readonly axis = new TemporalAxis(this.undo);
+  private generation = 0n;
+  private applying = false;
+  readonly axis = new TemporalAxis(this.undo, () => {
+    this.generation++;
+  });
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
   private readonly relations = new Map<string, Relation>();
@@ -149,7 +76,33 @@ export class Utterance {
   constructor(schema: HrgSchema, provenance?: ProvenanceCollector, diagnostics?: Diagnostics) {
     this.provenance = provenance ?? createProvenanceCollector();
     this.diagnostics = diagnostics ?? createDiagnostics();
-    this.schema = compileHrgSchema(schema);
+    const compiled = compileHrgSchema(schema);
+    // Add the runtime-owned scope after all declared and dynamic features.
+    this.schema = Object.freeze({
+      ...compiled,
+      itemTypes: Object.freeze(
+        Object.fromEntries(
+          Object.entries(compiled.itemTypes).map(([name, item]) => [
+            name,
+            Object.freeze({
+              features: Object.freeze({
+                ...item.features,
+                [PARAMETER_SCOPE_FEATURE]: item.features[PARAMETER_SCOPE_FEATURE] ?? {
+                  kind: "string" as const,
+                },
+              }),
+            }),
+          ]),
+        ),
+      ),
+    });
+  }
+
+  /** Never reused, even after rollback. Pure requests only observe committed state. */
+  committedGeneration(): bigint {
+    if (this.applying)
+      throw new Error("E_ATTRIBUTE_UNCOMMITTED: atomic graph mutation in progress");
+    return this.generation;
   }
 
   /**
@@ -292,6 +245,7 @@ export class Utterance {
       timestampMs: decision.timestampMs,
     });
     item._push(write);
+    if (this.items.get(item.id) === item) this.generation++;
     this.undo.record(() => item._popWrite(write));
     return write;
   };
@@ -329,6 +283,7 @@ export class Utterance {
       }),
     });
     relation._pushWrite(write);
+    this.generation++;
     return write;
   };
 
@@ -370,6 +325,7 @@ export class Utterance {
       }),
     });
     this.pushHistory(this.associationHistoryByEdge, key, write);
+    this.generation++;
     return write;
   }
 
@@ -411,6 +367,7 @@ export class Utterance {
     }
     const item = this._createDetachedItem(type, id);
     this.items.set(id, item);
+    this.generation++;
     return item;
   }
 
@@ -440,6 +397,7 @@ export class Utterance {
     });
     item._setCreationDecision(decision.id);
     this.items.set(item.id, item);
+    this.generation++;
     this.undo.record(() => {
       this.items.delete(item.id);
       item._clearCreationDecision();
@@ -471,6 +429,7 @@ export class Utterance {
       this.undo,
     );
     this.relations.set(name, created);
+    this.generation++;
     return created;
   }
 
@@ -614,6 +573,19 @@ export class Utterance {
    * `E_HRG_ROLLBACK_FAILED` (with the rollback error as `cause`).
    */
   _commitAtomically<T>(metadata: TransactionMetadata, apply: () => T): T {
+    if (this.applying) throw new Error("E_HRG_UNDO_NESTED: an undo capture is already open");
+    this.applying = true;
+    try {
+      return this.applyAtomically(metadata, apply);
+    } finally {
+      // UndoLog stops capturing before invoking inverses. Keep the whole lifetime
+      // inaccessible, and never let a rollback return to a speculative cache key.
+      this.generation++;
+      this.applying = false;
+    }
+  }
+
+  private applyAtomically<T>(metadata: TransactionMetadata, apply: () => T): T {
     this.undo.begin();
     let result: T;
     try {
@@ -765,6 +737,7 @@ export class Utterance {
       ...this.stampedTail(history.length, decision),
     });
     this.pushHistory(this.anchorHistoryByItemId, item.id, write);
+    this.generation++;
     return write;
   }
 

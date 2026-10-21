@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-parser-probes-f-v1",
+  "description": "Sixth list of probes for DECtalk 4.63's command text parser: texts for the last rules that might fire on plain text (a list word at a word's end after one consonant; six starting consonants with a y among them; quote marks standing alone). Written before the export and not edited afterwards (scripts/oracle/export-text-parser-fixture.ts).",
+  "entries": [
+    { "id": "last-word-folk", "text": "Try zorfolk today." },
+    { "id": "last-word-leaf", "text": "Try zobleaf today." },
+    { "id": "last-word-brook", "text": "Try zobbrook today." },
+    { "id": "six-consonants-with-y", "text": "Try glycktsk today." },
+    { "id": "six-consonants-with-y-capital", "text": "Ask Rhythmns today." },
+    { "id": "backticks-alone", "text": "A `` b here." },
+    { "id": "apostrophes-alone", "text": "A '' b here." },
+    { "id": "backticks-before-letter", "text": "Say ``x now." }
+  ]
+}

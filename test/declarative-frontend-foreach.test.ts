@@ -25,6 +25,66 @@ function readDispatch(value: unknown): unknown {
  * including inside `apply[*].dispatch`.
  */
 describe("foreach template expansion", () => {
+  it("composes authored paths through nested foreach and field expansion", () => {
+    const paths = new Map<string, readonly (string | number)[]>();
+    const spec = parseDslSpec(
+      {
+        rules: {
+          r: {
+            apply: [
+              {
+                foreach: [{ op: "set" }, { op: "add" }],
+                template: {
+                  for_each_field: ["F1", "F2"],
+                  field: "{field}",
+                  op: "{op}",
+                  dispatch: [
+                    {
+                      foreach: [{ n: 1 }, { n: 2 }],
+                      template: { when: "true", value: "{n}" },
+                    },
+                    { default: "0" },
+                  ],
+                },
+              },
+              { field: "F3", op: "set", value: "3" },
+            ],
+          },
+        },
+      },
+      undefined,
+      (compiled, authored) => {
+        paths.set(compiled.join("."), authored);
+      },
+    );
+    expect(spec.rules.r.apply).toHaveLength(5);
+    for (const index of [0, 1, 2, 3]) {
+      expect(paths.get(`rules.r.apply.${index}.dispatch.1.value`)).toEqual([
+        "rules",
+        "r",
+        "apply",
+        0,
+        "template",
+        "dispatch",
+        0,
+        "template",
+        "value",
+      ]);
+      expect(paths.get(`rules.r.apply.${index}.dispatch.2.default`)).toEqual([
+        "rules",
+        "r",
+        "apply",
+        0,
+        "template",
+        "dispatch",
+        1,
+        "default",
+      ]);
+    }
+    expect(paths.get("rules.r.apply.4.value")).toEqual(["rules", "r", "apply", 1, "value"]);
+    expect([...paths.keys()].some((path) => path.includes("for_each_field"))).toBe(false);
+  });
+
   it("expands a dispatch cross-product to the exact longhand entries in order", () => {
     const spec = parseDslSpec({
       version: "v1",

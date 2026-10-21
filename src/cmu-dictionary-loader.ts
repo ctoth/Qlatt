@@ -1,16 +1,14 @@
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
-
-function readDictionarySourceFromUrlSync(specPath: string): string | null {
-  if (typeof XMLHttpRequest !== "function") return null;
-  const request = new XMLHttpRequest();
-  request.open("GET", specPath, false);
-  request.send();
-  if (request.status < 200 || request.status >= 300) return null;
-  return typeof request.responseText === "string" ? request.responseText : null;
-}
+import { isAbsentResourceAnswer, requestFailureDetail, requestTextSync } from "./resource-answer";
+import {
+  isAbsentSyncResource,
+  noteAbsentSyncResource,
+  noteSynchronousFetch,
+  noteSyncResourceRequest,
+  primedSyncResource,
+} from "./sync-resource-cache";
 
 export type CmuDictionary = Record<string, string>;
-export const DEFAULT_CMU_DICTIONARY_PATH = "/cmu-dictionary.json";
 
 function parseDictionary(source: string, label: string): CmuDictionary {
   let parsed: unknown;
@@ -43,13 +41,10 @@ function normalizeAttempts(specPath: string): string[] {
 }
 
 export function listBundledCmuDictionaryPaths(): string[] {
-  const known = new Set<string>([...DICTIONARY_CACHE.keys(), DEFAULT_CMU_DICTIONARY_PATH]);
-  return [...known].sort();
+  return [...DICTIONARY_CACHE.keys()].sort();
 }
 
-export async function preloadCmuDictionaryFromPath(
-  specPath: string = DEFAULT_CMU_DICTIONARY_PATH,
-): Promise<CmuDictionary> {
+export async function preloadCmuDictionaryFromPath(specPath: string): Promise<CmuDictionary> {
   const cached = DICTIONARY_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -67,16 +62,27 @@ export async function preloadCmuDictionaryFromPath(
 
   if (typeof fetch === "function") {
     for (const attempt of attempts) {
+      let response: Response;
       try {
-        const response = await fetch(attempt);
-        if (!response.ok) continue;
-        const source = await response.text();
-        const parsed = parseDictionary(source, attempt);
-        DICTIONARY_CACHE.set(specPath, parsed);
-        return parsed;
-      } catch {
-        // Try next candidate path.
+        response = await fetch(attempt);
+      } catch (error) {
+        // A request that got no answer says nothing about whether the
+        // dictionary exists.
+        throw new Error(
+          `E_CMU_DICT_FETCH: '${specPath}' request for '${attempt}' failed${requestFailureDetail(0, error)}`,
+          { cause: error },
+        );
       }
+      // Only a resource the server says does not exist is "try the next path".
+      if (isAbsentResourceAnswer(response.status, response.headers.get("content-type"))) continue;
+      if (!response.ok) {
+        throw new Error(
+          `E_CMU_DICT_FETCH: '${specPath}' request for '${attempt}' failed${requestFailureDetail(response.status)}`,
+        );
+      }
+      const parsed = parseDictionary(await response.text(), attempt);
+      DICTIONARY_CACHE.set(specPath, parsed);
+      return parsed;
     }
   }
 
@@ -92,7 +98,7 @@ export async function preloadCmuDictionaryFromPath(
  *
  * Mirrors {@link loadYamlSourceSync}'s strategy (sync XHR in the browser, sync
  * filesystem read under Node) so the synchronous TTS pipeline can load a
- * per-frontend dictionary declared via `dictionary_path`. Caches per path in
+ * per-frontend dictionary declared via `resources.lexicon`. Caches per path in
  * the same {@link DICTIONARY_CACHE} the async loader uses, so a path loaded
  * either way is shared. Generic: a path -> a parsed flat word->pron map.
  */
@@ -102,18 +108,43 @@ export function loadCmuDictionaryFromPathSync(specPath: string): CmuDictionary {
 
   const attempts = normalizeAttempts(specPath);
 
+  // Text a host fetched ahead of time (src/sync-resource-cache.ts): no request.
   for (const attempt of attempts) {
-    const fromUrl = readDictionarySourceFromUrlSync(attempt);
-    if (typeof fromUrl === "string") {
-      const parsed = parseDictionary(fromUrl, attempt);
+    const fromPrimed = primedSyncResource(attempt);
+    if (typeof fromPrimed === "string") {
+      noteSyncResourceRequest(specPath);
+      const parsed = parseDictionary(fromPrimed, attempt);
       DICTIONARY_CACHE.set(specPath, parsed);
       return parsed;
     }
   }
 
   for (const attempt of attempts) {
+    // The server already said there is no such resource: no second request.
+    if (isAbsentSyncResource(attempt)) continue;
+    const answer = requestTextSync(attempt);
+    if (answer === null) break;
+    if (answer.kind === "absent") {
+      noteAbsentSyncResource(attempt);
+      continue;
+    }
+    if (answer.kind === "failed") {
+      throw new Error(
+        `E_CMU_DICT_FETCH: '${specPath}' request for '${attempt}' failed${requestFailureDetail(answer.status, answer.cause)}`,
+        { cause: answer.cause },
+      );
+    }
+    noteSyncResourceRequest(specPath);
+    noteSynchronousFetch(specPath);
+    const parsed = parseDictionary(answer.text, attempt);
+    DICTIONARY_CACHE.set(specPath, parsed);
+    return parsed;
+  }
+
+  for (const attempt of attempts) {
     const source = readFileFromFsSync(attempt);
     if (typeof source === "string") {
+      noteSyncResourceRequest(specPath);
       const parsed = parseDictionary(source, attempt);
       DICTIONARY_CACHE.set(specPath, parsed);
       return parsed;

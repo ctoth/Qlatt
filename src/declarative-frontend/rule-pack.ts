@@ -1,18 +1,72 @@
 import {
+  type CmuDictionary,
+  loadCmuDictionaryFromPathSync,
+  preloadCmuDictionaryFromPath,
+} from "../cmu-dictionary-loader";
+import {
+  getVoiceRegistry,
+  type VoiceDocument,
+  type VoiceRegistry,
+  voiceNameInRegistry,
+  voiceRuleRegistry,
+  withVoiceRulePolicy,
+} from "../dectalk-voice";
+import { parseLtsRulesData } from "../g2p/lts-engine";
+import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
+import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
+import type { PhonotacticsData } from "../g2p/syllabify";
+import { isLtsTableDocument } from "../g2p/table-lts-pronounce";
+import { parsePronunciationLayers } from "../g2p/types";
+import {
+  type AffectLibrary,
+  parseAffectPresets,
+  validateAffectPresetChannels,
+} from "../input/affect-presets";
+import { parseInlineMarkers } from "../input/inline";
+import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
+import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
+import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
+import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
+import { parseTextParserConfig, type TextParserConfig } from "../text-parser/frontend";
+import type { TextParserTable } from "../text-parser/interpreter";
+import {
   cloneValue,
   isPlainObject,
+  isYamlNotFoundError,
+  loadYamlDocument,
+  loadYamlDocumentSync,
   loadYamlSource,
   loadYamlSourceSync,
   parseYamlString,
   resolveIncludePath,
+  type YamlNodeSpans,
+  yamlDocumentSpans,
 } from "../yaml-loader";
+import type { CelMacroDefinition } from "./cel-macros";
 import {
+  type FrontendResources,
   type InventorySpec,
-  loadInventorySpecFromPath,
-  preloadInventorySpecFromPath,
+  inventoryPhonologyPath,
+  inventoryPhonologyReference,
+  parseInventorySpec,
 } from "./inventory";
-import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
-import { assertValidSpec, type ValidationDiagnostic } from "./validation";
+import {
+  DSL_ROOT_KEYS,
+  ForeachExpansionError,
+  type NormalizedDslSpec,
+  normalizeResourceAliases,
+  parseDslSpec,
+} from "./parser";
+import { parseRecognitionConfig } from "./recognition-config";
+import {
+  assertValidSpec,
+  type DiagnosticDocumentSpans,
+  type DocumentSpanOrigin,
+  type RelationFeatureSchemas,
+  type ValidationDiagnostic,
+  validatedHrgSchema,
+  validatedRelationFeatureSchemas,
+} from "./validation";
 
 type PlainObject = Record<string, unknown>;
 
@@ -21,6 +75,55 @@ const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
 /** Rule name -> resource path of the file whose `rules:` block declares it (#219). */
 type RuleOrigins = Readonly<Record<string, string>>;
 const RULE_ORIGINS = new WeakMap<object, RuleOrigins>();
+const PARAMETER_ORIGINS = new WeakMap<object, readonly YamlNodeSpans[]>();
+const RULE_DOCUMENT_SPANS = new WeakMap<object, readonly DiagnosticDocumentSpans[]>();
+const FUNCTION_BODY_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
+const NO_PARAMETER_ORIGINS: readonly YamlNodeSpans[] = Object.freeze([]);
+
+function sourceLookupPath(entry: DiagnosticDocumentSpans): readonly (string | number)[] {
+  return entry.compiledPath ?? entry.value.path;
+}
+
+/**
+ * Winning authored root-parameter locations, with original document paths.
+ * Generated accent/voice values and other compiled surfaces are not covered.
+ * The immutable entries are serializable; object identity only locates the index.
+ */
+export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlNodeSpans[] {
+  return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
+}
+
+/** Authored diagnostic spans, compiled rule paths, and macro body parents. */
+export function rulepackRuleDocumentSpans(
+  spec: CompiledRulepack,
+): readonly DiagnosticDocumentSpans[] {
+  return RULE_DOCUMENT_SPANS.get(spec) ?? NO_PARAMETER_ORIGINS;
+}
+
+/** Follow deepMergeChildWins: arrays/scalars replace, objects retain untouched siblings. */
+function mergeParameterOrigins(
+  base: PlainObject,
+  child: PlainObject,
+  origins = PARAMETER_ORIGINS,
+): readonly YamlNodeSpans[] {
+  function replaced(path: readonly (string | number)[]): boolean {
+    let baseValue: unknown = base;
+    let childValue: unknown = child;
+    for (const key of path) {
+      if (!isPlainObject(baseValue) || !isPlainObject(childValue)) return true;
+      if (!Object.hasOwn(childValue, key)) return false;
+      baseValue = baseValue[key];
+      childValue = childValue[key];
+    }
+    return true;
+  }
+  return Object.freeze([
+    ...(origins.get(base) ?? NO_PARAMETER_ORIGINS).filter(
+      (entry) => !replaced(sourceLookupPath(entry)),
+    ),
+    ...(origins.get(child) ?? NO_PARAMETER_ORIGINS),
+  ]);
+}
 
 /** Loader-derived rule origins: which rulepack file declared each rule. */
 export function rulepackRuleOrigins(spec: CompiledRulepack): RuleOrigins {
@@ -34,12 +137,81 @@ export function rulepackMapOrigins(
   return MAP_ORIGINS.get(spec) ?? {};
 }
 
-/** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
+/** Parse authored YAML and normalize resource aliases before document composition. */
 function parseRulepackDocument(source: string, label: string): PlainObject {
-  const document = parseYamlString(source, label);
-  if (!isPlainObject(document)) {
+  const authored = parseYamlString(source, label, {
+    resource: label.replace(/^(included|base) rulepack /, ""),
+    role: "rulepack",
+  });
+  if (!isPlainObject(authored)) {
     throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
   }
+  const aliases: ValidationDiagnostic[] = [];
+  const document = normalizeResourceAliases(authored, aliases);
+  const authoredSpans = yamlDocumentSpans(authored);
+  const defineAliases = authoredSpans.flatMap((alias) => {
+    const path = alias.value.path;
+    const target = alias.aliasTarget?.path;
+    if (path.length !== 3 || path[0] !== "rules" || path[2] !== "define" || !target) return [];
+    return authoredSpans.flatMap((entry) => {
+      const childPath = entry.value.path;
+      if (
+        childPath.length !== target.length + 1 ||
+        typeof childPath[target.length] !== "string" ||
+        !target.every((part, index) => part === childPath[index])
+      ) {
+        return [];
+      }
+      return [
+        Object.freeze({
+          ...entry,
+          compiledPath: Object.freeze([...path, childPath[target.length]]),
+        }),
+      ];
+    });
+  });
+  RULEPACK_DIAGNOSTICS.set(document, aliases);
+  PARAMETER_ORIGINS.set(
+    document,
+    Object.freeze(
+      yamlDocumentSpans(authored).filter((entry) => entry.value.path[0] === "parameters"),
+    ),
+  );
+  RULE_DOCUMENT_SPANS.set(
+    document,
+    Object.freeze([
+      ...authoredSpans.filter(
+        (entry) =>
+          entry.value.path[0] === "predicates" ||
+          entry.value.path[0] === "patterns" ||
+          entry.value.path[0] === "relations" ||
+          entry.value.path[0] === "schema" ||
+          entry.value.path[0] === "maps" ||
+          entry.value.path[0] === "string_sets" ||
+          entry.value.path[0] === "tags" ||
+          entry.value.path[0] === "frame_programs" ||
+          (entry.value.path[0] === "phases" &&
+            typeof entry.value.path[1] === "number" &&
+            entry.value.path.length <= 3) ||
+          (entry.value.path[0] === "rules" &&
+            (entry.value.path.every((part) => typeof part === "string") ||
+              (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
+              entry.value.path[2] === "set" ||
+              entry.value.path[2] === "insert_points" ||
+              entry.value.path[2] === "constraint" ||
+              (entry.value.path[2] === "select" && entry.value.path[3] === "where"))),
+      ),
+      ...defineAliases,
+    ]),
+  );
+  FUNCTION_BODY_SPANS.set(
+    document,
+    Object.freeze(
+      yamlDocumentSpans(authored).filter(
+        ({ value: { path } }) => path.length === 3 && path[0] === "functions" && path[2] === "body",
+      ),
+    ),
+  );
   MAP_ORIGINS.set(
     document,
     Object.fromEntries(
@@ -67,10 +239,10 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   return document;
 }
 
-function freezeRecursively(value: unknown): void {
-  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return;
+function freezeRecursively<T>(value: T): T {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
   for (const nested of Object.values(value)) freezeRecursively(nested);
-  Object.freeze(value);
+  return Object.freeze(value);
 }
 
 const MERGED_CHILD_ROOT_KEYS = new Set([
@@ -82,6 +254,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "string_sets",
   "maps",
   "tags",
+  "frame_programs",
   "syllabification",
   "text_recognition",
   "phases",
@@ -108,7 +281,6 @@ export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
 } as const);
 
 export type BundledFrontendId = keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS;
-export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRONTEND_ID];
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -128,8 +300,32 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   if (!isPlainObject(merged)) {
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
   }
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(root) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(child) ?? []),
+  ]);
+  // Includes do not merge parameters; the cloned root retains their authored locations.
+  PARAMETER_ORIGINS.set(merged, PARAMETER_ORIGINS.get(root) ?? NO_PARAMETER_ORIGINS);
+  FUNCTION_BODY_SPANS.set(
+    merged,
+    Object.freeze([
+      ...(FUNCTION_BODY_SPANS.get(root) ?? []),
+      ...(FUNCTION_BODY_SPANS.get(child) ?? []),
+    ]),
+  );
+  RULE_DOCUMENT_SPANS.set(
+    merged,
+    Object.freeze([
+      ...(RULE_DOCUMENT_SPANS.get(root) ?? []),
+      ...(RULE_DOCUMENT_SPANS.get(child) ?? []).filter((entry) => entry.value.path[0] !== "phases"),
+    ]),
+  );
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
   RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
+  INHERITABLE_SHADOWED_RULES.set(merged, {
+    ...INHERITABLE_SHADOWED_RULES.get(root),
+    ...INHERITABLE_SHADOWED_RULES.get(child),
+  });
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -143,6 +339,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     "string_sets",
     "maps",
     "tags",
+    "frame_programs",
   ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
@@ -174,6 +371,21 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 
   const childPhases = child.phases as unknown[];
   if (Array.isArray(childPhases) && childPhases.length > 0) {
+    const phaseOffset = Array.isArray(merged.phases) ? merged.phases.length : 0;
+    const phaseSpans = (RULE_DOCUMENT_SPANS.get(child) ?? []).flatMap((entry) => {
+      const path = entry.compiledPath ?? entry.value.path;
+      if (path[0] !== "phases" || typeof path[1] !== "number") return [];
+      return [
+        Object.freeze({
+          ...entry,
+          compiledPath: Object.freeze(["phases", path[1] + phaseOffset, ...path.slice(2)]),
+        }),
+      ];
+    });
+    RULE_DOCUMENT_SPANS.set(
+      merged,
+      Object.freeze([...(RULE_DOCUMENT_SPANS.get(merged) ?? []), ...phaseSpans]),
+    );
     merged.phases = [...(Array.isArray(merged.phases) ? merged.phases : []), ...childPhases];
   }
 
@@ -229,10 +441,135 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 // Only the child's root document is merged (NOT the base's resolved includes),
 // so the base contributes root-level data (parameters, output, …) while rules/
 // phases come from the child's own (fallback-resolved) include list.
+//
+// A child file that SHADOWS a base include (same relative path as an entry of
+// the base's own `include:` list, e.g. both frontends' pipeline.yaml) inherits
+// that base file's INHERITED_SHADOWED_FILE_KEYS dictionaries key-wise: an entry
+// the child declares replaces the base's entry of that name whole, and every
+// other base entry is inherited. It also inherits the base file's rules that
+// the child frontend runs but does not define (see INHERITED_SHADOWED_FILE_KEYS).
+// Everything else in a shadowing file (phases, include, string_sets, …) is
+// still the child's alone, and the base file's own nested includes are not
+// followed.
 
 /** Directory portion of a "/"-separated resource path. */
 function dirOfPath(path: string): string {
   return path.substring(0, path.lastIndexOf("/"));
+}
+
+/**
+ * Keyed sections a child file inherits from the base include it shadows.
+ * `string_sets` is not among them: inheriting it would hand an extending
+ * frontend every base set, and a child has no way to decline one.
+ *
+ * `rules` is inherited by a narrower test, for the same reason: a shadowing
+ * file inherits a rule of the base file only when no file of the child
+ * frontend defines a rule of that name AND one of the child frontend's phases
+ * names it. A base rule the child does not run stays out of its compiled
+ * rulepack, so leaving a rule out of every phase is how a child declines it;
+ * a rule the child defines anywhere replaces the base's whole. The phase lists
+ * are only complete once every include is resolved, so the base file's rules
+ * are carried as candidates (INHERITABLE_SHADOWED_RULES) and
+ * inheritPhasedShadowedRules settles them then. An inherited rule's origin is
+ * the base file its body was read from.
+ */
+const INHERITED_SHADOWED_FILE_KEYS = ["predicates", "maps", "tags", "relations"] as const;
+
+/** A base file's rule that a shadowing child file left undefined. */
+type InheritableRule = Readonly<{ rule: unknown; origin: string; spans: readonly YamlNodeSpans[] }>;
+/** Rule name -> the shadowed base file's rule, until the phases settle it. */
+const INHERITABLE_SHADOWED_RULES = new WeakMap<object, Readonly<Record<string, InheritableRule>>>();
+
+/**
+ * Add to a fully include-resolved document each candidate rule of a shadowed
+ * base file that the document does not define and one of its phases names.
+ */
+function inheritPhasedShadowedRules(resolved: PlainObject): void {
+  const candidates = INHERITABLE_SHADOWED_RULES.get(resolved);
+  if (!candidates) return;
+  const phased = new Set<unknown>();
+  for (const phase of Array.isArray(resolved.phases) ? resolved.phases : []) {
+    if (!isPlainObject(phase) || !Array.isArray(phase.rules)) continue;
+    for (const name of phase.rules) phased.add(name);
+  }
+  const defined = isPlainObject(resolved.rules) ? resolved.rules : {};
+  const inherited = Object.entries(candidates).filter(
+    ([name]) => !Object.hasOwn(defined, name) && phased.has(name),
+  );
+  if (inherited.length === 0) return;
+  RULE_DOCUMENT_SPANS.set(
+    resolved,
+    Object.freeze([
+      ...(RULE_DOCUMENT_SPANS.get(resolved) ?? []),
+      ...inherited.flatMap(([, candidate]) => candidate.spans),
+    ]),
+  );
+  resolved.rules = {
+    ...defined,
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.rule])),
+  };
+  RULE_ORIGINS.set(resolved, {
+    ...RULE_ORIGINS.get(resolved),
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.origin])),
+  });
+}
+
+/**
+ * Lay a child file's INHERITED_SHADOWED_FILE_KEYS over the base file it
+ * shadows: per section, base entries first, child entries replacing by name.
+ * The base file's rules become candidates for inheritPhasedShadowedRules.
+ */
+function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObject): PlainObject {
+  const merged: PlainObject = { ...childFile };
+  RULEPACK_DIAGNOSTICS.set(merged, RULEPACK_DIAGNOSTICS.get(childFile) ?? []);
+  for (const key of INHERITED_SHADOWED_FILE_KEYS) {
+    const baseDict = baseFile[key];
+    if (!isPlainObject(baseDict)) continue;
+    const childDict = childFile[key];
+    merged[key] = {
+      ...(cloneValue(baseDict) as PlainObject),
+      ...(isPlainObject(childDict) ? childDict : {}),
+    };
+  }
+  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
+  RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
+  RULE_DOCUMENT_SPANS.set(
+    merged,
+    Object.freeze([
+      ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
+      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter((entry) => {
+        const path = sourceLookupPath(entry);
+        if (
+          typeof path[0] !== "string" ||
+          !INHERITED_SHADOWED_FILE_KEYS.some((key) => key === path[0]) ||
+          typeof path[1] !== "string"
+        ) {
+          return false;
+        }
+        const childEntries = childFile[path[0]];
+        return !isPlainObject(childEntries) || !Object.hasOwn(childEntries, path[1]);
+      }),
+    ]),
+  );
+  FUNCTION_BODY_SPANS.set(merged, FUNCTION_BODY_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
+  const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
+  INHERITABLE_SHADOWED_RULES.set(
+    merged,
+    Object.fromEntries(
+      Object.entries(isPlainObject(baseFile.rules) ? baseFile.rules : {}).map(([name, rule]) => [
+        name,
+        {
+          rule: cloneValue(rule),
+          origin: baseOrigins[name] as string,
+          spans: (RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
+            (entry) =>
+              sourceLookupPath(entry)[0] === "rules" && sourceLookupPath(entry)[1] === name,
+          ),
+        },
+      ]),
+    ),
+  );
+  return merged;
 }
 
 /**
@@ -253,7 +590,25 @@ function deepMergeChildWins(base: unknown, child: unknown): unknown {
 }
 
 /** Base-directory fallback for include resolution under `extends`. */
-type IncludeFallback = { readonly fromDir: string; readonly toDir: string };
+type IncludeFallback = {
+  readonly fromDir: string;
+  readonly toDir: string;
+  /** Absolute paths of the base root document's own `include:` entries. */
+  readonly baseIncludes: ReadonlySet<string>;
+};
+
+function includeFallbackFor(
+  rootPath: string,
+  basePath: string,
+  baseDoc: PlainObject,
+): IncludeFallback {
+  const baseIncludes = Array.isArray(baseDoc.include) ? (baseDoc.include as string[]) : [];
+  return {
+    fromDir: dirOfPath(rootPath),
+    toDir: dirOfPath(basePath),
+    baseIncludes: new Set(baseIncludes.map((relPath) => resolveIncludePath(basePath, relPath))),
+  };
+}
 
 /**
  * Rewrite a child-directory absolute include path to its base-directory
@@ -268,6 +623,18 @@ function fallbackIncludePath(
   const prefix = fallback.fromDir + "/";
   if (!absPath.startsWith(prefix)) return null;
   return fallback.toDir + "/" + absPath.slice(prefix.length);
+}
+
+/**
+ * The base include a child-directory file shadows, or null when the base's
+ * `include:` list has no file at the same relative path.
+ */
+function shadowedBaseIncludePath(
+  absPath: string,
+  fallback: IncludeFallback | undefined,
+): string | null {
+  const basePath = fallbackIncludePath(absPath, fallback);
+  return basePath !== null && fallback?.baseIncludes.has(basePath) ? basePath : null;
 }
 
 /**
@@ -292,11 +659,15 @@ function resolveIncludesSync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = loadYamlSourceSync(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // Only a file the child directory does not have is read from the base;
+      // one that is there but could not be loaded is an error.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = loadYamlSourceSync(altPath);
       absPath = altPath;
     }
@@ -305,7 +676,13 @@ function resolveIncludesSync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(loadYamlSourceSync(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
@@ -331,6 +708,13 @@ function resolveExtendsSync(
   const baseSource = loadYamlSourceSync(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(baseDoc) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(rootDoc) ?? []),
+  ]);
+  PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
+  RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
+  FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -342,7 +726,7 @@ function resolveExtendsSync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -359,6 +743,13 @@ async function resolveExtendsAsync(
   const baseSource = await loadYamlSource(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(baseDoc) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(rootDoc) ?? []),
+  ]);
+  PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
+  RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
+  FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -370,7 +761,7 @@ async function resolveExtendsAsync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -393,11 +784,14 @@ async function resolveIncludesAsync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = await loadYamlSource(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // See resolveIncludesSync: fall back only when the file is absent.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = await loadYamlSource(altPath);
       absPath = altPath;
     }
@@ -406,7 +800,13 @@ async function resolveIncludesAsync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(await loadYamlSource(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
@@ -416,8 +816,26 @@ async function resolveIncludesAsync(
 
 export type CompiledRulepack = Readonly<NormalizedDslSpec>;
 
+export function rulepackRelationFeatureSchemas(spec: CompiledRulepack): RelationFeatureSchemas {
+  return validatedRelationFeatureSchemas(spec);
+}
+
+/** Checked static Item/relation declarations; runtime enrichment remains explicit. */
+export function rulepackHrgSchema(spec: CompiledRulepack) {
+  const schema = validatedHrgSchema(spec);
+  if (!schema) throw new Error("E_FRONTEND_CONFIG: schema is required for TTS construction");
+  return schema;
+}
+
 const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
 const RULEPACK_DIAGNOSTICS = new WeakMap<object, readonly ValidationDiagnostic[]>();
+const VALIDATED_RULEPACKS = new WeakSet<object>();
+
+/** Successful compiler validation, including its original inventory/schema context. */
+export function assertCompiledRulepack(spec: CompiledRulepack): void {
+  if (!VALIDATED_RULEPACKS.has(spec))
+    throw new Error("E_RULEPACK_UNCHECKED: compile the rulepack before requesting attributes");
+}
 
 function validationInventoryPhonemes(inventory: InventorySpec | null): string[] | undefined {
   if (!inventory) return undefined;
@@ -432,6 +850,7 @@ function validationInventoryPhonemes(inventory: InventorySpec | null): string[] 
 }
 
 function recordDiagnostics(spec: CompiledRulepack, diagnostics: ValidationDiagnostic[]): void {
+  VALIDATED_RULEPACKS.add(spec);
   RULEPACK_DIAGNOSTICS.set(
     spec,
     Object.freeze(diagnostics.map((diagnostic) => Object.freeze({ ...diagnostic }))),
@@ -444,16 +863,131 @@ export function getRulepackValidationDiagnostics(
   return RULEPACK_DIAGNOSTICS.get(spec) ?? Object.freeze([]);
 }
 
+function parseComposedRulepack(
+  merged: PlainObject,
+  voices: ReadonlyMap<string, VoiceDocument>,
+): NormalizedDslSpec {
+  const calls = new Map<string, readonly CelMacroDefinition[]>();
+  const paths: {
+    compiled: readonly (string | number)[];
+    authored: readonly (string | number)[];
+  }[] = [];
+  let spec: NormalizedDslSpec;
+  try {
+    spec = parseDslSpec(
+      withVoiceRulePolicy(merged, voices),
+      (path, macros) => {
+        calls.set(path, macros);
+      },
+      (compiled, authored) => {
+        paths.push({ compiled, authored });
+      },
+    );
+  } catch (error) {
+    if (!(error instanceof ForeachExpansionError)) throw error;
+    const matches = (RULE_DOCUMENT_SPANS.get(merged) ?? []).filter((entry) => {
+      const path = sourceLookupPath(entry);
+      return (
+        path.length === error.path.length && path.every((part, index) => part === error.path[index])
+      );
+    });
+    const span = matches.length === 1 ? matches[0][error.position] : undefined;
+    if (!span) throw error;
+    throw new Error(`${error.message} [${span.resource}:${span.line}:${span.column}]`, {
+      cause: error,
+    });
+  }
+  const bodies = FUNCTION_BODY_SPANS.get(merged) ?? [];
+  const originsOf = (macros: readonly CelMacroDefinition[]): readonly DocumentSpanOrigin[] =>
+    Object.freeze(
+      macros.flatMap((macro) => {
+        const matches = bodies.filter((entry) => entry.value.path[1] === macro.name);
+        if (matches.length !== 1) return [];
+        return [
+          Object.freeze({
+            documentSpan: matches[0].value,
+            parents: originsOf(macro.dependencies),
+          }),
+        ];
+      }),
+    );
+  const spans = RULE_DOCUMENT_SPANS.get(merged) ?? [];
+  const pathOf = (entry: DiagnosticDocumentSpans) =>
+    sourceLookupPath(entry)
+      .map((part, index) =>
+        typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
+      )
+      .join("");
+  const authoredSpans = spans.map((entry) => {
+    const path = pathOf(entry);
+    const macros = calls.get(path);
+    if (
+      !macros ||
+      sourceLookupPath(entry).some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
+      spans.filter((candidate) => pathOf(candidate) === path).length !== 1
+    ) {
+      return entry;
+    }
+    const parents = originsOf(macros);
+    return parents.length ? Object.freeze({ ...entry, parents }) : entry;
+  });
+  const sources = new Map<string, DiagnosticDocumentSpans[]>();
+  for (const entry of authoredSpans) {
+    const key = JSON.stringify(sourceLookupPath(entry));
+    sources.set(key, [...(sources.get(key) ?? []), entry]);
+  }
+  const compiledSpans = authoredSpans.filter(
+    (entry) =>
+      entry.value.path[0] === "predicates" ||
+      entry.value.path[0] === "patterns" ||
+      entry.value.path[0] === "relations" ||
+      entry.value.path[0] === "maps" ||
+      entry.value.path[0] === "string_sets" ||
+      entry.value.path[0] === "tags" ||
+      entry.value.path[0] === "frame_programs" ||
+      entry.value.path[0] === "phases" ||
+      entry.value.path.every((part) => typeof part === "string"),
+  );
+  for (const { compiled, authored } of paths) {
+    const matches = sources.get(JSON.stringify(authored)) ?? [];
+    if (matches.length !== 1) continue;
+    compiledSpans.push(
+      Object.freeze({ ...matches[0], compiledPath: Object.freeze([...compiled]) }),
+    );
+  }
+  // Order diagnostics use a normalized phase name instead of its array index.
+  // Preserve the authored path and do not attribute a duplicate name to one entry.
+  const phaseNames = spec.phases.map((phase) => phase.name);
+  const phaseOrderSpans = compiledSpans.flatMap((entry) => {
+    const path = entry.compiledPath ?? entry.value.path;
+    if (path[0] !== "phases" || typeof path[1] !== "number" || path[2] !== "after") {
+      return [];
+    }
+    const name = phaseNames[path[1]];
+    if (!name || phaseNames.filter((candidate) => candidate === name).length !== 1) return [];
+    return [Object.freeze({ ...entry, compiledPath: Object.freeze(["phases", name, "after"]) })];
+  });
+  RULE_DOCUMENT_SPANS.set(spec, Object.freeze([...compiledSpans, ...phaseOrderSpans]));
+  return spec;
+}
+
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
-  const spec = parseDslSpec(source);
+  const aliases: ValidationDiagnostic[] = [];
+  const voiced = withVoiceRulePolicy(source, loadVoiceRuleDocuments(source));
+  const authored = typeof voiced === "string" ? parseYamlString(voiced, "dsl spec") : voiced;
+  const document = isPlainObject(authored) ? normalizeResourceAliases(authored, aliases) : authored;
+  const spec = parseDslSpec(document);
   const inventory =
-    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+    typeof spec.resources.inventory === "string"
+      ? loadInventorySpecFromPath(spec.resources.inventory)
+      : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     parameterSchemaDeclared,
+    documentSpans: yamlDocumentSpans(authored).filter((entry) => entry.value.path[0] === "schema"),
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...aliases, ...diagnostics]);
   freezeRecursively(spec);
   return spec;
 }
@@ -483,21 +1017,29 @@ export function listBundledRulepackPaths(): string[] {
   return [...known].sort();
 }
 
-export function loadRulepackSpecFromPath(
-  specPath: string = DEFAULT_RULEPACK_PATH,
-): CompiledRulepack {
+/**
+ * The error for a rule pack that could not be loaded: "path unknown" when the
+ * file does not exist, and the loader's own error for anything else.
+ */
+function rulepackPathUnknown(specPath: string, cause: unknown): unknown {
+  if (!isYamlNotFoundError(cause)) return cause;
+  const known = listBundledRulepackPaths();
+  return new Error(
+    `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
+    { cause },
+  );
+}
+
+export function loadRulepackSpecFromPath(specPath: string): CompiledRulepack {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
   let source = "";
   try {
     source = loadYamlSourceSync(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // Resolve `extends` (cross-frontend inheritance) first, then resolve includes
@@ -510,6 +1052,7 @@ export function loadRulepackSpecFromPath(
     specPath,
   );
   const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,
@@ -517,18 +1060,23 @@ export function loadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseComposedRulepack(merged, loadVoiceRuleDocuments(merged));
+  PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
-    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+    typeof spec.resources.inventory === "string"
+      ? loadInventorySpecFromPath(spec.resources.inventory)
+      : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
+    documentSpans: [...rulepackParameterOrigins(spec), ...rulepackRuleDocumentSpans(spec)],
     requireLoweringSpec: true,
     requireTagVocabulary: true,
+    requireSyllabification: true,
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...(RULEPACK_DIAGNOSTICS.get(merged) ?? []), ...diagnostics]);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
@@ -548,6 +1096,16 @@ function attachAccentPolicy(spec: PlainObject, source: string, path: string): vo
   }
   const parameters = isPlainObject(spec.parameters) ? spec.parameters : {};
   const existing = isPlainObject(parameters.policy) ? parameters.policy : {};
+  // This whole subtree is synthesized below; no prior root declaration still owns it.
+  PARAMETER_ORIGINS.set(
+    spec,
+    Object.freeze(
+      (PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS).filter(
+        ({ value: { path } }) =>
+          !(path[0] === "parameters" && path[1] === "policy" && path[2] === "accent_assignment"),
+      ),
+    ),
+  );
   spec.parameters = {
     ...parameters,
     policy: {
@@ -565,21 +1123,15 @@ function attachAccentPolicy(spec: PlainObject, source: string, path: string): vo
   };
 }
 
-export async function preloadRulepackSpecFromPath(
-  specPath: string = DEFAULT_RULEPACK_PATH,
-): Promise<CompiledRulepack> {
+export async function preloadRulepackSpecFromPath(specPath: string): Promise<CompiledRulepack> {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
   let source = "";
   try {
     source = await loadYamlSource(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // See loadRulepackSpecFromPath: resolve `extends` then includes on the raw
@@ -589,6 +1141,7 @@ export async function preloadRulepackSpecFromPath(
     specPath,
   );
   const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,
@@ -596,20 +1149,23 @@ export async function preloadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseComposedRulepack(merged, await preloadVoiceRuleDocuments(merged));
+  PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
-    typeof spec.inventory_path === "string"
-      ? await preloadInventorySpecFromPath(spec.inventory_path)
+    typeof spec.resources.inventory === "string"
+      ? await preloadInventorySpecFromPath(spec.resources.inventory)
       : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
+    documentSpans: [...rulepackParameterOrigins(spec), ...rulepackRuleDocumentSpans(spec)],
     requireLoweringSpec: true,
     requireTagVocabulary: true,
+    requireSyllabification: true,
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...(RULEPACK_DIAGNOSTICS.get(merged) ?? []), ...diagnostics]);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
@@ -693,4 +1249,623 @@ export async function preloadBundledRulepackSpec(
   return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
 
-export const QLATT_ENGLISH_RULEPACK = await preloadBundledRulepackSpec(DEFAULT_FRONTEND_ID);
+const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
+const FRONTEND_ASSET_CACHE = new Map<string, unknown>();
+
+export function listBundledInventoryPaths(): string[] {
+  return [...BUNDLED_INVENTORY_CACHE.keys()].sort();
+}
+
+function phonologyUnreadable(path: string, cause: unknown): Error {
+  return new Error(`E_INVENTORY_PHONOLOGY_PATH: '${path}' could not be loaded`, { cause });
+}
+
+/**
+ * The error for an inventory that could not be loaded: "path unknown" when the
+ * file does not exist, and the loader's own error for anything else.
+ */
+function inventoryPathUnknown(specPath: string, cause: unknown): unknown {
+  if (!isYamlNotFoundError(cause)) return cause;
+  const known = listBundledInventoryPaths();
+  return new Error(
+    `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
+    { cause },
+  );
+}
+
+export function loadInventorySpecFromPath(specPath: string): InventorySpec {
+  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
+  if (cached) return cached;
+
+  let source = "";
+  try {
+    source = loadYamlSourceSync(specPath);
+  } catch (cause) {
+    throw inventoryPathUnknown(specPath, cause);
+  }
+
+  const phonologyPath = inventoryPhonologyReference(source);
+  let phonologySource: string | undefined;
+  if (phonologyPath !== undefined) {
+    try {
+      phonologySource = loadYamlSourceSync(phonologyPath);
+    } catch (cause) {
+      throw phonologyUnreadable(phonologyPath, cause);
+    }
+  }
+  const spec = parseInventorySpec(source, phonologySource);
+  BUNDLED_INVENTORY_CACHE.set(specPath, freezeRecursively(spec));
+  return spec;
+}
+
+export async function preloadInventorySpecFromPath(specPath: string): Promise<InventorySpec> {
+  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
+  if (cached) return cached;
+
+  let source = "";
+  try {
+    source = await loadYamlSource(specPath);
+  } catch (cause) {
+    throw inventoryPathUnknown(specPath, cause);
+  }
+
+  // The phonology document is fetched here, so that nothing is read
+  // synchronously on this path.
+  const phonologyPath = inventoryPhonologyReference(source);
+  let phonologySource: string | undefined;
+  if (phonologyPath !== undefined) {
+    try {
+      phonologySource = await loadYamlSource(phonologyPath);
+    } catch (cause) {
+      throw phonologyUnreadable(phonologyPath, cause);
+    }
+  }
+  const spec = parseInventorySpec(source, phonologySource);
+  BUNDLED_INVENTORY_CACHE.set(specPath, freezeRecursively(spec));
+  return spec;
+}
+
+// ---------------------------------------------------------------------------
+// FrontendResources loader
+// ---------------------------------------------------------------------------
+
+/** Acquire the actual requested voice, including names in an open registry. */
+export function loadFrontendVoiceDocument(
+  registry: VoiceRegistry,
+  voiceName: string,
+): VoiceDocument {
+  const name = voiceNameInRegistry(registry, voiceName);
+  const path = `${registry.dir}/${name}.yaml`;
+  if (!FRONTEND_ASSET_CACHE.has(path)) {
+    FRONTEND_ASSET_CACHE.set(path, freezeRecursively(loadYamlDocumentSync(path)));
+  }
+  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
+}
+
+/** Prepare a selected voice without making a synchronous request. */
+export async function preloadFrontendVoiceDocument(
+  registry: VoiceRegistry,
+  voiceName: string,
+): Promise<VoiceDocument> {
+  const name = voiceNameInRegistry(registry, voiceName);
+  const path = `${registry.dir}/${name}.yaml`;
+  if (!FRONTEND_ASSET_CACHE.has(path)) {
+    FRONTEND_ASSET_CACHE.set(path, freezeRecursively(await loadYamlDocument(path)));
+  }
+  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
+}
+
+/** Raw programmatic specs need only their declared voice rule documents here. */
+export function loadVoiceRuleDocuments(source: unknown): ReadonlyMap<string, VoiceDocument> {
+  const registry = voiceRuleRegistry(source);
+  const documents = new Map<string, VoiceDocument>();
+  if (!registry) return documents;
+  for (const name of new Set([registry.default, ...registry.voices])) {
+    const path = `${registry.dir}/${name}.yaml`;
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(path, freezeRecursively(loadYamlDocumentSync(path)));
+    }
+    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
+  }
+  return documents;
+}
+
+/** Async compilation acquires the same documents through the same owner cache. */
+export async function preloadVoiceRuleDocuments(
+  source: unknown,
+): Promise<ReadonlyMap<string, VoiceDocument>> {
+  const registry = voiceRuleRegistry(source);
+  const documents = new Map<string, VoiceDocument>();
+  if (!registry) return documents;
+  for (const name of new Set([registry.default, ...registry.voices])) {
+    const path = `${registry.dir}/${name}.yaml`;
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(path, freezeRecursively(await loadYamlDocument(path)));
+    }
+    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
+  }
+  return documents;
+}
+
+/** Acquire the contour asynchronously for browser vocabulary checks. */
+export async function preloadFrontendSourceContour(
+  spec: unknown,
+): Promise<FrontendResources["sourceContour"]> {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const path = isPlainObject(spec.resources) ? spec.resources.source_contour : undefined;
+  if (path == null) return undefined;
+  if (typeof path !== "string" || !path.trim()) {
+    throw new Error("E_FRONTEND_CONFIG: source_contour is required");
+  }
+  try {
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(
+        path,
+        freezeRecursively(parseSourceContourDocument(await loadYamlDocument(path))),
+      );
+    }
+  } catch (cause) {
+    throw new Error(`E_FRONTEND_CONFIG: source_contour could not load '${path}'`, { cause });
+  }
+  return { path, spec: FRONTEND_ASSET_CACHE.get(path) as SourceContourSpec };
+}
+
+/**
+ * Load inventory and resource paths from a parsed frontend.yaml spec.
+ * Every resource path originates in the spec — no hardcoded defaults.
+ */
+export function loadFrontendResources(spec: unknown): FrontendResources {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const inventoryPath = declaredResources.inventory;
+  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
+    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
+  }
+  const requireAsset = (
+    value: unknown,
+    name: string,
+    load: (path: string) => unknown = loadYamlDocumentSync,
+  ): string => {
+    if (typeof value !== "string" || !value.trim()) {
+      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
+    }
+    try {
+      if (!FRONTEND_ASSET_CACHE.has(value)) {
+        FRONTEND_ASSET_CACHE.set(value, freezeRecursively(load(value)));
+      }
+    } catch (cause) {
+      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
+      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
+    }
+    return value;
+  };
+  // Pronunciation and number normalization consume this same parsed document.
+  const ltsPath = requireAsset(declaredResources.lts, "lts", (path) => {
+    const document: unknown = path.endsWith(".json")
+      ? JSON.parse(loadYamlSourceSync(path))
+      : loadYamlDocumentSync<unknown>(path);
+    if (document === null || document === undefined) {
+      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
+    }
+    return path.endsWith(".json") && isLtsTableDocument(document)
+      ? document
+      : parseLtsRulesData(document);
+  });
+  const tablePronouncer =
+    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
+  let morphology: MorphologyContext | undefined;
+  if (!tablePronouncer || declaredResources.morphology != null) {
+    const path = requireAsset(declaredResources.morphology, "morphology");
+    const data = FRONTEND_ASSET_CACHE.get(path);
+    const phonotacticsPath = requireAsset(
+      isPlainObject(data) ? data.phonotactics_path : undefined,
+      "morphology.phonotactics_path",
+    );
+    morphology = {
+      path,
+      data: data as MorphologyData,
+      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
+    };
+  }
+  let stress: StressContext | undefined;
+  if (!tablePronouncer || declaredResources.stress_policy != null) {
+    const path = requireAsset(declaredResources.stress_policy, "stress_policy", (path) => {
+      const raw = loadYamlDocumentSync(path);
+      const phonotacticsPath = requireAsset(
+        isPlainObject(raw) ? raw.phonotactics_path : undefined,
+        "stress_policy.phonotactics_path",
+      );
+      const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
+      try {
+        return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+      } catch (cause) {
+        throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
+      }
+    });
+    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
+  }
+  validateFrontendRuntimeConfig(spec);
+  const inventory = loadInventorySpecFromPath(inventoryPath);
+  const speakerProfilePath =
+    declaredResources.speaker_profile == null
+      ? undefined
+      : requireAsset(declaredResources.speaker_profile, "speaker_profile", (path) =>
+          parseSpeakerProfileDocument(loadYamlDocumentSync(path)),
+        );
+  const sourceContourPath =
+    declaredResources.source_contour == null
+      ? undefined
+      : requireAsset(declaredResources.source_contour, "source_contour", (path) =>
+          parseSourceContourDocument(loadYamlDocumentSync(path)),
+        );
+  const textParserConfig = parseTextParserConfig(spec);
+  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
+  const speakerDefinitionPath =
+    speakers.definition_path == null
+      ? undefined
+      : requireAsset(speakers.definition_path, "speakers.definition_path");
+  if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
+  const lexiconReference = declaredResources.lexicon;
+  const lexiconPath =
+    lexiconReference == null
+      ? undefined
+      : requireAsset(lexiconReference, "lexicon", loadCmuDictionaryFromPathSync);
+  const affectPresetsPath =
+    declaredResources.affect_presets == null
+      ? undefined
+      : requireAsset(declaredResources.affect_presets, "affect_presets", (path) =>
+          parseAffectPresets(loadYamlDocumentSync(path)),
+        );
+  const vqChannelsPath =
+    declaredResources.vq_channels == null
+      ? undefined
+      : requireAsset(declaredResources.vq_channels, "vq_channels", (path) => {
+          const document = loadYamlDocumentSync(path);
+          return {
+            channels: parseVoiceQualityChannels(document),
+            rdPolicy: readRdPolicy(document),
+          };
+        });
+  return assembleFrontendResources(spec, inventory, {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  });
+}
+
+/** Acquire the complete declared runtime resources using only async loaders. */
+export async function preloadFrontendResources(spec: unknown): Promise<FrontendResources> {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const inventoryPath = declaredResources.inventory;
+  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
+    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
+  }
+  const requireAsset = async (
+    value: unknown,
+    name: string,
+    load: (path: string) => Promise<unknown> = loadYamlDocument,
+  ): Promise<string> => {
+    if (typeof value !== "string" || !value.trim()) {
+      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
+    }
+    try {
+      if (!FRONTEND_ASSET_CACHE.has(value)) {
+        FRONTEND_ASSET_CACHE.set(value, freezeRecursively(await load(value)));
+      }
+    } catch (cause) {
+      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
+      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
+    }
+    return value;
+  };
+  const ltsPath = await requireAsset(declaredResources.lts, "lts", async (path) => {
+    const document: unknown = path.endsWith(".json")
+      ? JSON.parse(await loadYamlSource(path))
+      : await loadYamlDocument(path);
+    if (document === null || document === undefined) {
+      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
+    }
+    return path.endsWith(".json") && isLtsTableDocument(document)
+      ? document
+      : parseLtsRulesData(document);
+  });
+  const tablePronouncer =
+    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
+  let morphology: MorphologyContext | undefined;
+  if (!tablePronouncer || declaredResources.morphology != null) {
+    const path = await requireAsset(declaredResources.morphology, "morphology");
+    const data = FRONTEND_ASSET_CACHE.get(path);
+    const phonotacticsPath = await requireAsset(
+      isPlainObject(data) ? data.phonotactics_path : undefined,
+      "morphology.phonotactics_path",
+    );
+    morphology = {
+      path,
+      data: data as MorphologyData,
+      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
+    };
+  }
+  let stress: StressContext | undefined;
+  if (!tablePronouncer || declaredResources.stress_policy != null) {
+    const path = await requireAsset(
+      declaredResources.stress_policy,
+      "stress_policy",
+      async (path) => {
+        const raw = await loadYamlDocument(path);
+        const phonotacticsPath = await requireAsset(
+          isPlainObject(raw) ? raw.phonotactics_path : undefined,
+          "stress_policy.phonotactics_path",
+        );
+        const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
+        try {
+          return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+        } catch (cause) {
+          throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
+        }
+      },
+    );
+    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
+  }
+  validateFrontendRuntimeConfig(spec);
+  const inventory = await preloadInventorySpecFromPath(inventoryPath);
+  const speakerProfilePath =
+    declaredResources.speaker_profile == null
+      ? undefined
+      : await requireAsset(declaredResources.speaker_profile, "speaker_profile", async (path) =>
+          parseSpeakerProfileDocument(await loadYamlDocument(path)),
+        );
+  const sourceContourPath =
+    declaredResources.source_contour == null
+      ? undefined
+      : await requireAsset(declaredResources.source_contour, "source_contour", async (path) =>
+          parseSourceContourDocument(await loadYamlDocument(path)),
+        );
+  const textParserConfig = parseTextParserConfig(spec);
+  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
+  const speakerDefinitionPath =
+    speakers.definition_path == null
+      ? undefined
+      : await requireAsset(speakers.definition_path, "speakers.definition_path");
+  if (textParserConfig) await requireAsset(textParserConfig.tablePath, "text_parser.table_path");
+  const lexiconPath =
+    declaredResources.lexicon == null
+      ? undefined
+      : await requireAsset(declaredResources.lexicon, "lexicon", preloadCmuDictionaryFromPath);
+  const affectPresetsPath =
+    declaredResources.affect_presets == null
+      ? undefined
+      : await requireAsset(declaredResources.affect_presets, "affect_presets", async (path) =>
+          parseAffectPresets(await loadYamlDocument(path)),
+        );
+  const vqChannelsPath =
+    declaredResources.vq_channels == null
+      ? undefined
+      : await requireAsset(declaredResources.vq_channels, "vq_channels", async (path) => {
+          const document = await loadYamlDocument(path);
+          return {
+            channels: parseVoiceQualityChannels(document),
+            rdPolicy: readRdPolicy(document),
+          };
+        });
+  return assembleFrontendResources(spec, inventory, {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  });
+}
+
+function validateFrontendRuntimeConfig(spec: Record<string, unknown>): void {
+  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
+  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
+    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
+  if (!parseRecognitionConfig(spec))
+    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
+  const punctuationTokens = isPlainObject(spec.transcription)
+    ? spec.transcription.punctuation_tokens
+    : undefined;
+  if (
+    !Array.isArray(punctuationTokens) ||
+    !punctuationTokens.length ||
+    !punctuationTokens.every(
+      (token): token is string => typeof token === "string" && token.length > 0,
+    )
+  ) {
+    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
+  }
+}
+
+/** Assemble already acquired documents; no loader or fallback is called here. */
+function assembleFrontendResources(
+  spec: Record<string, unknown>,
+  inventory: InventorySpec,
+  {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  }: {
+    inventoryPath: string;
+    ltsPath: string;
+    morphology?: MorphologyContext;
+    stress?: StressContext;
+    speakerProfilePath?: string;
+    sourceContourPath?: string;
+    speakerDefinitionPath?: string;
+    textParserConfig: TextParserConfig | null;
+    lexiconPath?: string;
+    affectPresetsPath?: string;
+    vqChannelsPath?: string;
+  },
+): FrontendResources {
+  const phonologyPath = inventoryPhonologyPath(inventory);
+  const vqChannels =
+    vqChannelsPath === undefined
+      ? undefined
+      : {
+          path: vqChannelsPath,
+          ...(FRONTEND_ASSET_CACHE.get(vqChannelsPath) as {
+            channels: readonly VoiceQualityChannel[];
+            rdPolicy: RdPolicy;
+          }),
+        };
+  const affectLibrary =
+    affectPresetsPath === undefined
+      ? undefined
+      : (FRONTEND_ASSET_CACHE.get(affectPresetsPath) as AffectLibrary);
+  if (affectLibrary && vqChannels) {
+    validateAffectPresetChannels(affectLibrary, vqChannels.channels);
+  }
+  return freezeRecursively({
+    inventory,
+    ...(Object.hasOwn(spec, "inline_markers")
+      ? { inlineMarkers: parseInlineMarkers(spec.inline_markers) }
+      : {}),
+    inventoryPath,
+    inventoryDocuments:
+      phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
+    lts: { path: ltsPath, document: FRONTEND_ASSET_CACHE.get(ltsPath) },
+    ...(!ltsPath.endsWith(".json") || !isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath))
+      ? {
+          pronunciationLayers: parsePronunciationLayers(
+            isPlainObject(spec.transcription) ? spec.transcription.pronunciation_layers : undefined,
+          ),
+        }
+      : {}),
+    ...(morphology === undefined ? {} : { morphology }),
+    ...(stress === undefined ? {} : { stress }),
+    ...(speakerDefinitionPath === undefined
+      ? {}
+      : {
+          speakerDefinition: {
+            path: speakerDefinitionPath,
+            data: FRONTEND_ASSET_CACHE.get(speakerDefinitionPath),
+          },
+        }),
+    ...(lexiconPath === undefined
+      ? {}
+      : {
+          lexicon: {
+            path: lexiconPath,
+            dictionary: FRONTEND_ASSET_CACHE.get(lexiconPath) as CmuDictionary,
+          },
+        }),
+    ...(affectPresetsPath === undefined || !affectLibrary
+      ? {}
+      : {
+          affectPresets: {
+            path: affectPresetsPath,
+            library: affectLibrary,
+          },
+        }),
+    ...(vqChannels ? { vqChannels } : {}),
+    ...(textParserConfig === null
+      ? {}
+      : {
+          textParser: {
+            config: textParserConfig,
+            table: FRONTEND_ASSET_CACHE.get(textParserConfig.tablePath) as TextParserTable,
+          },
+        }),
+    ...(sourceContourPath === undefined
+      ? {}
+      : {
+          sourceContour: {
+            path: sourceContourPath,
+            spec: FRONTEND_ASSET_CACHE.get(sourceContourPath) as SourceContourSpec,
+          },
+        }),
+    ...(speakerProfilePath === undefined
+      ? {}
+      : {
+          speakerProfile: {
+            path: speakerProfilePath,
+            spec: FRONTEND_ASSET_CACHE.get(speakerProfilePath) as SpeakerProfileSpec,
+          },
+        }),
+  });
+}
+
+/** One prepared frontend, using the existing rulepack and resource caches. */
+export type ResolvedFrontend = Readonly<{
+  spec: CompiledRulepack;
+  resources: FrontendResources;
+  voices: Readonly<Record<string, VoiceDocument>>;
+}>;
+
+function requestedVoices(spec: CompiledRulepack, selectedVoice?: string): string[] {
+  const registry = getVoiceRegistry(spec);
+  return registry
+    ? [
+        ...new Set([
+          registry.default,
+          ...registry.voices,
+          ...(selectedVoice ? [selectedVoice] : []),
+        ]),
+      ]
+    : [];
+}
+
+/** Prepare the declared closure before synchronous execution. */
+export function resolveFrontend(specPath: string, selectedVoice?: string): ResolvedFrontend {
+  const spec = loadRulepackSpecFromPath(specPath);
+  const resources = loadFrontendResources(spec);
+  const registry = getVoiceRegistry(spec);
+  const voices: Record<string, VoiceDocument> = Object.create(null);
+  if (registry) {
+    for (const name of requestedVoices(spec, selectedVoice)) {
+      voices[voiceNameInRegistry(registry, name)] = loadFrontendVoiceDocument(registry, name);
+    }
+  }
+  return freezeRecursively({ spec, resources, voices });
+}
+
+/** Acquire the same closure without synchronous loads on a cache miss. */
+export async function preloadFrontend(
+  specPath: string,
+  selectedVoice?: string,
+): Promise<ResolvedFrontend> {
+  const spec = await preloadRulepackSpecFromPath(specPath);
+  const resources = await preloadFrontendResources(spec);
+  const registry = getVoiceRegistry(spec);
+  const voices: Record<string, VoiceDocument> = Object.create(null);
+  if (registry) {
+    for (const name of requestedVoices(spec, selectedVoice)) {
+      voices[voiceNameInRegistry(registry, name)] = await preloadFrontendVoiceDocument(
+        registry,
+        name,
+      );
+    }
+  }
+  return freezeRecursively({ spec, resources, voices });
+}

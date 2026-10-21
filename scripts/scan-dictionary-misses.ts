@@ -3,9 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  DEFAULT_CMU_DICTIONARY_PATH,
-  preloadCmuDictionaryFromPath,
-} from "../src/cmu-dictionary-loader";
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
+import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 type ParsedArgs = {
@@ -103,17 +104,13 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
     console.warn = (...warnArgs: unknown[]) => {
       const text = warnArgs.map((arg) => String(arg)).join(" ");
       logger.warn(text);
-      const missMatch = text.match(/Word "([^"]+)" not found in dictionary/);
-      if (missMatch) {
-        missCount += 1;
-        const missWord = missMatch[1];
-        missWordCounts.set(missWord, (missWordCounts.get(missWord) ?? 0) + 1);
-      }
     };
 
     try {
-      const dictionary = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
-      const allWords = Object.keys(dictionary).sort();
+      const { lexicon } = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+      if (!lexicon)
+        throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+      const allWords = Object.keys(lexicon.dictionary).sort();
       const words = args.full ? allWords : allWords.slice(0, args.limit);
 
       logger.info(
@@ -123,13 +120,26 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
 
       let processed = 0;
       for (const word of words) {
+        const provenance = createProvenanceCollector();
         try {
-          textToKlattTrack(word);
+          textToKlattTrack(word, undefined, undefined, { provenance });
         } catch (error) {
           errorCount += 1;
           logger.warn(
             `[dict-miss] error word="${word}" reason="${error instanceof Error ? error.message : String(error)}"`,
           );
+        } finally {
+          // Count configured G2P fallbacks, not all non-dictionary sources.
+          for (const decision of provenance.getDecisions()) {
+            if (
+              decision.stage !== "transcribe" ||
+              decision.type !== "fallback_pronunciation_selected"
+            )
+              continue;
+            const missWord = decision.subject.slice("word:".length);
+            missCount += 1;
+            missWordCounts.set(missWord, (missWordCounts.get(missWord) ?? 0) + 1);
+          }
         }
         processed += 1;
         if (processed % args.progressEvery === 0) {

@@ -46,7 +46,8 @@ describe("track lowering output config", () => {
     expect(lowering.id).toBe("dectalk-english-track-lowering");
     expect(lowering.f0.renderer.type).toBe("layered_additive");
     expect(lowering.f0.layered_model_ref).toBe("f0_model");
-    expect(lowering.timeline.duration_floors.stop_release_ms.value).toBe(7);
+    // DECtalk's duration rules set every frame count; lowering adds no floor.
+    expect(lowering.timeline.duration_floors.stop_release_ms.value).toBe(0);
     expect(lowering.transitions.blend.factor.value).toBe(0.5);
   });
 

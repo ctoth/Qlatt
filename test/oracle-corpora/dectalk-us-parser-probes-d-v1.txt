@@ -1,0 +1,144 @@
+# Fourth list of probes for DECtalk 4.63's command text parser: texts aimed at
+# the rules of CMD/par_rule2.par that the earlier lists never made fire
+# (scripts/oracle/text-parser-coverage.ts), and the sentences vtm-port traced
+# for the abbreviation rules. One text per line; written before the export and
+# not edited afterwards (scripts/oracle/export-text-parser-fixture.ts).
+
+# vtm-port's sentences (list words, titles).
+Drive 30 mph in town.
+Drive 30 MPH. in town.
+Drive 30 mph.
+Drive 30 mph, then stop.
+Is it 30 mph?
+Send the URL now.
+See the API now.
+It is fyi only.
+Ask capt Smith now.
+The rm is big.
+The apt. is big.
+The Apt. is big.
+The apt is big.
+Go on Mon and Tue.
+Use E.G. this.
+Use I.E. this.
+Use i.e. this.
+Use w/o this.
+He has rec'd it.
+Dr. Smith lives on Oak Dr. now.
+DR. Smith is here.
+Dr. smith is here.
+Dr Smith is here.
+Dr. Jones' car.
+St. Paul is on Main St.
+St. John's Dr. Smith.
+Ask AT&T now.
+Ask at&t now.
+Dr. A. Smith is here.
+Dr. J. R. Smith is here.
+
+# Paths and backslashes (R2430, R2431, R2433, R2444, R2450).
+Open C:\temp\notes now.
+Look in D:\work for it.
+Use a \ here.
+The path is \\server\share today.
+
+# White space before a mark (R5199, R5200).
+Wait , then go.
+Is it late ? Yes.
+Stop . Now go.
+
+# Quotes around words with marks inside (R59, R31, R5400, R5401).
+Open "readme.txt" now.
+It cost "$5" then.
+He said ``hello'' to her.
+She typed "a.b" there.
+
+# Doubled and repeated marks inside a word (R34, R50, R70, R71, R51, R52, R54).
+Use std::vector here.
+Wait..now go.
+Try snake__case today.
+Well--then go.
+Stop!!!!! Now go.
+He wrote ----- there.
+I like c++ a lot.
+I like C++ a lot.
+What?!. Yes.
+Really?, yes.
+
+# An abbreviation or an initial before a mark (R56, R5601).
+He works at Acme Inc., now.
+It was Jan., then Feb.
+Ask J., then go.
+
+# Addresses (R131, R374, R3742, R330, R376, R377, R378, R381, R8020).
+Get ftp://files.example.com/readme now.
+Mail joe@example.com today.
+Write to ann@mit.edu now.
+Ask bob @ mit about it.
+Go to example dot com now.
+See example.org:80/path now.
+See example.org/path now.
+Visit site.co.uk today.
+Visit mit.edu today.
+Visit whitehouse.gov today.
+Visit example.info today.
+It is and/or here.
+We are open 24/7 here.
+
+# Months and days in words (R310, R311, R318, R3711, R3712).
+March 12 is fine.
+June 21 is fine.
+January 5 is fine.
+August 2 is fine.
+It was 5-January-1996 then.
+It was 5/January/96 then.
+It is Mon. Jan. 5 today.
+It is Tue. March 3 today.
+It is Fri Jan 5 today.
+
+# Time zones, directions, Roman numerals (R372, R384, R387).
+It is 5 EST now.
+It is 5 (PST) now.
+Go to 12 N. Main now.
+It is at 40 NW today.
+Henry VIII was king.
+World War II ended.
+See Chapter IV today.
+
+# Words that are in no dictionary (R342-R353, R355, R392, R393, R398, R352).
+Ask McDonald about it.
+Ask Mcdonald about it.
+Use PowerPoint today.
+Use MacBook today.
+He said aaah then.
+It is biggish today.
+He said shiuu then.
+Ask Schwartzkopf today.
+Try strengthless today.
+Try xylophonist today.
+Try blorptastic today.
+Try unhelpfulness today.
+Try zzyzx today.
+
+# Hyphens and marks inside unknown words (R221, R222, R223, R224, R230).
+Send e-mail now.
+Wear a T-shirt today.
+Build an a-frame there.
+Try the blorp-zorp today.
+Say yes,no then.
+Say half.baked then.
+
+# Possessive after consonants (R235).
+The TV's on.
+The CD's here.
+It is Bob's car.
+
+# Long telephone numbers (R520, R522, R524, R526, R530, R532, R540, R547).
+Call 011-44-20-7946-0958 now.
+Call 011-33-1-4268-5300 now.
+Call 1-800-555-1212 now.
+Call 617-555-1212 now.
+Call 617 555 1212 now.
+Call 555-1212 ext 34 now.
+Call 20-7946 now.
+Call 44-20-7946 now.

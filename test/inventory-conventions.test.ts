@@ -1,17 +1,19 @@
 import { expect, it, vi } from "vitest";
-import * as inventoryModule from "../src/declarative-frontend/inventory";
 import {
-  loadInventorySpecFromPath,
   materializePhonemeTarget,
   parseInventorySpec,
 } from "../src/declarative-frontend/inventory";
 import * as rulepackModule from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { syllabify } from "../src/g2p/syllabify";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import * as yamlModule from "../src/yaml-loader";
+import * as yamlLoader from "../src/yaml-loader";
 
 const base = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");
 
@@ -42,8 +44,11 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
   const provenance = createProvenanceCollector();
   const diagnostics = createDiagnostics();
   const tokens = transcribeText("hello", {
+    compiledSpec: rulepackModule.loadBundledRulepackSpec("qlatt-english"),
+    resources: loadFrontendResources(rulepackModule.loadBundledRulepackSpec("qlatt-english")),
     provenance,
     diagnostics,
+    dictionaryMap: {},
     dictLookup: () => ["HH", "bad!", "OW1"],
   });
   expect(tokens.map((token) => token.phoneme)).toEqual(["HH", "OW"]);
@@ -59,21 +64,20 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
 });
 
 it("keeps multi-character onset symbols distinct", () => {
-  const spy = vi
-    .spyOn(yamlModule, "loadYamlDocumentSync")
-    .mockReturnValue({ vowels: ["A"], legal_onsets: ["TH R"] });
-  try {
-    expect(syllabify(["A", "TH", "R", "A"], "/fixture/onset-collision.yaml")).toEqual([
-      ["A"],
-      ["TH", "R", "A"],
-    ]);
-    expect(syllabify(["A", "T", "HR", "A"], "/fixture/onset-collision.yaml")).toEqual([
-      ["A", "T"],
-      ["HR", "A"],
-    ]);
-  } finally {
-    spy.mockRestore();
-  }
+  const { stress } = rulepackModule.loadFrontendResources(
+    rulepackModule.loadBundledRulepackSpec("qlatt-english"),
+  );
+  if (!stress) throw new Error("Qlatt fixture requires stress context");
+  const phonotactics = {
+    ...stress.phonotactics,
+    vowels: ["A"],
+    legal_onsets: ["TH R"],
+  };
+  expect(syllabify(["A", "TH", "R", "A"], phonotactics)).toEqual([["A"], ["TH", "R", "A"]]);
+  expect(syllabify(["A", "T", "HR", "A"], phonotactics)).toEqual([
+    ["A", "T"],
+    ["HR", "A"],
+  ]);
 });
 
 // Rename vocabulary in both inventory and declarative rules, leaving function
@@ -94,14 +98,27 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
   const phrase = "The little bird sings. A cat sleeps.";
   const control = textToKlattTrackDetailed(phrase);
   const spec = rulepackModule.loadBundledRulepackSpec("qlatt-english");
-  const resources = inventoryModule.loadFrontendResources(spec);
-  const alternate = renameVocabulary(spec) as typeof spec;
+  const resources = rulepackModule.loadFrontendResources(spec);
+  const renamed = renameVocabulary(spec) as typeof spec;
   const alternateInventory = renameVocabulary(resources.inventory) as typeof resources.inventory;
-  const specSpy = vi.spyOn(rulepackModule, "loadBundledRulepackSpec").mockReturnValue(alternate);
-  const resourceSpy = vi
-    .spyOn(inventoryModule, "loadFrontendResources")
-    .mockReturnValue({ ...resources, inventory: alternateInventory });
+  const inventoryPath = "/fixture/renamed-acoustic-inventory.yaml";
+  const loadSource = yamlLoader.loadYamlSourceSync;
+  const sourceSpy = vi
+    .spyOn(yamlLoader, "loadYamlSourceSync")
+    .mockImplementation((path) =>
+      path === inventoryPath ? JSON.stringify(alternateInventory) : loadSource(path),
+    );
+  let resourceSpy: ReturnType<typeof vi.spyOn> | undefined;
   try {
+    const alternate = rulepackModule.compileRuleEngineSpec({
+      ...renamed,
+      resources: { ...renamed.resources, inventory: inventoryPath },
+    });
+    resourceSpy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
+      spec: alternate,
+      resources: { ...resources, inventory: alternateInventory },
+      voices: {},
+    });
     const result = textToKlattTrackDetailed(phrase);
     expect(result.track.map(({ time, phoneme, params }) => ({ time, phoneme, params }))).toEqual(
       control.track.map(({ time, phoneme, params }) => ({
@@ -113,33 +130,31 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
     expect(result.track.some((frame) => frame.phoneme === "pause")).toBe(true);
     expect(result.track.at(-1)?.phoneme).toBe("pause");
   } finally {
-    specSpy.mockRestore();
-    resourceSpy.mockRestore();
+    resourceSpy?.mockRestore();
+    sourceSpy.mockRestore();
   }
 });
 
 it("transcribes a Unicode alphabet and custom stress markers without altering phone identity", () => {
   const spec = rulepackModule.loadBundledRulepackSpec("qlatt-english");
-  const resources = inventoryModule.loadFrontendResources(spec);
+  const resources = rulepackModule.loadFrontendResources(spec);
   const inventory = {
     ...base,
     silence_symbol: "pause",
     symbol_grammar: "[əŋ]+",
     stress_markers: { 0: "_weak", 1: "_strong", 2: "_secondary" },
   };
-  const spy = vi
-    .spyOn(inventoryModule, "loadFrontendResources")
-    .mockReturnValue({ ...resources, inventory });
-  try {
-    const result = transcribeText("hello .", { dictLookup: () => ["ə_strong", "ŋ"] });
-    expect(result.map(({ phoneme, stress }) => ({ phoneme, stress }))).toEqual([
-      { phoneme: "ə", stress: 1 },
-      { phoneme: "ŋ", stress: null },
-      { phoneme: "pause", stress: null },
-    ]);
-  } finally {
-    spy.mockRestore();
-  }
+  const result = transcribeText("hello .", {
+    compiledSpec: spec,
+    resources: { ...resources, inventory },
+    dictionaryMap: {},
+    dictLookup: () => ["ə_strong", "ŋ"],
+  });
+  expect(result.map(({ phoneme, stress }) => ({ phoneme, stress }))).toEqual([
+    { phoneme: "ə", stress: 1 },
+    { phoneme: "ŋ", stress: null },
+    { phoneme: "pause", stress: null },
+  ]);
 });
 
 it.each([
@@ -148,6 +163,11 @@ it.each([
   ["symbol_grammar", "["],
   ["stress_markers", { 0: "0", 1: "0", 2: "2" }],
   ["default_duration_ms", 0],
+  ["target_feature_exclusions", undefined],
+  ["target_feature_exclusions", "dur"],
+  ["target_feature_exclusions", [null]],
+  ["target_feature_exclusions", [""]],
+  ["target_feature_exclusions", ["  "]],
 ])("rejects invalid %s declarations at load time", (key, value) => {
   expect(() => parseInventorySpec(JSON.stringify({ ...base, [key]: value }))).toThrow(
     /E_INVENTORY_SCHEMA/,
@@ -158,3 +178,58 @@ it("loads a renamed silence target without requiring the English silence label",
   const inventory = renameVocabulary(base);
   expect(parseInventorySpec(JSON.stringify(inventory)).silence_symbol).toBe("pause");
 });
+
+it("accepts an explicit empty target-feature exclusion declaration", () => {
+  const inventory = parseInventorySpec(JSON.stringify({ ...base, target_feature_exclusions: [] }));
+  expect(inventory.target_feature_exclusions).toEqual([]);
+});
+
+it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+  "%s applies target exclusions only to declared target features",
+  (frontendId) => {
+    const resources = rulepackModule.loadFrontendResources(
+      rulepackModule.loadBundledRulepackSpec(frontendId),
+    );
+    const inventory = structuredClone(resources.inventory);
+    expect(inventory.target_feature_exclusions).toEqual(["dur", "SW", "type"]);
+    const target = Object.values(inventory.phoneme_targets)[0];
+    target.fixture_note = "target metadata";
+    inventory.target_features = { ...inventory.target_features, fixture_note: { kind: "string" } };
+    const spy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
+      spec: rulepackModule.loadBundledRulepackSpec(frontendId),
+      resources: { ...resources, inventory },
+      voices: {},
+    });
+    try {
+      const control = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      const controlFeatures = control.utterance.schemaDefinition().itemTypes.segment.features;
+      expect(controlFeatures.fixture_note).toBeDefined();
+      expect(controlFeatures.dur).toBeUndefined();
+      const materialized = materializePhonemeTarget(inventory.silence_symbol, {
+        inventorySpec: inventory,
+      });
+      inventory.target_feature_exclusions = [
+        ...inventory.target_feature_exclusions,
+        "fixture_note",
+        "F1",
+      ];
+      const excluded = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      const excludedFeatures = excluded.utterance.schemaDefinition().itemTypes.segment.features;
+      expect(excludedFeatures.fixture_note).toBeUndefined();
+      expect(excludedFeatures.F1).toEqual({ kind: "number" });
+      expect(excludedFeatures.SW).toEqual({ kind: "number" });
+      expect(excludedFeatures.type).toEqual(controlFeatures.type);
+      expect(excluded.track).toEqual(control.track);
+      expect(
+        materializePhonemeTarget(inventory.silence_symbol, { inventorySpec: inventory }),
+      ).toEqual(materialized);
+      inventory.target_feature_exclusions = [];
+      const unexcluded = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      expect(unexcluded.utterance.schemaDefinition().itemTypes.segment.features.dur).toEqual({
+        kind: "number",
+      });
+    } finally {
+      spy.mockRestore();
+    }
+  },
+);

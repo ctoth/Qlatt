@@ -1,26 +1,58 @@
 import { describe, expect, it, vi } from "vitest";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadFrontendVoiceDocument,
+} from "../src/declarative-frontend/rule-pack";
 import { resolveVoice } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
 import {
   collectSpeakerProfileCitations,
-  loadSpeakerProfileSync,
+  parseSpeakerProfileDocument,
   resolveSpeakerProfile,
 } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const qlattRulepack = rulepack.loadBundledRulepackSpec("qlatt-english");
 
 const profilePath = "test/fixtures/speaker-profile/extended.yaml";
 
 describe("declarative speaker profile fields", () => {
+  it("keeps an undeclared profile absent until synthesis requires it", () => {
+    const spec = {
+      ...qlattRulepack,
+      resources: { ...qlattRulepack.resources, speaker_profile: null },
+    };
+    expect(loadFrontendResources(spec).speakerProfile).toBeUndefined();
+    const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec: rulepack.compileRuleEngineSpec(spec),
+      resources: loadFrontendResources(spec),
+      voices: {},
+    });
+    try {
+      expect(() => textToKlattTrackDetailed("hello")).toThrow(
+        /E_FRONTEND_CONFIG.*qlatt-english.*speaker_profile/,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("uses the frontend's profile fields for voice selection and provenance", () => {
-    const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
-      ...rulepack.QLATT_ENGLISH_RULEPACK,
-      speaker_profile_path: profilePath,
+    const spec = {
+      ...qlattRulepack,
+      resources: { ...qlattRulepack.resources, speaker_profile: profilePath },
       speakers: {
         dir: "test/fixtures/speaker-profile",
         default: "voice",
         voices: ["voice"],
       },
+    };
+    const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec: rulepack.compileRuleEngineSpec(spec),
+      resources: loadFrontendResources(spec),
+      voices: {},
     });
     try {
       const provenance = createProvenanceCollector();
@@ -37,7 +69,7 @@ describe("declarative speaker profile fields", () => {
   });
 
   it("parses additional fields and collects their citations", () => {
-    const spec = loadSpeakerProfileSync(profilePath);
+    const spec = parseSpeakerProfileDocument(loadYamlDocumentSync(profilePath));
     expect(spec.default_profile.oq_default).toEqual({
       value: 0.5,
       sources: ["request.oq_default", "voice.oq_default"],
@@ -47,17 +79,20 @@ describe("declarative speaker profile fields", () => {
   });
 
   it("carries a declared voice field through overrides and source resolution", () => {
-    const profileSpec = loadSpeakerProfileSync(profilePath);
+    const profileSpec = parseSpeakerProfileDocument(loadYamlDocumentSync(profilePath));
+    const registry = {
+      dir: "test/fixtures/speaker-profile",
+      default: "voice",
+      voices: ["voice"],
+      ruleFields: {},
+      speakerFrameParams: [],
+      speakerGainOffsets: [],
+    };
     const voice = resolveVoice(
-      {
-        dir: "test/fixtures/speaker-profile",
-        default: "voice",
-        voices: ["voice"],
-        speakerFrameParams: [],
-        speakerGainOffsets: [],
-      },
+      registry,
       "voice",
       profileSpec,
+      loadFrontendVoiceDocument(registry, "voice"),
     );
     expect(voice.override).toEqual({ oq_default: 0.6 });
     expect(voice.params.unrelated_param).toBe(42);

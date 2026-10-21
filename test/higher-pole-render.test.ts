@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { expect, it } from "vitest";
 import { measureSpectrum } from "../scripts/measure-spectrum";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import { writeWav } from "../src/rendering/write-wav";
 
 it("renders the worked HPC at 44.1 kHz and compares legacy and four-pole controls", async () => {

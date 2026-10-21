@@ -1,13 +1,113 @@
 version: v13-cel
+inline_markers:
+  global_affect:
+    open: "(("
+    close: "))"
+    degree_separator: "@"
+    selection: first
+  emphasis:
+    open: "*"
+    close: "*"
+    level: strong
+  citations:
+    - "engineering convention: optional inline shorthand lifts authored markers into the authoritative Direction Track"
+resources:
+  inventory: /rules/frontends/qlatt-english/inventory.yaml
+  lts: /rules/languages/english/lts-rules.yaml
+  morphology: /rules/languages/english/morphology.yaml
+  stress_policy: /rules/languages/english/stress-policy.yaml
+  speaker_profile: /rules/frontends/qlatt-english/policy/speaker-profile.yaml
+  source_contour: /rules/frontends/qlatt-english/policy/source-contour.yaml
+  lexicon: /rules/languages/english/cmu-dictionary.json
+  vq_channels: /rules/frontends/qlatt-english/policy/vq-channels.yaml
+  affect_presets: /rules/frontends/qlatt-english/policy/affect-presets.yaml
+# Qlatt's existing phonotactics.yaml vowel/onset policy, encoded for syllabifyWord.
+# Encoding characters are engineering identifiers, not an additional phone inventory.
+# No affix stripping: src/g2p/syllabify.ts uses maximum onset alone.
+syllabification:
+  citations:
+    - Kahn 1976 (syllable structure; existing phonotactics.yaml)
+    - Selkirk 1982 (onset maximization; existing phonotactics.yaml)
+    - Elovitz et al. 1976 (AX/NX/WH normalization; phases/normalize.yaml)
+  nuclei: "iIeE@acoUu^RAWOx"
+  onset_clusters:
+    - "pr"
+    - "pl"
+    - "tr"
+    - "tw"
+    - "kr"
+    - "kl"
+    - "kw"
+    - "br"
+    - "bl"
+    - "dr"
+    - "gr"
+    - "gl"
+    - "fr"
+    - "fl"
+    - "Tr"
+    - "Sr"
+    - "sk"
+    - "sp"
+    - "st"
+    - "sm"
+    - "sn"
+    - "sl"
+    - "sw"
+    - "skr"
+    - "spr"
+    - "str"
+    - "spl"
+    - "skw"
+  affixes: []
+  ascky:
+    IY: "i"
+    IH: "I"
+    EY: "e"
+    EH: "E"
+    AE: "@"
+    AA: "a"
+    AO: "c"
+    OW: "o"
+    UH: "U"
+    UW: "u"
+    AH: "^"
+    ER: "R"
+    AY: "A"
+    AW: "W"
+    OY: "O"
+    AX: "x"
+    S: "s"
+    Z: "z"
+    SH: "S"
+    ZH: "Z"
+    F: "f"
+    V: "v"
+    TH: "T"
+    DH: "D"
+    HH: "h"
+    M: "m"
+    N: "n"
+    NG: "G"
+    NX: "G"
+    L: "l"
+    R: "r"
+    W: "w"
+    WH: "w"
+    Y: "y"
+    P: "p"
+    T: "t"
+    K: "k"
+    B: "b"
+    D: "d"
+    G: "g"
+    CH: "C"
+    JH: "J"
+    DX: "&"
+    GS: "q"
 accent_policy_path: /rules/frontends/qlatt-english/policy/accent-policy.yaml
-inventory_path: /rules/frontends/qlatt-english/inventory.yaml
-lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
-morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
-stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
-speaker_profile_path: /rules/policy/speaker-profile.yaml
-source_contour_path: /rules/policy/source-contour.yaml
 functions:
   has_voiced_formants:
     params: [item]
@@ -21,8 +121,73 @@ functions:
           || (has(item.AVS) && item.AVS > 0))
     citations:
       - "Engineering estimate: Qlatt acoustic F0 eligibility requires F1 presence and positive AV or AVS; extracted unchanged from prosody selectors (#135)"
+  # Item-argument phonological tests. Each replaces a family of predicates that
+  # was written once per cursor position (current / prev / next). Expansion is
+  # textual, so a call reads exactly as the predicate it replaced did: none of
+  # these guards a null item, and a caller that may pass one keeps its own
+  # `x != null &&` in front, as the positional predicates did.
+  voiced:
+    params: [item]
+    body: isTrue(item, 'voiced')
+    citations:
+      - "Engineering convention: Qlatt inventory `voiced` flag; extracted unchanged from the is_voiced and prev_is_voiced predicates"
+  voiceless:
+    params: [item]
+    body: isTrue(item, 'voiceless')
+    citations:
+      - "Engineering convention: Qlatt inventory `voiceless` flag; extracted unchanged from the is_voiceless and prev_is_voiceless predicates"
+  bilabial:
+    params: [item]
+    body: isTrue(item, 'bilabial')
+    citations:
+      - "Engineering convention: Qlatt inventory `bilabial` place flag; extracted unchanged from the is_bilabial predicate"
+  alveolar:
+    params: [item]
+    body: isTrue(item, 'alveolar')
+    citations:
+      - "Engineering convention: Qlatt inventory `alveolar` place flag; extracted unchanged from the is_alveolar predicate"
+  velar:
+    params: [item]
+    body: isTrue(item, 'velar')
+    citations:
+      - "Engineering convention: Qlatt inventory `velar` place flag; extracted unchanged from the is_velar predicate"
+  # "Coronal" is the disjunction of the alveolar and postalveolar feature flags.
+  # No token in this codebase carries a `coronal: true` annotation.
+  coronal:
+    params: [item]
+    body: >-
+      isTrue(item, 'alveolar')
+      || isTrue(item, 'postalveolar')
+    citations:
+      - "Engineering convention: coronal is the Qlatt inventory `alveolar` or `postalveolar` place flag; extracted unchanged from the prev/next/both/one_coronal predicates"
+  # A word here is the `word` text a Segment carries, not its Word Item:
+  # DECtalk's dectalk_same_word compares Word Items and stays separate.
+  # False when either Segment carries no word.
+  same_word:
+    params: [a, b]
+    body: has(a.word) && has(b.word) && a.word == b.word
+    citations:
+      - "Engineering convention: two Segments are in one word when both carry the same `word` text; extracted unchanged from the prev_same_word and next_same_word predicates"
+  # Not the negation of same_word: false, not true, when either Segment
+  # carries no word ("any missing = no match").
+  different_word:
+    params: [a, b]
+    body: has(a.word) && has(b.word) && a.word != b.word
+    citations:
+      - "Engineering convention: two Segments are in different words only when both carry a `word` text and the texts differ; extracted unchanged from the next_diff_word predicate"
+  # Whether `item` hangs under the syllable `anchor` names. Asymmetric as
+  # extracted: `item` is read through SylStructure, `anchor` through its
+  # `syllable` feature, which the caller has already established.
+  in_syllable_of:
+    params: [item, anchor]
+    body: >-
+      path(item, 'R:SylStructure.parent') != null
+      && path(item, 'R:SylStructure.parent').id == anchor.syllable.id
+    citations:
+      - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Syllable through SylStructure)"
+      - "Engineering convention: same-syllable test extracted unchanged from hertz_nucleus_timing"
 include:
-  - /rules/normalization/components.yaml
+  - /rules/languages/english/normalization/components.yaml
   - normalization-policy.yaml
   - pipeline.yaml
   - phases/orthography.yaml
@@ -37,6 +202,10 @@ include:
 parameters:
   policy:
     rate:
+      default:
+        value: 1
+        citations:
+          - "Engineering default: preserve the existing unit speaking-rate multiplier when omitted"
       undershoot_coefficient:
         value: 0.3
         citations:
@@ -344,22 +513,6 @@ parameters:
         value: 1.2
         citations:
           - White 2014
-      fricative_min_sibilant_ms:
-        value: 30
-        citations:
-          - Jongman 1989
-      fricative_min_labiodental_ms:
-        value: 50
-        citations:
-          - Jongman 1989
-      fricative_min_dental_ms:
-        value: 60
-        citations:
-          - Jongman 1989
-      fricative_min_glottal_ms:
-        value: 40
-        citations:
-          - Engineering estimate (Jongman 1989 does not test glottal /hh/)
       affricate_frication_min_ms:
         value: 20
         citations:
@@ -414,6 +567,12 @@ parameters:
           - "Engineering adaptation: factor applied to compressible portion and later cluster positions"
     f0:
       # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
+      # base_hz and range_hz are the speaker's: src/tts-frontend.ts gives the
+      # prosody phase the resolved speaker profile's base_f0_hz (times the
+      # source preset's f0_scale) and f0_range_hz in their place
+      # (policy/speaker-profile.yaml; a voice of the frontend's
+      # `speakers:` registry or a request sets them). The leaves here declare
+      # the paths to load-time validation and repeat the profile's defaults.
       base_hz:
         value: 110
         citations:
@@ -459,12 +618,6 @@ parameters:
         citations:
           - "Pierrehumbert 1980 Rule 9 / upstep formula (a ≈ 0.2)"
           - "Ladd 2008 Ch.3 (H% final rise modeled as local upstep)"
-      # --- Final lowering ---
-      final_lowering_factor:
-        value: 0.85
-        citations:
-          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
-          - "Pierrehumbert 1980 (final lowering as separate effect)"
       # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
         value: 1.08
@@ -862,22 +1015,6 @@ parameters:
         value: 2.5
         citations:
           - Maeda 1993 (velopharyngeal port sweep 0 to 2.5 cm2)
-      pole_base_hz:
-        value: 250
-        citations:
-          - Klatt 1980 Table I
-      pole_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
-      zero_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
-      place_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
       vowel_onset_delay_ms:
         value: 40
         citations:
@@ -891,18 +1028,6 @@ parameters:
         citations:
           - Hawkins & Stevens 1985
           - "Engineering estimate: decay is slightly shorter than the anticipatory rise for cleaner oral release"
-      murmur_fnz_m_hz:
-        value: 1000
-        citations:
-          - Fujimura 1962
-      murmur_fnz_n_hz:
-        value: 1700
-        citations:
-          - Fujimura 1962
-      murmur_fnz_ng_hz:
-        value: 3000
-        citations:
-          - Fujimura 1962
       murmur_strength:
         value: 1.0
         citations:
@@ -938,54 +1063,6 @@ parameters:
         citations:
           - Hawkins & Stevens 1985
           - "Engineering estimate: second carryover subwindow halves the residual nasal coupling"
-      b1_stage_1_fraction:
-        value: 0.33
-        citations:
-          - Chen 1997
-          - "Engineering estimate: early anticipatory B1 cue scales with the first coupling stage"
-      b1_stage_2_fraction:
-        value: 0.66
-        citations:
-          - Chen 1997
-          - "Engineering estimate: later anticipatory B1 cue scales with the second coupling stage"
-      b1_carryover_fraction:
-        value: 0.5
-        citations:
-          - Chen 1997
-          - "Engineering estimate: early carryover B1 cue is half-strength"
-      b1_carryover_tail_fraction:
-        value: 0.25
-        citations:
-          - Chen 1997
-          - "Engineering estimate: final carryover B1 cue decays to one quarter strength"
-      b1_addition_hz:
-        value: 107
-        citations:
-          - Chen 1997
-          - Hawkins & Stevens 1985
-    speaker:
-      base_f0_hz:
-        value: 110
-        citations:
-          - O'Shaughnessy 1976
-      formant_scale:
-        value: 1.0
-        citations:
-          - Kent & Vorperian 2018
-      rd_default:
-        value: 0.7
-        citations:
-          - Fant 1997 Table 1
-      spectral_tilt_offset_db:
-        value: 0
-        citations:
-          - Klatt & Klatt 1990
-      # NOTE: voice-quality presets (modal/breathy/pressed/creaky/whispery/falsetto)
-      # are NOT declared here. The live source of truth is the source-contour policy
-      # at source_contour_path (/rules/policy/source-contour.yaml), loaded by
-      # src/source-contour.ts. A duplicate table formerly lived here but was dead
-      # (nothing reads params.policy.speaker.voice_quality_presets); removed in
-      # phase 4 item 2 to keep a single source of truth.
 output:
   lowering:
     id: qlatt-english-track-lowering
@@ -1059,6 +1136,43 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  pronunciation_layers:
+    order: [dictionary, clitic, morphology, lts]
+    citations:
+      - 'Engineering compatibility policy: preserve dictionary, clitic, morphology, then LTS priority'
+  compound_recovery:
+    max_span: 4
+    joiners: ["-", "'"]
+    citations:
+      - "Engineering convention: recover up to four normalized words using CMU dictionary hyphen/apostrophe entries, longest span first"
+  dictionary_candidates:
+    order: [exact, prepend-apostrophe, append-apostrophe, strip-trailing-apostrophe, append-period, strip-alternate-suffix]
+    citations:
+      - "Engineering convention: CMU dictionary adapter exact, elision, abbreviation and alternate-entry lookup order"
+  empty_pronunciation:
+    duration_ms: 50
+    citations:
+      - "Engineering fallback: preserve an empty pronunciation as 50 ms of silence"
+  diagnostic_symbol_delimiters:
+    characters: "/"
+    citations:
+      - "Engineering convention: trim repeated edge slashes from diagnostic phone symbols"
+  sources:
+    diagnostic-symbol:
+      name: Diagnostic symbol input
+      citation: "Engineering convention: direct configured symbol-to-phoneme mapping for explicit segment-list utterances"
+    spelling:
+      name: Configured letter names
+      citation: "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)"
+    dictionary:
+      name: CMU dictionary
+      citation: CMU Pronouncing Dictionary
+    lts-rules:
+      name: Elovitz LTS + configured lexical stress
+      citation: "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)"
+    morphology:
+      name: Morphological decomposition
+      citation: "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)"
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
   letter_names:
@@ -1199,3 +1313,142 @@ transcription:
     - "!"
     - ;
     - ":"
+
+# Static Item declarations consumed by the TTS construction stage.
+schema:
+  itemTypes:
+    token:
+      features:
+        word: {"kind":"string"}
+        tokenType: {"kind":"string","values":["word","punctuation"]}
+        punctuationSymbol: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        pronunciationKey: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        active: {"kind":"boolean"}
+        sourceNormalizationId: {"kind":"string"}
+    word:
+      features:
+        text: {"kind":"string"}
+        tokenIndex: {"kind":"number"}
+        form_classes: {"kind":"array","items":{"kind":"string"}}
+        # The classes before the lexicon hands them to the phonetic rules.
+        text_form_classes: {"kind":"array","items":{"kind":"string"}}
+        # The marks the frontend names that the written word has at its
+        # start or its end (transcription.written_word_marks).
+        written_marks: {"kind":"array","items":{"kind":"string"}}
+        # The written word's place among the words between two punctuation
+        # marks, from 1, and how many there are.
+        clause_word_index: {"kind":"number"}
+        clause_word_count: {"kind":"number"}
+        # The word's place among the stretch's words as they are spoken one
+        # by one; 0 for a word the routine before it read ahead.
+        clause_spoken_index: {"kind":"number"}
+        # The stretch of words ends at the text's end, where no mark is
+        # written (a text rule supplied the one that closes it).
+        clause_end_supplied: {"kind":"boolean"}
+        # The word's part in a conjunction of several words.
+        conjunction_sequence: {"kind":"string","values":["first","rest"]}
+        # A later word of the words one written word is spoken as.
+        continues_written_word: {"kind":"boolean"}
+        # Set by a frontend's rules: the word can carry a clause break, its
+        # place in the stretch has one, and a break stands before it.
+        break_marker: {"kind":"boolean"}
+        break_slot: {"kind":"boolean"}
+        clause_break_before: {"kind":"boolean"}
+        phrase_start: {"kind":"string","values":["vp","pp"]}
+        # The word before is phonemic text: no word boundary stands before
+        # this word's phrase start.
+        phrase_start_unbounded: {"kind":"boolean"}
+        # What a frontend's rules make of a prepositional-phrase start in
+        # its context (kept, dropped, or kept with no word boundary before it).
+        phrase_start_state: {"kind":"string","values":["pp","word","alone"]}
+    syllable:
+      features:
+        index: {"kind":"number"}
+        stress: {"kind":"union","variants":[{"kind":"number"},{"kind":"null"}]}
+        positionInWord: {"kind":"string"}
+    segment:
+      features:
+        phoneme: {"kind":"string"}
+        type: {"kind":"string"}
+        word: {"kind":"string"}
+        morpheme_boundary_after: {"kind":"boolean"}
+        # The first phone of the word's own text, after phones joined to it.
+        word_text_start: {"kind":"boolean"}
+        rules_blocked: {"kind":"boolean"}
+        written_duration_ms: {"kind":"number"}
+        written_silence: {"kind":"boolean"}
+        # A phone of phonemic text, not of a word letter-to-sound read.
+        phonemic_text: {"kind":"boolean"}
+        written_pitch: {"kind":"number"}
+        sourceTokenId: {"kind":"string"}
+        punctuationSymbol: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        # The mark was sent by a text rule, not read as a word's delimiter.
+        punctuation_sent: {"kind":"boolean"}
+        # For a mark a text rule supplied: what is written where it stands.
+        punctuation_written: {"kind":"string"}
+        stress: {"kind":"union","variants":[{"kind":"number"},{"kind":"null"}]}
+        duration: {"kind":"number"}
+        durationFloor: {"kind":"number"}
+        vot_from_table: {"kind":"boolean"}
+        inherentDuration: {"kind":"union","variants":[{"kind":"number"},{"kind":"null"}]}
+        active: {"kind":"boolean"}
+        inventorySW: {"kind":"number"}
+        minimumDuration: {"kind":"number"}
+        word_syllable_count: {"kind":"number"}
+        cluster_position: {"kind":"number"}
+        syllable_index: {"kind":"number"}
+        syllable_role: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        syllable_position_in_word: {"kind":"string"}
+        isFunctionWord: {"kind":"boolean"}
+        isContentWord: {"kind":"boolean"}
+        isAccented: {"kind":"boolean"}
+        isAccentCarrier: {"kind":"boolean"}
+        isNuclearAccent: {"kind":"boolean"}
+        accentType: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        accentIndexInPhrase: {"kind":"number"}
+        breakIndex: {"kind":"number"}
+        initialBoundaryTone: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        phraseAccent: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        boundaryTone: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        transition_ms: {"kind":"number"}
+        nucleus_duration_ms: {"kind":"number"}
+        dummy_vowel: {"kind":"boolean"}
+        weak: {"kind":"union","variants":[{"kind":"boolean"},{"kind":"null"}]}
+        glottal: {"kind":"union","variants":[{"kind":"boolean"},{"kind":"null"}]}
+    f0Point:
+      features:
+        value: {"kind":"number"}
+        tag: {"kind":"string"}
+        layer: {"kind":"string"}
+        duration_frames: {"kind":"number"}
+        profile_points: {"kind":"array","items":{"kind":"number"}}
+        active: {"kind":"boolean"}
+    phraseCommand:
+      features:
+        value: {"kind":"number"}
+        tag: {"kind":"string"}
+        layer: {"kind":"string"}
+        duration_frames: {"kind":"number"}
+        profile_points: {"kind":"array","items":{"kind":"number"}}
+        active: {"kind":"boolean"}
+    tilt:
+      features:
+        value: {"kind":"number"}
+        tag: {"kind":"string"}
+        layer: {"kind":"string"}
+        duration_frames: {"kind":"number"}
+        profile_points: {"kind":"array","items":{"kind":"number"}}
+        active: {"kind":"boolean"}
+    transition:
+      features:
+        active: {"kind":"boolean"}
+  relations:
+    Token: {"kind":"list","itemTypes":["token"]}
+    Word: {"kind":"list","itemTypes":["word"]}
+    Syllable: {"kind":"list","itemTypes":["syllable"]}
+    Segment: {"kind":"list","itemTypes":["segment"]}
+    SylStructure: {"kind":"tree","itemTypes":["word","syllable","segment"]}
+    Transition: {"kind":"list","itemTypes":["transition"]}
+    Tilt: {"kind":"list","itemTypes":["tilt"]}
+    PhraseCommand: {"kind":"list","itemTypes":["phraseCommand"]}
+    F0Point: {"kind":"list","itemTypes":["f0Point"]}

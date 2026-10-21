@@ -3,6 +3,7 @@
  */
 
 import type { Diagnostics } from "../diagnostics";
+import type { ProvenanceCollector } from "../provenance";
 
 /** CEL expression string */
 export type CelExpression = string;
@@ -10,17 +11,24 @@ export type CelExpression = string;
 /** Parameter value types */
 export type ParamValue = number | string | boolean;
 
+/** Plain document data; nested mappings, arrays and null retain their CEL shape. */
+export type ConstantValue = ParamValue | null | ConstantValue[] | { [key: string]: ConstantValue };
+export type SemanticsConstants = Record<string, ConstantValue>;
+
 /** Context for expression evaluation */
 export interface EvaluationContext {
   diagnostics?: Diagnostics;
+  provenance?: ProvenanceCollector;
   params: Record<string, ParamValue>;
-  constants: Record<string, ParamValue | Record<string, ParamValue>>;
+  constants: SemanticsConstants;
   [key: string]: unknown;
 }
 
 /** Realization rule */
 export interface RealizationRule {
   expr: CelExpression;
+  /** Authored sources; optional while existing semantics documents migrate. */
+  citations?: string[];
   deps?: string[];
   /** When true, use linearRampToValueAtTime instead of the document default. */
   ramp?: boolean;
@@ -42,11 +50,30 @@ export interface PlstepPolicy {
   citations: string[];
 }
 
+/** Experiment-owned classification of authored track metadata, not measured audio. */
+export interface TrackMetricsPolicy {
+  voicing_params: string[];
+  silence_phoneme: string;
+  citations: string[];
+}
+
+/** Experiment-owned display thresholds, with their cited or estimated basis. */
+export type TrackAnalysisPolicy = {
+  metrics?: TrackMetricsPolicy;
+  source_modes?: { params: string[]; citations: string[] };
+  branch_switch?: { param: string; value: number; citations: string[] };
+} & Record<
+  "maxVoicingIssues" | "lowParallelScale" | "lowParallelGain",
+  { value: number; basis: string }
+>;
+
 /** Semantics document structure */
 export interface SemanticsDocument {
   name: string;
   /** Optional burst telemetry policy; audio bursts remain graph-owned. */
   plstep?: PlstepPolicy;
+  /** Optional policy for gain and voicing diagnostic displays. */
+  analysis?: TrackAnalysisPolicy;
   /** Default scheduling mode for all bindings.
    *  'ramp' = linearRampToValueAtTime (Klatt 1980 inter-frame interpolation).
    *  'step' = setValueAtTime (legacy default).
@@ -55,8 +82,31 @@ export interface SemanticsDocument {
    *  update frames at the 5 ms update rate. */
   defaultScheduling?: "step" | "ramp";
   params?: Record<string, ParamDefinition>;
-  constants?: Record<string, ParamValue | Record<string, ParamValue>>;
+  constants?: SemanticsConstants;
   realize?: Record<string, RealizationRule | CelExpression>;
+}
+
+/**
+ * One `realize_each` entry: a family of realize rules written once and
+ * generated for every value of a single scalar index.
+ * See `src/semantics/realize-each.ts`.
+ */
+export interface RealizeEachEntry {
+  /** Placeholder name; `{<index>}` is substituted textually. */
+  index: string;
+  /** Values the index takes, in generation order. */
+  over: Array<number | string>;
+  /** Rule-name template → rule template. Every name must contain `{<index>}`. */
+  rules: Record<string, RealizationRule | CelExpression>;
+}
+
+/**
+ * A semantics document as written on disk. `expandRealizeEach` turns it into
+ * the `SemanticsDocument` every consumer evaluates; `realize_each` does not
+ * exist after loading.
+ */
+export interface AuthoredSemanticsDocument extends SemanticsDocument {
+  realize_each?: RealizeEachEntry[];
 }
 
 /** Parameter definition */

@@ -25,7 +25,7 @@ rules:
       model: current.duration_model
       # Allen et al. 1987 Table 9-1 and Ch.9 Rule 7; see docs/per-phone-duration-floors.md.
       # Engineering adaptation: scale source MIN/INHERENT to the allocated component.
-      basis: min([current.inherentDuration, current.duration])
+      basis: min(current.inherentDuration, current.duration)
       stress_scale: "has(current.stress) && current.stress == 0 ? model.unstressed_scale : 1"
     apply:
       - field: durationFloor
@@ -49,19 +49,17 @@ rules:
       rhotic: tail.phoneme == 'R'
       three_phone: >-
         !rhotic && after_tail != null
-        && path(after_tail, 'R:SylStructure.parent') != null && path(after_tail, 'R:SylStructure.parent').id == current.syllable.id
+        && in_syllable_of(after_tail, current)
         && after_tail.type in ['liquid', 'glide']
       coda: "three_phone ? after_third : after_tail"
       after_coda: "three_phone ? ahead(current, 4.0) : after_third"
       voiced_coda: >-
-        coda != null && path(coda, 'R:SylStructure.parent') != null
-        && path(coda, 'R:SylStructure.parent').id == current.syllable.id && has(coda.voiced) && coda.voiced
+        coda != null && in_syllable_of(coda, current) && isTrue(coda, 'voiced')
       nasal_stop_exception: >-
         voiced_coda && coda.type == 'nasal' && after_coda != null
-        && path(after_coda, 'R:SylStructure.parent') != null
-        && path(after_coda, 'R:SylStructure.parent').id == current.syllable.id
+        && in_syllable_of(after_coda, current)
         && after_coda.type in ['stop', 'stop_closure']
-        && has(after_coda.voiceless) && after_coda.voiceless
+        && isTrue(after_coda, 'voiceless')
       # Hertz & Huffman 1992 p.1173: AY 145 ms, two-phone /r/ nucleus 160 ms.
       # Engineering adaptation: retain the already assigned third-phone duration
       # when extending the AY starting budget; no three-phone base is tabulated.
@@ -70,7 +68,7 @@ rules:
       # but no cap for the two-phone /r/ class: do not invent one for that class.
       budget_ms: >-
         !rhotic && voiced_coda && !nasal_stop_exception
-        ? min([base_ms * params.policy.duration.nucleus_voiced_multiplier, three_phone ? params.policy.duration.nucleus_three_phone_cap_ms : params.policy.duration.nucleus_glide_cap_ms]) : base_ms
+        ? min(base_ms * params.policy.duration.nucleus_voiced_multiplier, three_phone ? params.policy.duration.nucleus_three_phone_cap_ms : params.policy.duration.nucleus_glide_cap_ms) : base_ms
       # Segments include their transitions. Subtracting the full non-vowel
       # intervals reserves their fixed transition time before the vowel gets
       # the remainder; lowering must not lengthen those transitions.
@@ -82,7 +80,7 @@ rules:
         tag: transition
       - field: duration
         op: set
-        value: "max([params.policy.duration.default_floor_ms, budget_ms - other_ms])"
+        value: "max(params.policy.duration.default_floor_ms, budget_ms - other_ms)"
         tag: transition
     citations:
       - "Hertz & Huffman 1992 pp.1172–1173, section 2.3"
@@ -94,7 +92,7 @@ rules:
       where:
         all:
           - predicate: is_pausable_consonant
-          - predicate: prev_same_word
+          - same_word(prev, current)
     apply:
       - field: duration
         op: mul
@@ -109,8 +107,8 @@ rules:
       where:
         all:
           - predicate: is_pausable_consonant
-          - predicate: prev_same_word
-          - predicate: next_same_word
+          - same_word(prev, current)
+          - same_word(next, current)
     apply:
       - field: duration
         op: mul
@@ -141,7 +139,7 @@ rules:
       where:
         all:
           - predicate: is_pausable_consonant
-          - predicate: prev_diff_word
+          - prev == null || !same_word(prev, current)
     apply:
       - field: duration
         op: mul
@@ -222,18 +220,18 @@ rules:
           - when: "n == null ? true : n.phoneme == 'SIL'"
             value: params.policy.duration.vowel_shortening_end_multiplier
           - when: >-
-              (n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative'))
+              (n == null ? false : (isTrue(n, 'voiced') && n.type == 'fricative'))
               && is_phrase_final
             value: params.policy.duration.vowel_shortening_voiced_fricative_multiplier
-          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')"
+          - when: "n == null ? false : (isTrue(n, 'voiced') && n.type == 'fricative')"
             value: params.policy.duration.vowel_shortening_voiced_fricative_medial_multiplier
           - when: >-
-              n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_closure',
+              n == null ? false : (isTrue(n, 'voiced') && n.type in ['stop', 'stop_closure',
               'stop_release'])
             value: params.policy.duration.vowel_shortening_voiced_stop_multiplier
           - when: "n == null ? false : n.type == 'nasal'"
             value: params.policy.duration.vowel_shortening_nasal_multiplier
-          - when: "n == null ? false : (has(n.voiceless) && n.voiceless == true && n.type in ['stop', 'stop_closure'])"
+          - when: "n == null ? false : (isTrue(n, 'voiceless') && n.type in ['stop', 'stop_closure'])"
             value: voiceless_stop_factor
           - default: 1
         tag: segmental_context
@@ -246,12 +244,12 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel' && has(current.isAccented) && current.isAccented == true
+      where: current.type == 'vowel' && isTrue(current, 'isAccented')
     apply:
       - field: duration
         op: mul
         dispatch:
-          - when: has(current.isNuclearAccent) && current.isNuclearAccent == true
+          - when: isTrue(current, 'isNuclearAccent')
             value: params.policy.duration.accent_nuclear_multiplier
           - when: has(current.stress) && current.stress == 1
             value: params.policy.duration.accent_stressed_multiplier
@@ -353,8 +351,7 @@ rules:
     define:
       fricative_target: target(current.phoneme)
       fricative_floor_ms: >-
-        has(current.fricative_min_ms) ? current.fricative_min_ms :
-        (has(fricative_target.fricative_min_ms) ? fricative_target.fricative_min_ms : 0)
+        get(current, 'fricative_min_ms', get(fricative_target, 'fricative_min_ms', 0))
     apply:
       - field: duration
         op: set
@@ -407,7 +404,7 @@ rules:
     apply:
       - field: duration
         op: set
-        value: "has(current.vot_from_table) && current.vot_from_table ? current.inherentDuration : params.policy.duration.s_cluster_aspiration_ms"
+        value: "isTrue(current, 'vot_from_table') ? current.inherentDuration : params.policy.duration.s_cluster_aspiration_ms"
         tag: s_cluster_aspiration
       - field: AH
         op: add
@@ -424,17 +421,17 @@ rules:
       where: current.type == 'stop_aspiration'
     define:
       weak_scale: >-
-        (has(current.weak) && current.weak == true) ? params.policy.duration.aspiration_frication_weak_scale : 1.0
+        isTrue(current, 'weak') ? params.policy.duration.aspiration_frication_weak_scale : 1.0
     apply:
       - field: AF
         op: set
         dispatch:
-          - when: has(current.alveolar) && current.alveolar == true
-            value: "max([0, params.policy.duration.aspiration_frication_t_af_db * weak_scale])"
-          - when: has(current.velar) && current.velar == true
-            value: "max([0, params.policy.duration.aspiration_frication_k_af_db * weak_scale])"
-          - when: has(current.bilabial) && current.bilabial == true
-            value: "max([0, params.policy.duration.aspiration_frication_p_af_db * weak_scale])"
+          - when: isTrue(current, 'alveolar')
+            value: "max(0, params.policy.duration.aspiration_frication_t_af_db * weak_scale)"
+          - when: isTrue(current, 'velar')
+            value: "max(0, params.policy.duration.aspiration_frication_k_af_db * weak_scale)"
+          - when: isTrue(current, 'bilabial')
+            value: "max(0, params.policy.duration.aspiration_frication_p_af_db * weak_scale)"
           - default: 0
         tag: aspiration_frication
     citations:

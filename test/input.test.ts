@@ -2,22 +2,25 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-
 import {
-  AFFECT_PRESETS,
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
+import {
   compileAffect,
   isClinicalSexRequired,
   neutralAffect,
   resolveAffectPreset,
 } from "../src/input/affect";
-import type { DirectionInput, DirectionTrack } from "../src/input/direction-track";
+import { parseAffectPresets } from "../src/input/affect-presets";
+import type { DirectionInput, DirectionSpan, DirectionTrack } from "../src/input/direction-track";
 import {
   NEUTRAL_DIMENSIONS,
-  NEUTRAL_VQ,
+  neutralVoiceQualityDelta,
   parseDirectionTrack,
   serializeDirectionTrack,
 } from "../src/input/direction-track";
-import { parseInline } from "../src/input/inline";
+import { parseInline, parseInlineMarkers } from "../src/input/inline";
 import {
   effectiveSpanFieldAt,
   parseDirectionInput,
@@ -25,7 +28,18 @@ import {
   spansAt,
   tokenizeScore,
 } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const NEUTRAL_VQ = neutralVoiceQualityDelta(channels);
+const affectOptions = { frontendId: "fixture", affectLibrary: library, vqChannels: channels };
 
 describe("input contract — Direction Track schema", () => {
   it("round-trips syllable stress and rejects invalid indices and levels", () => {
@@ -88,8 +102,10 @@ describe("input contract — Direction Track schema", () => {
 
 describe("input contract — authored syllable stress", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
+    // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+    const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
     it(`promotes to and demotes I before annotation (${frontendId})`, () => {
-      const control = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const control = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",
@@ -107,7 +123,7 @@ describe("input contract — authored syllable stress", () => {
           ],
         },
       });
-      const result = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const result = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",
@@ -167,7 +183,42 @@ describe("input contract — authored syllable stress", () => {
     });
   }
 
-  it("preserves level 3 on a single DECtalk word and adds the cited 19 and 38 ms", () => {
+  it("preserves level 3 on a single DECtalk word and adds the cited three and six frames", () => {
+    // "we" is an onset consonant and a vowel. ("you" is DECtalk's single
+    // allophone YU and has no onset.)
+    const result = textToKlattTrackDetailed("we", 110, 30, {
+      frontendId: "dectalk-english",
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
+      },
+    });
+    const live = result.utterance
+      .relation("Segment")
+      .listItems()
+      .filter((s) => s.get("active") !== false);
+    const nucleus = live.find((s) => s.get("type") === "vowel")!;
+    expect(nucleus.get("stress")).toBe(3);
+    const onset = live.find((s) => s.get("phoneme") === "W")!;
+    expect(onset.get("stress")).toBe(3);
+    expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
+    // p_us_tim.c Rule 8: NF20MS (3 frames) for emphasis and NF40MS (6) more on
+    // a syllabic. The onset consonant gets the 3 alone.
+    for (const [item, frames] of [
+      [nucleus, 9],
+      [onset, 3],
+    ] as const) {
+      const writes = item.writes("timing_added_frames");
+      const index = writes.findIndex((w) => w.ruleId === "dectalk_timing_8_emphasis");
+      expect(index).toBeGreaterThan(0);
+      expect(writes[index].tag).toBe("emphasis");
+      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBe(frames);
+    }
+  });
+
+  it("carries level 3 onto the live Segment of a vowel that a later rule re-emits", () => {
+    // "you" is one allophone, YU, with a formant trajectory: the structural
+    // phase replaces it with a copy carrying the trajectory windows.
     const result = textToKlattTrackDetailed("you", 110, 30, {
       frontendId: "dectalk-english",
       directionTrack: {
@@ -175,26 +226,11 @@ describe("input contract — authored syllable stress", () => {
         spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
       },
     });
-    const nucleus = result.utterance
+    const live = result.utterance
       .relation("Segment")
       .listItems()
-      .find((s) => s.get("type") === "vowel")!;
-    expect(nucleus.get("stress")).toBe(3);
-    const onset = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((s) => s.get("phoneme") === "Y")!;
-    expect(onset.get("stress")).toBe(3);
-    expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
-    const writes = nucleus.writes("duration");
-    for (const [tag, delta] of [
-      ["emphasis", 19],
-      ["emphasis_syllabic", 38],
-    ] as const) {
-      const index = writes.findIndex((w) => w.tag === tag);
-      expect(index).toBeGreaterThan(0);
-      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBeCloseTo(delta);
-    }
+      .filter((s) => s.get("active") !== false && s.get("type") === "vowel");
+    expect(live.map((s) => [s.get("phoneme"), s.get("stress")])).toEqual([["YU", 3]]);
   });
 
   it("honors the accent policy switch without discarding authored stress", () => {
@@ -213,6 +249,7 @@ describe("input contract — authored syllable stress", () => {
           version: "1",
           spans: [
             { id: "meter", anchor: { unit: "syllable", word: 0, start: 0 }, stress: { level: 1 } },
+            { id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { semitones: 1 } },
           ],
         },
       });
@@ -224,6 +261,10 @@ describe("input contract — authored syllable stress", () => {
         )!;
       expect(nucleus.get("stress")).toBe(1);
       expect(nucleus.get("isAccentCarrier")).toBe(false);
+      const pitch = result.utterance.provenance
+        .getDecisions()
+        .find((decision) => decision.type === "pitch");
+      expect(pitch?.reason).toContain(`frontend '${frontendPath}' vq_channels entries: f0Scale`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -298,7 +339,7 @@ describe("input contract — authored syllable stress", () => {
 
 describe("input contract — neutral base case", () => {
   it("neutralAffect() is the identity dimensional + VQ vector", () => {
-    const n = neutralAffect();
+    const n = neutralAffect(library, channels);
     expect(n.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(n.vq).toEqual(NEUTRAL_VQ);
   });
@@ -315,7 +356,7 @@ describe("input contract — neutral base case", () => {
   });
 
   it("degree 0 of any preset collapses to the neutral vector", () => {
-    const zero = compileAffect("angry", 0);
+    const zero = compileAffect(library, channels, "angry", 0);
     expect(zero.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(zero.vq).toEqual(NEUTRAL_VQ);
   });
@@ -323,7 +364,7 @@ describe("input contract — neutral base case", () => {
 
 describe("input contract — affect compiler (cited presets)", () => {
   it("compiles 'angry' to the cited V/A/D + Rd/F0 deltas (Rutledge/France/Murray)", () => {
-    const c = compileAffect("angry", 1);
+    const c = compileAffect(library, channels, "angry", 1);
     // Dimensional: negative valence, high arousal, dominant (doc 03 §1a).
     expect(c.dimensions.valence).toBeLessThan(0);
     expect(c.dimensions.arousal).toBeGreaterThan(0.5);
@@ -338,7 +379,7 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("compiles 'tender' to a positive-valence breathy substrate (doc 03 §6 composite)", () => {
-    const c = compileAffect("tender", 1);
+    const c = compileAffect(library, channels, "tender", 1);
     expect(c.dimensions.valence).toBeGreaterThan(0);
     expect(c.dimensions.arousal).toBeLessThan(0); // low-arousal intimate
     expect(c.vq.rdDelta).toBeGreaterThan(0); // breathy (Gobl)
@@ -347,8 +388,8 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("scales linearly with degree (the continuous styledegree knob)", () => {
-    const half = compileAffect("angry", 0.5);
-    const full = compileAffect("angry", 1);
+    const half = compileAffect(library, channels, "angry", 0.5);
+    const full = compileAffect(library, channels, "angry", 1);
     // additive field rdDelta: half is half of full
     expect(half.vq.rdDelta).toBeCloseTo(full.vq.rdDelta / 2, 6);
     // multiplicative field f0Scale: interpolated from 1
@@ -358,13 +399,13 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("every preset in the library carries at least one citation", () => {
-    for (const [name, preset] of AFFECT_PRESETS) {
+    for (const [name, preset] of Object.entries(library.presets)) {
       expect(preset.citations.length, `preset '${name}' must be cited`).toBeGreaterThan(0);
     }
   });
 
   it("covers all five preset groups (emotion, epistemic, pragmatic, speech_act, clinical)", () => {
-    const groups = new Set([...AFFECT_PRESETS.values()].map((p) => p.group));
+    const groups = new Set(Object.values(library.presets).map((p) => p.group));
     expect(groups).toEqual(
       new Set(["emotion", "epistemic", "pragmatic", "speech_act", "clinical"]),
     );
@@ -373,8 +414,8 @@ describe("input contract — affect compiler (cited presets)", () => {
 
 describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () => {
   it("manic_male and manic_female are acoustically INVERTED", () => {
-    const male = compileAffect("manic", 1, { sex: "male" });
-    const female = compileAffect("manic", 1, { sex: "female" });
+    const male = compileAffect(library, channels, "manic", 1, { sex: "male" });
+    const female = compileAffect(library, channels, "manic", 1, { sex: "female" });
 
     // Loudness inverts: male louder (+), female quieter (-).
     expect(male.vq.intensityBoost).toBeGreaterThan(0);
@@ -399,9 +440,9 @@ describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () 
   });
 
   it("a clinical preset REQUIRES a sex parameter (throws without one)", () => {
-    expect(isClinicalSexRequired("manic")).toBe(true);
-    expect(() => compileAffect("manic", 1)).toThrow(/sex/i);
-    expect(() => resolveAffectPreset("depressive")).toThrow(/sex/i);
+    expect(isClinicalSexRequired(library, "manic")).toBe(true);
+    expect(() => compileAffect(library, channels, "manic", 1)).toThrow(/sex/i);
+    expect(() => resolveAffectPreset(library, "depressive")).toThrow(/sex/i);
   });
 });
 
@@ -459,6 +500,133 @@ describe("input contract — anchor resolution + span precedence", () => {
 });
 
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
+  it("attributes authored voice, emphasis, and break records to host conventions", () => {
+    const voice = { name: "authored", sex: "female" as const, baseF0Hz: 123 };
+    const result = parseDirectionInput({
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        global: { voice },
+        spans: [
+          {
+            id: "request",
+            anchor: { unit: "word", start: 0 },
+            emphasis: { level: "strong" },
+            break: { strength: 3, timeMs: 150 },
+          },
+        ],
+      },
+    });
+    expect(
+      result.directions.map((direction) => [
+        direction.kind,
+        direction.hrgRelation,
+        direction.label,
+      ]),
+    ).toEqual([
+      ["voice_identity", "Affect", "authored"],
+      ["emphasis", "Intonation", "strong"],
+      ["break", "Break", "strength_3"],
+    ]);
+    expect(result.directions[0].voice).toEqual(voice);
+    expect(result.decisions.map((decision) => decision.subject)).toEqual([
+      "utterance",
+      "token:0",
+      "token:0",
+    ]);
+    expect(result.decisions[2].reason).toContain("Break strength 3 (150ms)");
+    for (const direction of result.directions) {
+      expect(direction.decision.stage).toBe("frontend");
+      expect(direction.decision.parents ?? []).toEqual([]);
+      expect(direction.citations).toEqual(direction.decision.citations);
+      expect(direction.citations).toHaveLength(1);
+      expect(direction.citations[0]).toMatch(/^Engineering convention: Direction Track records/);
+    }
+  });
+
+  it("attributes pitch, rate, and VQ to only their selected configured channel entries", () => {
+    const configured = parseVoiceQualityChannels({
+      channels: channels.map((row) => ({
+        ...row,
+        citations: [`authored:${row.channel}`, "shared"],
+      })),
+    });
+    const cases: { fields: Partial<DirectionSpan>; keys: string[]; kind: string }[] = [
+      { fields: { pitch: { semitones: 12 } }, keys: ["f0Scale"], kind: "pitch" },
+      { fields: { pitch: { rangeScale: 1.5 } }, keys: ["f0VarianceScale"], kind: "pitch" },
+      {
+        fields: { pitch: { semitones: 12, rangeScale: 1.5 } },
+        keys: ["f0Scale", "f0VarianceScale"],
+        kind: "pitch",
+      },
+      { fields: { rate: 2 }, keys: ["durationScale"], kind: "rate" },
+      { fields: { voiceQuality: { rdDelta: 0.2 } }, keys: ["rdDelta"], kind: "voice_quality" },
+    ];
+    for (const { fields, keys, kind } of cases) {
+      const input: DirectionInput = {
+        score: { text: "hello" },
+        directionTrack: {
+          version: "1",
+          spans: [{ id: "configured", anchor: { unit: "word", start: 0 }, ...fields }],
+        },
+      };
+      const direction = parseDirectionInput(input, {
+        ...affectOptions,
+        frontendId: "alternate",
+        vqChannels: configured,
+      }).directions[0];
+      const control = parseDirectionInput(input, affectOptions).directions[0];
+      expect(direction.kind).toBe(kind);
+      expect(direction.delta).toEqual(control.delta);
+      expect(direction.deltaFields).toEqual(keys);
+      expect(direction.decision.subject).toBe("token:0");
+      expect(direction.decision.stage).toBe("frontend");
+      expect(direction.decision.parents).toEqual(control.decision.parents);
+      expect(direction.citations).toEqual(direction.decision.citations);
+      expect(
+        direction.citations.filter((citation) => !citation.startsWith("Engineering convention:")),
+      ).toEqual([...new Set(keys.flatMap((key) => [`authored:${key}`, "shared"]))]);
+      expect(
+        direction.citations.some((citation) => citation.startsWith("Engineering convention:")),
+      ).toBe(true);
+      expect(direction.decision.reason.split("; frontend ").at(-1)).toBe(
+        `'alternate' vq_channels entries: ${keys.join(", ")}`,
+      );
+    }
+  });
+
+  it("preserves empty and unknown-only overrides without claiming channel evidence", () => {
+    const cases: Partial<DirectionSpan>[] = [
+      { pitch: {} },
+      { voiceQuality: {} },
+      { voiceQuality: { unknownChannel: 2 } },
+    ];
+    for (const fields of cases) {
+      const result = parseDirectionInput(
+        {
+          score: { text: "hello" },
+          directionTrack: {
+            version: "1",
+            spans: [{ id: "noop", anchor: { unit: "word", start: 0 }, ...fields }],
+          },
+        },
+        affectOptions,
+      );
+      expect(result.directions[0].delta).toEqual(NEUTRAL_VQ);
+      expect(result.directions[0].citations).toHaveLength(1);
+      expect(result.directions[0].citations[0]).toMatch(/^Engineering convention:/);
+      expect(result.directions[0].decision.reason).toContain("vq_channels entries: none");
+    }
+  });
+
+  it("rejects missing channel attribution at the existing resource boundary", () => {
+    for (const citations of [undefined, [], [" "]]) {
+      expect(() =>
+        parseVoiceQualityChannels({ channels: [{ ...channels[0], citations }] }),
+      ).toThrow(/E_VQ_CHANNEL_SCHEMA:.*citations/);
+    }
+  });
+
   it("routes pitch semitones to mean F0", () => {
     const input: DirectionInput = {
       score: { text: "hello" },
@@ -468,7 +636,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBeCloseTo(2, 6);
     expect(pitch.delta?.f0VarianceScale).toBe(1);
@@ -485,7 +655,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBe(1);
     expect(pitch.delta?.f0VarianceScale).toBe(1.5);
@@ -508,7 +680,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBeCloseTo(0.5, 6);
     expect(pitch.delta?.f0VarianceScale).toBe(0.75);
@@ -524,7 +698,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         global: { affect: { preset: "sad", degree: 0.8 } },
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
 
     const affectDir = result.directions.find((d) => d.kind === "global_affect");
     expect(affectDir).toBeDefined();
@@ -545,6 +719,14 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
   });
 
   it("a local affect span chains its decision to the global affect (parents[])", () => {
+    const configured = parseAffectPresets({
+      degree: library.degree,
+      variants: {},
+      presets: Object.values(library.presets).map((preset) => ({
+        ...preset,
+        citations: [`configured:${preset.name}`],
+      })),
+    });
     const input: DirectionInput = {
       score: { text: "no not ever" },
       directionTrack: {
@@ -559,7 +741,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         ],
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, { ...affectOptions, affectLibrary: configured });
     const globalDir = result.directions.find((d) => d.kind === "global_affect")!;
     const localDir = result.directions.find((d) => d.kind === "local_affect")!;
 
@@ -567,6 +749,22 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
     expect(localDir.decision.parents).toContain(globalDir.decision.id);
     expect(localDir.scope).toEqual({ startToken: 1, endToken: 1 });
     expect(localDir.decision.subject).toBe("token:1");
+    for (const [direction, name] of [
+      [globalDir, "sad"],
+      [localDir, "angry"],
+    ] as const) {
+      const preset = result.decisions.find(
+        (decision) =>
+          decision.type === "affect_preset_applied" &&
+          decision.subject === direction.decision.subject,
+      )!;
+      expect(preset.reason).toContain(`'${name}' resolved to '${name}'`);
+      expect(preset.citations).toEqual([`configured:${name}`]);
+      expect(direction.citations).toEqual(preset.citations);
+      expect(direction.decision.parents).toEqual(
+        direction === globalDir ? [preset.id] : [globalDir.decision.id, preset.id],
+      );
+    }
   });
 
   it("a clinical global affect requires voice.sex and resolves sex-specifically", () => {
@@ -577,7 +775,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         global: { voice: { sex: "female" }, affect: { preset: "manic" } },
       },
     };
-    const result = parseDirectionInput(base);
+    const result = parseDirectionInput(base, affectOptions);
     const dir = result.directions.find((d) => d.kind === "global_affect")!;
     expect(dir.affect?.resolvedSex).toBe("female");
     expect(dir.affect?.vq.intensityBoost).toBeLessThan(0); // female mania = quieter
@@ -587,7 +785,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       score: { text: "x" },
       directionTrack: { version: "1", global: { affect: { preset: "manic" } } },
     };
-    expect(() => parseDirectionInput(noSex)).toThrow(/sex/i);
+    expect(() => parseDirectionInput(noSex, affectOptions)).toThrow(/sex/i);
   });
 
   it("a gesture span lowers to a cited gesture direction with a scaled delta", () => {
@@ -600,7 +798,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         ],
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
     const g = result.directions.find((d) => d.kind === "gesture")!;
     expect(g.tag).toBe("gesture");
     expect(g.citations).toContain("Gobl_2003");
@@ -610,8 +808,11 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
 });
 
 describe("input contract — inline shorthand is demoted to a lifter", () => {
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const policy = loadFrontendResources(spec).inlineMarkers!;
+
   it("lifts ((preset@degree)) + *emphasis* into a Direction Track, not the source of truth", () => {
-    const input = parseInline("((angry@0.7)) I said *no* to you");
+    const input = parseInline("((angry@0.7)) I said *no* to you", policy);
     expect(input.score.text).toBe("I said no to you");
     expect(input.directionTrack.global?.affect).toEqual({ preset: "angry", degree: 0.7 });
 
@@ -622,8 +823,93 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     expect(spans[0].anchor.start).toBe(2);
 
     // and the lifted track parses + lowers end to end
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
     expect(result.directions.some((d) => d.kind === "global_affect")).toBe(true);
     expect(result.directions.some((d) => d.kind === "emphasis")).toBe(true);
+  });
+
+  it("inherits the bundled policy and leaves undeclared syntax unavailable", () => {
+    expect(loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty")).inlineMarkers).toEqual(
+      policy,
+    );
+    const without = Object.fromEntries(
+      Object.entries(spec).filter(([key]) => key !== "inline_markers"),
+    );
+    expect(loadFrontendResources(without).inlineMarkers).toBeUndefined();
+  });
+
+  it("uses literal configurable delimiters, degree separator, level and last-global selection", () => {
+    const selected = parseInlineMarkers({
+      ...policy,
+      global_affect: { open: "[[", close: "]]", degree_separator: "+", selection: "last" },
+      emphasis: { open: "$[", close: "]$", level: "moderate" },
+    });
+    const input = parseInline("[[angry+0.2]] I $[said]$ [[calm-2+.75]] no", selected);
+    expect(input.score.text).toBe("I said no");
+    expect(input.directionTrack.global?.affect).toEqual({ preset: "calm-2", degree: 0.75 });
+    expect(input.directionTrack.spans).toEqual([
+      { id: "inline_emph_0", anchor: { unit: "word", start: 1 }, emphasis: { level: "moderate" } },
+    ]);
+    const control = parseInline("((angry@0.2)) I *said* ((calm-2@.75)) no", policy);
+    expect(control.score.text).toBe(input.score.text);
+    expect(control.directionTrack.global?.affect).toEqual({ preset: "angry", degree: 0.2 });
+    expect(control.directionTrack.spans?.[0].anchor).toEqual(
+      input.directionTrack.spans?.[0].anchor,
+    );
+  });
+
+  it("leaves numeric and hyphenated preset authority with the supplied affect library", () => {
+    const preset = { ...library.presets.angry, name: "angry-2" };
+    const selectedLibrary = {
+      ...library,
+      presets: Object.assign(Object.create(null), library.presets, { [preset.name]: preset }),
+    };
+    const input = parseInline("((angry-2@.5)) *no*", policy);
+    expect(input.directionTrack.global?.affect).toEqual({ preset: "angry-2", degree: 0.5 });
+    const result = parseDirectionInput(input, { ...affectOptions, affectLibrary: selectedLibrary });
+    expect(result.directions.some((direction) => direction.kind === "global_affect")).toBe(true);
+    expect(() => parseDirectionInput(input, affectOptions)).toThrow(
+      "Unknown affect preset 'angry-2'",
+    );
+    expect(parseInline("((2)) no", policy).directionTrack.global?.affect).toEqual({ preset: "2" });
+  });
+
+  it.each([
+    "*left",
+    "right*",
+    "**",
+    "a*b",
+    "((angry",
+    "((angry@bad))",
+    "((angry@))",
+    "(())",
+    "((angry@.2@.3))",
+  ])("preserves malformed marker %s and anchors following words", (literal) => {
+    const input = parseInline(`${literal} plain *yes*`, policy);
+    expect(input.score.text).toBe(`${literal} plain yes`);
+    expect(input.directionTrack.global).toBeUndefined();
+    expect(input.directionTrack.spans?.[0].anchor).toEqual({ unit: "word", start: 2 });
+    expect(parseDirectionInput(input, affectOptions).score.tokens).toEqual([
+      literal,
+      "plain",
+      "yes",
+    ]);
+  });
+
+  it("rejects malformed selected declarations at resource acquisition", () => {
+    const invalid = [
+      null,
+      {},
+      { ...policy, citations: [] },
+      { ...policy, emphasis: { ...policy.emphasis, open: "" } },
+      { ...policy, emphasis: { ...policy.emphasis, close: 3 } },
+      { ...policy, emphasis: { ...policy.emphasis, level: "loud" } },
+      { ...policy, global_affect: { ...policy.global_affect, selection: "middle" } },
+      { ...policy, global_affect: { ...policy.global_affect, degree_separator: " " } },
+      { ...policy, global_affect: { ...policy.global_affect, degree_separator: "(" } },
+      { ...policy, emphasis: { ...policy.emphasis, open: "((" } },
+    ];
+    for (const inline_markers of invalid)
+      expect(() => loadFrontendResources({ ...spec, inline_markers })).toThrow(/E_INLINE_MARKERS/);
   });
 });

@@ -4,6 +4,31 @@
 bacon: "0.1"
 name: klatt80
 
+analysis:
+  branch_switch:
+    param: SW
+    value: 1
+    citations:
+      - "engineering convention: count the SW=1 track control used by cascadeGain and parallelVoiceGain; parallel frication remains independent"
+  source_modes:
+    params: [sourceMode, lfMode]
+    citations:
+      - "engineering convention: summarize held numeric track source controls using their declared defaults; not evidence of audible source activity"
+  metrics:
+    voicing_params: [AV, AVS]
+    silence_phoneme: SIL
+    citations:
+      - "engineering convention: classify authored track metadata by finite positive AV/AVS, with unvoiced SIL as silence; not measured acoustic voicing"
+  maxVoicingIssues:
+    value: 6
+    basis: "engineering estimate: retained diagnostic display cap"
+  lowParallelScale:
+    value: 0.05
+    basis: "engineering estimate: retained low parallel-scale warning threshold"
+  lowParallelGain:
+    value: 0.001
+    basis: "engineering estimate: retained low parallel-gain warning threshold"
+
 # Interpreter burst telemetry policy (audio triggering remains in graph.yaml).
 # Klatt 1980 PARCOE.FOR: frication onset, NNAF - NAFLAS >= 49.
 # Preserve the host convention: initial and omitted parameters mean off (0 dB).
@@ -548,9 +573,9 @@ constants:
   # AH note: Klatt 80 uses -102 (aspiration 30 dB quieter than voicing).
   # Our input AH values are ~15 dB lower than Klatt 80 (max ~40 vs ~55),
   # so we use -87 to maintain the same output amplitude relationship.
-  # A1-A10 values mirror the per-formant ndbScale entries declared by
-  # formantBanks in graph.yaml; kept here so TS consumers (klatt-synth.ts,
-  # track-analysis.ts) can look them up by name.
+  # Source amplitude offsets are consumed by this experiment's realization rules.
+  # A1-A10 mirror graph.yaml formantBanks values; generated PFE rules use the
+  # graph-owned per-formant scales rather than these mirrored entries.
   ndbScale:
     AV: -119   # -72 - 47
     AH: -134   # -87 - 47

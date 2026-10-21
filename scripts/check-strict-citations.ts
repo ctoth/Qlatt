@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { listBundledFrontendIds } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector, type DecisionRecord } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";
 
@@ -11,6 +12,7 @@ type CliIo = {
 };
 
 type ParsedArgs = {
+  frontendIds: string[];
   corpusPath: string;
   phraseLimit: number | null;
   baseF0Override: number | null;
@@ -23,6 +25,7 @@ type CorpusFile = {
 };
 
 type UncitedDecision = {
+  frontendId: string;
   phrase: string;
   decision: DecisionRecord;
 };
@@ -71,7 +74,13 @@ function parseArgs(argv: string[]): ParsedArgs {
     baseF0Override = parsed;
   }
 
-  return { corpusPath, phraseLimit, baseF0Override };
+  const bundledIds = listBundledFrontendIds();
+  const frontendId = flags.get("frontend");
+  if (frontendId !== undefined && !bundledIds.includes(frontendId)) {
+    throw new Error(`Invalid --frontend '${frontendId}'; expected ${bundledIds.join(", ")}`);
+  }
+  const frontendIds = frontendId === undefined ? bundledIds : [frontendId];
+  return { corpusPath, phraseLimit, baseF0Override, frontendIds };
 }
 
 function toPhrases(value: unknown): string[] {
@@ -85,7 +94,7 @@ function summarizeUncited(items: UncitedDecision[], limit: number): string {
   const shown = items.slice(0, limit);
   for (const item of shown) {
     lines.push(
-      `${item.phrase} | #${item.decision.seq} [${item.decision.stage}] ` +
+      `${item.frontendId} | ${item.phrase} | #${item.decision.seq} [${item.decision.stage}] ` +
         `${item.decision.type} ${item.decision.subject}`,
     );
   }
@@ -111,29 +120,41 @@ export function runStrictCitationsCheck(argv: string[], io: CliIo = defaultIo())
     }
 
     const selectedPhrases = args.phraseLimit != null ? phrases.slice(0, args.phraseLimit) : phrases;
-    const baseF0 = args.baseF0Override ?? Number(corpus.baseF0 ?? 110);
-    if (!Number.isFinite(baseF0) || baseF0 <= 0) {
+    // Absent from the flag and the corpus: no base pitch is requested, and the
+    // frontend's voice keeps its own.
+    const corpusBaseF0 = corpus.baseF0 === undefined ? undefined : Number(corpus.baseF0);
+    const baseF0 = args.baseF0Override ?? corpusBaseF0;
+    if (baseF0 !== undefined && (!Number.isFinite(baseF0) || baseF0 <= 0)) {
       throw new Error(`Invalid baseF0 '${String(corpus.baseF0)}' in corpus`);
     }
 
     const uncited: UncitedDecision[] = [];
     let decisionCount = 0;
 
-    for (const phrase of selectedPhrases) {
-      const provenance = createProvenanceCollector();
-      textToKlattTrack(phrase, baseF0, 30, { provenance });
-      const decisions = provenance.getDecisions();
-      decisionCount += decisions.length;
-      for (const decision of decisions) {
-        if (decision.citations.length === 0) {
-          uncited.push({ phrase, decision });
+    for (const frontendId of args.frontendIds) {
+      let frontendDecisions = 0;
+      const uncitedBefore = uncited.length;
+      for (const phrase of selectedPhrases) {
+        const provenance = createProvenanceCollector();
+        textToKlattTrack(phrase, baseF0, 30, { provenance, frontendId });
+        const decisions = provenance.getDecisions();
+        frontendDecisions += decisions.length;
+        for (const decision of decisions) {
+          if (decision.citations.length === 0) {
+            uncited.push({ frontendId, phrase, decision });
+          }
         }
       }
+      decisionCount += frontendDecisions;
+      io.stdout(
+        `${frontendId}: checked ${selectedPhrases.length} phrases` +
+          ` | decisions=${frontendDecisions} uncited=${uncited.length - uncitedBefore}\n`,
+      );
     }
 
     io.stdout(
       `checked ${selectedPhrases.length} phrases from ${args.corpusPath}` +
-        ` | decisions=${decisionCount} uncited=${uncited.length}\n`,
+        ` | frontends=${args.frontendIds.length} decisions=${decisionCount} uncited=${uncited.length}\n`,
     );
 
     if (uncited.length > 0) {

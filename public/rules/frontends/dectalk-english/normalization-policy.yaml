@@ -3,5 +3,236 @@ maps:
   tn_recognition_policy:
     years: 'yes'
     fractions: 'yes'
-    hundreds: hundredand
+    # Numbers inside dates and money, which the text rules still write out.
+    hundreds: hundred
+    # A bare number or year stays digits: DECtalk speaks it from its own phone
+    # lists (LTS/l_us_pr1.c), not from the words in its dictionary.
+    bare_numbers: digits
+    # A dollar amount, a clock time, a plural number and a number with
+    # thousands separators or fraction digits stay as written too: DECtalk's
+    # text task reads each from the word itself (LTS/ls_task.c:3181-3513
+    # money, 3622-3652 time, 3747-3825 and 3936-4046 numbers and plurals),
+    # with its own boundaries between the parts.
+    number_tokens: source
+    # A number with an ordinal ending stays as written as well: the number
+    # routine speaks it with its ordinal flag (LTS/ls_task.c:3967-3972,
+    # LTS/ls_util.c:517-553), from the number phone lists and not from the
+    # dictionary's words. Measured on say.exe: "11th" is AX L EH V AX N TH
+    # (the word "eleventh" begins IH) and "100th" has R AX D TH (the word
+    # "hundredth" has R IX D TH).
+    ordinal_numbers: source
+    # This frontend's text comes from its text parser (frontend.yaml
+    # text_parser), which writes a pause as phonemic text between two marks
+    # (DECtalk 4.63 CMD/par_def1.h:286-287, CMD/cm_text.c:1088-1145).
+    parser_marks: phonemic
+    # A word of digits and letters joined by hyphens or slashes stays as
+    # written too: the text task reads a fraction as one (LTS/ls_task.c:3688,
+    # LTS/l_us_pr1.c:980-1067) and any other as a part number, the hyphen and
+    # the slash by name (LTS/ls_task.c:4118-4180, LTS/l_us_pr1.c:161-255).
+    # Measured on say.exe: "1/8" is "one eighth", "3/8" "three eighths",
+    # "10-15" "ten dash fifteen", "1/1000" "one slash one thousand".
+    part_numbers: source
     fraction_exception: '100'
+    # A capital letter followed by a period is an initial: it is spelled and
+    # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,
+    # 1547-1549). "I." is not: DECtalk's dictionary search, which runs before
+    # the single-letter rules (ls_task.c main loop), takes "I" as the pronoun
+    # (PH receives the class PRON|FUNC for it, 00802000, and one period).
+    # "I" is the whole measured set: DECtalk 4.63 say.exe speaks each of
+    # "A." to "Z." except "I." as the letter's name and two clause ends
+    # (test/fixtures/dectalk-oracle/dectalk-us-letters-v1.frames.json,
+    # letters-initial-a and initial-b to initial-z against letters-pronoun-i).
+    initials: spelled
+    initial_exceptions: 'I'
+    # An apostrophe in front of a letter stays on its word, as one after a
+    # letter does: DECtalk looks the word up as written before it strips the
+    # punctuation at its ends (LTS/ls_task.c:2161, then 2244-2325 and
+    # 2477-2478). Measured on say.exe: "'n" is EN and "'em" IX M (the
+    # dictionary's words), "'tis", "'cause", "'bout", "'hello'" the same as
+    # without the marks, "'n'" EH N and "'em'" EH M.
+    lexical_apostrophe: "(?<=[a-z])'|'(?=[a-z])"
+    # Abbreviations are the dictionary's entries that end in a period
+    # (dictionary-abbreviations.yaml, generated), not the shared list: a word
+    # followed by a period is looked up with it and a hit eats the period
+    # (LTS/ls_task.c:2040-2160). Measured on say.exe: "No." is "no" and a
+    # sentence end, "Main St. near" is "street" with no break, "The Dept. and"
+    # is "department" while "The dept. and" is not (the entry is "Dept."),
+    # "See fig. 3" is "figure" while "See Fig. 3" is "fig" and a sentence end.
+    abbreviations: dictionary
+    # A word of capitals with periods between is spelled, each letter a word,
+    # and the period after it is eaten (LTS/ls_task.c:2840-2890). Measured on
+    # say.exe: "The U.S. flag was raised." is one clause with Y UW, EH S;
+    # "The U.S.A. is large." has EY for the A; "He works for the F.B.I." ends
+    # the sentence at the text's end. The shared rule, which also takes lower
+    # case and speaks the letters as words, is off.
+    initialisms: capitals
+    # A word with hyphens between its parts is one word, read part by part
+    # with the compound mark between (LTS/ls_task.c:4208-4435). Measured on
+    # say.exe, as the symbols the phonemic stage receives: "well-known" is
+    # W EH LL, the mark, N OW N; "mother-in-law" M AH DH RR, the mark,
+    # IH N LL AO with nothing between "in" and "law".
+    hyphenated_words: source
+    # A word with "?!" or "!?" on it is the word with the first mark and a
+    # clause that ends in the second: the word is spelled and the mark named
+    # (LTS/ls_task.c:4118-4150, LTS/ls_spel.c:158-170). Measured on say.exe:
+    # "What?!" is "w h a t question mark" and an exclamation's clause end,
+    # "What!?" "w h a t exclamation point" and a question's.
+    marked_words: spelled
+    # A hyphen that stands alone between two words is the dictionary's word
+    # for it, with no pause: measured on say.exe, "Red - green." is R EH D,
+    # D AE SH, G R IY N, and "Red -- green." the same (DECtalk's parser makes
+    # one hyphen of the two).
+    lone_dash: word
+    # A word with no letter and no digit that stands alone is the
+    # dictionary's word for it: the dictionary is searched for the word as
+    # written before any punctuation is stripped (LTS/ls_task.c:697, 746).
+    # Measured on say.exe, as the symbols the phonemic stage receives:
+    # "It is % here." has P RR S EH N T, "Meet me @ the gate." AE T,
+    # "Two + two = four." P LL AH S and IY K W AX LL Z. DECtalk's text parser
+    # writes "12%" as "12 %", and leaves a mark alone after nested quotes
+    # (`'no' ? " he`): "question mark" and "quote" are then words too.
+    symbol_words: dictionary
+    # A word with an underscore in it is spelled character by character,
+    # the underscore by its name (LTS/ls_task.c:4118-4150,
+    # LTS/ls_spel.c:151-170). Measured on say.exe: "tom_west42" is
+    # "t o m underscore w e s t four two".
+    underscore_words: spelled
+    # Digits with an apostrophe between them are spelled, the apostrophe by
+    # its name (LTS/ls_task.c:4128-4158): "5'10" is "five apostrophe one
+    # zero" on say.exe.
+    digit_apostrophe_words: spelled
+    # A word with an accented letter keeps its accents: the dictionary is
+    # searched for it as written, and the rules read each accented letter as
+    # its plain one (LTS/l_us_ru1.c:108-112, INCLUDE/ls_fold.tab). "café" is
+    # K EY F on say.exe, not the dictionary's "cafe".
+    accented_words: kept
+    # A word with a plus sign in it, where the text parser leaves one whole
+    # (the local part of a mail address), is spelled, the plus by its name
+    # (LTS/ls_task.c:4118-4150): "ann+news" is "a n n plus n e w s".
+    plus_words: spelled
+    # Digits with a colon that are no clock time are spelled digit by digit,
+    # the colon by its name (the same lines): "10:1" is "one zero colon one".
+    digit_colon_words: spelled
+    # "2024-03-15" is a part number, not a date: DECtalk's date routine takes
+    # a day, a month's name and a year (LTS/ls_task.c:3589-3608), and the
+    # word is "twenty twenty four dash zero three dash fifteen" on say.exe.
+    dashed_number_dates: part_number
+    # A decimal with no digit before its point is a number: ".5" is "point
+    # five" and ".05" "point zero five" on say.exe, not a sentence end
+    # (LTS/l_us_pr1.c:497-749).
+    bare_decimals: source
+    # A sign written on a number is spoken, "minus" or "plus", from DECtalk's
+    # own phone lists (LTS/l_us_pr1.c:80-110), and the number after it is
+    # read by its own rule. Measured on say.exe: "-7", "+3", "-2.5", "-$20",
+    # "-.5", "-1/2" (minus one half), "-1990" (minus one thousand, nine
+    # hundred and ninety: no year with a sign).
+    signed_numbers: source
+    # A period standing alone after white space is a word, the dictionary's
+    # "period": the word reader keeps a mark that begins a word
+    # (LTS/ls_task.c:1420-1437). DECtalk's parser writes one in "Ph.D.,"
+    # (`Ph . D., `) and after the pause it puts behind a zip code.
+    lone_period: word
+    # A closing parenthesis stripped from a word forces a comma, and a mark
+    # standing alone after it is then that word's delimiter
+    # (LTS/ls_task.c:2303-2319, 1547-1558). DECtalk's parser writes
+    # `two) . ` for `(back at two)."` inside a quotation.
+    stripped_parenthesis_mark: delimiter
+    # A parenthesis, an angle bracket or a curly brace on a word's edge is
+    # stripped and forces a comma, before the word for an opening mark and
+    # after it for a closing one (LTS/l_us_con.c:135-136 and the rows for
+    # the other four, LTS/ls_task.c:2244-2275, 2303-2319). DECtalk's parser
+    # takes them away in its default mode; in its punctuation mode pass
+    # "See the (red) car." has a comma before and after "red" on say.exe.
+    enclosing_marks: comma
+    # A word with one of @ & = # $ * + % in it that is no number is spelled,
+    # each sign by its name (LTS/ls_task.c:4118-4150): in the mode pass
+    # "bob@example.com", "AT&T", "C++", "#42" and "15$" are spelled on
+    # say.exe.
+    sign_words: spelled
+    # Digits with slashes are a part number, not a date
+    # (LTS/ls_task.c:4118-4180): DECtalk's parser rewrites a date before
+    # letter-to-sound sees it, and in the mode pass "3/4/2024" is "three
+    # slash four slash twenty twenty four" on say.exe.
+    slash_dates: part_number
+    # A comma, colon or semicolon with an apostrophe on it at a word's end
+    # is stripped with the apostrophe and sent by the word's own routine
+    # (LTS/ls_task.c:2303-2340, 1547-1549): it ends the clause but is not a
+    # written break: the class of the stretch's first word is not sent again.
+    # Measured on say.exe: "'Be late,' they went." has "went" with emphasis,
+    # "Be late, they went." has it with primary stress.
+    mark_stripped_with_quote: sent
+    # A period with a comma, a colon or a semicolon right after it stays in
+    # its word and is not spoken (LTS/ls_task.c:1451-1463,
+    # LTS/ls_util.c:887-900): "B., then" is B IY and a comma on say.exe.
+    period_before_mark: silent
+    # A word of slashes and hyphens goes to the part-number reader
+    # (LTS/ls_task.c:4118-4170): "/-" is "slash dash" on say.exe.
+    slash_dash_words: part_number
+    # A clock time is written out by a text rule (tn_clock_time) as phonemic
+    # text, from the number phone lists of number-phonemes.yaml, as
+    # ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209).
+    clock_times: phonemic
+    # A date word ("23-Aug-1984", the form the text parser writes a date in)
+    # is written out the same way by tn_date_text, as ls_proc_do_date speaks
+    # it (LTS/l_us_pr1.c:815-961).
+    date_words: phonemic
+    # A number with a plural ending ("60s", "1990's") too, by
+    # tn_plural_number (LTS/ls_task.c:3936-3962, LTS/ls_util.c:1442-1466).
+    plural_numbers: phonemic
+    # And a dollar amount, by tn_money_text (LTS/ls_task.c:3312-3513), unless
+    # one of the words that take "dollars" behind them follows it ("$2
+    # million"): the lexicon reads those two words together.
+    money_amounts: phonemic
+  # The characters of this frontend's phonemic text that the text rules
+  # compose with: the two marks around phonemic text (CMD/par_def1.h
+  # PAR_PHONES_ON_D 0x81, PAR_PHONES_OFF_D 0x82) and, from INCLUDE/usa_phon.tab
+  # usa_ascky_rev[], the characters of the word boundary, the verb-phrase
+  # start and the comma.
+  tn_phonemic_text:
+    open: "\x81"
+    close: "\x82"
+    word_boundary: " "
+    verb_phrase: ")"
+    pause: ","
+    # The two marks around a written word at the start of phonemic text a
+    # rule composed for it: the text has that word's form class
+    # (src/text-parser/phonemes.ts PHONEMIC_CLASS_WORD_OPEN and _CLOSE).
+    class_word_open: ""
+    class_word_close: ""
+  # The six auxiliaries DECtalk speaks itself as the first word of a sentence
+  # (LTS/ls_task.c:4636-4645 verbs[]), for the text rules of the spelling
+  # mode: such a word is not spelled (tn_spell_mode_first_verb_source). The
+  # same table as params.policy.structure.sentence_initial_auxiliaries of
+  # frontend.yaml, which the rule that stresses the word reads.
+  tn_first_verbs:
+    are: verb
+    had: verb
+    is: verb
+    was: verb
+    were: verb
+    will: verb
+  # The question words: a sentence that begins with one has its question
+  # mark sent as a period (LTS/l_us_con.c:1215-1226 whdic), for the text
+  # rule of the spelling mode (tn_spell_mode_wh_mark_source). The same table
+  # as params.policy.structure.wh_words of frontend.yaml.
+  tn_wh_words:
+    what: wh
+    when: wh
+    where: wh
+    why: wh
+    who: wh
+    how: wh
+    which: wh
+    whose: wh
+    whom: wh
+# A text that does not end in punctuation is still closed as a sentence: when
+# the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
+# the VT case) and the clause ends as one that ends in a period. Measured on
+# DECtalk 4.63 say.exe, as the symbols the phonemic stage receives: "cat" is
+# K AE T, a word boundary and the period symbol; the same for "1st", "42",
+# "hello world", "Mr" (spelled, then the period) and "B".
+# The flush character is in this frontend's text: its text parser's output
+# carries the host's clause end (frontend.yaml text_parser.ending), and the
+# shared rules tn_parser_clause_end_source and tn_parser_clause_end, on under
+# parser_marks above, read it. So a clause end inside a text (a tab, an end
+# the parser's rules write) closes the words before it the same way.

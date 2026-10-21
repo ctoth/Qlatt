@@ -6,14 +6,13 @@ import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
 import {
   analyzeTrackGains,
   collectParamRange,
-  findTimingMismatches,
   findVoicingIssues,
   formatMeters,
   formatPlstepEventsRelative,
   formatRange,
   formatTelemetry,
-  summarizeLfMode,
-  summarizeParallel,
+  summarizeBranchSwitch,
+  summarizeSourceControl,
   summarizeTrack,
 } from "../track-analysis";
 import type {
@@ -127,7 +126,9 @@ function formatTrackSummary(state: DisplayState): string[] {
   if (!state.run || !state.run.track || state.run.track.length === 0) {
     return ["(no track data)"];
   }
-  const summary = summarizeTrack(state.run.track);
+  const policy = state.semantics?.analysis?.metrics;
+  if (!policy) return ["(no experiment metrics policy)"];
+  const summary = summarizeTrack(state.run.track, policy);
   return [
     `Events: ${summary.events}`,
     `Total time: ${summary.totalTime.toFixed(3)}s`,
@@ -183,19 +184,30 @@ function formatFormantTracking(state: DisplayState): string[] {
 function formatSignalFlow(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
-  const parallel = summarizeParallel(track);
-  const lfMode = summarizeLfMode(track, Math.round(Number(state.sliderParams.lfMode ?? 0)));
-  const timing = findTimingMismatches(track, state.telemetryMax);
-  const lfSummary = Object.entries(lfMode.seconds)
-    .filter(([, seconds]) => Number.isFinite(seconds) && seconds > 0)
-    .map(([mode, seconds]) => `lfMode${mode}=${seconds.toFixed(3)}s`)
-    .join(" ");
+  const branchPolicy = state.semantics?.analysis?.branch_switch;
+  const branch = branchPolicy ? summarizeBranchSwitch(track, branchPolicy) : undefined;
+  const sourcePolicy = state.semantics?.analysis?.source_modes;
+  const sourceLines = sourcePolicy?.params.map((parameter) => {
+    const slider = state.sliderParams[parameter];
+    const initial = Number.isFinite(slider)
+      ? slider
+      : Number(state.semantics?.params?.[parameter]?.default);
+    const summary = summarizeSourceControl(track, parameter, initial);
+    const values = Object.entries(summary.seconds)
+      .filter(([, seconds]) => Number.isFinite(seconds) && seconds > 0)
+      .map(([mode, seconds]) => `${parameter}=${mode}: ${seconds.toFixed(3)}s`)
+      .join(" ");
+    return `Track source controls: ${values || `${parameter}: none observed`}`;
+  });
 
   return [
-    `SW=1: ${parallel.swOn} frames, ${parallel.swOnSeconds.toFixed(3)}s (${parallel.swOnShare.toFixed(1)}%)`,
-    `Parallel-marked events: ${parallel.parallelEvents}; SW=0 frames: ${parallel.swOff}`,
-    lfSummary ? `LF modes: ${lfSummary}` : "LF modes: none observed",
-    ...(timing.length > 0 ? timing : ["No branch timing mismatches detected"]),
+    ...(branch && branchPolicy
+      ? [
+          `${branchPolicy.param}=${branchPolicy.value}: ${branch.selectedEvents} frames, ${branch.selectedSeconds.toFixed(3)}s (${branch.selectedShare.toFixed(1)}%)`,
+          `${branchPolicy.param} other finite values: ${branch.otherEvents} frames`,
+        ]
+      : ["(no experiment branch-switch policy)"]),
+    ...(sourceLines ?? ["(no experiment source-control policy)"]),
   ];
 }
 
@@ -206,11 +218,14 @@ function formatMeterReadings(state: DisplayState): string[] {
 function formatGainDerivation(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
+  if (!state.semantics) return ["(no experiment semantics)"];
+  if (!state.semantics.analysis) return ["(no experiment analysis policy)"];
   const analysis = analyzeTrackGains(
     track,
     state.sliderParams,
     state.sampleRate || 48000,
     state.semantics,
+    state.semantics.analysis,
   );
   if (!analysis) return ["(no gain data)"];
   const { ranges, warnings, parallelScale } = analysis;
@@ -268,7 +283,8 @@ function formatTrackEvents(section: DisplaySection, state: DisplayState): string
 function formatVoicingIssues(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
-  const issues = findVoicingIssues(track, state.sliderParams);
+  if (!state.semantics?.analysis) return ["(no experiment analysis policy)"];
+  const issues = findVoicingIssues(track, state.sliderParams, state.semantics.analysis);
   return issues.length > 0 ? issues : ["No voicing inconsistencies detected"];
 }
 

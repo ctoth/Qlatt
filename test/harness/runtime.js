@@ -1,18 +1,31 @@
 // test/harness/runtime.js — Runtime lifecycle: init, start, stop, speak
 
+import {
+  preloadFrontend,
+  resolveBundledRulepackPath,
+} from "../../src/declarative-frontend/rule-pack.ts";
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
 import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
-import { summarizeParallel, summarizeTrack } from "../../src/track-analysis.ts";
-import { textToKlattTrack } from "../../src/tts-frontend";
+import { summarizeBranchSwitch, summarizeTrack } from "../../src/track-analysis.ts";
+import { contextGate, endPlayback, playTrack, untilAdvanced } from "../../src/track-playback.ts";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../../src/tts-frontend";
 import { updateDiagnostics } from "./diagnostics.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
+import { readSpeakRequest } from "./speak-request.js";
 import { getSelectedSpeaker } from "./speaker.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { state } from "./state.js";
+import { installTap, tapEnabled } from "./tap.js";
 import { handleTelemetry } from "./telemetry.js";
+
+// Context time Stop lets pass after ending a track before it suspends the
+// context: a few render blocks (128 frames is 2.7 ms at 48 kHz) and more than
+// one dectalk-vtm frame (6.4 ms), so the nodes have rendered the end.
+// engineering estimate
+const STOP_SETTLE_SEC = 0.02;
 
 export async function start() {
   await state.ctx.resume();
@@ -21,6 +34,13 @@ export async function start() {
 }
 
 export async function stop() {
+  // Stop ends what is being spoken, so the next Speak starts a run of its
+  // own: the track's resting state is applied now, and the context is given
+  // a moment to render it before it is suspended (src/track-playback.ts).
+  if (state.newInterpreter && state.ctx.state === "running") {
+    endPlayback(state.newInterpreter);
+    await untilAdvanced(state.ctx, STOP_SETTLE_SEC);
+  }
   await state.ctx.suspend();
   state.status.textContent = "Status: suspended";
 }
@@ -33,25 +53,57 @@ export function slugify(text) {
     .slice(0, 64);
 }
 
+// Where a Speak click spends its time, as User Timing measures
+// (`qlatt:speak:<stage>`, visible in the browser's performance panel) and in
+// `state.lastSpeakTimings` (ms).
+function stageTimer() {
+  const timings = {};
+  let last = performance.now();
+  return {
+    timings,
+    mark(stage) {
+      const now = performance.now();
+      timings[stage] = Math.round((now - last) * 10) / 10;
+      performance.measure(`qlatt:speak:${stage}`, { start: last, end: now });
+      last = now;
+    },
+  };
+}
+
+/**
+ * Load, validate and compile a frontend by running one utterance through it,
+ * with the voice the page has selected. Acquire declared resources asynchronously
+ * before the synchronous utterance; test/harness/warmup.js calls it in idle time.
+ */
+export async function warmFrontend(frontendId, phrase) {
+  const speaker = getSelectedSpeaker();
+  await preloadFrontend(resolveBundledRulepackPath(frontendId), speaker);
+  const options = { frontendId };
+  if (speaker) options.speaker = speaker;
+  textToKlattTrack(phrase, undefined, undefined, options);
+}
+
 export async function speak() {
+  const timer = stageTimer();
   await state.ctx.resume();
+  timer.mark("resume");
   // The layered-additive F0 renderer (dectalk-english) calls a synchronous
   // WASM kernel; in the browser its bytes must be fetched and injected before
   // the synchronous textToKlattTrack() below. Idempotent after the first call.
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
-  const phrase = document.getElementById("phrase").value.trim();
-  const baseF0 = Number(document.getElementById("baseF0").value) || 110;
-  const rate = Number(document.getElementById("rate").value) || 1.0;
-  const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
-  if (!phrase) return;
+  timer.mark("f0Filters");
   // Selected voice (string name) comes from the frontend's declarative speakers
   // registry; null when the active frontend has no registry, in which case we
   // pass no `speaker` option (default voice / current behavior).
-  const speaker = getSelectedSpeaker();
-  const options = { rate, frontendId };
-  if (speaker) options.speaker = speaker;
-  const track = textToKlattTrack(phrase, baseF0, 30, options);
-  await speakWithNewRuntime(track);
+  const { phrase, baseF0, options } = readSpeakRequest(document, getSelectedSpeaker());
+  if (!phrase) return;
+  // No base F0 is passed unless the box holds one: the voice's own applies.
+  const { track, resolvedSpeaker } = textToKlattTrackDetailed(phrase, baseF0, undefined, options);
+  timer.mark("textToTrack");
+  await speakWithNewRuntime(track, resolvedSpeaker.base_f0_hz);
+  timer.mark("runtimeAndSchedule");
+  state.lastSpeakTimings = timer.timings;
+  console.log("[QLATT] Speak timings (ms)", timer.timings);
 }
 
 export async function initializeNewRuntime() {
@@ -76,6 +128,8 @@ export async function initializeNewRuntime() {
         telemetryHandler: (data) => handleTelemetry(data), // Route to shared handler
       });
       state.newRuntime.connectToDestination();
+      // `?tap=1`: record what leaves the graph's output (harness/tap.js).
+      if (tapEnabled) await installTap(state.newRuntime);
       state.status.textContent = "Status: new runtime initialized";
       console.log("[QLATT] New runtime initialized");
 
@@ -119,7 +173,8 @@ export async function initializeNewRuntime() {
   return state.newRuntimeInitPromise;
 }
 
-export async function speakWithNewRuntime(track) {
+/** `baseF0` is the base F0 the frontend resolved for the track, for the diagnostics. */
+export async function speakWithNewRuntime(track, baseF0) {
   const runtime = await initializeNewRuntime();
 
   if (!track || track.length === 0) {
@@ -128,32 +183,10 @@ export async function speakWithNewRuntime(track) {
   }
 
   const phrase = document.getElementById("phrase").value.trim();
-  const baseF0 = Number(document.getElementById("baseF0").value) || 110;
 
   // Session setup (matching speak())
-  const startTime = state.ctx.currentTime + 0.05;
   state.sessionId += 1;
   const currentSessionId = state.sessionId;
-
-  // Clear state BEFORE scheduling (matching speak())
-  state.plstepEvents.length = 0;
-  state.plstepTotalCount = 0;
-  state.telemetry.clear();
-  state.telemetryMax.clear();
-
-  // Set run context BEFORE scheduling so telemetry handler can use it
-  state.lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
-  state.runStartTime = startTime;
-
-  if (state.diagEngine) {
-    state.diagEngine.onPlayStart({
-      phrase,
-      baseF0,
-      track,
-      sessionId: currentSessionId,
-      startTime,
-    });
-  }
 
   state.status.textContent = `Status: speaking "${phrase}" (new runtime)`;
 
@@ -175,7 +208,14 @@ export async function speakWithNewRuntime(track) {
 
   // Connect spectrogram to new runtime output (if analyser exists)
   if (state.specState.analyser) {
-    const outputNode = runtime.getNode("masterGain") ?? runtime.getNode("outputGain");
+    // A graph without those nodes (dectalk-vtm is a single node) is tapped at
+    // the first output it declares.
+    const firstOutput = state.newRuntimeGraph?.outputs?.[0];
+    const firstOutputId = typeof firstOutput === "string" ? firstOutput : firstOutput?.node;
+    const outputNode =
+      runtime.getNode("masterGain") ??
+      runtime.getNode("outputGain") ??
+      (firstOutputId ? runtime.getNode(firstOutputId) : undefined);
     if (outputNode) {
       try {
         outputNode.connect(state.specState.analyser);
@@ -185,6 +225,44 @@ export async function speakWithNewRuntime(track) {
     }
   }
 
+  // The track is compiled first; then, with the context held, what was
+  // playing is ended and this track is scheduled a lead after the held time,
+  // so its run cannot begin before all of its events exist and is a run of
+  // its own (src/track-playback.ts). The start time is known only then.
+  const startTime = await playTrack({
+    clock: state.ctx,
+    gate: contextGate(state.ctx),
+    interpreter: state.newInterpreter,
+    track,
+    beforeSchedule: (scheduledStart) => {
+      // Clear state BEFORE scheduling (matching speak())
+      state.plstepEvents.length = 0;
+      state.plstepTotalCount = 0;
+      state.telemetry.clear();
+      state.telemetryMax.clear();
+
+      // Set run context BEFORE scheduling so telemetry handler can use it
+      state.lastRun = {
+        phrase,
+        baseF0,
+        track,
+        sessionId: currentSessionId,
+        startTime: scheduledStart,
+      };
+      state.runStartTime = scheduledStart;
+
+      if (state.diagEngine) {
+        state.diagEngine.onPlayStart({
+          phrase,
+          baseF0,
+          track,
+          sessionId: currentSessionId,
+          startTime: scheduledStart,
+        });
+      }
+    },
+  });
+
   console.log("[QLATT] New runtime: scheduling track", {
     frames: track.length,
     startTime,
@@ -192,15 +270,19 @@ export async function speakWithNewRuntime(track) {
     sessionId: currentSessionId,
   });
 
-  state.newInterpreter.scheduleTrack(track, startTime);
-
   const trackDuration = state.newInterpreter.getTrackDuration();
-  console.log("[QLATT] Track summary", summarizeTrack(track));
-  const parallelSummary = summarizeParallel(track);
-  console.log("[QLATT] Parallel summary", parallelSummary);
-  if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {
-    console.warn("[QLATT] Parallel params present, but SW=0 (cascade-only path).");
-  }
+  const metricsPolicy = state.newRuntimeSemantics?.analysis?.metrics;
+  console.log(
+    "[QLATT] Track summary",
+    metricsPolicy ? summarizeTrack(track, metricsPolicy) : "(no experiment metrics policy)",
+  );
+  const branchPolicy = state.newRuntimeSemantics?.analysis?.branch_switch;
+  console.log(
+    "[QLATT] Branch switch summary",
+    branchPolicy
+      ? summarizeBranchSwitch(track, branchPolicy)
+      : "(no experiment branch-switch policy)",
+  );
   console.log("[QLATT] First events", track.slice(0, 6));
 
   // Start spectrogram visualization (matching speak())

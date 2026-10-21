@@ -8,21 +8,23 @@
  *  - the resolved phoneme sequence (from inventory_target_selected decisions)
  *  - whether a non-empty KlattFrame track was produced with F0 present
  *
- * Cross-checks dictionary-sourced words against public/dectalk-dictionary.json.
+ * Cross-checks dictionary-sourced words against the selected frontend's raw lexicon.
  * Read-only. Does NOT modify any baselines.
  */
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { loadCmuDictionaryFromPathSync } from "../src/cmu-dictionary-loader";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
+import { readFileFromFsSync } from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dictPath = path.resolve(__dirname, "../public/dectalk-dictionary.json");
-const rawDict = JSON.parse(fs.readFileSync(dictPath, "utf8")) as Record<string, string>;
-
 const FRONTEND = "dectalk-english";
+const { lexicon } = loadFrontendResources(loadBundledRulepackSpec(FRONTEND));
+if (!lexicon) throw new Error(`E_FRONTEND_CONFIG: frontend '${FRONTEND}' requires lexicon`);
+const rawSource = readFileFromFsSync(lexicon.path);
+if (rawSource === null) throw new Error(`Could not read raw lexicon '${lexicon.path}'`);
+const rawDict = JSON.parse(rawSource) as Record<string, string>;
 
 const argWords = process.argv.slice(2);
 const sampleWords =
@@ -31,9 +33,7 @@ const sampleWords =
     : ["hello", "world", "nuclear", "judicial", "computer", "question", "you"];
 
 console.log(`dict entries (raw json): ${Object.keys(rawDict).length}`);
-console.log(
-  `loader sanity (cached map size): ${Object.keys(loadCmuDictionaryFromPathSync("/dectalk-dictionary.json")).length}`,
-);
+console.log(`loader sanity (cached map size): ${Object.keys(lexicon.dictionary).length}`);
 
 for (const word of sampleWords) {
   const provenance = createProvenanceCollector();

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-betty-v1",
+  "defaults": {
+    "voiceId": "betty",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "betty-sea-shells", "text": "She sells sea shells.", "group": "voice", "tags": ["fricatives", "front-vowels"], "expectedFocus": ["trace"] },
+    { "id": "betty-yellow-moon", "text": "The yellow moon rose.", "group": "voice", "tags": ["glides", "nasals", "back-vowels"], "expectedFocus": ["trace"] },
+    { "id": "betty-cup-of-tea", "text": "Bring me a cup of tea.", "group": "voice", "tags": ["stops", "nasals"], "expectedFocus": ["trace"] },
+    { "id": "betty-how-old", "text": "How old are you?", "group": "voice", "tags": ["question", "h", "diphthongs"], "expectedFocus": ["trace"] },
+    { "id": "betty-big-dog", "text": "A big dog ran by.", "group": "voice", "tags": ["voiced-stops", "diphthongs"], "expectedFocus": ["trace"] },
+    { "id": "betty-thank-you", "text": "Thank you very much.", "group": "voice", "tags": ["velar-nasal", "affricate"], "expectedFocus": ["trace"] },
+    { "id": "betty-yes-we-can", "text": "Yes, we can go now.", "group": "voice", "tags": ["two-clauses", "velars"], "expectedFocus": ["trace"] },
+    { "id": "betty-voice-clear", "text": "Her voice is clear.", "group": "voice", "tags": ["r-vowels", "diphthongs", "clusters"], "expectedFocus": ["trace"] },
+    { "id": "betty-judge", "text": "judge.", "group": "voice", "tags": ["affricate", "single-word"], "expectedFocus": ["trace"] },
+    { "id": "betty-look-boy", "text": "Look at the boy.", "group": "voice", "tags": ["laterals", "diphthongs", "velars"], "expectedFocus": ["trace"] },
+    { "id": "betty-red-car", "text": "Did you see the red car?", "group": "voice", "tags": ["question", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-lovely-day", "text": "What a lovely day!", "group": "voice", "tags": ["exclamation", "female-range"], "expectedFocus": ["trace"] },
+    { "id": "betty-stop-now", "text": "Stop now!", "group": "voice", "tags": ["exclamation", "two-words", "female-range"], "expectedFocus": ["trace"] },
+    { "id": "betty-eat-sing", "text": "First we eat, then we sing, and then we go home.", "group": "voice", "tags": ["comma", "consecutive-commas", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-long-morning", "text": "After a long and very busy morning, we rested.", "group": "voice", "tags": ["comma", "long-comma-clause", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-big-dog-break", "text": "The big dog barked and the small cat ran away.", "group": "voice", "tags": ["inserted-break", "f0-floor"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-period", "text": "Ask J. Smith today.", "group": "clause-type", "tags": ["empty-clause", "period", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-exclamation", "text": "It is B.! Go.", "group": "clause-type", "tags": ["empty-clause", "exclamation", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-comma", "text": "Ask J., then go.", "group": "clause-type", "tags": ["empty-clause", "comma", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-exclamation", "text": "She said \"Stop (now)!\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "exclamation", "after-comma", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-period", "text": "He said \"Go (now).\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "period", "after-comma", "female-baseline"], "expectedFocus": ["trace"] }
+  ]
+}

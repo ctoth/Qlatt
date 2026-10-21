@@ -128,6 +128,7 @@ These primitives use Rust/WASM for DSP with JavaScript worklet wrappers.
 | `fujisaki-resonator` | Resonator with Fujisaki history compensation | `frequency` (Hz), `bandwidth` (Hz) |
 | `reconstruction-filter` | Fixed output reconstruction lowpass | — |
 | `aerodynamic-model` | Stevens & Bickley 1991 aerodynamic coupling | (physical params) |
+| `dectalk-vtm` | DECtalk 4.63's whole synthesizer as one node (`dectalk-vtm` experiment) | DECtalk's packet and speaker definition words; see `docs/host-contract.md` |
 
 **Note**: `signal-switch` is particularly useful for synthesizers with multiple source types (e.g., klsyn88's impulsive/natural/triangular sources). Wire all sources to the switch, bind the selector to a source-select parameter.
 
@@ -281,6 +282,34 @@ realize:
 - `realize`: CEL expressions with explicit dependencies
   - `deps`: Required for topological ordering
   - `ramp: true`: Enables smooth interpolation between frames
+- `realize_each` (optional): realize rules that differ only in one index,
+  written once and generated at load
+
+**Indexed rule families (`realize_each`):**
+
+When several realize rules differ only in a formant number or another single
+index, write the family once. `{n}` is replaced textually in the rule name,
+`expr`, each `deps` item and `description`; the generated rules are merged
+into `realize` when the document is loaded, so the rest of the system sees
+ordinary rules.
+
+```yaml
+realize_each:
+  - index: n
+    over: [2, 3, 4, 5, 6]
+    rules:
+      # Cite the source once, on the template.
+      "parallelGain{n}":
+        expr: "dbToLinear(A{n} + ndbScale.A{n}) * parallelScale"
+        deps: ["A{n}", parallelScale]
+```
+
+Quote any name or `deps` item that contains braces. A generated name may not
+collide with a rule authored under `realize` in the same document; a child
+experiment overrides a parent's generated rule by writing a rule with the
+generated name. Rules whose constants vary per index cannot be templated: the
+substitution is textual and takes one scalar per value. See
+`docs/host-contract.md` §4 for the exact semantics and error codes.
 
 ### Step 2: Define Topology (graph.yaml)
 
@@ -944,7 +973,7 @@ Use this checklist when adding a new synthesizer.
 | `src/klatt-interpreter.ts` | Track scheduling, semantics evaluation |
 | `src/semantics/cel-evaluator.ts` | CEL expression parser |
 | `src/semantics/topological-evaluator.ts` | Dependency ordering |
-| `src/builtin-functions.ts` | dbToLinear, proximity, ndbScale |
+| `src/builtin-functions.ts` | dbToLinear, proximity and generic amplitude conversions |
 | `crates/*/src/lib.rs` | WASM primitive implementations |
 | `src/worklets/*-processor.ts` | AudioWorklet processor sources (compiled to `public/worklets/`) |
 

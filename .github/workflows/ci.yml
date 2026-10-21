@@ -13,6 +13,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # The native binary that build:only copies out of target/release;
+  # load-native.cjs loads it in preference to any prebuilt one.
+  NODE_WEB_AUDIO_API_BINARY: node_modules/node-web-audio-api/node-web-audio-api.build-release.node
+
 jobs:
   native:
     runs-on: ubuntu-latest
@@ -26,6 +31,83 @@ jobs:
             rustup target remove wasm32-unknown-unknown
           fi
           cargo test --workspace
+
+  # Puts the node-web-audio-api binary in the cache before the test shards
+  # start, so no two shards build it at once.
+  node-web-audio-api:
+    runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.key.outputs.key }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Key the node-web-audio-api build
+        id: key
+        run: |
+          source=$(node -p "require('./package-lock.json').packages['node_modules/node-web-audio-api'].resolved.split('/').pop()")
+          rust=$(rustc --version | cut -d' ' -f2)
+          echo "key=node-web-audio-api-${{ runner.os }}-${{ runner.arch }}-rust-$rust-$source" >> "$GITHUB_OUTPUT"
+
+      - name: Look up the node-web-audio-api build
+        id: cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.NODE_WEB_AUDIO_API_BINARY }}
+          key: ${{ steps.key.outputs.key }}
+          lookup-only: true
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # libasound2-dev supplies the ALSA headers the build links against.
+      - name: Build node-web-audio-api for the runner
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install --yes libasound2-dev
+          printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
+          npm --prefix node_modules/node-web-audio-api run build:only
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.NODE_WEB_AUDIO_API_BINARY }}
+          key: ${{ steps.key.outputs.key }}
+
+  test:
+    needs: node-web-audio-api
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore the node-web-audio-api build
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.NODE_WEB_AUDIO_API_BINARY }}
+          key: ${{ needs.node-web-audio-api.outputs.key }}
+          fail-on-cache-miss: true
+
+      - run: rustup target add wasm32-unknown-unknown
+
+      - run: bash build.sh
+
+      - run: npx vitest run --shard=${{ matrix.shard }}/4
 
   quality:
     runs-on: ubuntu-latest
@@ -45,18 +127,15 @@ jobs:
 
       - run: npm run typecheck
 
+      # The first half of `npm test`; the test job runs the Vitest half.
+      - run: npm run check:registry-bindings
+
       - run: rustup target add wasm32-unknown-unknown
 
-      - run: sudo apt-get update && sudo apt-get install --yes libasound2-dev
-
-      - name: Build node-web-audio-api for the runner
-        run: |
-          printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
-          npm --prefix node_modules/node-web-audio-api run build:only
-
+      # The production build ships public/worklets/*.wasm, which this rebuilds.
       - run: bash build.sh
 
-      - run: npm test
+      - run: npm run check:citations
 
       - run: npm run build
 

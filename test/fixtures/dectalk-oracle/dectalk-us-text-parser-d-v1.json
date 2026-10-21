@@ -1,0 +1,874 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-d-v1.txt",
+  "dectalk-us-messy-sweep-v1.json"
+ ],
+ "entries": {
+  "Drive 30 mph in town.": [
+   "Drive 30 miles per hour in town. "
+  ],
+  "Drive 30 MPH. in town.": [
+   "Drive 30 miles per hour ",
+   "in town. "
+  ],
+  "Drive 30 mph.": [
+   "Drive 30 miles per hour "
+  ],
+  "Drive 30 mph, then stop.": [
+   "Drive 30 miles per hour, ",
+   "then stop. "
+  ],
+  "Is it 30 mph?": [
+   "Is it 30 miles per hour? "
+  ],
+  "Send the URL now.": [
+   "Send the U R L now. "
+  ],
+  "See the API now.": [
+   "See the A.P.I. now. "
+  ],
+  "It is fyi only.": [
+   "It is for your information only. "
+  ],
+  "Ask capt Smith now.": [
+   "Ask captain Smith now. "
+  ],
+  "The rm is big.": [
+   "The room is big. "
+  ],
+  "The apt. is big.": [
+   "The apartment ",
+   "is big. "
+  ],
+  "The Apt. is big.": [
+   "The apartment ",
+   "is big. "
+  ],
+  "The apt is big.": [
+   "The apt is big. "
+  ],
+  "Go on Mon and Tue.": [
+   "Go on Mon and Tuesday "
+  ],
+  "Use E.G. this.": [
+   "Use E.G. this. "
+  ],
+  "Use I.E. this.": [
+   "Use I.E. this. "
+  ],
+  "Use i.e. this.": [
+   "Use this is this. "
+  ],
+  "Use w/o this.": [
+   "Use without this. "
+  ],
+  "He has rec'd it.": [
+   "He has received it. "
+  ],
+  "Dr. Smith lives on Oak Dr. now.": [
+   "Doctor Smith lives on Oak Dr. now. "
+  ],
+  "DR. Smith is here.": [
+   "Doctor Smith is here. "
+  ],
+  "Dr. smith is here.": [
+   "Dr. smith is here. "
+  ],
+  "Dr Smith is here.": [
+   "Dr Smith is here. "
+  ],
+  "Dr. Jones' car.": [
+   "Dr. Jones' ",
+   "car. "
+  ],
+  "St. Paul is on Main St.": [
+   "Saint Paul is on Main St. "
+  ],
+  "St. John's Dr. Smith.": [
+   "Saint John's Doctor Smith. "
+  ],
+  "Ask AT&T now.": [
+   "Ask A.T. & T. now. "
+  ],
+  "Ask at&t now.": [
+   "Ask A.T. & T. now. "
+  ],
+  "Dr. A. Smith is here.": [
+   "Doctor A ",
+   "Smith is here. "
+  ],
+  "Dr. J. R. Smith is here.": [
+   "Doctor J ",
+   "R. ",
+   "Smith is here. "
+  ],
+  "Open C:\\temp\\notes now.": [
+   "Open C: \\x5c temp \\x5c notes now. "
+  ],
+  "Look in D:\\work for it.": [
+   "Look in D: \\x5c work for it. "
+  ],
+  "Use a \\ here.": [
+   "Use a \\x5c here. "
+  ],
+  "The path is \\\\server\\share today.": [
+   "The path is server share today. "
+  ],
+  "Wait , then go.": [
+   "Wait, ",
+   "then go. "
+  ],
+  "Is it late ? Yes.": [
+   "Is it late? ",
+   "Yes. "
+  ],
+  "Stop . Now go.": [
+   "Stop. Now go. "
+  ],
+  "Open \"readme.txt\" now.": [
+   "Open readme \\x81d'at\\x82 txt now. "
+  ],
+  "It cost \"$5\" then.": [
+   "It cost $5 then. "
+  ],
+  "He said ``hello'' to her.": [
+   "He said hello ",
+   "to her. "
+  ],
+  "She typed \"a.b\" there.": [
+   "She typed a \\x81d'at\\x82 b there. "
+  ],
+  "Use std::vector here.": [
+   "Use s t d : : vector here. "
+  ],
+  "Wait..now go.": [
+   "Wait now go. "
+  ],
+  "Try snake__case today.": [
+   "Try snake case today. "
+  ],
+  "Well--then go.": [
+   "Well then go. "
+  ],
+  "Stop!!!!! Now go.": [
+   "Stop! ",
+   "Now go. "
+  ],
+  "He wrote ----- there.": [
+   "He wrote \\x81.\\x82 ",
+   "there. "
+  ],
+  "I like c++ a lot.": [
+   "I like c++ a lot. "
+  ],
+  "I like C++ a lot.": [
+   "I like C++ a lot. "
+  ],
+  "What?!. Yes.": [
+   "What?! \\x81 . \\x82 ",
+   "Yes. "
+  ],
+  "Really?, yes.": [
+   "Really? \\x81 . \\x82 ",
+   "yes. "
+  ],
+  "He works at Acme Inc., now.": [
+   "He works at Acme Inc., ",
+   "now. "
+  ],
+  "It was Jan., then Feb.": [
+   "It was Jan., ",
+   "then Feb. "
+  ],
+  "Ask J., then go.": [
+   "Ask J., ",
+   "then go. "
+  ],
+  "Get ftp://files.example.com/readme now.": [
+   "Get f t p \\x81k'olxn\\x82 / / files \\x81d'at\\x82 example \\x81d'at\\x82 com / readme\\x0bnow. "
+  ],
+  "Mail joe@example.com today.": [
+   "Mail joe @ example \\x81d'at\\x82 com\\x0btoday. "
+  ],
+  "Write to ann@mit.edu now.": [
+   "Write to ann @ m i t \\x81d'at\\x82 e d u\\x0bnow. "
+  ],
+  "Ask bob @ mit about it.": [
+   "Ask bob @ mit about it. "
+  ],
+  "Go to example dot com now.": [
+   "Go to example dot com now. "
+  ],
+  "See example.org:80/path now.": [
+   "See example \\x81d'at\\x82 org : 80 / path now. "
+  ],
+  "See example.org/path now.": [
+   "See example . org path now. "
+  ],
+  "Visit site.co.uk today.": [
+   "Visit site \\x81d'at\\x82 c o \\x81d'at\\x82 u k today. "
+  ],
+  "Visit mit.edu today.": [
+   "Visit mit \\x81d'at\\x82 e d u today. "
+  ],
+  "Visit whitehouse.gov today.": [
+   "Visit whitehouse \\x81d'at\\x82 g o v today. "
+  ],
+  "Visit example.info today.": [
+   "Visit example \\x81d'at\\x82 info today. "
+  ],
+  "It is and/or here.": [
+   "It is and/or here. "
+  ],
+  "We are open 24/7 here.": [
+   "We are open 24/7 here. "
+  ],
+  "March 12 is fine.": [
+   "March 12th is fine. "
+  ],
+  "June 21 is fine.": [
+   "June 21st is fine. "
+  ],
+  "January 5 is fine.": [
+   "January 5th is fine. "
+  ],
+  "August 2 is fine.": [
+   "August 2nd is fine. "
+  ],
+  "It was 5-January-1996 then.": [
+   "It was 5-jan-1996 then. "
+  ],
+  "It was 5/January/96 then.": [
+   "It was 5-jan-96 then. "
+  ],
+  "It is Mon. Jan. 5 today.": [
+   "It is Monday 5-Jan today. "
+  ],
+  "It is Tue. March 3 today.": [
+   "It is Tuesday March 3rd today. "
+  ],
+  "It is Fri Jan 5 today.": [
+   "It is Friday 5-Jan today. "
+  ],
+  "It is 5 EST now.": [
+   "It is 5 eastern standard time now. "
+  ],
+  "It is 5 (PST) now.": [
+   "It is 5 pacific standard time now. "
+  ],
+  "Go to 12 N. Main now.": [
+   "Go to 12 north ",
+   "Main now. "
+  ],
+  "It is at 40 NW today.": [
+   "It is at 40 northwest today. "
+  ],
+  "Henry VIII was king.": [
+   "Henry the 8th was king. "
+  ],
+  "World War II ended.": [
+   "World War the 2nd ended. "
+  ],
+  "See Chapter IV today.": [
+   "See Chapter the 4th today. "
+  ],
+  "Ask McDonald about it.": [
+   "Ask McDonald about it. "
+  ],
+  "Ask Mcdonald about it.": [
+   "Ask Mcdonald about it. "
+  ],
+  "Use PowerPoint today.": [
+   "Use Power Point today. "
+  ],
+  "Use MacBook today.": [
+   "Use Mac Book today. "
+  ],
+  "He said aaah then.": [
+   "He said aaah then. "
+  ],
+  "It is biggish today.": [
+   "It is biggish today. "
+  ],
+  "He said shiuu then.": [
+   "He said uuish then. "
+  ],
+  "Ask Schwartzkopf today.": [
+   "Ask Schwartzkopf today. "
+  ],
+  "Try strengthless today.": [
+   "Try strengthless today. "
+  ],
+  "Try xylophonist today.": [
+   "Try xylophonist today. "
+  ],
+  "Try blorptastic today.": [
+   "Try blorptastic today. "
+  ],
+  "Try unhelpfulness today.": [
+   "Try unhelpfulness today. "
+  ],
+  "Try zzyzx today.": [
+   "Try zzyzx today. "
+  ],
+  "Send e-mail now.": [
+   "Send e mail now. "
+  ],
+  "Wear a T-shirt today.": [
+   "Wear a T-shirt today. "
+  ],
+  "Build an a-frame there.": [
+   "Build an eyh  dash frame there. "
+  ],
+  "Try the blorp-zorp today.": [
+   "Try the blorp-zorp today. "
+  ],
+  "Say yes,no then.": [
+   "Say yes , no then. "
+  ],
+  "Say half.baked then.": [
+   "Say half \\x81d'at\\x82 baked then. "
+  ],
+  "The TV's on.": [
+   "The TV\\x81z\\x82 on. "
+  ],
+  "The CD's here.": [
+   "The CD\\x81z\\x82 here. "
+  ],
+  "It is Bob's car.": [
+   "It is Bob's car. "
+  ],
+  "Call 011-44-20-7946-0958 now.": [
+   "Call 011-44-20-7946-0958 now. "
+  ],
+  "Call 011-33-1-4268-5300 now.": [
+   "Call 011-33-1-4268-5300 now. "
+  ],
+  "Call 1-800-555-1212 now.": [
+   "Call 1, 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 617-555-1212 now.": [
+   "Call 6 1 7, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 617 555 1212 now.": [
+   "Call 6 1 7, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 555-1212 ext 34 now.": [
+   "Call 5 5 5, 1 2 1 2\\x81,\\x82 ext 34 now. "
+  ],
+  "Call 20-7946 now.": [
+   "Call 20-7946 now. "
+  ],
+  "Call 44-20-7946 now.": [
+   "Call 44-20-7946 now. "
+  ],
+  "She bought a well-known brand.": [
+   "She bought a well-known brand. "
+  ],
+  "My mother-in-law is visiting.": [
+   "My mother-in-law is visiting. "
+  ],
+  "It was a last-minute, high-risk decision.": [
+   "It was a last-minute, ",
+   "high-risk decision. "
+  ],
+  "The six-year-old drew a self-portrait.": [
+   "The six-year-old drew a self-portrait. "
+  ],
+  "We need a part-time, long-term helper.": [
+   "We need a part-time, ",
+   "long-term helper. "
+  ],
+  "Re-enter the up-to-date password.": [
+   "Re-enter the up-to-date password. "
+  ],
+  "He is twenty-one and she is thirty-five.": [
+   "He is twenty-one and she is thirty-five. "
+  ],
+  "Read pages 10-15 tonight.": [
+   "Read pages 10-15 tonight. "
+  ],
+  "The shop is open 9-5 on weekdays.": [
+   "The shop is open 9-5 on weekdays. "
+  ],
+  "He lived there 1990-1998.": [
+   "He lived there 1990-1998. "
+  ],
+  "The trip takes 2-3 hours.": [
+   "The trip takes 2-3 hours. "
+  ],
+  "Ages 8-12 are welcome.": [
+   "Ages 8-12 are welcome. "
+  ],
+  "He paused - then he laughed.": [
+   "He paused - ",
+   "then he laughed. "
+  ],
+  "The answer -- if there is one -- is not simple.": [
+   "The answer - ",
+   "if there is one - ",
+   "is not simple. "
+  ],
+  "Three things matter--time, money, and luck.": [
+   "Three things matter time, ",
+   "money, ",
+   "and luck. "
+  ],
+  "I wanted to go - really - but I could not.": [
+   "I wanted to go - ",
+   "really - ",
+   "but I could not. "
+  ],
+  "She said yes--at last.": [
+   "She said yes at last. "
+  ],
+  "One more thing - close the gate.": [
+   "One more thing - ",
+   "close the gate. "
+  ],
+  "Well... I am not sure.": [
+   "Well. ",
+   "I am not sure. "
+  ],
+  "He opened the door and...": [
+   "He opened the door and. "
+  ],
+  "Wait... what was that?": [
+   "Wait. ",
+   "what was that? "
+  ],
+  "I thought... never mind.": [
+   "I thought. ",
+   "never mind. "
+  ],
+  "The list goes on and on . . . and on.": [
+   "The list goes on and on... and on. "
+  ],
+  "...and then it rained.": [
+   "\\x81d'at\\x82 and then it rained. "
+  ],
+  "The meeting (the second one) ran late.": [
+   "The meeting the second one ran late. "
+  ],
+  "He paid the fee (about ten dollars).": [
+   "He paid the fee about ten dollars. "
+  ],
+  "See the note [page four] for details.": [
+   "See the note page four for details. "
+  ],
+  "Bring your tools (hammer, saw, nails) on Monday.": [
+   "Bring your tools hammer, ",
+   "saw, ",
+   "nails on Monday. "
+  ],
+  "(This part is optional.)": [
+   " This part is optional. "
+  ],
+  "She said [quietly] that she agreed.": [
+   "She said quietly that she agreed. "
+  ],
+  "The old bridge (built long ago (or so they say)) still stands.": [
+   "The old bridge built long ago or so they say still stands. "
+  ],
+  "Press the on/off switch.": [
+   "Press the on off switch. "
+  ],
+  "Each student must bring his/her own lunch.": [
+   "Each student must bring his her own lunch. "
+  ],
+  "Answer yes/no to each question.": [
+   "Answer yes/no to each question. "
+  ],
+  "It is an and/or choice.": [
+   "It is an and/or choice. "
+  ],
+  "The speed limit is 55 miles/hour.": [
+   "The speed limit is 55 miles hour. "
+  ],
+  "Call the owner / manager today.": [
+   "Call the owner / manager today. "
+  ],
+  "That is John's coat.": [
+   "That is John's coat. "
+  ],
+  "The dogs' bowls are empty.": [
+   "The dogs' ",
+   "bowls are empty. "
+  ],
+  "James's car is in the shop.": [
+   "James's car is in the shop. "
+  ],
+  "The children's toys were everywhere.": [
+   "The children's toys were everywhere. "
+  ],
+  "It is the boss's decision, not the workers'.": [
+   "It is the boss's decision, ",
+   "not the workers'. "
+  ],
+  "We stayed at my parents' house.": [
+   "We stayed at my parents' ",
+   "house. "
+  ],
+  "The fox's tail and the foxes' den.": [
+   "The fox's tail and the foxes' ",
+   "den. "
+  ],
+  "STOP right there.": [
+   "STOP right there. "
+  ],
+  "DO NOT ENTER.": [
+   "DO NOT ENTER. "
+  ],
+  "This is VERY important.": [
+   "This is VERY important. "
+  ],
+  "THE STORE CLOSES AT NINE TONIGHT.": [
+   "THE STORE CLOSES AT NINE TONIGHT. "
+  ],
+  "Please read the WARNING label first.": [
+   "Please read the WARNING label first. "
+  ],
+  "I said NO.": [
+   "I said NO. "
+  ],
+  "WET PAINT, KEEP OFF THE GRASS.": [
+   "WET PAINT, ",
+   "KEEP OFF THE GRASS. "
+  ],
+  "the meeting is on monday.": [
+   "the meeting is on monday. "
+  ],
+  "We Went To The Lake Last Summer.": [
+   "We Went To The Lake Last Summer. "
+  ],
+  "She uses an iPhone and a MacBook.": [
+   "She uses an iPhone and a Mac Book. "
+  ],
+  "tHe cAt sAt oN tHe mAt.": [
+   "tHe cAt sAt oN tHe mAt. "
+  ],
+  "McDonald and O'Brien left early.": [
+   "McDonald and O'Brien left early. "
+  ],
+  "She finished 1st in the race.": [
+   "She finished 1st in the race. "
+  ],
+  "He lives on the 3rd floor.": [
+   "He lives on the 3rd floor. "
+  ],
+  "This is my 22nd birthday.": [
+   "This is my 22nd birthday. "
+  ],
+  "Turn left at 42nd Street.": [
+   "Turn left at 42nd Street. "
+  ],
+  "It was the 100th day of school.": [
+   "It was the 100th day of school. "
+  ],
+  "The 4th, 5th, and 11th rows are full.": [
+   "The 4th, ",
+   "5th, ",
+   "and 11th rows are full. "
+  ],
+  "Sales rose 15% last year.": [
+   "Sales rose 15 % last year. "
+  ],
+  "About 50% of the class passed.": [
+   "About 50 % of the class passed. "
+  ],
+  "The rate fell to 3.5%.": [
+   "The rate fell to  3 point 5  %. "
+  ],
+  "I am 100% sure.": [
+   "I am 100 % sure. "
+  ],
+  "Only 7 percent agreed, and 93% did not.": [
+   "Only 7 percent agreed, ",
+   "and 93 % did not. "
+  ],
+  "Add 1/2 cup of sugar.": [
+   "Add 1/2 cup of sugar. "
+  ],
+  "About 3/4 of the seats were taken.": [
+   "About 3/4 of the seats were taken. "
+  ],
+  "He ate 2/3 of the pie.": [
+   "He ate 2/3 of the pie. "
+  ],
+  "The board is 5 1/2 feet long.": [
+   "The board is 5 1/2 feet long. "
+  ],
+  "Cut it into 1/8 inch strips.": [
+   "Cut it into 1/8 inch strips. "
+  ],
+  "One half plus 1/4 is three quarters.": [
+   "One half plus 1/4 is three quarters. "
+  ],
+  "The box weighs 5 lbs.": [
+   "The box weighs 5 lbs. "
+  ],
+  "It is 10 km to the next town.": [
+   "It is 10 km to the next town. "
+  ],
+  "He is 6 ft. 2 in. tall.": [
+   "He is 6 ft. 2 in. tall. "
+  ],
+  "Add 250 ml of milk.": [
+   "Add 250 ml of milk. "
+  ],
+  "The car was going 60 mph.": [
+   "The car was going 60 miles per hour "
+  ],
+  "The bag holds 2 kg of rice.": [
+   "The bag holds 2 kg of rice. "
+  ],
+  "It is 30 degrees outside.": [
+   "It is 30 degrees outside. "
+  ],
+  "Take 2 tsp. every 4 hrs.": [
+   "Take 2 tsp. every 4 hrs. "
+  ],
+  "The party is on May 5.": [
+   "The party is on 5-May. "
+  ],
+  "She was born on July 4, 1976.": [
+   "She was born on July 4th, ",
+   "1976. "
+  ],
+  "The form is due 3/15/2024.": [
+   "The form is due 15-mar-2024. "
+  ],
+  "We met on the 2nd of June.": [
+   "We met on the 2nd of June. "
+  ],
+  "The letter is dated Jan. 12, 2001.": [
+   "The letter is dated 12-Jan, ",
+   "2001. "
+  ],
+  "It happened on 12 October 1999.": [
+   "It happened on 12 October 1999. "
+  ],
+  "The deadline is Fri., Dec. 1.": [
+   "The deadline is Friday, ",
+   "1-Dec. "
+  ],
+  "He left in the summer of '69.": [
+   "He left in the summer of '69. "
+  ],
+  "The train leaves at 7:30.": [
+   "The train leaves at 7:30. "
+  ],
+  "Lunch is at 12:00 noon.": [
+   "Lunch is at 12:00 noon. "
+  ],
+  "Call me after 5 p.m.": [
+   "Call me after 5 pm "
+  ],
+  "The store opens at 9 AM and closes at 6 PM.": [
+   "The store opens at 9 AM and closes at 6 PM. "
+  ],
+  "The alarm rang at 6:05 a.m. sharp.": [
+   "The alarm rang at 6:05 am ",
+   "sharp. "
+  ],
+  "The flight lands at 23:45.": [
+   "The flight lands at 23:45. "
+  ],
+  "Be there by 8 o'clock.": [
+   "Be there by 8 o'clock. "
+  ],
+  "Write to me at john.smith@example.com.": [
+   "Write to me at john \\x81d'at\\x82 smith @ example \\x81d'at\\x82 com.\\x0b"
+  ],
+  "Visit www.example.com for details.": [
+   "Visit www \\x81d'at\\x82 example \\x81d'at\\x82 com\\x0bfor details. "
+  ],
+  "The page is at http://example.org/help.": [
+   "The page is at h t t p \\x81k'olxn\\x82 / / example \\x81d'at\\x82 org / help.\\x0b"
+  ],
+  "Send it to info@school.edu today.": [
+   "Send it to info @ school \\x81d'at\\x82 e d u\\x0btoday. "
+  ],
+  "Our site, example.net, is down.": [
+   "Our site, ",
+   "example \\x81d'at\\x82 net, ",
+   "is down. "
+  ],
+  "Her address is mary_jones99@mail.example.co.uk.": [
+   "Her address is mary_jones99 @ mail \\x81d'at\\x82 example \\x81d'at\\x82 c o \\x81d'at\\x82 u k.\\x0b"
+  ],
+  "Call 555-1234 after six.": [
+   "Call 5 5 5, 1 2 3 4\\x81,\\x82 after six. "
+  ],
+  "The number is (617) 555-0142.": [
+   "The number is \\x81,\\x826 1 7,  5 5 5, 0 1 4 2.\\x81,\\x82 "
+  ],
+  "Dial 1-800-555-0199 for help.": [
+   "Dial 1, 8 0 0, 5 5 5, 0 1 9 9\\x81,\\x82 for help. "
+  ],
+  "My extension is 555.0173 x 42.": [
+   "My extension is 555.0173 x 42. "
+  ],
+  "In an emergency, call 911.": [
+   "In an emergency, ",
+   "call 911. "
+  ],
+  "It costs $5 a pound.": [
+   "It costs $5 a pound. "
+  ],
+  "The house sold for $2 million.": [
+   "The house sold for $2 million. "
+  ],
+  "He owes me $20.50 for lunch.": [
+   "He owes me $20.50 for lunch. "
+  ],
+  "The budget is $1.5 billion dollars.": [
+   "The budget is $1.5 billion dollars. "
+  ],
+  "Tickets are $15 each or 2 for $25.": [
+   "Tickets are $15 each or 2 for $25. "
+  ],
+  "She found 75 cents and a $1 bill.": [
+   "She found 75 cents and a $1 bill. "
+  ],
+  "The fine was $1,250.00 plus costs.": [
+   "The fine was $1,250.00 plus costs. "
+  ],
+  "Read Chapter IV tonight.": [
+   "Read Chapter the 4th tonight. "
+  ],
+  "King Henry VIII had six wives.": [
+   "King Henry the 8th had six wives. "
+  ],
+  "World War II ended in 1945.": [
+   "World War the 2nd ended in 1945. "
+  ],
+  "See Part III, Section ii.": [
+   "See Part the 3rd, ",
+   "Section ii. "
+  ],
+  "Pope John Paul II visited the city.": [
+   "Pope John Paul the 2nd visited the city. "
+  ],
+  "The clock showed XII.": [
+   "The clock showed XII. "
+  ],
+  "J. R. Smith wrote the report.": [
+   "J. ",
+   "R. ",
+   "Smith wrote the report. "
+  ],
+  "The book is by C.S. Lewis.": [
+   "The book is by C.S. ",
+   "Lewis. "
+  ],
+  "Ask Mary K. Brown about it.": [
+   "Ask Mary K. ",
+   "Brown about it. "
+  ],
+  "John F. Kennedy was born in 1917.": [
+   "John F. ",
+   "Kennedy was born in 1917. "
+  ],
+  "T. S. Eliot and W. H. Auden were poets.": [
+   "T. ",
+   "S. ",
+   "Eliot and W. ",
+   "H. ",
+   "Auden were poets. "
+  ],
+  "Dr. Jones will see you now.": [
+   "Doctor Jones will see you now. "
+  ],
+  "Mr. and Mrs. Green live next door.": [
+   "Mr. and Mrs. Green live next door. "
+  ],
+  "Ask Prof. Lee or Ms. Park.": [
+   "Ask Prof. Lee or Ms. Park. "
+  ],
+  "Robert Brown, Jr., signed the letter.": [
+   "Robert Brown, ",
+   "Jr., ",
+   "signed the letter. "
+  ],
+  "Mary White, M.D., spoke first.": [
+   "Mary White, ",
+   "M.D., ",
+   "spoke first. "
+  ],
+  "Capt. Hill and Sgt. Stone were there.": [
+   "captain ",
+   "Hill and Sgt. ",
+   "Stone were there. "
+  ],
+  "Gov. Adams met Sen. Clark and the Rev. Mr. Hall.": [
+   "Gov. Adams met Sen. Clark and the Rev. Mr. Hall. "
+  ],
+  "\"Did she really say 'no'?\" he asked.": [
+   "\"Did she really say 'no' ? \" he asked. "
+  ],
+  "\"Stop!\" she cried. \"Where are you going?\"": [
+   "Stop! she cried. ",
+   "Where are you going? "
+  ],
+  "He called it \"the best day ever\"; I did not.": [
+   "He called it the best day ever; ",
+   "I did not. "
+  ],
+  "\"Well,\" said Tom, \"that is that.\"": [
+   "Well, said Tom, ",
+   "that is that. "
+  ],
+  "The sign said \"Closed (back at two).\"": [
+   "The sign said \"Closed back at two) . "
+  ],
+  "'I heard him say \"wait\",' she told us.": [
+   "'I heard him say \"wait\" , ' ",
+   "she told us. "
+  ],
+  "What?!": [
+   "What?! "
+  ],
+  "No way!!!": [
+   "No way! "
+  ],
+  "Are you serious??": [
+   "Are you serious? "
+  ],
+  "Wait,, what did you say?": [
+   "Wait, ",
+   "what did you say? "
+  ],
+  "Really?! You did that!?": [
+   "Really?! ",
+   "You did that!? "
+  ],
+  "It is over.. I think.": [
+   "It is over. ",
+   "I think. "
+  ],
+  "See you tomorrow": [
+   "See you tomorrow "
+  ],
+  "The keys are on the table": [
+   "The keys are on the table "
+  ],
+  "Thanks, I will call you later": [
+   "Thanks, ",
+   "I will call you later "
+  ],
+  "Is anyone there": [
+   "Is anyone there "
+  ],
+  "Milk bread eggs and a dozen apples": [
+   "Milk bread eggs and a dozen apples "
+  ],
+  "The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every Saturday morning that he had once sailed around the world on a ship that carried tea and spices from the far east to the cold ports of the north where the snow fell for six months of the year.": [
+   "The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every Saturday morning that he had once sailed around the world",
+   " on a ship that carried tea and spices from the far east to the cold ports of the north where the snow fell for six months of the year. "
+  ]
+ }
+}

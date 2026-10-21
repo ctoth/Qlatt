@@ -15,6 +15,7 @@
       "tsconfig*.json",
       "vite.config.ts",
       "vitest.config.ts",
+      "vitest.audit.config.ts",
       "index.html"
     ]
   },

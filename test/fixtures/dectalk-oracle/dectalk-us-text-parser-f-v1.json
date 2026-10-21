@@ -1,0 +1,35 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-f-v1.json"
+ ],
+ "entries": {
+  "Try zorfolk today.": [
+   "Try zor-folk today. "
+  ],
+  "Try zobleaf today.": [
+   "Try zob-leaf today. "
+  ],
+  "Try zobbrook today.": [
+   "Try zob-brook today. "
+  ],
+  "Try glycktsk today.": [
+   "Try glycktsk today. "
+  ],
+  "Ask Rhythmns today.": [
+   "Ask Rhythmns today. "
+  ],
+  "A `` b here.": [
+   "A \" b here. "
+  ],
+  "A '' b here.": [
+   "A \" ",
+   "b here. "
+  ],
+  "Say ``x now.": [
+   "Say \"x now. "
+  ]
+ }
+}

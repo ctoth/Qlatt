@@ -3,15 +3,14 @@
  * Run via test/lexical-stress-evaluation.test.ts for the repository's Vite resource initialization.
  * Reference: bundled CMU dictionary. Baseline: e3e8b4cf src/g2p/stress.ts count/hint rule.
  */
-import { loadCmuDictionaryFromPathSync } from "../src/cmu-dictionary-loader";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
-import { applyLtsRules } from "../src/g2p/lts-engine";
+import { applyLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
 import { getStressHintForWord } from "../src/g2p/morphology";
 import { type StressHint, stressPronunciation } from "../src/g2p/stress";
-import { loadStressPolicy } from "../src/g2p/stress-policy";
-import { loadPhonotacticsSync } from "../src/g2p/syllabify";
 
 // Chosen before the first evaluation run; no accuracy-based selection or removal.
 // Families describe the spelling/input challenge, not an inferred lexical category.
@@ -31,10 +30,15 @@ export const evaluationWords = {
   long: ["locomotive", "encyclopedia", "aristocratic", "university", "cafeteria"],
 } as const;
 
-const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
-const policyPath = resources.stressPolicyPath;
-const ltsPath = resources.ltsPath;
-const vowels = new Set(loadPhonotacticsSync(loadStressPolicy(policyPath).phonotacticsPath).vowels);
+const selected = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+if (!selected.stress || !selected.morphology) {
+  throw new Error(
+    "E_FRONTEND_CONFIG: frontend 'qlatt-english' requires stress_policy and morphology",
+  );
+}
+const resources = { ...selected, stress: selected.stress, morphology: selected.morphology };
+const ltsRules = resources.lts.document as LtsRulesData;
+const vowels = new Set(resources.stress.phonotactics.vowels);
 const stressPattern = (phones: string[]) =>
   phones
     .filter((phone) => /[012]$/.test(phone))
@@ -56,7 +60,10 @@ function baseline(phones: string[], hint: StressHint | undefined): string[] {
 }
 
 export function evaluateLexicalStress() {
-  const dictionary = loadCmuDictionaryFromPathSync("/cmu-dictionary.json");
+  const { lexicon } = resources;
+  if (!lexicon)
+    throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+  const dictionary = lexicon.dictionary;
   const keys = Object.keys(dictionary);
   return Object.entries(evaluationWords).flatMap(([family, words]) =>
     words.map((word) => {
@@ -69,13 +76,17 @@ export function evaluateLexicalStress() {
         .map((key) => dictionary[key].split(/\s+/));
       if (!variants.length) throw new Error(`Missing frozen evaluation reference: ${word}`);
       const phones = variants[0].map((phone) => phone.replace(/[012]$/, ""));
-      const hint = getStressHintForWord(word, resources.morphologyPath);
-      const reference = stressPronunciation(phones, { policyPath, wordId: word, hint });
+      const hint = getStressHintForWord(word, resources.morphology);
+      const reference = stressPronunciation(phones, {
+        stress: resources.stress,
+        wordId: word,
+        hint,
+      });
       // No whole-word OR root dictionary access: both old and new use the same bare LTS phones.
       const generated = pronounce(word, () => null, resources);
       if (generated.source !== "lts-rules")
         throw new Error(`Evaluation dictionary bypass failed: ${word}`);
-      const lts = applyLtsRules(word, ltsPath);
+      const lts = applyLtsRules(word, ltsRules);
       const gold = [...new Set(variants.map(stressPattern))];
       const compatibleGold = variants
         .filter(

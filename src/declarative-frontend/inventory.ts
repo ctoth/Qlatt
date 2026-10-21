@@ -1,15 +1,23 @@
+import type { CmuDictionary } from "../cmu-dictionary-loader";
+import type { SpeakerDefinitionContext } from "../dectalk-voice";
 import type { Diagnostics } from "../diagnostics";
-import { loadStressPolicy } from "../g2p/stress-policy";
+import type { LtsContext } from "../g2p/lts-document";
+import type { MorphologyContext } from "../g2p/morphology";
+import type { StressContext } from "../g2p/stress-policy";
+import type { PronunciationLayers } from "../g2p/types";
+import type { AffectLibrary } from "../input/affect-presets";
+import type { InlineMarkers } from "../input/inline";
+import type { RdPolicy } from "../input/rd-policy";
+import type { VoiceQualityChannel } from "../input/vq-channels";
 import type { AreaFunctionDerivation } from "../provenance";
-import {
-  cloneValue,
-  isPlainObject,
-  loadYamlDocumentSync,
-  loadYamlSource,
-  loadYamlSourceSync,
-  parseYamlString,
-} from "../yaml-loader";
-import { parseRecognitionConfig } from "./recognition-config";
+import type { SourceContourSpec } from "../source-contour";
+import type { SpeakerProfileSpec } from "../speaker-profile";
+import type { TextParserConfig } from "../text-parser/frontend";
+import type { TextParserTable } from "../text-parser/interpreter";
+import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
+import { compileFeatureSchema } from "./hrg/feature-schema";
+import { validateFeatureValue } from "./hrg/item";
+import type { FeatureSchema } from "./hrg/types";
 
 export type InventorySpec = {
   silence_symbol: string;
@@ -19,6 +27,8 @@ export type InventorySpec = {
   default_duration_ms: number;
   citations?: readonly string[];
   base_params: Record<string, number>;
+  target_features: Readonly<Record<string, FeatureSchema>>;
+  target_feature_exclusions: readonly string[];
   normalization_aliases?: Readonly<Record<string, string>>;
   secondary_stress_fallback?: { target: 0 | 1; citations: string[] };
   phoneme_targets: Record<string, Record<string, unknown>>;
@@ -45,27 +55,33 @@ export function parseInventorySymbol(
  * Resources loaded from a frontend.yaml spec.
  * Every path originates in the frontend spec — no hardcoded defaults.
  */
-export type FrontendResources = {
+export type FrontendResources = Readonly<{
   inventory: InventorySpec;
   inventoryPath: string;
-  ltsPath: string;
-  morphologyPath: string;
-  stressPolicyPath: string;
   /**
-   * Optional per-frontend pronunciation dictionary path (JSON, flat
-   * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
-   * lookup against this file instead of the global CMU default. Generic:
-   * a path -> a map -> lookup. Frontends without it keep the global behavior.
+   * Every document the inventory's targets come from, for provenance
+   * citations: `inventoryPath`, then the phonology document it is layered over
+   * (`phonology_path`) when it names one.
    */
-  dictionaryPath?: string;
-};
-
-const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
-const FRONTEND_ASSET_CACHE = new Map<string, unknown>();
-
-export function listBundledInventoryPaths(): string[] {
-  return [...BUNDLED_INVENTORY_CACHE.keys()].sort();
-}
+  inventoryDocuments: readonly string[];
+  lts: LtsContext;
+  pronunciationLayers?: PronunciationLayers;
+  morphology?: MorphologyContext;
+  stress?: StressContext;
+  /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
+  lexicon?: { path: string; dictionary: CmuDictionary };
+  speakerProfile?: { path: string; spec: SpeakerProfileSpec };
+  speakerDefinition?: SpeakerDefinitionContext;
+  sourceContour?: { path: string; spec: SourceContourSpec };
+  textParser?: { config: TextParserConfig; table: TextParserTable };
+  vqChannels?: {
+    path: string;
+    channels: readonly VoiceQualityChannel[];
+    rdPolicy: RdPolicy;
+  };
+  affectPresets?: { path: string; library: AffectLibrary };
+  inlineMarkers?: InlineMarkers;
+}>;
 
 function normalizeBaseParams(node: unknown): Record<string, number> {
   if (!isPlainObject(node)) {
@@ -212,13 +228,180 @@ function normalizeSecondaryFallback(raw: unknown): InventorySpec["secondary_stre
   return { target: raw.target, citations: [...raw.citations] };
 }
 
-export function parseInventorySpec(source: string): InventorySpec {
+// --- Phonology layer ---
+// An inventory may name a phonology document (`phonology_path`): the language's
+// symbol conventions and phoneme class table, shared by every voice of the
+// language (docs/frontend-document-model.md decision 6;
+// docs/inventory-conventions.md, "Layering an inventory over a phonology
+// document"). The two are merged into one raw inventory document before any
+// validation, so every reader sees a single InventorySpec.
+
+/** The convention keys either document may declare, never both. */
+const PHONOLOGY_CONVENTION_KEYS = [
+  "silence_symbol",
+  "nucleus_types",
+  "symbol_grammar",
+  "stress_markers",
+] as const;
+const PHONOLOGY_DOCUMENT_KEYS: readonly string[] = [
+  "version",
+  ...PHONOLOGY_CONVENTION_KEYS,
+  "phoneme_targets",
+  "target_features",
+];
+
+const INVENTORY_PHONOLOGY_PATHS = new WeakMap<InventorySpec, string>();
+
+/** The phonology document an inventory was layered over, if it named one. */
+export function inventoryPhonologyPath(spec: InventorySpec): string | undefined {
+  return INVENTORY_PHONOLOGY_PATHS.get(spec);
+}
+
+function parseInventoryDocument(source: string): Record<string, unknown> {
   const raw = parseYamlString(source, "inventory spec");
   if (!isPlainObject(raw)) {
     throw new Error("E_INVENTORY_SCHEMA: inventory spec must be a YAML object document");
   }
+  return raw;
+}
 
+/** Declared dependency for the resource owner; parsing performs no acquisition. */
+export function inventoryPhonologyReference(source: string): string | undefined {
+  return declaredPhonologyPath(parseInventoryDocument(source));
+}
+
+function declaredPhonologyPath(raw: Record<string, unknown>): string | undefined {
+  if (!Object.hasOwn(raw, "phonology_path")) return undefined;
+  const path = raw.phonology_path;
+  if (typeof path !== "string" || !path.trim()) {
+    throw new Error("E_INVENTORY_PHONOLOGY_PATH: phonology_path must be a non-empty path");
+  }
+  return path;
+}
+
+/**
+ * The inventory document with its phonology document's conventions and
+ * per-target fields added. Nothing overrides anything: a key or a field that
+ * both documents declare is an error, and so is an inventory target the
+ * phonology document does not declare. A phoneme the phonology document
+ * declares and the inventory gives no target is not a target.
+ */
+function layerOverPhonology(
+  raw: Record<string, unknown>,
+  phonologySource: string,
+  phonologyPath: string,
+): Record<string, unknown> {
+  const phonology = parseYamlString(phonologySource, "inventory phonology");
+  if (!isPlainObject(phonology)) {
+    throw new Error(
+      `E_INVENTORY_PHONOLOGY_SCHEMA: '${phonologyPath}' must be a YAML object document`,
+    );
+  }
+  for (const key of Object.keys(phonology)) {
+    if (!PHONOLOGY_DOCUMENT_KEYS.includes(key)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_SCHEMA: '${phonologyPath}' may not declare '${key}' (allowed: ${PHONOLOGY_DOCUMENT_KEYS.join(", ")})`,
+      );
+    }
+  }
+  const classes = phonology.phoneme_targets;
+  if (!isPlainObject(classes)) {
+    throw new Error(
+      `E_INVENTORY_PHONOLOGY_SCHEMA: '${phonologyPath}' phoneme_targets must be an object`,
+    );
+  }
+  for (const [phoneme, fields] of Object.entries(classes)) {
+    if (!isPlainObject(fields)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_SCHEMA: '${phonologyPath}' phoneme_targets.${phoneme} must be an object`,
+      );
+    }
+  }
+
+  const { phonology_path: _path, ...merged } = raw;
+  if (!isPlainObject(raw.target_features) || !isPlainObject(phonology.target_features)) {
+    throw new Error("E_INVENTORY_SCHEMA: inventory and phonology require target_features mappings");
+  }
+  for (const field of Object.keys(phonology.target_features)) {
+    if (Object.hasOwn(raw.target_features, field)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_CONFLICT: target_features.${field} is declared by both documents`,
+      );
+    }
+  }
+  merged.target_features = { ...raw.target_features, ...phonology.target_features };
+  for (const key of PHONOLOGY_CONVENTION_KEYS) {
+    if (!Object.hasOwn(phonology, key)) continue;
+    if (Object.hasOwn(raw, key)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_CONFLICT: '${key}' is declared by the inventory and by '${phonologyPath}'`,
+      );
+    }
+    merged[key] = phonology[key];
+  }
+  // A malformed target table is reported by normalizePhonemeTargets.
+  if (!isPlainObject(raw.phoneme_targets)) return merged;
+  const targets: Record<string, unknown> = {};
+  for (const [phoneme, target] of Object.entries(raw.phoneme_targets)) {
+    if (!isPlainObject(target)) {
+      targets[phoneme] = target;
+      continue;
+    }
+    if (!Object.hasOwn(classes, phoneme)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_TARGET: inventory target '${phoneme}' is not declared by '${phonologyPath}'`,
+      );
+    }
+    const fields = classes[phoneme] as Record<string, unknown>;
+    for (const field of Object.keys(fields)) {
+      if (Object.hasOwn(target, field)) {
+        throw new Error(
+          `E_INVENTORY_PHONOLOGY_CONFLICT: phoneme_targets.${phoneme}.${field} is declared by the inventory and by '${phonologyPath}'`,
+        );
+      }
+    }
+    targets[phoneme] = { ...target, ...fields };
+  }
+  merged.phoneme_targets = targets;
+  return merged;
+}
+
+function buildLayeredInventorySpec(
+  raw: Record<string, unknown>,
+  phonologySource: string,
+  phonologyPath: string,
+): InventorySpec {
+  const spec = buildInventorySpec(layerOverPhonology(raw, phonologySource, phonologyPath));
+  INVENTORY_PHONOLOGY_PATHS.set(spec, phonologyPath);
+  return spec;
+}
+
+/**
+ * Parse an inventory document, layering explicitly supplied phonology source
+ * when it names a `phonology_path`. Acquisition belongs to the loaders below.
+ */
+export function parseInventorySpec(source: string, phonologySource?: string): InventorySpec {
+  const raw = parseInventoryDocument(source);
+  const phonologyPath = declaredPhonologyPath(raw);
+  if (phonologyPath === undefined) return buildInventorySpec(raw);
+  if (phonologySource === undefined) {
+    throw new Error(
+      `E_INVENTORY_PHONOLOGY_PATH: '${phonologyPath}' requires supplied phonology source`,
+    );
+  }
+  return buildLayeredInventorySpec(raw, phonologySource, phonologyPath);
+}
+
+function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
   const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
+  if (
+    !Array.isArray(raw.target_feature_exclusions) ||
+    raw.target_feature_exclusions.some((key) => typeof key !== "string" || !key.trim())
+  ) {
+    throw new Error(
+      "E_INVENTORY_SCHEMA: target_feature_exclusions must be an array of non-empty strings",
+    );
+  }
   if (
     typeof raw.silence_symbol !== "string" ||
     !raw.silence_symbol.trim() ||
@@ -270,6 +453,31 @@ export function parseInventorySpec(source: string): InventorySpec {
     throw new Error("E_INVENTORY_SCHEMA: citations must be non-empty strings");
   }
   applyDurationModels(raw.duration_models, phonemeTargets);
+  const baseParams = normalizeBaseParams(raw.base_params);
+  if (!isPlainObject(raw.target_features)) {
+    throw new Error("E_INVENTORY_SCHEMA: target_features must declare target column shapes");
+  }
+  const targetFeatures = Object.freeze(
+    Object.fromEntries(
+      Object.entries(raw.target_features).map(([name, shape]) => [
+        name,
+        compileFeatureSchema(shape),
+      ]),
+    ),
+  );
+  for (const [name, target] of Object.entries(phonemeTargets)) {
+    for (const [field, value] of Object.entries(target)) {
+      const shape =
+        targetFeatures[field] ??
+        (Object.hasOwn(baseParams, field) ? ({ kind: "number" } as const) : undefined);
+      if (!shape) {
+        throw new Error(
+          `E_INVENTORY_SCHEMA: phoneme_targets.${name}.${field} has no declared column shape`,
+        );
+      }
+      validateFeatureValue("inventory", `${name}.${field}`, value, shape);
+    }
+  }
   return {
     silence_symbol: raw.silence_symbol,
     nucleus_types: [...raw.nucleus_types] as string[],
@@ -277,7 +485,9 @@ export function parseInventorySpec(source: string): InventorySpec {
     stress_markers: { ...markers },
     default_duration_ms: raw.default_duration_ms,
     citations: [...citations],
-    base_params: normalizeBaseParams(raw.base_params),
+    base_params: baseParams,
+    target_features: targetFeatures,
+    target_feature_exclusions: [...raw.target_feature_exclusions],
     normalization_aliases: normalizeNormalizationAliases(
       raw.normalization_aliases,
       phonemeTargets,
@@ -286,46 +496,6 @@ export function parseInventorySpec(source: string): InventorySpec {
     secondary_stress_fallback: normalizeSecondaryFallback(raw.secondary_stress_fallback),
     phoneme_targets: phonemeTargets,
   };
-}
-
-export function loadInventorySpecFromPath(specPath: string): InventorySpec {
-  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
-  if (cached) return cached;
-
-  let source = "";
-  try {
-    source = loadYamlSourceSync(specPath);
-  } catch {
-    const known = listBundledInventoryPaths();
-    throw new Error(
-      `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
-  }
-
-  const spec = parseInventorySpec(source);
-  BUNDLED_INVENTORY_CACHE.set(specPath, spec);
-  return spec;
-}
-
-export async function preloadInventorySpecFromPath(specPath: string): Promise<InventorySpec> {
-  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
-  if (cached) return cached;
-
-  let source = "";
-  try {
-    source = await loadYamlSource(specPath);
-  } catch {
-    const known = listBundledInventoryPaths();
-    throw new Error(
-      `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
-  }
-
-  const spec = parseInventorySpec(source);
-  BUNDLED_INVENTORY_CACHE.set(specPath, spec);
-  return spec;
 }
 
 // --- Rule Functions ---
@@ -561,74 +731,4 @@ export function materializePhonemeTarget(
   }
 
   return payload;
-}
-
-// ---------------------------------------------------------------------------
-// FrontendResources loader
-// ---------------------------------------------------------------------------
-
-/**
- * Load inventory and resource paths from a parsed frontend.yaml spec.
- * Every resource path originates in the spec — no hardcoded defaults.
- */
-export function loadFrontendResources(spec: unknown): FrontendResources {
-  if (!isPlainObject(spec)) {
-    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
-  }
-  const inventoryPath = spec.inventory_path;
-  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
-    throw new Error("E_FRONTEND_SPEC: inventory_path is required");
-  }
-  const requireAsset = (value: unknown, name: string): string => {
-    if (typeof value !== "string" || !value.trim()) {
-      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
-    }
-    try {
-      if (!FRONTEND_ASSET_CACHE.has(value)) {
-        FRONTEND_ASSET_CACHE.set(value, loadYamlDocumentSync(value));
-      }
-    } catch (cause) {
-      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
-    }
-    return value;
-  };
-  const ltsPath = requireAsset(spec.lts_path, "lts_path");
-  const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
-  const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
-  requireAsset(
-    isPlainObject(morphology) ? morphology.phonotactics_path : undefined,
-    "morphology.phonotactics_path",
-  );
-  const stressPolicyPath = requireAsset(spec.stress_policy_path, "stress_policy_path");
-  const stress = FRONTEND_ASSET_CACHE.get(stressPolicyPath);
-  requireAsset(
-    isPlainObject(stress) ? stress.phonotactics_path : undefined,
-    "stress_policy.phonotactics_path",
-  );
-  loadStressPolicy(stressPolicyPath);
-  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
-  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
-    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
-  if (!parseRecognitionConfig(spec))
-    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
-  const punctuationTokens = isPlainObject(spec.transcription)
-    ? spec.transcription.punctuation_tokens
-    : undefined;
-  if (
-    !Array.isArray(punctuationTokens) ||
-    !punctuationTokens.length ||
-    !punctuationTokens.every(
-      (token): token is string => typeof token === "string" && token.length > 0,
-    )
-  ) {
-    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
-  }
-  return {
-    inventory: loadInventorySpecFromPath(inventoryPath),
-    inventoryPath,
-    ltsPath,
-    morphologyPath,
-    stressPolicyPath,
-    dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
-  };
 }

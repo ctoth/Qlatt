@@ -68,6 +68,7 @@ export async function createNodeRuntimeAssetLoader(
   const wasmUtilsPath = path.resolve(normalizedDir, "wasm-utils.js");
   const wasmUtilsSource = readUtf8File(wasmUtilsPath);
   const transformedModules = new Map<string, string>();
+  const wasmModules = new Map<string, ArrayBuffer>();
 
   const server = http.createServer((req, res) => {
     try {
@@ -128,11 +129,13 @@ export async function createNodeRuntimeAssetLoader(
     },
     async loadWasmModule(wasmName: string): Promise<ArrayBuffer> {
       const candidate = path.resolve(normalizedDir, wasmName);
-      const bytes = readBinaryFromFsSync(candidate);
+      const bytes = wasmModules.get(candidate) ?? readBinaryFromFsSync(candidate);
       if (!bytes) {
         throw new Error(`Unable to load WASM module '${wasmName}' from '${normalizedDir}'`);
       }
-      return bytes;
+      wasmModules.set(candidate, bytes);
+      // A caller may transfer or mutate its buffer; keep the cached bytes intact.
+      return bytes.slice(0);
     },
     async dispose(): Promise<void> {
       await new Promise<void>((resolve, reject) => {

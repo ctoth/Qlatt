@@ -1,0 +1,15 @@
+{
+  "pl-and": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "pl-word-after": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-cross": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-wh-question": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pl-period": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-verb-after": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-comma": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-question-end": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-exclaim": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-semicolon": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pl-digit-control": ["B1","AV","AP","A2","A6","AB"],
+  "pl-written-control": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"]
+}

@@ -1,7 +1,8 @@
 # Frame foundation (#243)
 
-The foundation preserves the existing event schedule. It does not implement the
-frame rule phase or move policy into CEL; those deliveries remain #244–#247.
+The foundation preserves the existing event schedule. One Segment F1 copy now
+uses the common checked requested-attribute evaluator (#261). The remaining
+frame phase and policy migrations remain #244–#247.
 
 `lowerToFrames` creates a typed `frame` for each existing row. Segment events
 have a `segment` association, never a stored string feature with that name.
@@ -16,13 +17,25 @@ projected output clock, including the existing controller overrides. The emitter
 converts output milliseconds to seconds. Equal-time rows retain insertion order.
 Active Segments with nonpositive duration retain the existing rejection.
 
-Clock construction, output-clock projection, metadata, and parameter writes use
-separate transactions. Parameter transformations use bounded transactions and
-preserve intermediate transition endpoints, F0 samples, and variance centers.
-An unset control writes an internal null tombstone; the emitted field is absent.
-`parameterOrder` preserves the original insertion/deletion/reinsertion sequence.
-The public provenance pointer and `provenanceByFrame` identify the final Frame
-write, with source writes reachable through ancestry.
+Clock construction, output-clock projection, metadata, and Frame relation order
+use transactions and finish before numeric evaluation. Numeric evaluation keeps
+the original event enumeration order, independently of sorted emission. No
+numeric Frame value creates a feature write, undo entry or journal transaction.
+The existing parameter map preserves insertion/deletion/reinsertion and absence.
+
+The authored `frame_copy.define.copied_f1` reads the Segment association through
+`assoc`; its actual dependency evidence includes the named `frame_segments`
+definition and the source F1 stamp. Repeated requests reuse the common evaluator's
+value and evidence. Public pointers identify evaluation records, with authored
+paths, document spans and observed reads in their reasons and source decisions
+as parents. Remaining imperative transformations are explicitly recorded as
+`frame_value_computed`, retaining transition endpoints, F0 samples and variance
+centers. They are not presented as checked definitions. Programmatic lowering
+without a supplied checked copy program retains imperative copying.
+
+Revised measurement acceptance is pending. The reports below describe the old
+transaction-based candidate, not this revision. No new performance claim or
+fulfillment of the final 2x budget follows from the schema/evaluator changes.
 
 ## Reproducing the measurements
 

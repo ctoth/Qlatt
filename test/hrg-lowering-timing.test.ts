@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import {
+  loadBundledRulepackSpec,
   loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
 const SCHEMA = withFrameSchema({
@@ -61,10 +61,14 @@ function latestFeature(item: Readonly<Record<string, unknown>>, key: string): un
 
 function loadSegmentType(frontendId: string, phoneme: string): string {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
-  if (!isPlainObject(spec) || typeof spec.inventory_path !== "string") {
+  if (
+    !isPlainObject(spec) ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string"
+  ) {
     throw new Error("compiled frontend inventory path missing");
   }
-  const targets = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
+  const targets = loadInventorySpecFromPath(spec.resources.inventory).phoneme_targets;
   const target = targets[phoneme] ?? targets[`${phoneme}0`] ?? targets[`${phoneme}1`];
   if (!target || typeof target.type !== "string") {
     throw new Error(`selected inventory type for '${phoneme}' missing`);
@@ -180,7 +184,7 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
     timeline: {
       initial_silence_ms: citedNumber(lowering.timeline.initial_silence_ms, "initial_silence_ms"),
       final_silence_ms: citedNumber(lowering.timeline.final_silence_ms, "final_silence_ms"),
-      duration_floors: {
+      duration_floors: capturedFloors(frontendId, {
         stop_release_ms: citedNumber(
           lowering.timeline.duration_floors.stop_release_ms,
           "duration_floors.stop_release_ms",
@@ -189,9 +193,29 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
           lowering.timeline.duration_floors.default_ms,
           "duration_floors.default_ms",
         ),
-      },
+      }),
       event_points: eventPoints(lowering.timeline.event_points),
     },
+  };
+}
+
+// The DECtalk baseline was captured while dectalk-english floored a stop
+// release at 7 ms and every other Segment at 30 ms. That frontend has no
+// lowering floor now (its duration rules give DECtalk's frame counts), so the
+// capture is replayed under the floors it was made with.
+const CAPTURED_DECTALK_FLOORS = { stop_release_ms: 7, default_ms: 30 };
+
+function capturedFloors<
+  T extends { stop_release_ms: { value: number }; default_ms: { value: number } },
+>(frontendId: string, current: T): T {
+  if (frontendId !== "dectalk-english") return current;
+  return {
+    ...current,
+    stop_release_ms: {
+      ...current.stop_release_ms,
+      value: CAPTURED_DECTALK_FLOORS.stop_release_ms,
+    },
+    default_ms: { ...current.default_ms, value: CAPTURED_DECTALK_FLOORS.default_ms },
   };
 }
 
@@ -276,8 +300,8 @@ describe("HRG lowering production event timing", () => {
     resolveTimes(utterance, segments, baseline.timings, policy);
 
     const expected = expectedBoundaryFrames(baseline, policy);
-    const inventoryPath = loadBundledRulepackSpec(frontendId).inventory_path;
-    if (!inventoryPath) throw new Error("fixture inventory path missing");
+    const inventoryPath = loadBundledRulepackSpec(frontendId).resources.inventory;
+    if (typeof inventoryPath !== "string") throw new Error("fixture inventory path missing");
     const inventory = loadInventorySpecFromPath(inventoryPath);
     const silence = materializePhonemeTarget(inventory.silence_symbol, {
       inventorySpec: inventory,

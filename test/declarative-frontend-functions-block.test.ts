@@ -262,6 +262,7 @@ describe("rulepack functions: block", () => {
         version: "v1",
         include: ["child.yaml"],
         output: base.output,
+        syllabification: base.syllabification,
         tags: { duration: "Duration scaling" },
         relations: RELATIONS,
         rules: {

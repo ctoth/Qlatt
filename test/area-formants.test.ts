@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { deriveFormants, scaleGeometry } from "../scripts/area-formants";
-import { resolveSpeakerProfile } from "../src/speaker-profile";
+import { parseSpeakerProfileDocument, resolveSpeakerProfile } from "../src/speaker-profile";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const profileSpec = parseSpeakerProfileDocument(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/speaker-profile.yaml"),
+);
 
 // Analytic closed/open uniform tube, Fant 1960 Eq. A.33-7.
 const tube = { areas_cm2: Array(44).fill(4), section_length_cm: 17.5 / 44, pharynx_fraction: 0.4 };
@@ -24,7 +29,10 @@ describe("offline wave-reflection formants", () => {
     });
   });
   it("recovers four quarter-wave resonances and the analytic lossy-tube bandwidth", () => {
-    const result = deriveFormants(scaleGeometry(tube, resolveSpeakerProfile({})), model);
+    const result = deriveFormants(
+      scaleGeometry(tube, resolveSpeakerProfile({ profileSpec })),
+      model,
+    );
     result.forEach((resonance, index) => {
       expect(resonance.frequency_hz).toBeCloseTo((2 * index + 1) * 500, 0);
       // Fant's pole damping convention B = alpha*c/pi.
@@ -35,7 +43,7 @@ describe("offline wave-reflection formants", () => {
   });
 
   it("scales geometry before deriving frequencies, including separate regional volume factors", () => {
-    const neutral = resolveSpeakerProfile({});
+    const neutral = resolveSpeakerProfile({ profileSpec });
     expect(neutral).toMatchObject({ tract_length_scale: 1, pharynx_scale: 1, mouth_scale: 1 });
     const baseline = deriveFormants(scaleGeometry(tube, neutral), model);
     const shorter = deriveFormants(
@@ -58,9 +66,9 @@ describe("offline wave-reflection formants", () => {
   });
 
   it.each([0, -1, NaN, Infinity])("rejects invalid geometry or scaling (%s)", (value) => {
-    expect(() => scaleGeometry({ ...tube, areas_cm2: [value] }, resolveSpeakerProfile({}))).toThrow(
-      /area/i,
-    );
+    expect(() =>
+      scaleGeometry({ ...tube, areas_cm2: [value] }, resolveSpeakerProfile({ profileSpec })),
+    ).toThrow(/area/i);
     expect(() =>
       scaleGeometry(tube, { tract_length_scale: value, pharynx_scale: 1, mouth_scale: 1 }),
     ).toThrow(/scale/i);

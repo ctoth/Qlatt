@@ -14,7 +14,7 @@ This is an *explainable* synthesizer. Every decision the system makes — which 
 
 This is enforced through three interlocking systems:
 
-**Provenance** (`src/provenance.ts`, `src/tts-frontend-provenance.ts`):
+**Provenance** (`src/provenance.ts`):
 - `ProvenanceCollector` records a `DecisionRecord` for every pipeline decision
 - Each record has: `stage`, `type`, `subject`, `reason`, `citations[]`, `parents[]`
 - Records form a DAG: inventory selection → rule match → rule rewrite, linked by parent IDs
@@ -75,6 +75,9 @@ pwsh -File build.ps1          # Windows
 # Full Vitest suite (requires the WASM build above in this exact checkout)
 npm test
 
+# Dictionary audit (test/audit-dictionary.test.ts; excluded from npm test, runs nightly in CI)
+npm run test:audit
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 
@@ -104,16 +107,42 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 
 | Flag | Description |
 |------|-------------|
-| `--format text\|json` | Output format (default: text) |
+| `--format text\|json\|dot\|html` | Output format (default: text); DOT and self-contained HTML export selected decisions and parent edges with stage colors. |
 | `--verbose` | Show all decisions in text mode (default shows ~40) |
 | `--stage <stages>` | Comma-separated filter: `transcribe`, `rules`, `prosody`, `semantics`, `interpreter`, `runtime`, `frontend` |
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
-| `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`) |
-| `--base-f0 <Hz>` | Fundamental frequency (default: 110) |
-| `--transition-ms <ms>` | Formant transition duration (default: 30) |
-| `--strict-citations` | Exit code 2 if any decisions lack citations |
+| `--why <id>` | Show ancestry chain and joined compiled rules with their referenced patterns (e.g., `--why d000045`); bypasses stage, subject and range filters. Whole definitions do not identify selected branches or contributing literals. |
+| `--why-param <P> --at <ms>` | Query lowered frame ancestry and report its selected time/value; bypasses stage, subject and range filters, and cannot combine with `--why`. Milliseconds must be finite and nonnegative. No interpolation or scheduled-value claim. |
+| `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
+| `--transition-ms <ms>` | Formant transition override (default: selected frontend policy) |
+| `--strict-citations` | Exit code 2 if any decisions in the full run lack citations, regardless of display filters or selected ancestry; displayed summaries still describe the selected output |
+| `--strict` | Exit code 2 before synthesis if rulepack validation emits warnings |
+| `--phrase <text>` | Explicit phrase; takes precedence over positional phrase words |
 | `--out <file>` | Write output to file instead of stdout |
+| `--item <id>` | Item to inspect with `--field` or `--why-not` (required for either); does not filter the decision list |
+| `--field <key>` | Show field history for an item |
+| `--why-not <rule>` | Show why a specific rule did not fire |
+| `--field-phase <phase>` | Replay this phase for field inspection; omission inspects the final utterance |
+| `--field-boundary before\|after` | Boundary used with `--field-phase` (default: `after`) |
+| `--phase-views` | Include phase boundary checkpoints in output |
+| `--verify-replay` | Report original/replayed graph digests and whether they match; a mismatch alone does not change the exit code |
+| `--tooling-only` | With JSON output, emit only the tooling object (field, why-not, checkpoints and replay); no effect on text output |
+| `--frontend <id>` | Frontend rulepack ID (default: `qlatt-english`) |
+| `--speaker <name>` | Voice name from the selected frontend's speaker registry |
+
+Use `--format json` for full field history, checkpoint details and replay digests. Text output summarizes the field version count, checkpoint count and replay match result.
+Parameter queries expose `tooling.parameter` in JSON. Selection uses the latest frame at/before the requested time (with the lowerer's tolerance); before the first frame it selects the first, and after the last it retains the last. Missing parameter provenance yields an empty ancestry; a missing value is reported as unavailable.
+
+Valued options accept both `--flag value` and `--flag=value`; equals signs inside the value are preserved. Bare boolean flags (`--strict`, `--strict-citations`, `--verbose`, `--phase-views`, `--verify-replay`, `--tooling-only`) do not consume following phrase words; use `--flag=true` or `--flag=false` for explicit boolean values.
+
+In PowerShell, invoke Node directly with an explicit phrase to avoid npm argument-forwarding differences:
+
+```powershell
+node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-phrase.ts --phrase "hello world" --format json
+```
+
+These are the same Node loader arguments as `npm run explain`. Phrase words such as `json` are legitimate text; the CLI does not infer lost flags from their spelling.
 
 ## Testing Audio in Chrome
 
@@ -146,7 +175,7 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 2. **Declarative HRG Rule Engine** (`src/declarative-frontend/hrg/rule-engine.ts`)
    - Processes rule phases defined in `public/rules/frontends/<frontend-id>/phases/*.yaml`
    - Reads and writes typed Items and Relations through atomic transactions
-   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments)
+   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments), `f0_layer` (insert a command or tilt for the layered F0 model), `frame` (guarded assignments to named registers, run every control frame; see `docs/frame-rules.md`)
    - Rules use CEL expressions for conditions and values
    - Navigation is relation-aware and preserves shared Item identity
    - Every committed write is versioned and provenance-stamped from the rule's
@@ -158,9 +187,9 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
    - **Interpreter**: Schedules track frames to AudioParams
    - Uses CEL expressions for parameter derivation (semantics evaluation)
 
-4. **Legacy Synthesizer** (`src/klatt-synth.ts`)
-   - Standalone implementation with hardcoded graph topology
-   - Used by test harness, parallel to runtime system
+4. **Offline Rendering** (`src/rendering/`)
+   - Node and browser adapters use the declarative runtime system
+   - The standalone legacy synthesizer and its offline page have been retired
 
 ### Declarative Configuration (Bacon IR)
 
@@ -225,13 +254,17 @@ Shared utilities in `crates/klatt-wasm-common/`.
 `src/builtin-functions.ts` is the single source of truth for:
 - `dbToLinear()` - Klatt dB conversion (6 dB per doubling)
 - `proximity()` - Formant proximity correction
-- `ndbScale` - Source amplitude scale factors (includes G0 compensation)
 
 These are registered with the CEL evaluator for use in semantics expressions.
+
+Source amplitude scale factors (`ndbScale`, including G0 compensation) belong to
+the selected experiment's `semantics.yaml`. Per-formant bank scales belong to
+`graph.yaml` and feed generated PFE realization rules.
 
 ## Documentation
 
 - `docs/parameter-scheduling.md` - How parameters flow from text to audio (track structure, ramp vs step, semantics)
+- `docs/frame-rules.md` - Rules of kind `frame`: per-frame registers, how they are declared, validated, run and traced
 - `docs/adding-a-synthesizer.md` - Guide for adding new synthesizer configurations
 - `docs/synthesizer-architecture.md` - Overview of synthesizer architecture
 - `docs/yaml-graph-tests.md` - Testing YAML graph definitions

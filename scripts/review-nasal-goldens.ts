@@ -8,6 +8,11 @@ try {
   const { textToKlattTrackDetailed } = (await server.ssrLoadModule(
     "/src/tts-frontend.ts",
   )) as typeof import("../src/tts-frontend");
+  const { loadExperimentConfig } = (await server.ssrLoadModule(
+    "/src/experiments/load-experiment-config.ts",
+  )) as typeof import("../src/experiments/load-experiment-config");
+  const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!
+    .metrics!;
 
   // Compare against the pre-change golden before accepting the nasal model.
   // The old golden must first pass on the exact base checkout (recorded in PR).
@@ -24,7 +29,7 @@ try {
   const unexpected: string[] = [];
   const summaries = before.summaries.map((old) => {
     const { track } = textToKlattTrackDetailed(old.phrase, before.baseF0, 30);
-    const metrics = summarizeTrackMetrics(track);
+    const metrics = summarizeTrackMetrics(track, metricsPolicy);
     const changed = Object.entries(metrics).filter(
       ([key, value]) => Math.abs(value - old[key as keyof typeof metrics]) > 1e-6,
     );

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-bracket-word-class-v1",
+  "description": "A word right after bracketed phonemic text, with no word boundary between them: the word's class begins at the bracket's last phone. With a function-word verb that is its clause's only verb (\"and\"), after a vowel and after a consonant, with a duration and a pitch written on the vowel, with a second verb in the clause, and with words of other classes. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "bw-01", "text": "[:phoneme arpabet speak on][uw] and.", "group": "only-verb" },
+    { "id": "bw-02", "text": "[:phoneme arpabet speak on][uw] and me.", "group": "only-verb" },
+    { "id": "bw-03", "text": "[:phoneme arpabet speak on][ax] and me.", "group": "only-verb" },
+    { "id": "bw-04", "text": "[:phoneme arpabet speak on][b'uw] and me.", "group": "only-verb" },
+    { "id": "bw-05", "text": "[:phoneme arpabet speak on][uwt] and me.", "group": "only-verb-after-consonant" },
+    { "id": "bw-06", "text": "[:phoneme arpabet speak on][uw<400>] and me.", "group": "written-duration" },
+    { "id": "bw-07", "text": "[:phoneme arpabet speak on][uw<400,140>] and me.", "group": "written-pitch" },
+    { "id": "bw-08", "text": "[:phoneme arpabet speak on][uw<400,30>] and me.", "group": "written-pitch" },
+    { "id": "bw-09", "text": "[:phoneme arpabet speak on][uwt<400,30>] and me.", "group": "written-pitch" },
+    { "id": "bw-10", "text": "[:phoneme arpabet speak on][uw] and go.", "group": "two-verbs" },
+    { "id": "bw-11", "text": "[:phoneme arpabet speak on][uw<400>] and go.", "group": "two-verbs" },
+    { "id": "bw-12", "text": "[:phoneme arpabet speak on][uw<400,30>] and go.", "group": "two-verbs" },
+    { "id": "bw-13", "text": "[:phoneme arpabet speak on][uw]are here.", "group": "joined-word" },
+    { "id": "bw-14", "text": "[:phoneme arpabet speak on][uw] to go.", "group": "other-class" },
+    { "id": "bw-15", "text": "[:phoneme arpabet speak on][uw] for it.", "group": "other-class" },
+    { "id": "bw-16", "text": "[:phoneme arpabet speak on][uw] can.", "group": "other-class" },
+    { "id": "bw-17", "text": "[:phoneme arpabet speak on][uw] and, go.", "group": "comma" },
+    { "id": "bw-18", "text": "You and me.", "group": "control" }
+  ]
+}

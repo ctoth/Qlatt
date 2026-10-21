@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-capitalised-entries-v1",
+  "description": "Words the dictionary holds twice, once capitalised and once in lower case, with different phones (dic/Dic_us.txt: New n`uw and new n'uw, Miss m`Is and miss m'Is, Baton b'@tN and baton bxt'an, Bologna and bologna). The search takes the capitalised entry for a word written with a capital first letter and a lower-case second one, and the lower-case entry for any other writing (LTS/ls_dict.c:641-718). From the third messy sweep's m3-017, m3-024 and m3-059 (\"New\" with secondary stress). Each word is listed capitalised, in lower case and in capitals where a sentence allows, and once with a suffix.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "cap-new-first", "text": "New post is up.", "group": "new", "tags": ["capitalised", "messy-sweep-3-m3-059"], "expectedFocus": ["trace"] },
+    { "id": "cap-new-lower", "text": "The new post is up.", "group": "new", "tags": ["lower-case"], "expectedFocus": ["trace"] },
+    { "id": "cap-new-upper", "text": "NEW post is up.", "group": "new", "tags": ["capitals"], "expectedFocus": ["trace"] },
+    { "id": "cap-new-inside", "text": "Mayor Opens New Bridge Over River", "group": "new", "tags": ["capitalised", "messy-sweep-3-m3-017"], "expectedFocus": ["trace"] },
+    { "id": "cap-miss-title", "text": "We saw Miss Lane today.", "group": "miss", "tags": ["capitalised"], "expectedFocus": ["trace"] },
+    { "id": "cap-miss-first", "text": "Miss the bus.", "group": "miss", "tags": ["capitalised"], "expectedFocus": ["trace"] },
+    { "id": "cap-miss-lower", "text": "I miss the old dog.", "group": "miss", "tags": ["lower-case"], "expectedFocus": ["trace"] },
+    { "id": "cap-miss-upper", "text": "MISS Lane ran.", "group": "miss", "tags": ["capitals"], "expectedFocus": ["trace"] },
+    { "id": "cap-miss-suffix", "text": "Misses ran.", "group": "miss", "tags": ["capitalised", "suffix"], "expectedFocus": ["trace"] },
+    { "id": "cap-baton", "text": "The Baton is old.", "group": "baton", "tags": ["capitalised"], "expectedFocus": ["trace"] },
+    { "id": "cap-baton-lower", "text": "The baton is old.", "group": "baton", "tags": ["lower-case"], "expectedFocus": ["trace"] },
+    { "id": "cap-bologna", "text": "We ate Bologna today.", "group": "bologna", "tags": ["capitalised"], "expectedFocus": ["trace"] },
+    { "id": "cap-bologna-lower", "text": "We ate bologna today.", "group": "bologna", "tags": ["lower-case"], "expectedFocus": ["trace"] }
+  ]
+}

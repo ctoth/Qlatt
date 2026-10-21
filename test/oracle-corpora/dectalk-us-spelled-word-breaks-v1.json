@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-spelled-word-breaks-v1",
+  "description": "A written word that is spelled letter by letter is one word slot in DECtalk's parse of a stretch (LTS/ls_task.c:5066-5075: a slot is what stands between two white spaces), so the clause breaks before a conjunction or a preposition are counted with it as one word. From the third messy sweep's m3-142.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "spelled-break-nw-at", "text": "Winds from the NW at 10 to 15 mph.", "group": "spelled-word", "tags": ["no-break", "third-word-after-a-marked-one", "messy-sweep-3-m3-142"], "expectedFocus": ["trace"] },
+    { "id": "spelled-break-xq-and", "text": "The XQ and the old cat ran off down the road today.", "group": "spelled-word", "tags": ["no-break", "third-word"], "expectedFocus": ["trace"] },
+    { "id": "spelled-break-length", "text": "The dog ran off and the XQ came.", "group": "spelled-word", "tags": ["no-break", "too-few-words-after"], "expectedFocus": ["trace"] },
+    { "id": "spelled-break-kept-nw", "text": "The NW wind at the old port blew hard today.", "group": "spelled-word", "tags": ["break", "fourth-word"], "expectedFocus": ["trace"] },
+    { "id": "spelled-break-kept-usb", "text": "We sent the old USB cable and the new one back today.", "group": "spelled-word", "tags": ["break"], "expectedFocus": ["trace"] }
+  ]
+}

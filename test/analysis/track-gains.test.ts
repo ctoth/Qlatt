@@ -1,8 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { loadExperimentConfig } from "../../src/experiments/load-experiment-config";
+import { expandFormantBanks } from "../../src/formant-bank";
+import type { SemanticsDocument } from "../../src/semantics/types";
 import { analyzeTrackGains } from "../../src/track-analysis";
 import { textToKlattTrack } from "../../src/tts-frontend";
 
 describe("analyzeTrackGains", () => {
+  let semantics: SemanticsDocument;
+  beforeAll(async () => {
+    const config = await loadExperimentConfig("klatt80-baseline");
+    expandFormantBanks(config.graph, config.semantics);
+    semantics = config.semantics;
+  });
+
   it("masterGain is nonzero for voiced event with GO=47", () => {
     const result = analyzeTrackGains(
       [
@@ -13,6 +23,9 @@ describe("analyzeTrackGains", () => {
         },
       ],
       {},
+      48000,
+      semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     expect(result!.ranges.masterGain).not.toBeNull();
@@ -29,6 +42,9 @@ describe("analyzeTrackGains", () => {
         },
       ],
       {},
+      48000,
+      semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 62 + (-119)) = dbToLinear(-10) ≈ 0.316
@@ -45,6 +61,9 @@ describe("analyzeTrackGains", () => {
         },
       ],
       {},
+      48000,
+      semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 40 + (-134)) = dbToLinear(-47) — still nonzero (> -72 floor)
@@ -61,6 +80,9 @@ describe("analyzeTrackGains", () => {
         },
       ],
       {},
+      48000,
+      semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 55 + (-119)) = dbToLinear(-17) — nonzero
@@ -68,7 +90,7 @@ describe("analyzeTrackGains", () => {
   });
 
   it("returns null for empty track", () => {
-    const result = analyzeTrackGains([], {});
+    const result = analyzeTrackGains([], {}, 48000, semantics, semantics.analysis!);
     expect(result).toBeNull();
   });
 
@@ -82,6 +104,9 @@ describe("analyzeTrackGains", () => {
         },
       ],
       { parallelGainScale: 1n },
+      48000,
+      semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     expect(result!.ranges.fricGain!.max).toBeGreaterThan(0);

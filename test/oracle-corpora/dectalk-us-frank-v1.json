@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-frank-v1",
+  "defaults": {
+    "voiceId": "frank",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "frank-fresh-fruit", "text": "Fresh fruit is good.", "group": "voice", "tags": ["fricatives", "clusters"], "expectedFocus": ["trace"] },
+    { "id": "frank-where-going", "text": "Where are you going?", "group": "voice", "tags": ["question", "glides", "velar-nasal"], "expectedFocus": ["trace"] },
+    { "id": "frank-dog-barked", "text": "The dog barked twice.", "group": "voice", "tags": ["stops", "r-vowels", "diphthongs"], "expectedFocus": ["trace"] },
+    { "id": "frank-open-window", "text": "Open the window, please.", "group": "voice", "tags": ["two-clauses", "nasals", "laterals"], "expectedFocus": ["trace"] },
+    { "id": "frank-moon", "text": "moon.", "group": "voice", "tags": ["single-word", "nasals"], "expectedFocus": ["trace"] }
+  ]
+}

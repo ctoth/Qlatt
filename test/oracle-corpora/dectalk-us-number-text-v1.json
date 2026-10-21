@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-number-text-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "money-cents", "text": "It costs $3.50.", "group": "money" },
+    { "id": "money-grouped", "text": "The total is $1,250.", "group": "money" },
+    { "id": "grouped-million", "text": "About 1,000,000 people live there.", "group": "number" },
+    { "id": "time-half", "text": "The meeting is at 3:30.", "group": "time" },
+    { "id": "time-quarter", "text": "The train leaves at 10:15.", "group": "time" },
+    { "id": "decimal", "text": "The bill came to 19.99.", "group": "number" },
+    { "id": "plural-century", "text": "It happened in the 1800s.", "group": "plural" }
+  ]
+}

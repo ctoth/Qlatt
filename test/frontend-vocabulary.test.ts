@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { defaultExperimentFor, type FrontendManifest } from "../src/experiments/frontend-pairing";
 import { assertFrontendVocabulary, checkVocabulary } from "../src/experiments/frontend-vocabulary";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 
@@ -54,8 +56,49 @@ describe("frontend/experiment pairing", () => {
   it.each([
     ["qlatt-english", "klatt80-baseline"],
     ["dectalk-english", "dectalk-english"],
+    ["dectalk-english", "dectalk-vtm"],
     ["qlatt-beauty", "qlatt-beauty"],
   ])("accepts shipped pair %s / %s", async (frontendId, experimentId) => {
     await expect(loadExperimentConfig(experimentId, frontendId)).resolves.toBeDefined();
+  });
+
+  const frontendManifest = JSON.parse(
+    readFileSync("public/rules/frontends/manifest.json", "utf8"),
+  ) as FrontendManifest;
+  const experimentIds = (
+    JSON.parse(readFileSync("public/experiments/manifest.json", "utf8")) as {
+      experiments: { id: string }[];
+    }
+  ).experiments.map((experiment) => experiment.id);
+
+  it("pairs each frontend with the experiment its manifest entry names, else its own id", () => {
+    expect(defaultExperimentFor("dectalk-english", frontendManifest, experimentIds)).toBe(
+      "dectalk-vtm",
+    );
+    expect(defaultExperimentFor("qlatt-beauty", frontendManifest, experimentIds)).toBe(
+      "qlatt-beauty",
+    );
+    // No experiment of that id and no declared default: the selection stands.
+    expect(defaultExperimentFor("qlatt-english", frontendManifest, experimentIds)).toBeNull();
+    // Without a manifest the same-id rule still applies.
+    expect(defaultExperimentFor("dectalk-english", null, experimentIds)).toBe("dectalk-english");
+    expect(() =>
+      defaultExperimentFor(
+        "x",
+        { frontends: [{ id: "x", defaultExperiment: "missing" }] },
+        experimentIds,
+      ),
+    ).toThrow(/E_FRONTEND_DEFAULT_EXPERIMENT.*'x'.*'missing'/);
+  });
+
+  it("every frontend's default experiment declares the frontend's columns", async () => {
+    for (const frontend of frontendManifest.frontends ?? []) {
+      const experimentId = defaultExperimentFor(frontend.id, frontendManifest, experimentIds);
+      if (experimentId === null) continue;
+      await expect(
+        loadExperimentConfig(experimentId, frontend.id),
+        `${frontend.id} / ${experimentId}`,
+      ).resolves.toBeDefined();
+    }
   });
 });

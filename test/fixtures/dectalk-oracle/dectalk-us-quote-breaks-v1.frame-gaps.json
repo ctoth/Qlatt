@@ -1,0 +1,8 @@
+{
+  "quote-break": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "quote-break-after-preposition": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "quote-no-break-next-marked": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "quote-no-break-short": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "quote-no-break-near-start": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "quote-marks-removed": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

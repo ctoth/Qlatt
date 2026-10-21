@@ -1,0 +1,62 @@
+# dectalk-us-date-tokens-v1: date words as DECtalk's command text parser
+# writes them (day, hyphen, three letters of a month, and maybe a year), whose
+# reading DECtalk's letter-to-sound stage decides (LTS/l_us_pr1.c
+# ls_proc_is_date, ls_proc_do_date), and a few words that look like one.
+#
+# One text per line, given to say.exe alone;
+# scripts/oracle/export-number-fixture.ts --list records DECtalk's phoneme log
+# for each in test/fixtures/dectalk-oracle/dectalk-us-date-tokens-v1.phonemes.json.
+# Written before any of it was exported. "#" lines and blank lines are ignored.
+
+# day and month
+3-May
+5-Jan
+23-Aug
+1-Feb
+31-Dec
+12-Sep
+2-Mar
+22-Apr
+11-Jun
+13-Jul
+20-Oct
+30-Nov
+01-Jan
+09-Mar
+3-may
+3-MAY
+
+# with a year of two digits
+23-Aug-84
+1-Jan-00
+3-May-96
+5-Jul-05
+01-Jan-84
+
+# with a year of four digits
+23-Aug-1984
+3-May-1996
+1-Jan-2000
+2-Apr-2001
+15-Jun-2005
+4-Jul-1776
+9-Sep-1900
+31-Dec-1999
+7-Oct-2010
+6-Nov-1066
+
+# a month's first three letters with more after them
+3-Mayor
+3-June
+5-January
+
+# not dates
+3-Abc
+32-Jan
+0-Jan
+3-Ma
+123-Jan
+3-May-1
+3-May-123
+3-May-12345
+May-3

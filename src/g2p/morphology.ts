@@ -5,10 +5,15 @@
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
 
-import { loadYamlDocumentSync } from "../yaml-loader";
 import type { StressHint } from "./stress";
-import { loadPhonotacticsSync } from "./syllabify";
+import type { PhonotacticsData } from "./syllabify";
 import type { DictLookup, MorphologyCycle, PronunciationResult } from "./types";
+
+export interface MorphologyContext {
+  path: string;
+  data: MorphologyData;
+  phonotactics: PhonotacticsData;
+}
 
 // --- Affix data types ---
 
@@ -50,7 +55,7 @@ interface ConfiguredValue<T> {
   estimate?: string;
 }
 
-interface MorphologyData {
+export interface MorphologyData {
   phonotactics_path: string;
   suffixes: SuffixEntry[];
   prefixes: PrefixEntry[];
@@ -62,22 +67,9 @@ interface MorphologyData {
   };
 }
 
-// --- Load affix tables from YAML ---
-
-const morphologyCache = new Map<string, MorphologyData>();
-
-function getMorphologyData(path: string): MorphologyData {
-  const cached = morphologyCache.get(path);
-  if (cached) return cached;
-  const data = loadYamlDocumentSync<MorphologyData>(path);
-  morphologyCache.set(path, data);
-  return data;
-}
-
 // --- Condition classes for contextual allomorphs (loaded from phonotactics.yaml) ---
 
-function getVoicingClasses(path: string): Record<ContextualConditionClass, Set<string>> {
-  const data = loadPhonotacticsSync(path);
+function getVoicingClasses(data: PhonotacticsData): Record<ContextualConditionClass, Set<string>> {
   return {
     voiceless_finals: new Set(data.voicing_classes.voiceless_finals),
     td_finals: new Set(data.voicing_classes.td_finals),
@@ -98,10 +90,10 @@ function resolveAffixPhonemes(
   entries: AffixEntry[],
   spelling: string,
   rootPhonemes: string[],
-  phonotacticsPath: string,
+  phonotactics: PhonotacticsData,
 ): string[] | null {
   const last = lastPhoneme(rootPhonemes);
-  const conditionClasses = getVoicingClasses(phonotacticsPath);
+  const conditionClasses = getVoicingClasses(phonotactics);
   let fallback: string[] | null = null;
 
   for (const entry of entries) {
@@ -157,7 +149,7 @@ function trySuffixDecomposition(
   surfaceWord: string,
   data: MorphologyData,
   dictLookup: DictLookup,
-  morphologyPath: string,
+  morphology: MorphologyContext,
 ): { rootWord: string; phonemes: string[]; morphology: MorphologyCycle[] } | null {
   const seenSpellings = new Set<string>();
 
@@ -171,7 +163,7 @@ function trySuffixDecomposition(
     if (root.length < suffix.min_root) continue;
 
     const direct = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup, data.heuristics);
-    const nested = direct ? null : decomposeWord(root, dictLookup, morphologyPath);
+    const nested = direct ? null : decomposeWord(root, dictLookup, morphology);
     const lookup = direct ?? nested;
     if (!lookup) continue;
 
@@ -179,7 +171,7 @@ function trySuffixDecomposition(
       data.suffixes,
       suffix.spelling,
       lookup.phonemes,
-      data.phonotactics_path,
+      morphology.phonotactics,
     );
     if (!suffixPhonemes) continue;
 
@@ -217,12 +209,12 @@ function trySuffixDecomposition(
 export function decomposeClitic(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string,
+  morphology: MorphologyContext,
 ): PronunciationResult | null {
   if (!word) return null;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphologyPath);
+  const data = morphology.data;
   for (const clitic of data.clitics) {
     if (!lowerWord.endsWith(clitic.spelling)) continue;
 
@@ -234,7 +226,7 @@ export function decomposeClitic(
       data.suffixes,
       clitic.allomorph_spelling,
       basePhonemes,
-      data.phonotactics_path,
+      morphology.phonotactics,
     );
     if (!cliticPhonemes) continue;
 
@@ -258,16 +250,16 @@ export function decomposeClitic(
 export function decomposeWord(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string,
+  morphology: MorphologyContext,
 ): PronunciationResult | null {
   if (!word) return null;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphologyPath);
+  const data = morphology.data;
   if (word.length < data.heuristics.minimum_word_length.value) return null;
 
   // Try suffixes first (already ordered longest-first in YAML).
-  const suffixOnly = trySuffixDecomposition(lowerWord, data, dictLookup, morphologyPath);
+  const suffixOnly = trySuffixDecomposition(lowerWord, data, dictLookup, morphology);
   if (suffixOnly) {
     return {
       phonemes: suffixOnly.phonemes,
@@ -315,7 +307,7 @@ export function decomposeWord(
 
     // Compound morphology: prefix + (suffix decomposition of remainder)
     // Example: "unkindness" = "un" + "kind" + "ness".
-    const suffixInRemainder = decomposeWord(remainder, dictLookup, morphologyPath);
+    const suffixInRemainder = decomposeWord(remainder, dictLookup, morphology);
     if (!suffixInRemainder) continue;
 
     return {
@@ -353,11 +345,14 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(word: string, morphologyPath: string): StressHint | undefined {
+export function getStressHintForWord(
+  word: string,
+  morphology: MorphologyContext,
+): StressHint | undefined {
   if (!word) return undefined;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphologyPath);
+  const data = morphology.data;
   if (word.length < data.heuristics.minimum_word_length.value) return undefined;
 
   for (const suffix of data.suffixes) {

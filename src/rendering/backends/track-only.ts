@@ -1,0 +1,65 @@
+import { createDiagnostics } from "../../diagnostics.ts";
+import { loadExperimentConfig } from "../../experiments/load-experiment-config.ts";
+import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
+import { summarizeTrack } from "../track-summary.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
+
+export const trackOnlyBackend: RenderBackend = {
+  id: "track-only",
+  supports(request: RenderRequest): boolean {
+    return !request.persistWav;
+  },
+  async render(request: RenderRequest): Promise<RenderPayload> {
+    const diagnostics = createDiagnostics({ maxEntries: 1000 });
+    const config = await loadExperimentConfig(request.experimentId, request.frontendId);
+    const frontend = textToKlattTrackDetailed(
+      request.phrase,
+      request.baseF0,
+      request.transitionMs,
+      {
+        frontendId: request.frontendId,
+        rate: request.rate,
+        speaker: request.speaker,
+        voiceQuality: request.voiceQuality,
+        directionTrack: request.directionTrack,
+        ...(request.pitchScale === undefined ? {} : { pitchScale: request.pitchScale }),
+        diagnostics,
+      },
+    );
+    const track = frontend.track;
+    const totalTime =
+      (track.length ? track[track.length - 1].time : 0) + request.leadTime + request.tailTime;
+
+    const payload: RenderPayload = {
+      phrase: request.phrase,
+      baseF0: request.baseF0,
+      engine: request.engine,
+      frontendId: request.frontendId,
+      experimentId: request.experimentId,
+      rate: request.rate,
+      transitionMs: request.transitionMs,
+      speaker: request.speaker,
+      pitchScale: request.pitchScale,
+      voiceQuality: request.voiceQuality,
+      directionTrack: request.directionTrack,
+      resolvedSpeaker: frontend.resolvedSpeaker,
+      sampleRate: request.sampleRate,
+      leadTime: request.leadTime,
+      tailTime: request.tailTime,
+      length: Math.max(1, Math.ceil(totalTime * request.sampleRate)),
+      metrics: { rms: 0, peak: 0 },
+      trackSummary: summarizeTrack(
+        track,
+        config.semantics.analysis?.metrics,
+        diagnostics,
+        request.experimentId,
+      ),
+      diagnostics: diagnostics.getEntries(),
+      samples: [],
+    };
+    if (request.includeTrack) {
+      payload.track = track;
+    }
+    return payload;
+  },
+};

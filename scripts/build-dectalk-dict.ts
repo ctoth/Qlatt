@@ -1,10 +1,10 @@
 /**
  * build-dectalk-dict.ts — Convert the DECtalk 4.63 US pronunciation dictionary
  * (`Dic_us.txt`) into the flat word->ARPABET JSON format Qlatt's CMU dictionary
- * uses (`public/cmu-dictionary.json`).
+ * uses (the English frontend's declared CMU lexicon).
  *
  * This is a BUILD TOOL (like build-cmudict.ts), not pipeline/runtime code. It
- * produces a DATA ASSET (`public/dectalk-dictionary.json`). It does NOT wire
+ * produces the frontend's declared lexicon DATA ASSET. It does NOT wire
  * anything into the TTS pipeline.
  *
  * ---------------------------------------------------------------------------
@@ -31,31 +31,39 @@
  * (e.g. rr->ER, ax->AX, hx->HH, ll->L, nx->NG, ix->IH, yu->Y+UW).
  *
  * Stress: `'` = primary stress, backtick = secondary stress; both immediately
- * precede the stressed vowel. The DECtalk-target inventory only defines stress
- * digits 0 and 1 (IY0/IY1; there is no IY2), so BOTH primary and secondary map
- * to stress digit 1 (stressed), and unmarked vowels to 0. This collapse keeps
- * every emitted symbol inside the inventory; CMU-style "2" is intentionally not
- * produced. See notes/chunk-dt2a-coder.md.
+ * precede the stressed vowel. Primary becomes stress digit 1, secondary digit
+ * 2, an unmarked vowel 0. The inventory has no targets named with a 2; its
+ * `secondary_stress_fallback` gives a secondary vowel the strong target while
+ * the Segment keeps stress 2, which DECtalk's duration and F0 rules read
+ * (FSTRESS_2, ph_defs.h). 3,591 of Dic_us.txt's 13,682 lines carry a secondary
+ * stress, and some words have nothing stronger ("about" is xb`Wt, "make" m`ek,
+ * "many" m`Eni).
  *
  * Boundary/control chars (`~` block-rules, `#` hyphen/compound, `*` morpheme
  * boundary, ` ` word boundary) produce no phoneme and are skipped.
  *
- * Homographs: a word may appear in multiple `word,POS,...` rows. v1 policy:
- * keep the HIGHEST-priority row (field 5); on a priority tie keep the FIRST row
- * encountered. The output is a flat single-pronunciation map. POS-conditioned
- * pronunciation selection is explicitly a v2 concern and is NOT built here.
+ * Homographs: 254 words have two rows, marked `P` (primary) and `S`
+ * (secondary) in the second field. The output is a flat map with the primary
+ * row's pronunciation; the secondary rows go into the frontend's table
+ * (scripts/build-dectalk-lts-table.ts), and src/g2p/table-homograph.ts
+ * chooses between the two by context, as LTS/ls_homo.c does.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 
 const DEFAULT_SRC = "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic\\Dic_us.txt";
-const OUT_PATH = path.join(root, "public", "dectalk-dictionary.json");
+// Read only the declaration so a missing output can still be built.
+const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+  path.join(root, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
+);
+const OUT_PATH = path.resolve(root, "public", frontend.resources.lexicon.replace(/^\/+/, ""));
 
 // --- Table 2: US_* enum values (l_us_ph.h:59-116) ---------------------------
 // Index into usa_arpa[] is exactly this value.
@@ -276,13 +284,13 @@ const VOWEL_RAW = new Set([
 // --- FIXUP: raw lowercase ARPABET -> Qlatt inventory symbol(s) ----------------
 // Reconciles DECtalk's raw output to the exact key set in
 // dectalk-english/inventory.yaml. Vowels here are returned WITHOUT the stress
-// digit; the digit is appended by mapToken. `yu` is the only multi-symbol
-// expansion (Y glide + UW vowel, "you"/"cute").
+// digit; the digit is appended by mapToken.
 const FIXUP_VOWEL: Record<string, string> = {
-  rr: "ER", // r-colored vowel -> ER (inventory has no RR)
-  ax: "AX", // reduced schwa -> AX (DECtalk US_DF code 17; gets stress 0)
-  ix: "IH", // reduced barred-i -> IH (inventory has no IX; gets stress 0)
-  // yu handled specially in mapToken (splits to Y + UW)
+  // rr, ix and yu are inventory phones (RR, IX, YU) and need no fixup. rr and
+  // ix were once folded into ER and IH, which are different DECtalk allophones
+  // (US_ER is the fused vowel of "air"; US_IH is the full vowel of "bit"), and
+  // yu was split into Y + UW.
+  ax: "AX", // reduced schwa -> AX (DECtalk US_AX code 17)
 };
 const FIXUP_CONS: Record<string, string> = {
   yx: "Y", // Y glide (dict char 'y') -> inventory Y
@@ -298,11 +306,9 @@ const FIXUP_CONS: Record<string, string> = {
 
 /**
  * Map one raw ARPABET token + its stress digit to inventory symbol(s).
- * Returns an array because `yu` expands to two symbols.
  */
 function mapToken(raw: string, stress: string): string[] {
   if (VOWEL_RAW.has(raw)) {
-    if (raw === "yu") return ["Y", `UW${stress}`];
     const fixed = FIXUP_VOWEL[raw];
     if (fixed) return [`${fixed}${stress}`];
     return [`${raw.toUpperCase()}${stress}`];
@@ -312,22 +318,65 @@ function mapToken(raw: string, stress: string): string[] {
 }
 
 /**
- * Convert one DECtalk phoneme field to a space-joined ARPABET string.
- * Returns null if the field yields no phonemes.
+ * Convert one DECtalk phoneme field to a space-joined ARPABET string, empty
+ * if the field yields no phonemes.
  */
 export function convertPhonemeField(field: string): string {
+  return convertPhonemeFieldDetailed(field).phones.join(" ");
+}
+
+/**
+ * The phones of a DECtalk phoneme field, and the indices of the phones that a
+ * `~` stands before. `~` is BLOCK_RULES (INCLUDE/phonlist.h:191): DECtalk
+ * gives the next phone FBLOCK and skips its allophone rules for that phone
+ * (PH/ph_sort.c:1611-1612, PH/ph_aloph.c:563-567).
+ *
+ * `boundaryAfter` holds the indices of the phones that a `*` (MBOUND, a
+ * morpheme boundary) or a `#` (HYPHEN, the joint of a compound) stands after
+ * (INCLUDE/phonlist.h). Both give the rime before them the morpheme boundary
+ * type (PH/ph_romi.c bounftab).
+ *
+ * `wordBreakAfter` holds the indices of the phones that a space stands after:
+ * a word boundary inside the entry ("#" is `n'^mbR s`An`, two words).
+ */
+export function convertPhonemeFieldDetailed(field: string): {
+  phones: string[];
+  rulesBlocked: number[];
+  boundaryAfter: number[];
+  wordBreakAfter: number[];
+} {
   const out: string[] = [];
+  const rulesBlocked: number[] = [];
+  const boundaryAfter: number[] = [];
+  const wordBreakAfter: number[] = [];
   let stress = "0";
+  let blockNext = false;
   for (const c of field) {
     if (c === "'") {
       stress = "1";
       continue;
     } // primary stress
     if (c === "`") {
-      stress = "1";
+      stress = "2";
       continue;
-    } // secondary stress (collapsed to 1)
-    if (c === "~" || c === "#" || c === "*" || c === " ") continue; // boundaries
+    } // secondary stress
+    if (c === "~") {
+      blockNext = true;
+      continue;
+    }
+    if (c === "#" || c === "*") {
+      if (out.length > 0 && !boundaryAfter.includes(out.length - 1)) {
+        boundaryAfter.push(out.length - 1);
+      }
+      continue;
+    }
+    if (c === " ") {
+      // A word boundary inside an entry.
+      if (out.length > 0 && !wordBreakAfter.includes(out.length - 1)) {
+        wordBreakAfter.push(out.length - 1);
+      }
+      continue;
+    }
     // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
     // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt
     // inventory has no discrete glottal-stop segment, and CMU likewise omits it
@@ -336,43 +385,89 @@ export function convertPhonemeField(field: string): string {
     if (c === "q") continue;
     const raw = CHAR_RAW_ARPA[c];
     if (raw === undefined) continue; // unknown char: skip (validator reports these)
-    for (const tok of mapToken(raw, stress)) out.push(tok);
-    stress = "0"; // stress is consumed by the next phoneme only
+    if (blockNext) rulesBlocked.push(out.length);
+    blockNext = false;
+    const tokens = mapToken(raw, stress);
+    for (const tok of tokens) out.push(tok);
+    // A stress mark stands before its syllable and may have the onset between
+    // it and the vowel ("overrun" is `ovR#~'r^n): it waits for the next phone
+    // that carries a stress digit.
+    if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = "0";
   }
-  return out.join(" ");
+  return {
+    phones: out,
+    rulesBlocked,
+    boundaryAfter,
+    // A space after the last phone divides nothing.
+    wordBreakAfter: wordBreakAfter.filter((index) => index < out.length - 1),
+  };
 }
 
-interface Row {
+export interface Row {
   word: string;
   pos: string;
   phonemes: string;
+  /**
+   * The form class field: one character per bit of the entry's form class
+   * word, bit 0 first ("1" set), in the order of INCLUDE/fc_def.tab.
+   */
+  formClass: string;
   priority: number;
 }
 
 function parseLine(line: string): Row | null {
   if (!line || line.startsWith(";")) return null;
-  const f = line.split(",");
-  if (f.length < 5) return null;
-  const word = f[0];
-  const pos = f[1];
-  const phonemes = f[2];
-  const priority = Number.parseInt(f[4], 10);
+  // In the word, a backslash stands before a character that is taken as
+  // written (dic/dic_comm.c:445-469): `\,` is the comma, `\;` the semicolon
+  // and `\\` the backslash.
+  let word = "";
+  let at = 0;
+  for (; at < line.length && line[at] !== ","; at += 1) {
+    if (line[at] === "\\") at += 1;
+    word += line[at] ?? "";
+  }
+  const f = line.slice(at + 1).split(",");
+  if (f.length < 4) return null;
+  const pos = f[0];
+  const phonemes = f[1];
+  const formClass = f[2];
+  const priority = Number.parseInt(f[3], 10);
   if (!word || !phonemes) return null;
-  return { word, pos, phonemes, priority: Number.isNaN(priority) ? 0 : priority };
+  return { word, pos, phonemes, formClass, priority: Number.isNaN(priority) ? 0 : priority };
 }
 
-function main(): void {
-  const srcPath = process.argv[2] ?? DEFAULT_SRC;
-  const text = fs.readFileSync(srcPath, "utf8");
-  const lines = text.split(/\r?\n/);
-
-  // Collapse homographs: keep highest-priority row; tie -> first encountered.
+/**
+ * The rows of a `Dic_us.txt` text by lower-cased word.
+ *
+ * The second field says whether the word has two entries: `P` the primary
+ * one, `S` the secondary, `N` neither (dic/dic_comm.c:485-501). `best` holds
+ * the primary of such a pair and `secondary` the other; DECtalk chooses
+ * between them by context (LTS/ls_homo.c, src/g2p/table-homograph.ts).
+ *
+ * The fifth field is not a preference between rows: the dictionary compiler
+ * leaves out rows above a size limit given on its command line
+ * (dic/dic_comm.c:646-664).
+ *
+ * Five words have two `N` rows that differ in case ("New" n`uw and "new"
+ * n'uw). The keys here are lower case, so the lower-case row is kept: it is
+ * the one DECtalk speaks for the word written in lower case ("a new car" has
+ * primary stress on "new", "baton" is b@t'an). The capitalised row, which
+ * DECtalk uses for the capitalised word (LTS/ls_dict.c:641-718), is in
+ * `capitalised`.
+ */
+export function selectDictionaryRows(text: string): {
+  best: Map<string, Row>;
+  secondary: Map<string, Row>;
+  capitalised: Map<string, Row>;
+  totalRows: number;
+  multiRowWords: Set<string>;
+} {
   const best = new Map<string, Row>();
+  const secondary = new Map<string, Row>();
+  const capitalised = new Map<string, Row>();
   let totalRows = 0;
-  let collapsedWords = 0;
   const multiRowWords = new Set<string>();
-
-  for (const line of lines) {
+  for (const line of text.split(/\r?\n/)) {
     const row = parseLine(line);
     if (!row) continue;
     totalRows++;
@@ -380,13 +475,51 @@ function main(): void {
     const existing = best.get(key);
     if (existing === undefined) {
       best.set(key, row);
-    } else {
-      multiRowWords.add(key);
-      if (row.priority > existing.priority) best.set(key, row);
-      // tie or lower: keep existing (first encountered)
+      continue;
+    }
+    multiRowWords.add(key);
+    if (row.pos === "S" && existing.pos === "P") {
+      secondary.set(key, row);
+    } else if (row.pos === "P" && existing.pos === "S") {
+      secondary.set(key, existing);
+      best.set(key, row);
+    } else if (row.word === key && existing.word !== key) {
+      capitalised.set(key, existing);
+      best.set(key, row);
+    } else if (row.word !== key && existing.word === key && row.pos === "N") {
+      capitalised.set(key, row);
     }
   }
-  collapsedWords = multiRowWords.size;
+  for (const [key, row] of best) {
+    if ((row.pos === "P" || row.pos === "S") && !secondary.has(key)) {
+      throw new Error(`E_HOMOGRAPH_UNPAIRED: '${key}' has a ${row.pos} row and no partner`);
+    }
+  }
+  return { best, secondary, capitalised, totalRows, multiRowWords };
+}
+
+/**
+ * The dictionary's text, one character per byte ("exposé" has the byte E9,
+ * which is the character U+00E9 here): a byte above 127 is what say.exe is
+ * handed for an accented letter typed on its command line, and the
+ * dictionary is searched for the word as it was written (LTS/ls_task.c:697,
+ * 2040-2160). The compiled dictionary's words are read the same way
+ * (scripts/build-dectalk-lts-table.ts), so the two agree and a word's place
+ * in the search order is its bytes'. Bytes 80 to 9F are not mapped to the
+ * characters the Windows code page gives them (the entry for byte 80, the
+ * euro sign there, is under U+0080).
+ */
+export function readDictionaryText(srcPath: string): string {
+  return fs.readFileSync(srcPath, "latin1");
+}
+
+function main(): void {
+  const srcPath = process.argv[2] ?? DEFAULT_SRC;
+  const text = readDictionaryText(srcPath);
+
+  // One row per word: a homograph's primary row.
+  const { best, totalRows, multiRowWords } = selectDictionaryRows(text);
+  const collapsedWords = multiRowWords.size;
 
   const dict: Record<string, string> = {};
   for (const [key, row] of best) {
@@ -404,7 +537,7 @@ function main(): void {
   fs.writeFileSync(OUT_PATH, payload, "utf8");
 
   console.log(`Source rows parsed:        ${totalRows}`);
-  console.log(`Words with multiple rows:  ${collapsedWords} (collapsed to highest-priority)`);
+  console.log(`Words with multiple rows:  ${collapsedWords} (one kept; see selectDictionaryRows)`);
   console.log(`Dictionary entries written: ${Object.keys(sorted).length}`);
   console.log(`Output: ${OUT_PATH}`);
 }

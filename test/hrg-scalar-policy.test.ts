@@ -3,9 +3,11 @@ import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   compileRuleEngineSpec,
-  QLATT_ENGLISH_RULEPACK,
+  loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 const fallback = loadYamlDocumentSync<{
   relations: {
@@ -57,7 +59,7 @@ function spec(
 ) {
   const field = options.field ?? "duration";
   return compileRuleEngineSpec({
-    parameters: { ...QLATT_ENGLISH_RULEPACK.parameters, scale: 0.5 },
+    parameters: { ...qlattRulepack.parameters, scale: 0.5 },
     relations: {
       Segment: {
         type: "base",
@@ -70,6 +72,7 @@ function spec(
         scalars: {
           [field]: {
             unit: "ms",
+            quantum: 1,
             resolution: "klatt",
             floor_field: options.floorField ?? "durationFloor",
             ...(options.fallback === false

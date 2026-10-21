@@ -1,16 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
-import { createProvenanceCollector } from "../src/provenance";
 import {
-  DEFAULT_SPEAKER_PROFILE_PATH,
-  loadSpeakerProfileSync,
-  resolveSpeakerProfile,
-} from "../src/speaker-profile";
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
+import { createProvenanceCollector } from "../src/provenance";
+import { parseSpeakerProfileDocument, resolveSpeakerProfile } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import { loadYamlSourceSync } from "../src/yaml-loader";
+import { loadYamlDocumentSync, loadYamlSourceSync } from "../src/yaml-loader";
+
+const profilePath = "/rules/frontends/qlatt-english/policy/speaker-profile.yaml";
+const profileSpec = parseSpeakerProfileDocument(loadYamlDocumentSync(profilePath));
 
 describe("speaker profile schema", () => {
+  it("loads each frontend's declared profile, with independent DECtalk ownership", () => {
+    const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+    const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+    expect(english.speakerProfile?.path).toBe(profilePath);
+    expect(dectalk.speakerProfile?.path).toBe(
+      "/rules/frontends/dectalk-english/policy/speaker-profile.yaml",
+    );
+    expect(dectalk.speakerProfile?.spec).toEqual(english.speakerProfile?.spec);
+    expect(dectalk.speakerProfile?.spec).not.toBe(english.speakerProfile?.spec);
+  });
+
   it("uses the field's declared source order to compose a voice and request", () => {
-    const spec = loadSpeakerProfileSync();
+    const spec = profileSpec;
     const options = {
       profileSpec: spec,
       voiceProfile: { formant_scale: 1.17 },
@@ -32,8 +46,8 @@ describe("speaker profile schema", () => {
   });
 
   it("declares the canonical speaker profile document", () => {
-    const source = loadYamlSourceSync(DEFAULT_SPEAKER_PROFILE_PATH);
-    const spec = loadSpeakerProfileSync();
+    const source = loadYamlSourceSync(profilePath);
+    const spec = profileSpec;
 
     expect(source).toContain("version: v1");
     expect(spec.version).toBe("v1");
@@ -44,7 +58,7 @@ describe("speaker profile schema", () => {
   });
 
   it("resolves the current precedence order for overrides", () => {
-    const spec = loadSpeakerProfileSync();
+    const spec = profileSpec;
 
     expect(
       resolveSpeakerProfile({
@@ -54,6 +68,9 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 200,
+      // The span follows the level (pitch_composition.span_follows_level):
+      // the profile's 80 times the requested 200 over the reference 110.
+      f0_range_hz: 80 * (200 / 110),
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,
@@ -70,6 +87,7 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 150,
+      f0_range_hz: 80 * (150 / 110),
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,
@@ -100,7 +118,7 @@ describe("speaker profile schema", () => {
       .find((entry) => entry.type === "speaker_profile_selected");
     expect(decision).toBeDefined();
     expect(decision?.stage).toBe("frontend");
-    expect(decision?.citations).toContain(DEFAULT_SPEAKER_PROFILE_PATH);
+    expect(decision?.citations).toContain(profilePath);
     expect(decision?.reason).toContain("base_f0_hz=180");
     expect(decision?.reason).toContain("formant_scale=1.1");
   });

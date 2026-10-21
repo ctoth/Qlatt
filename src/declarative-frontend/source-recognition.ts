@@ -1,3 +1,4 @@
+import type { LtsContext } from "../g2p/lts-document";
 import type { RecognitionEvidence } from "../provenance";
 import { evaluateExpression } from "./cel-expressions";
 import { type HrgSchema, type Item, Utterance } from "./hrg";
@@ -67,7 +68,17 @@ function speak(
 }
 
 /** Host span matching only. The selected rulepack owns eligibility and speech. */
-export function recognizeText(text: string, utterance: Utterance, spec: CompiledRulepack): void {
+export function recognizeText(
+  text: string,
+  utterance: Utterance,
+  spec: CompiledRulepack,
+  /**
+   * When `text` is not the caller's input but what an earlier step made of
+   * it: the decisions of that step, which the source text then depends on,
+   * and what to say of it.
+   */
+  origin?: { parents: readonly string[]; reason: string },
+): void {
   const config = parseRecognitionConfig(spec);
   if (!config) throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
   const sourceItemId = "source_text";
@@ -90,6 +101,16 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
   // Sticky matching at successive source positions preserves lookaround/anchors
   // in the original input and permits overlapping retries after rejection.
   for (const rule of config.rules) {
+    if (rule.enabled !== undefined) {
+      const enabled = evaluateExpression(rule.enabled, {
+        source: { text },
+        maps: spec.maps,
+        sets: spec.string_sets,
+      });
+      if (typeof enabled !== "boolean")
+        throw new Error(`E_RECOGNITION_RESULT: '${rule.id}' enabled must return a boolean`);
+      if (!enabled) continue;
+    }
     const regex = new RegExp(rule.pattern, `${rule.flags}dy`);
     for (let start = 0; start <= text.length; ) {
       regex.lastIndex = start;
@@ -190,10 +211,11 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
     ruleId: "source_text_ingestion",
     phase: "recognition",
     tag: "source",
-    reason: "Preserved original input and UTF-16 source coordinates",
+    reason: origin?.reason ?? "Preserved original input and UTF-16 source coordinates",
     citations: ["Issue #142: source-backed normalization contract"],
     stage: "transcribe",
   });
+  for (const parent of origin?.parents ?? []) ingestion.dependOn(parent);
   const source = ingestion.createItem("sourceText", sourceItemId);
   ingestion.set(source, "text", text);
   ingestion.append("SourceText", source);
@@ -248,15 +270,24 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
   }
 }
 
-/** Execute the selected bounded phases and hand off terminal words exactly once. */
+/**
+ * Execute the selected bounded phases and hand off terminal words exactly once.
+ * `captureTooling` is the rule engine's option (phase checkpoints and rule
+ * attempts are recorded unless it is false).
+ */
 export function normalizeSourceItems(
   utterance: Utterance,
   spec: CompiledRulepack,
+  options: { captureTooling?: boolean; lts?: LtsContext } = {},
 ): SourceTranscriptionInput[] {
   if (!parseRecognitionConfig(spec))
     throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
   if (Array.isArray(spec.normalization.phases)) {
-    runGraphRuleEngine(utterance, spec, { phases: spec.normalization.phases as string[] });
+    runGraphRuleEngine(utterance, spec, {
+      phases: spec.normalization.phases as string[],
+      lts: options.lts,
+      ...(options.captureTooling === undefined ? {} : { captureTooling: options.captureTooling }),
+    });
     return utterance
       .relation("Normalization")
       .listItems()
@@ -279,10 +310,14 @@ export function normalizeSourceItems(
 }
 
 /** Public text-only projection of the same graph path used by transcription. */
-export function normalizeGraphText(text: string, spec: CompiledRulepack): string {
+export function normalizeGraphText(
+  text: string,
+  spec: CompiledRulepack,
+  options: { lts?: LtsContext } = {},
+): string {
   const utterance = new Utterance(NORMALIZATION_SCHEMA);
   recognizeText(text, utterance, spec);
-  return normalizeSourceItems(utterance, spec)
+  return normalizeSourceItems(utterance, spec, options)
     .map((entry) => entry.word)
     .join(" ");
 }

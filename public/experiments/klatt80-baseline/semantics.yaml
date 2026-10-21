@@ -4,6 +4,31 @@
 bacon: "0.1"
 name: klatt80
 
+analysis:
+  branch_switch:
+    param: SW
+    value: 1
+    citations:
+      - "engineering convention: count the SW=1 track control used by cascadeGain and parallelVoiceGain; parallel frication remains independent"
+  source_modes:
+    params: [sourceMode, lfMode]
+    citations:
+      - "engineering convention: summarize held numeric track source controls using their declared defaults; not evidence of audible source activity"
+  metrics:
+    voicing_params: [AV, AVS]
+    silence_phoneme: SIL
+    citations:
+      - "engineering convention: classify authored track metadata by finite positive AV/AVS, with unvoiced SIL as silence; not measured acoustic voicing"
+  maxVoicingIssues:
+    value: 6
+    basis: "engineering estimate: retained diagnostic display cap"
+  lowParallelScale:
+    value: 0.05
+    basis: "engineering estimate: retained low parallel-scale warning threshold"
+  lowParallelGain:
+    value: 0.001
+    basis: "engineering estimate: retained low parallel-gain warning threshold"
+
 # Interpreter burst telemetry policy (audio triggering remains in graph.yaml).
 # Klatt 1980 PARCOE.FOR: frication onset, NNAF - NAFLAS >= 49.
 # Preserve the host convention: initial and omitted parameters mean off (0 dB).
@@ -463,9 +488,9 @@ constants:
   # AH note: Klatt 80 uses -102 (aspiration 30 dB quieter than voicing).
   # Our input AH values are ~15 dB lower than Klatt 80 (max ~40 vs ~55),
   # so we use -87 to maintain the same output amplitude relationship.
-  # A1-A10 values mirror the per-formant ndbScale entries declared by
-  # formantBanks in graph.yaml; kept here so TS consumers (klatt-synth.ts,
-  # track-analysis.ts) can look them up by name.
+  # Source amplitude offsets are consumed by this experiment's realization rules.
+  # A1-A10 mirror graph.yaml formantBanks values; generated PFE rules use the
+  # graph-owned per-formant scales rather than these mirrored entries.
   ndbScale:
     AV: -119   # -72 - 47
     AH: -134   # -87 - 47
@@ -964,89 +989,9 @@ realize:
   fricCavityHz:
     expr: "fricFrontCavityCm > 0.0 ? 34300.0 / (4.0 * fricFrontCavityCm) : 1.0"
     deps: [fricFrontCavityCm]
-  # Stevens 1971 Eq. 7: second-order pole magnitude, normalized at resonance.
-  # Each PFE parallel amplitude samples the same physical transfer function.
-  # The engineering dB reference fixes calibration, not spectral shape.
-  fricA2:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F2 / fricCavityHz, 2.0), 2.0) + pow(F2 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A2"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F2, fricCavityHz, A2]
-  fricA3:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F3 / fricCavityHz, 2.0), 2.0) + pow(F3 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A3"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F3, fricCavityHz, A3]
-  fricA4:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F4 / fricCavityHz, 2.0), 2.0) + pow(F4 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A4"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F4, fricCavityHz, A4]
-  fricA5:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F5 / fricCavityHz, 2.0), 2.0) + pow(F5 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A5"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F5, fricCavityHz, A5]
-  fricA6:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F6 / fricCavityHz, 2.0), 2.0) + pow(F6 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A6"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F6, fricCavityHz, A6]
-  fricA7:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F7 / fricCavityHz, 2.0), 2.0) + pow(F7 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A7"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F7, fricCavityHz, A7]
-  fricA8:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F8 / fricCavityHz, 2.0), 2.0) + pow(F8 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A8"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F8, fricCavityHz, A8]
-  fricA9:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F9 / fricCavityHz, 2.0), 2.0) + pow(F9 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A9"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F9, fricCavityHz, A9]
-  fricA10:
-    expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F10 / fricCavityHz, 2.0), 2.0) + pow(F10 / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A10"
-    deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, F10, fricCavityHz, A10]
-  fricA2Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA2 > 0.0 ? dbToLinear(fricA2 - fricParallelReferenceDb - resonatorMagnitudeDb(F2, F2, B2, sampleRate)) * parallelScale : 0.0) : a2Linear"
-    deps: [fricActive, fricA2, fricParallelReferenceDb, F2, B2, sampleRate, parallelScale, a2Linear]
-
-  fricA3Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA3 > 0.0 ? dbToLinear(fricA3 - fricParallelReferenceDb - resonatorMagnitudeDb(F3, F3, B3, sampleRate)) * parallelScale : 0.0) : a3Linear"
-    deps: [fricActive, fricA3, fricParallelReferenceDb, F3, B3, sampleRate, parallelScale, a3Linear]
-
-  fricA4Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA4 > 0.0 ? dbToLinear(fricA4 - fricParallelReferenceDb - resonatorMagnitudeDb(F4, F4, B4, sampleRate)) * parallelScale : 0.0) : a4Linear"
-    deps: [fricActive, fricA4, fricParallelReferenceDb, F4, B4, sampleRate, parallelScale, a4Linear]
-
-  fricA5Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA5 > 0.0 ? dbToLinear(fricA5 - fricParallelReferenceDb - resonatorMagnitudeDb(F5, F5, B5, sampleRate)) * parallelScale : 0.0) : a5Linear"
-    deps: [fricActive, fricA5, fricParallelReferenceDb, F5, B5, sampleRate, parallelScale, a5Linear]
-
-  fricA6Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA6 > 0.0 ? dbToLinear(fricA6 - fricParallelReferenceDb - resonatorMagnitudeDb(F6, F6, B6, sampleRate)) * parallelScale : 0.0) : a6Linear"
-    deps: [fricActive, fricA6, fricParallelReferenceDb, F6, B6, sampleRate, parallelScale, a6Linear]
-
-  fricA7Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA7 > 0.0 ? dbToLinear(fricA7 - fricParallelReferenceDb - resonatorMagnitudeDb(F7, F7, B7, sampleRate)) * parallelScale : 0.0) : a7Linear"
-    deps: [fricActive, fricA7, fricParallelReferenceDb, F7, B7, sampleRate, parallelScale, a7Linear]
-
-  fricA8Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA8 > 0.0 ? dbToLinear(fricA8 - fricParallelReferenceDb - resonatorMagnitudeDb(F8, F8, B8, sampleRate)) * parallelScale : 0.0) : a8Linear"
-    deps: [fricActive, fricA8, fricParallelReferenceDb, F8, B8, sampleRate, parallelScale, a8Linear]
-
-  fricA9Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA9 > 0.0 ? dbToLinear(fricA9 - fricParallelReferenceDb - resonatorMagnitudeDb(F9, F9, B9, sampleRate)) * parallelScale : 0.0) : a9Linear"
-    deps: [fricActive, fricA9, fricParallelReferenceDb, F9, B9, sampleRate, parallelScale, a9Linear]
-
-  fricA10Linear:
-    # Physical pressure spectrum: normalize each analysis resonator at its peak.
-    # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
-    expr: "fricActive ? (fricA10 > 0.0 ? dbToLinear(fricA10 - fricParallelReferenceDb - resonatorMagnitudeDb(F10, F10, B10, sampleRate)) * parallelScale : 0.0) : a10Linear"
-    deps: [fricActive, fricA10, fricParallelReferenceDb, F10, B10, sampleRate, parallelScale, a10Linear]
+  # fricA2..fricA10 and fricA2Linear..fricA10Linear, one pair per parallel
+  # formant, are generated from the templates under `realize_each` at the end
+  # of this file.
 
   fricBypassDb:
     expr: "fricActive ? (fricFrontCavityCm > 0.0 ? 0.0 : fricParallelReferenceDb) : AB"
@@ -1158,3 +1103,23 @@ realize:
     expr: "dbToLinear(plstepAmplitudeDb)"
     deps: [plstepAmplitudeDb]
     description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"
+
+# Realize rules written once per family and generated at load for each value
+# of `over`: `{n}` is replaced textually in the rule name, `expr` and `deps`,
+# and the result is merged into `realize` above (src/semantics/realize-each.ts).
+realize_each:
+  # Aerodynamic frication amplitude of parallel formants 2-10.
+  - index: n
+    over: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+    rules:
+      # Stevens 1971 Eq. 7: second-order pole magnitude, normalized at resonance.
+      # Each PFE parallel amplitude samples the same physical transfer function.
+      # The engineering dB reference fixes calibration, not spectral shape.
+      "fricA{n}":
+        expr: "fricActive ? (fricFrontCavityCm > 0.0 ? max(0.0, fricParallelReferenceDb + 10.0 * log(pow(1.0 / fricCavityQ, 2.0) / (pow(1.0 - pow(F{n} / fricCavityHz, 2.0), 2.0) + pow(F{n} / (fricCavityHz * fricCavityQ), 2.0))) / log(10.0)) : 0.0) : A{n}"
+        deps: [fricActive, fricFrontCavityCm, fricParallelReferenceDb, fricCavityQ, "F{n}", fricCavityHz, "A{n}"]
+      "fricA{n}Linear":
+        # Physical pressure spectrum: normalize each analysis resonator at its peak.
+        # Klatt 1980 two-pole response; Stevens 1971 source/front-cavity separation.
+        expr: "fricActive ? (fricA{n} > 0.0 ? dbToLinear(fricA{n} - fricParallelReferenceDb - resonatorMagnitudeDb(F{n}, F{n}, B{n}, sampleRate)) * parallelScale : 0.0) : a{n}Linear"
+        deps: [fricActive, "fricA{n}", fricParallelReferenceDb, "F{n}", "B{n}", sampleRate, parallelScale, "a{n}Linear"]

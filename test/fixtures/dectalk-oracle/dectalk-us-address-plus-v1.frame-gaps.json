@@ -1,0 +1,8 @@
+{
+  "ap-underscore-plus": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ap-letters": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ap-words": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ap-underscore-address-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ap-plain-words-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ap-plain-letters-control": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

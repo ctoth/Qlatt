@@ -3,6 +3,7 @@ import * as celExpressions from "../src/declarative-frontend/cel-expressions";
 import {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { transcribeText } from "../src/transcribe-text";
@@ -70,7 +71,11 @@ describe("graph normalization declarations (supersede legacy #14/#15 dispatcher 
     });
     const normalized = normalizeGraphText("hello~world!", spec);
     expect(normalized).toBe("hello ~ world");
-    const tokens = transcribeText(normalized, { compiledSpec: spec });
+    const tokens = transcribeText(normalized, {
+      compiledSpec: spec,
+      resources: loadFrontendResources(spec),
+      dictionaryMap: loadFrontendResources(spec).lexicon?.dictionary,
+    });
     expect(tokens.filter((token) => token.isPunctuation).map((token) => token.symbol)).toEqual([
       "~",
     ]);

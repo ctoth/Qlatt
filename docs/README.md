@@ -17,6 +17,22 @@ Use these documents as the main entry points into the codebase:
 ## CLI Tools
 
 - `npm run explain -- "<phrase>"` — provenance trace of the full TTS pipeline.
-- `npm run tts-dsl -- <subcommand>` — rule engine inspector (run, validate, explain, diff, why-not).
+- `npm run tts-dsl -- <subcommand>` — rule engine inspector (phases, field, why-not, replay, explain).
 - `scripts/render-phrase.ts` — offline WAV rendering via node-web-audio-api or Playwright.
 - `scripts/oracle/` — DECtalk oracle pipeline: build reference binary, render corpora, compare audio.
+
+For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.
+
+Use `--why-param F1 --at 340` to inspect the selected lowered frame value and ancestry at a requested time in milliseconds. Text, DOT and HTML label the lowered layer; JSON exposes `tooling.parameter`. Endpoint frames remain selected outside their times. This query does not interpolate or explain realized/scheduled audio values.
+
+Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`.
+Executed vocabulary reads also show exact authored map-value locations in text and `tooling.vocabularySources`, including dotted map keys. Other literal origins and macro-body ancestry are not included.
+
+Use `--format dot --out decisions.dot` to export the selected provenance DAG for Graphviz.
+DOT uses current-run IDs and stage colors, and reports parent links omitted by selection.
+Use `--format html --out decisions.html` for a self-contained SVG DAG and linked text details.
+HTML columns show stages and rows follow sequence, not time; citations remain text, and no network resources are required.
+With `--why`, text also prints the full compiled rule and its referenced pattern;
+JSON exposes them by decision ID in `tooling.ruleExpressions`. These normalized,
+expanded definitions are distinct from authored YAML and do not identify which
+dispatch branch or individual literals contributed to the decision.

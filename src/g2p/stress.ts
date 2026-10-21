@@ -12,8 +12,8 @@ import type {
   StressSyllable,
 } from "./lexical-stress-types";
 import { assignMetricalStress } from "./metrical-stress";
-import { loadStressPolicy } from "./stress-policy";
-import { loadPhonotacticsSync, syllabify } from "./syllabify";
+import type { StressContext } from "./stress-policy";
+import { syllabify } from "./syllabify";
 import type { MorphologyCycle } from "./types";
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -32,15 +32,19 @@ export interface StressHint {
  * @param hint - Optional suffix-derived stress placement hint.
  * @returns New array with stress digits appended to vowel phonemes.
  */
-export function assignStress(phonemes: string[], policyPath: string, hint?: StressHint): string[] {
+export function assignStress(
+  phonemes: string[],
+  stress: StressContext,
+  hint?: StressHint,
+): string[] {
   return stressPronunciation(phonemes, {
-    policyPath,
+    stress,
     hint,
   }).phonemes;
 }
 
 export interface StressInput {
-  policyPath: string;
+  stress: StressContext;
   wordId?: string;
   category?: LexicalCategory;
   domains?: StressDomain[];
@@ -55,8 +59,7 @@ export function stressPronunciation(
   phonemes: string[],
   input: StressInput,
 ): LexicalStressResult & { phonemes: string[]; syllables: StressSyllable[] } {
-  const policy = loadStressPolicy(input.policyPath ?? "");
-  const phonotactics = loadPhonotacticsSync(policy.phonotacticsPath);
+  const { policy, phonotactics } = input.stress;
   const vowels = new Set(phonotactics.vowels);
   if (
     [...policy.longVowels, ...policy.shortFinalVowels].some((vowel) => !vowels.has(vowel)) ||
@@ -64,7 +67,7 @@ export function stressPronunciation(
   )
     throw new Error("E_STRESS_PHONOTACTICS: incompatible vowel inventory");
   const bare = phonemes.map((phone) => phone.replace(/[012]$/, ""));
-  const parts = syllabify(bare, policy.phonotacticsPath).filter((part) =>
+  const parts = syllabify(bare, phonotactics).filter((part) =>
     part.some((phone) => vowels.has(phone)),
   );
   let offset = 0;

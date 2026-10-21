@@ -50,7 +50,13 @@ describe("declarative transition edge policy", () => {
     expect(() => readLowerOptions(policy)).toThrow("E_HRG_LOWER_POLICY");
   });
 
-  it.each([20, 80])("uses a configured %i ms floor at both transition edges", (edgeMs) => {
+  it.each([
+    { edgeMs: 5, noFields: false },
+    { edgeMs: 20, noFields: false },
+    { edgeMs: 80, noFields: false },
+    { edgeMs: 100, noFields: false },
+    { edgeMs: 100, noFields: true },
+  ])("reports altered windows with edge $edgeMs and noFields=$noFields", ({ edgeMs, noFields }) => {
     const base = readLowerOptions(loadBundledRulepackSpec("qlatt-english").output.lowering);
     const policy = {
       ...base,
@@ -61,7 +67,7 @@ describe("declarative transition edge policy", () => {
         default_transition_ms: { value: 90, citations: ["engineering estimate: test"] },
         blend: {
           factor: { value: 0.5, citations: ["engineering estimate: test"] },
-          keys: ["F1"],
+          keys: noFields ? [] : ["F1"],
           smooth_types: ["vowel"],
           smooth_all_boundaries: true,
         },
@@ -116,11 +122,50 @@ describe("declarative transition edge policy", () => {
     const track = lowerToFrames(utterance, policy);
     const timesFor = (id: string) =>
       track.frames.filter((frame) => frame.segmentId === id).map((frame) => frame.time);
-    expect(timesFor(segments[0].id)).toContain(
-      (policy.timeline.initial_silence_ms.value + edgeMs) / 1000,
-    );
-    expect(timesFor(segments[1].id)).toContain(
-      (policy.timeline.initial_silence_ms.value + 200 - edgeMs) / 1000,
-    );
+    const dropped = edgeMs >= 100;
+    const warnings = utterance.diagnostics
+      .getEntries()
+      .filter((entry) => entry.code === "HRG_LOWER_TRANSITION_WINDOW_LIMITED");
+    expect(warnings).toHaveLength(edgeMs > 10 && !noFields ? 2 : 0);
+    if (warnings.length > 0) {
+      expect(warnings[0]).toMatchObject({
+        level: "warn",
+        data: {
+          itemId: segments[0].id,
+          kind: "blend",
+          edge: "trailing",
+          requested: { startMs: 10, endMs: 100 },
+          applied: dropped ? null : { startMs: edgeMs, endMs: 100 },
+          reason: "minimum_transition_edge",
+          fields: ["F1"],
+          citations: ["engineering estimate: test"],
+          parents: expect.arrayContaining([segments[0].latestWrite("F1")?.decisionId]),
+        },
+      });
+      expect(warnings[1]).toMatchObject({
+        data: {
+          itemId: segments[1].id,
+          edge: "leading",
+          requested: { startMs: 0, endMs: 90 },
+          applied: dropped ? null : { startMs: 0, endMs: 100 - edgeMs },
+        },
+      });
+    }
+    expect(
+      utterance.diagnostics
+        .getEntries()
+        .some((entry) => entry.code === "HRG_LOWER_TRANSITION_FALLBACK"),
+    ).toBe(true);
+    if (dropped || noFields) {
+      expect(track.frames.some((frame) => frame.params.F1 === 600)).toBe(false);
+    } else {
+      expect(timesFor(segments[0].id)).toContain(
+        (policy.timeline.initial_silence_ms.value + Math.max(edgeMs, 10)) / 1000,
+      );
+      expect(timesFor(segments[1].id)).toContain(
+        (policy.timeline.initial_silence_ms.value + 100 + Math.min(90, 100 - edgeMs)) / 1000,
+      );
+      expect(track.frames.some((frame) => frame.params.F1 === 600)).toBe(true);
+    }
   });
 });

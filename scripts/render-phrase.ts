@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createDiagnostics } from "../src/diagnostics.ts";
+import { selectRenderBackend } from "../src/rendering/select-backend.ts";
 import type { RenderRequest } from "../src/rendering/types.ts";
 import { writeWav } from "../src/rendering/write-wav.ts";
-import { selectRenderBackend } from "./rendering/select-backend.ts";
 
 const args = new Map<string, string>();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -19,10 +20,13 @@ const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 const phrase = args.get("phrase") ?? "hello world";
 const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
 const frontendId = args.get("frontend-id") ?? "qlatt-english";
+// A voice of the frontend's registry, as the page's voice selection gives it
+// (test/harness/runtime.js). Absent: the frontend's default voice.
+const speaker = args.get("speaker");
 const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
 const engine = args.get("engine") ?? "runtime";
-const rate = Number(args.get("rate") ?? 1);
-const transitionMs = Number(args.get("transition-ms") ?? 30);
+const rate = args.has("rate") ? Number(args.get("rate")) : undefined;
+const transitionMs = args.has("transition-ms") ? Number(args.get("transition-ms")) : undefined;
 const sampleRate = Number(args.get("sample-rate") ?? 22050);
 const outJson = args.get("out-json")
   ? path.resolve(args.get("out-json") as string)
@@ -73,6 +77,7 @@ function buildRequest(): RenderRequest {
     phrase,
     baseF0,
     frontendId,
+    ...(speaker ? { speaker } : {}),
     experimentId,
     engine,
     rate,
@@ -100,13 +105,19 @@ payload.engine = engine;
 payload.frontendId = frontendId;
 payload.experimentId = experimentId;
 
+if (persistWav) {
+  const diagnostics = createDiagnostics();
+  const stats = writeWav(outWav, payload.samples, payload.sampleRate, diagnostics);
+  payload.wavEncoding = { path: outWav, ...stats };
+  payload.diagnostics = [
+    ...(Array.isArray(payload.diagnostics) ? payload.diagnostics : []),
+    ...diagnostics.getEntries(),
+  ];
+}
+
 if (persistJson) {
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
   fs.writeFileSync(outJson, JSON.stringify(payload, jsonSafeReplacer, 2));
-}
-
-if (persistWav) {
-  writeWav(outWav, payload.samples, payload.sampleRate);
 }
 
 if (!persistWav || !compareGolden) {

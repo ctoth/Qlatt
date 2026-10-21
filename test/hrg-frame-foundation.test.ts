@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
-import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
+import { recordFrameEvaluation, withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { decisionChain } from "../src/declarative-frontend/hrg/provenance-query";
+import {
+  checkRequestedAttributes,
+  RequestedAttributes,
+} from "../src/declarative-frontend/hrg/requested-attributes";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   compileRuleEngineSpec,
@@ -75,7 +79,7 @@ describe("Frame foundation", () => {
       expect(missing).toEqual([]);
     },
   );
-  it("emits each event from a typed Frame with a resolved control anchor and field writes", () => {
+  it("emits each event from typed clocks and evaluated values without numeric writes", () => {
     const { track, utterance } = textToKlattTrackDetailed("hello world", 110, 30);
     const frames = utterance.getRelation("Frames")?.listItems();
     expect(frames).toHaveLength(track.length);
@@ -86,15 +90,56 @@ describe("Frame foundation", () => {
         10,
       );
       expect(frame.get("outputTimeMs")).toBeCloseTo(track[i].time * 1000, 10);
-      for (const [key, value] of Object.entries(track[i].params)) {
-        expect(frame.get(key)).toBe(value);
-        expect(track[i].provenance?.[key]).toBe(frame.latestWrite(key)?.decisionId);
+      for (const key of Object.keys(track[i].params)) {
+        expect(frame.has(key)).toBe(false);
+        expect(frame.latestWrite(key)).toBeUndefined();
+        const chain = decisionChain(utterance.provenance, track[i].provenance![key]);
+        expect(chain[0].citations.length).toBeGreaterThan(0);
       }
       expect(frame.has("segment")).toBe(false);
     });
   });
 
-  it("retains both midpoint sources and an intermediate write without unrelated fields", () => {
+  it("memoizes authored F1 copying and projects its actual source ancestry without writes", () => {
+    const { utterance, items, options } = fixture();
+    options.transitions.blend.keys = [];
+    const program = checkRequestedAttributes(loadBundledRulepackSpec("qlatt-english"), "frame_copy");
+    const result = lowerToFrames(utterance, options, { frameCopy: program });
+    const index = result.frames.findIndex((row) => row.segmentId === "s0");
+    const row = result.frames[index];
+    const frame = utterance.relation("Frames").listItems()[index];
+    expect(row.params.F1).toBe(400);
+    expect(Object.keys(row.params)).toEqual(["F1", "F2"]);
+    const chain = decisionChain(utterance.provenance, row.provenance!.F1);
+    expect(chain[0].type).toBe("attribute_evaluated");
+    expect(chain[0].subject).toBe(`item:${frame.id}.copied_f1`);
+    expect(chain[0].reason).toContain("frame-schema.yaml");
+    expect(chain.some((record) => record.subject.endsWith(".frame_segments"))).toBe(true);
+    expect(chain.map((record) => record.id)).toContain(items[0].latestWrite("F1")!.decisionId);
+    expect(chain.map((record) => record.id)).not.toContain(items[0].latestWrite("F2")!.decisionId);
+    expect(frame.latestWrite("F1")).toBeUndefined();
+    expect(
+      utterance.journal()
+        .filter((entry) => entry.metadata.ruleId.startsWith("lowering."))
+        .map((entry) => entry.metadata.ruleId),
+    ).not.toContain("lowering.frame_copy");
+
+    const before = [utterance.committedGeneration(), utterance.journal()];
+    const request = new RequestedAttributes(utterance, program);
+    const first = request.evaluate(frame, "copied_f1");
+    expect(request.evaluate(frame, "copied_f1")).toBe(first);
+    expect(request.evaluationCount).toBe(2);
+    expect(request.evaluate(frame, "copied_f1", "values").value).toBe(first.value);
+    expect(first.evidence!.reads.some((read) => read.subject === `${items[0].id}.F1`)).toBe(true);
+    const projected = new WeakMap();
+    const id = recordFrameEvaluation(utterance, program, first.evidence!, projected);
+    const count = utterance.provenance.size;
+    expect(recordFrameEvaluation(utterance, program, first.evidence!, projected)).toBe(id);
+    expect(utterance.provenance.size).toBe(count);
+    expect([utterance.committedGeneration(), utterance.journal()]).toEqual(before);
+  });
+
+  it("retains both midpoint sources and an intermediate computation without unrelated fields", () => {
     const { utterance, items, options } = fixture();
     const anchors = items.map((item) => utterance.intervalAnchor(item));
     const durations = items.map((item) => item.latestWrite("duration"));

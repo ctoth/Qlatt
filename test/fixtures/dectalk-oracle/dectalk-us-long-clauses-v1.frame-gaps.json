@@ -1,0 +1,8 @@
+{
+  "ln-new-one": ["B1","AV","AP","A2"],
+  "ln-new-one-sentence": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ln-new-car": ["B1","AV","AP","A2","A5","A2_AMPLITUDE"],
+  "ln-clause-130": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ln-clause-short": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "ln-bridge-letter": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

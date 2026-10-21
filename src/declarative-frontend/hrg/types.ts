@@ -153,6 +153,8 @@ export type JournalOperation =
       readonly relationName: string;
       readonly parentItemId: string;
       readonly itemId: string;
+      /** Absent: last daughter. Null: first. Otherwise: right after that item. */
+      readonly previousItemId?: string | null;
     }
   | {
       readonly kind: "associate" | "disassociate";

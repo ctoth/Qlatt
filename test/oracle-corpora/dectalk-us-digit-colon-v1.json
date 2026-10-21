@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-digit-colon-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "dc-ratio", "text": "The ratio is 3:2, not 2:3.", "group": "digit-colon", "tags": ["spelled", "comma-after"], "expectedFocus": ["trace"] },
+    { "id": "dc-two-digits-first", "text": "Mix it 10:1 with water.", "group": "digit-colon", "tags": ["spelled", "digits-one-by-one"], "expectedFocus": ["trace"] },
+    { "id": "dc-twelve", "text": "It was 12:5 then.", "group": "digit-colon", "tags": ["spelled", "digits-one-by-one"], "expectedFocus": ["trace"] },
+    { "id": "dc-thirteen", "text": "It was 13:2 then.", "group": "digit-colon", "tags": ["spelled", "digits-one-by-one"], "expectedFocus": ["trace"] },
+    { "id": "dc-chain", "text": "It was 3:2:1 then.", "group": "digit-colon", "tags": ["spelled", "two-colons"], "expectedFocus": ["trace"] },
+    { "id": "dc-text-end", "text": "The score was 3:2.", "group": "digit-colon", "tags": ["spelled", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "dc-time-control", "text": "Read John 3:16 aloud.", "group": "digit-colon", "tags": ["control", "time-form"], "expectedFocus": ["trace"] },
+    { "id": "dc-time-zero-control", "text": "It was 3:07 then.", "group": "digit-colon", "tags": ["control", "time-form"], "expectedFocus": ["trace"] },
+    { "id": "dc-parser-splits-control", "text": "The odds are 100:1 against.", "group": "digit-colon", "tags": ["control", "parser-splits"], "expectedFocus": ["trace"] },
+    { "id": "dc-parser-splits-minutes-control", "text": "It was 3:75 then.", "group": "digit-colon", "tags": ["control", "parser-splits"], "expectedFocus": ["trace"] }
+  ]
+}

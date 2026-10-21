@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
 import { createKlattRuntime, type KlattRuntimeOptions } from "../src/klatt-runtime";
+import { createProvenanceCollector } from "../src/provenance";
 
 function fixture() {
   const diagnostics = createDiagnostics();
@@ -119,6 +120,7 @@ describe("runtime structural diagnostics", () => {
 
   it("reports omitted unknown nodes and each dropped edge with endpoints", async () => {
     const { options, diagnostics, node } = fixture();
+    options.provenance = createProvenanceCollector();
     options.graph.nodes.lost = { type: "unknown" };
     options.graph.connections = [
       ["lost", "out"],
@@ -127,6 +129,7 @@ describe("runtime structural diagnostics", () => {
     const runtime = await createKlattRuntime(options);
     expect(runtime.getAllNodeIds()).toEqual(["out"]);
     expect(node.connect).not.toHaveBeenCalled();
+    expect(options.provenance.getDecisions()).toEqual([]);
     expect(diagnostics.getEntries()).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -244,14 +247,35 @@ describe("runtime structural diagnostics", () => {
 
   it("resolves named ports and honors the graph output port", async () => {
     const { options, diagnostics, node } = fixture();
+    options.provenance = createProvenanceCollector();
+    options.graph.name = "named-ports";
     options.registry.primitives.gain.outputs = 2;
     options.registry.primitives.gain.ports = { second: { direction: "out", index: 1 } };
     options.graph.outputs = [{ node: "out", port: "second" }];
-    options.graph.connections = [{ from: { node: "out", port: "second" }, to: "out" }];
+    options.graph.connections = [
+      { from: { node: "out", port: "second" }, to: "out" },
+      { from: { node: "out", port: 0 }, to: { node: "out", param: "gain" } },
+    ];
     const runtime = await createKlattRuntime(options);
     runtime.connectToDestination();
     expect(node.connect).toHaveBeenCalledWith(node, 1, 0);
+    expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
     expect(node.connect).toHaveBeenCalledWith(options.audioContext.destination, 1);
+    const records = options.provenance.getDecisions();
+    expect(records.map((record) => record.reason)).toEqual([
+      "named-ports: connected out[1] -> out[0]; source: named port 'second' in primitive 'gain'; destination: omitted port defaults to 0",
+      "named-ports: connected out[0] -> out.gain (AudioParam); source: explicit numeric port 0",
+      "named-ports: connected out[1] -> audioContext.destination; source: named port 'second' in primitive 'gain'",
+    ]);
+    for (const record of records) {
+      expect(record.stage).toBe("runtime");
+      expect(record.type).toBe("connection_resolved");
+      expect(record.citations).toEqual([
+        "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+      ]);
+      expect(record.timestampMs).toBeUndefined();
+      expect(record.parents).toBeUndefined();
+    }
     expect(diagnostics.getEntries()).toEqual([]);
   });
 
@@ -292,11 +316,13 @@ describe("runtime structural diagnostics", () => {
 
   it("reports host connection rejection and disconnects constructed nodes", async () => {
     const { options, diagnostics, node } = fixture();
+    options.provenance = createProvenanceCollector();
     options.graph.connections = [["out", "out"]];
     node.connect.mockImplementation(() => {
       throw new Error("host port mismatch");
     });
     await expect(createKlattRuntime(options)).rejects.toThrow(/host port mismatch/);
+    expect(options.provenance.getDecisions()).toEqual([]);
     expect(node.disconnect).toHaveBeenCalledOnce();
     expect(diagnostics.getEntries()[0]).toMatchObject({
       code: "runtime.connection_failed",
@@ -324,9 +350,14 @@ describe("runtime structural diagnostics", () => {
 
   it("connects an existing destination AudioParam", async () => {
     const { options, diagnostics, node } = fixture();
+    options.provenance = createProvenanceCollector();
     options.graph.connections = [{ from: "out", to: { node: "out", param: "gain" } }];
     await createKlattRuntime(options);
     expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
+    expect(options.provenance.getDecisions()).toHaveLength(1);
+    expect(options.provenance.getDecisions()[0].reason).toBe(
+      "unnamed graph: connected out[0] -> out.gain (AudioParam); source: omitted port defaults to 0",
+    );
     expect(diagnostics.getEntries()).toEqual([]);
   });
 

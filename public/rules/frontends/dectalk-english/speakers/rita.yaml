@@ -1,17 +1,52 @@
-# DECtalk voice "Rita" — converted from DECtalk 4.63 voice tables.
-# Imported by scripts/dt1-import-voices.ts from the canonical converted
-# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
-# f0_lp_filter_alpha is derived: f0_lp_filter / 16384
-# (DECtalk 4.63 Ph_drwt02.c signed Q14 coefficient).
+# DECtalk voice "Rita". Generated from DECtalk 4.63
+# dapi/src/PH/P_us_vdf1.h:1182-1224 (us_rita, by SPD_ index, INCLUDE/cmd.h:159-205)
+# and setspdef() (PH/ph_vset.c) by scripts/oracle/import-dectalk-voices.ts --write.
+# Do not edit: change the script and run it again.
 #
-# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
-# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
-# STORED here but not yet wired into the synthesis graph (deferred chunk).
+# sex: SPD_SEX. fnscale: (200 - HS) * 41 (ph_vset.c:712). base_f0_hz: AP.
+# f0_minimum: (AP - 12) * 10. f0_scale_factor: PR * 41. f0_lp_filter:
+# 1500 + 15 * QU, and f0_lp_filter_alpha that over 16384 (the F0 filter's Q14
+# coefficient, Ph_drwt02.c). hat_rise_hz10: HR * 10. scale_str_rise: SR.
+# assertiveness: AS * 41. baseline_fall_hz10: BF * 10. falling_target: FT
+# (ph_vset.c:675-685). F4, F5: the definition's times fnscale >> 12, or 6000
+# (off) when the definition says so or the result is too high; B4, B5 with
+# them (ph_vset.c:714-757). F7, F8: P4, P5. spd_F4: the definition's own F4.
+# GF..LO, AGO, AGVO, AGUO, UNVOW, CHINK, smoothness (SM), breathiness (BR),
+# richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),
+# quickness (QU): the definition's entries.
+#
+# Every entry is the definition's plus the voice's tuning table's, as
+# usevoice() adds them (ph_vset.c:446-448; PH/p_us_vdf_tunehl.h:888-943,
+# us_rita_tune). The table changes GN by +18, G1 by +1, G2 by -19, G3 by +24, LO by +13.
+#
+# SPD_R4CB..SPD_SEX: the speaker definition packet setspdef() sends the
+# synthesizer (struct SPD_CHIP, ph_defs.h:693-720), word by word: r4cb F4,
+# r4cc B4, r5cb F5, r5cc B5 as above; r4pb F7; r5pb F8; t0jit LA; r5ca G1;
+# r4ca G2; r3ca G3; r2ca G4; r1ca LO; nopen1 5000 + 160 * (100 - RI); nopen2
+# NF * 4; aturb BR; afgain GF; azgain GV; apgain GH; sex SPD_SEX
+# (ph_vset.c:537-538, 714-818). last_voice: the voice number. NOM_Open_Quo:
+# entry SPD_OQ (672). Tiltm: SM * 20 / 100 (689). The dectalk-vtm node takes
+# these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they
+# equal the packet the stock say.exe sent
+# (test/dectalk-speaker-packets.test.ts).
+#
+# stress_step..end_of_phrase_spread: what case Rita of
+# changeSpeakerValues() assigns (VTM/vtmiont.c:3194-3217, the lines the build
+# compiles): STRESS_STEP, UNSTRESS_PRESSURE, STRESS_PRESSURE, NOM_Sub_Pressure,
+# NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.
+#
+# formant_scale, rd_default and spectral_tilt_offset_db are not DECtalk's:
+# the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus
+# 0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate
 citations:
-  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
-  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+  - "DECtalk 4.63 PH/P_us_vdf1.h us_rita; INCLUDE/cmd.h:159-205 SPD_ indices"
+  - "DECtalk 4.63 PH/p_us_vdf_tunehl.h us_rita_tune; ph_vset.c:446-448 (definition plus tuning table)"
+  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"
+  - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
+  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"
 name: Rita
 sex: female
+fnscale: 4305
 base_f0_hz: 106
 formant_scale: 1.17
 rd_default: 0.94
@@ -20,28 +55,28 @@ f0_minimum: 940
 f0_scale_factor: 3280
 f0_lp_filter: 1950
 f0_lp_filter_alpha: 0.1190185546875
-hat_rise_hz10: 150
-scale_str_rise: 20
+hat_rise_hz10: 200
+scale_str_rise: 32
 assertiveness: 2665
 baseline_fall_hz10: 100
 falling_target: 0
-F4: 3604
+F4: 4204
 B4: 250
-F5: 4324
+F5: 5044
 B5: 700
 F7: 4100
 F8: 4700
 GF: 65
-GH: 65
+GH: 60
 GV: 60
-GN: 69
-G1: 69
-G2: 80
-G3: 48
+GN: 87
+G1: 70
+G2: 61
+G3: 72
 G4: 58
-LO: 73
+LO: 86
 AGO: 500
-AGVO: 800
+AGVO: 700
 AGUO: 1900
 UNVOW: 0
 CHINK: 60
@@ -50,5 +85,39 @@ breathiness: 36
 richness: 20
 nopen_fraction: 10
 laryngealization: 1
-head_size: 110
+head_size: 95
 quickness: 30
+spd_F4: 4000
+SPD_R4CB: 4204
+SPD_R4CC: 250
+SPD_R5CB: 5044
+SPD_R5CC: 700
+SPD_R4PB: 4100
+SPD_R5PB: 4700
+SPD_T0JIT: 1
+SPD_R5CA: 70
+SPD_R4CA: 61
+SPD_R3CA: 72
+SPD_R2CA: 58
+SPD_R1CA: 86
+SPD_NOPEN1: 17800
+SPD_NOPEN2: 40
+SPD_ATURB: 36
+SPD_AFGAIN: 65
+SPD_AZGAIN: 60
+SPD_APGAIN: 60
+SPD_SEX: 0
+last_voice: 7
+NOM_Open_Quo: 0
+Tiltm: 8
+stress_step: 20
+unstress_pressure: 80
+stress_pressure: 100
+sub_pressure: 800
+fricative_opening: 110
+glottal_stop_area: 0
+vot_speed: 0
+end_of_phrase_spread: 0
+definition:
+  values: [0, 44, 65, 106, 80, 36, 20, 10, 1, 95, 4000, 250, 4800, 700, 4100, 4700, 65, 60, 60, 87, 70, 61, 72, 58, 86, 0, 10, 0, 30, 20, 32, 500, 700, 1900, 0, 60, 0]
+  tune: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 1, -19, 24, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-rime-t-glottal-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "tg-attn-sentence", "text": "Send it attn. Mrs. Gray, c/o the front desk.", "group": "t-in-final-rime", "tags": ["t-before-n", "word-final-cluster"], "expectedFocus": ["trace"] },
+    { "id": "tg-attn-short", "text": "It is attn.", "group": "t-in-final-rime", "tags": ["t-before-n", "word-final-cluster", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "tg-attn-then-word", "text": "Send it attn. now.", "group": "t-in-final-rime", "tags": ["t-before-n", "word-final-cluster"], "expectedFocus": ["trace"] },
+    { "id": "tg-word-boundary-control", "text": "Send it at noon.", "group": "t-in-final-rime", "tags": ["control", "t-word-final"], "expectedFocus": ["trace"] },
+    { "id": "tg-syllabic-n-control", "text": "The kitten ran.", "group": "t-in-final-rime", "tags": ["control", "syllabic-n"], "expectedFocus": ["trace"] },
+    { "id": "tg-vowel-after-control", "text": "He is a witness.", "group": "t-in-final-rime", "tags": ["control", "syllabic-later-in-word"], "expectedFocus": ["trace"] },
+    { "id": "tg-name-control", "text": "It was Whitney.", "group": "t-in-final-rime", "tags": ["control", "syllabic-later-in-word"], "expectedFocus": ["trace"] },
+    { "id": "tg-partner-control", "text": "Partner up now.", "group": "t-in-final-rime", "tags": ["control", "syllabic-later-in-word"], "expectedFocus": ["trace"] }
+  ]
+}

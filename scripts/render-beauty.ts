@@ -8,7 +8,7 @@
  *
  * Default (no --affect, or --affect neutral) is the neutral render, which is
  * numerically identical to a plain `render-phrase.ts` render (the (c) base
- * case: NEUTRAL_VQ is the identity transform).
+ * case: the selected channel neutrals give the identity transform).
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
@@ -25,8 +25,8 @@
  *   --frontend-id <id>         Frontend (default qlatt-beauty)
  *   --experiment-id <id>       Experiment/graph (default qlatt-beauty)
  *   --base-f0 <Hz>             Base F0 override
- *   --transition-ms <ms>       Formant transition duration (default 30)
- *   --rate <x>                 Speaking rate (default 1)
+ *   --transition-ms <ms>       Formant transition override (default: frontend policy)
+ *   --rate <x>                 Speaking rate (default: frontend policy)
  *   --sample-rate <Hz>         Output sample rate (default 48000)
  *   --lead-time <s>            Silence lead (default 0.05)
  *   --tail-time <s>            Silence tail (default 0.2)
@@ -39,6 +39,10 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack.ts";
 import { createDiagnostics } from "../src/diagnostics.ts";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
 import { compileAffect, neutralAffect } from "../src/input/affect.ts";
@@ -70,8 +74,8 @@ const sex: SpeakerSex | undefined = sexArg === "male" || sexArg === "female" ? s
 const frontendId = args.get("frontend-id") ?? "qlatt-beauty";
 const experimentId = args.get("experiment-id") ?? "qlatt-beauty";
 const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
-const transitionMs = Number(args.get("transition-ms") ?? 30);
-const rate = Number(args.get("rate") ?? 1);
+const transitionMs = args.has("transition-ms") ? Number(args.get("transition-ms")) : undefined;
+const rate = args.has("rate") ? Number(args.get("rate")) : undefined;
 const sampleRate = Number(args.get("sample-rate") ?? 48000);
 const leadTime = Number(args.get("lead-time") ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? 0.2);
@@ -110,11 +114,26 @@ async function main(): Promise<void> {
   });
 
   // 2. Compile the named affect preset + degree into its V/A/D + VQ substrate.
+  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
+  const library = resources.affectPresets?.library;
+  if (!library) {
+    throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires affect_presets`);
+  }
+  const channels = resources.vqChannels?.channels;
+  if (!channels) {
+    throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires vq_channels`);
+  }
   const isNeutral = affectName === "neutral" || degree === 0;
-  const affect = isNeutral ? neutralAffect() : compileAffect(affectName, degree, { sex });
+  const affect = isNeutral
+    ? neutralAffect(library, channels)
+    : compileAffect(library, channels, affectName, degree, { sex });
 
-  // 3. Apply the affect delta to the assembled track (NEUTRAL_VQ = identity).
-  const { track, citations } = applyAffectToTrack(frontend.track, affect);
+  // 3. Apply the affect delta to the assembled track (neutral = identity).
+  const { track, citations } = applyAffectToTrack(frontend.track, affect, {
+    frontendId,
+    rdPolicy: resources.vqChannels?.rdPolicy,
+    vqChannels: channels,
+  });
 
   console.log(
     `render-beauty: phrase="${phrase}" affect=${affect.label}@${degree} ` +

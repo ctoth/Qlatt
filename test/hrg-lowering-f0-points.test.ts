@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 import { historicalLoweringColumns } from "./historical-lowering-columns";
 
@@ -92,7 +94,8 @@ function readFixture(): {
     !isPlainObject(parsed.oldProduction.controlScore) ||
     !Array.isArray(parsed.oldProduction.controlScore.f0_points) ||
     !Array.isArray(parsed.oldProduction.sourceFrames) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.output)
   ) {
     throw new Error("point-contour fixture/spec invalid");
@@ -102,7 +105,7 @@ function readFixture(): {
     ...currentPolicy,
     columns: historicalLoweringColumns(parsed, currentPolicy.columns),
   };
-  const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
+  const inventory = loadInventorySpecFromPath(spec.resources.inventory).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");

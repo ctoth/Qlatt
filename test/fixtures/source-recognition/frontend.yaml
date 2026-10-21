@@ -1,9 +1,9 @@
 extends: qlatt-english
 include:
-  - /rules/normalization/lexical.yaml
+  - /rules/languages/english/normalization/lexical.yaml
   - normalization-policy.yaml
   - recognition.yaml
-  - /rules/normalization/numbers.yaml
+  - /rules/languages/english/normalization/numbers.yaml
   - pipeline.yaml
   - phases/orthography.yaml
   - phases/normalize.yaml

@@ -1,7 +1,60 @@
 import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
-import { expandSpecCelMacros, parseCelMacroBlock } from "./cel-macros";
+import { expandSpecCelMacros, type MacroExpansionObserver, parseCelMacroBlock } from "./cel-macros";
+import type { ValidationDiagnostic } from "./validation";
 
 type PlainObject = Record<string, unknown>;
+
+/** An existing foreach failure, with its authored path before expansion. */
+export class ForeachExpansionError extends Error {
+  constructor(
+    message: string,
+    readonly path: readonly (string | number)[],
+    readonly position: "key" | "value" = "value",
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "ForeachExpansionError";
+  }
+}
+const RESOURCE_ALIASES = {
+  inventory_path: "inventory",
+  lts_path: "lts",
+  morphology_path: "morphology",
+  stress_policy_path: "stress_policy",
+  dictionary_path: "lexicon",
+  speaker_profile_path: "speaker_profile",
+  source_contour_path: "source_contour",
+} as const;
+
+/** Normalize one authored document before inheritance; never mutate the input. */
+export function normalizeResourceAliases(
+  source: PlainObject,
+  diagnostics: ValidationDiagnostic[] = [],
+): PlainObject {
+  if (!Object.keys(RESOURCE_ALIASES).some((alias) => Object.hasOwn(source, alias))) return source;
+  const document = { ...source };
+  const resources = isPlainObject(source.resources) ? { ...source.resources } : {};
+  for (const [alias, role] of Object.entries(RESOURCE_ALIASES)) {
+    if (!Object.hasOwn(source, alias)) continue;
+    diagnostics.push({
+      code: "W_FRONTEND_RESOURCE_ALIAS",
+      severity: "warning",
+      path: alias,
+      message: `${alias} is deprecated; declare resources.${role} instead`,
+    });
+    // Presence, including explicit null, wins over an alias in the same document.
+    if (!Object.hasOwn(resources, role)) resources[role] = source[alias];
+    delete document[alias];
+  }
+  if (Object.keys(resources).length || Object.hasOwn(source, "resources")) {
+    document.resources = resources;
+  }
+  return document;
+}
+export type RulePathObserver = (
+  compiled: readonly (string | number)[],
+  authored: readonly (string | number)[],
+) => void;
 
 type NormalizedPhase = {
   name: string;
@@ -87,10 +140,14 @@ function substituteFieldPlaceholders(value: unknown, fieldName: string): unknown
   return value;
 }
 
-function expandForEachField(entries: unknown[]): PlainObject[] {
+function expandForEachField(
+  entries: unknown[],
+  observe?: (output: number, input: number) => void,
+): PlainObject[] {
   const out: PlainObject[] = [];
-  for (const entry of entries) {
+  for (const [inputIndex, entry] of entries.entries()) {
     if (!isPlainObject(entry) || !Object.hasOwn(entry, "for_each_field")) {
+      observe?.(out.length, inputIndex);
       out.push(cloneObject(entry));
       continue;
     }
@@ -112,6 +169,7 @@ function expandForEachField(entries: unknown[]): PlainObject[] {
     for (const fieldName of fields as string[]) {
       const cloned = cloneValue(template) as PlainObject;
       const substituted = substituteFieldPlaceholders(cloned, fieldName) as PlainObject;
+      observe?.(out.length, inputIndex);
       out.push(substituted);
     }
   }
@@ -164,37 +222,49 @@ function isForeachDirective(entry: unknown): boolean {
   return isPlainObject(entry) && Object.hasOwn(entry, "foreach");
 }
 
-function expandForeachArray(entries: unknown[]): unknown[] {
+function expandForeachArray(
+  entries: unknown[],
+  authored: readonly (string | number)[],
+  compiled: readonly (string | number)[],
+  observe?: RulePathObserver,
+): unknown[] {
   const out: unknown[] = [];
-  for (const entry of entries) {
+  for (const [inputIndex, entry] of entries.entries()) {
     if (!isForeachDirective(entry)) {
-      out.push(expandForeachValue(entry));
+      out.push(
+        expandForeachValue(entry, [...authored, inputIndex], [...compiled, out.length], observe),
+      );
       continue;
     }
     const directive = entry as PlainObject;
     for (const key of Object.keys(directive)) {
       if (key !== "foreach" && key !== "template") {
-        throw new Error(
+        throw new ForeachExpansionError(
           `E_FOREACH_INVALID: a 'foreach' directive may only contain 'foreach' and 'template', got extra key '${key}'`,
+          [...authored, inputIndex, key],
+          "key",
         );
       }
     }
     const items = directive.foreach;
     const template = directive.template;
     if (!Array.isArray(items) || items.length === 0) {
-      throw new Error(
+      throw new ForeachExpansionError(
         `E_FOREACH_INVALID: 'foreach' must be a non-empty array of binding maps, got ${JSON.stringify(items)}`,
+        [...authored, inputIndex, "foreach"],
       );
     }
     if (!isPlainObject(template)) {
-      throw new Error(
+      throw new ForeachExpansionError(
         `E_FOREACH_INVALID: 'foreach' requires an object 'template', got ${JSON.stringify(template)}`,
+        [...authored, inputIndex, "template"],
       );
     }
-    for (const item of items) {
+    for (const [bindingIndex, item] of items.entries()) {
       if (!isPlainObject(item)) {
-        throw new Error(
+        throw new ForeachExpansionError(
           `E_FOREACH_INVALID: 'foreach' items must be binding maps, got ${JSON.stringify(item)}`,
+          [...authored, inputIndex, "foreach", bindingIndex],
         );
       }
       const bindings: Record<string, string> = {};
@@ -204,8 +274,9 @@ function expandForeachArray(entries: unknown[]): unknown[] {
           typeof binding !== "number" &&
           typeof binding !== "boolean"
         ) {
-          throw new Error(
+          throw new ForeachExpansionError(
             `E_FOREACH_INVALID: 'foreach' binding '${key}' must be a scalar (string/number/boolean), got ${JSON.stringify(binding)}`,
+            [...authored, inputIndex, "foreach", bindingIndex, key],
           );
         }
         bindings[key] = String(binding);
@@ -213,19 +284,35 @@ function expandForeachArray(entries: unknown[]): unknown[] {
       const cloned = cloneValue(template);
       const substituted = substituteBindings(cloned, bindings);
       // Recurse to allow nested foreach inside a template.
-      out.push(expandForeachValue(substituted));
+      out.push(
+        expandForeachValue(
+          substituted,
+          [...authored, inputIndex, "template"],
+          [...compiled, out.length],
+          observe,
+        ),
+      );
     }
   }
   return out;
 }
 
-function expandForeachValue(value: unknown): unknown {
+function expandForeachValue(
+  value: unknown,
+  authored: readonly (string | number)[] = [],
+  compiled: readonly (string | number)[] = [],
+  observe?: RulePathObserver,
+): unknown {
+  observe?.(compiled, authored);
   if (Array.isArray(value)) {
-    return expandForeachArray(value);
+    return expandForeachArray(value, authored, compiled, observe);
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, expandForeachValue(entry)]),
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        expandForeachValue(entry, [...authored, key], [...compiled, key], observe),
+      ]),
     );
   }
   return value;
@@ -233,14 +320,9 @@ function expandForeachValue(value: unknown): unknown {
 
 export const DSL_ROOT_KEYS = new Set([
   "version",
-  "inventory_path",
-  "lts_path",
-  "morphology_path",
-  "stress_policy_path",
+  "schema",
+  "resources",
   "accent_policy_path",
-  "dictionary_path",
-  "speaker_profile_path",
-  "source_contour_path",
   "normalization",
   "text_recognition",
   "speakers",
@@ -252,6 +334,9 @@ export const DSL_ROOT_KEYS = new Set([
   "topology",
   "predicates",
   "tags",
+  // Registers, features and outputs of the rules of kind `frame`
+  // (hrg/frame-program.ts).
+  "frame_programs",
   // Chunk 3: pipeline-level reusable string-set and string-keyed map blocks.
   "string_sets",
   "maps",
@@ -353,12 +438,52 @@ function normalizePattern(pattern: unknown): PlainObject {
   };
 }
 
-function normalizeRule(ruleInput: unknown): PlainObject {
+function normalizeRule(ruleInput: unknown, observe?: RulePathObserver): PlainObject {
   if (!isPlainObject(ruleInput)) return {};
   // Expand any `foreach` template directives before field normalization so the
   // engine and validation never see the directive itself. Structure-preserving
   // when no directive is present.
-  const rule = expandForeachValue(ruleInput) as PlainObject;
+  const paths: {
+    compiled: readonly (string | number)[];
+    authored: readonly (string | number)[];
+  }[] = [];
+  const rule = expandForeachValue(
+    ruleInput,
+    [],
+    [],
+    observe
+      ? (compiled, authored) => {
+          paths.push({ compiled, authored });
+          if (
+            (compiled[0] === "constraint" ||
+              compiled[0] === "set" ||
+              compiled[0] === "insert_points" ||
+              (compiled[0] === "select" && compiled[1] === "where")) &&
+            compiled.some((part) => typeof part === "number")
+          ) {
+            observe(compiled, authored);
+          }
+        }
+      : undefined,
+  ) as PlainObject;
+  const apply = Array.isArray(rule.apply)
+    ? expandForEachField(
+        rule.apply,
+        observe
+          ? (output, input) => {
+              for (const { compiled, authored } of paths) {
+                if (
+                  compiled[0] === "apply" &&
+                  compiled[1] === input &&
+                  compiled[2] !== "for_each_field"
+                ) {
+                  observe(["apply", output, ...compiled.slice(2)], authored);
+                }
+              }
+            }
+          : undefined,
+      )
+    : [];
   const define = isPlainObject(rule.define)
     ? Object.fromEntries(
         Object.entries(rule.define)
@@ -390,7 +515,7 @@ function normalizeRule(ruleInput: unknown): PlainObject {
           };
         })()
       : null,
-    apply: Array.isArray(rule.apply) ? expandForEachField(rule.apply) : [],
+    apply,
     contour: isPlainObject(rule.contour) ? cloneObject(rule.contour) : null,
     scan: isPlainObject(rule.scan) ? cloneObject(rule.scan) : null,
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
@@ -413,12 +538,20 @@ function normalizeRule(ruleInput: unknown): PlainObject {
   };
 }
 
-export function parseDslSpec(source: unknown) {
+export function parseDslSpec(
+  source: unknown,
+  observeMacroExpansion?: MacroExpansionObserver,
+  observeRulePath?: RulePathObserver,
+) {
   const parsed = typeof source === "string" ? parseYamlString(source, "dsl spec") : source;
   if (!isPlainObject(parsed)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
-  const raw = expandSpecCelMacros(parsed, parseCelMacroBlock(parsed.functions));
+  const raw = expandSpecCelMacros(
+    normalizeResourceAliases(parsed),
+    parseCelMacroBlock(parsed.functions),
+    observeMacroExpansion,
+  );
   if (Object.hasOwn(raw, "streams")) {
     throw new Error("E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'");
   }
@@ -442,16 +575,11 @@ export function parseDslSpec(source: unknown) {
 
   return {
     ...extraRootFields,
+    ...(Object.hasOwn(raw, "schema") ? { schema: cloneValue(raw.schema) } : {}),
     functions: cloneObject(raw.functions),
     version: raw.version ?? null,
-    inventory_path: asString(raw.inventory_path, null),
-    lts_path: asString(raw.lts_path, null),
-    morphology_path: asString(raw.morphology_path, null),
-    stress_policy_path: asString(raw.stress_policy_path, null),
+    resources: cloneObject(raw.resources),
     accent_policy_path: asString(raw.accent_policy_path, null),
-    dictionary_path: asString(raw.dictionary_path, null),
-    speaker_profile_path: asString(raw.speaker_profile_path, null),
-    source_contour_path: asString(raw.source_contour_path, null),
     normalization: cloneObject(raw.normalization),
     ...(Object.hasOwn(raw, "text_recognition")
       ? { text_recognition: cloneValue(raw.text_recognition) }
@@ -478,6 +606,9 @@ export function parseDslSpec(source: unknown) {
       ]),
     ),
     tags: cloneObject(raw.tags),
+    frame_programs: cloneValue(
+      isPlainObject(raw.frame_programs) ? raw.frame_programs : {},
+    ) as PlainObject,
     // Chunk 3: carry pipeline-level string_sets / maps blocks through to the
     // runtime. Shape is validated downstream by validation.ts
     // (validateStringSets / validateMaps).
@@ -492,7 +623,29 @@ export function parseDslSpec(source: unknown) {
     ),
     phases: phases.map((phase) => normalizePhase(phase)),
     rules: Object.fromEntries(
-      Object.entries(rules).map(([name, rule]) => [name, normalizeRule(rule)]),
+      Object.entries(rules).map(([name, rule]) => {
+        try {
+          return [
+            name,
+            normalizeRule(
+              rule,
+              observeRulePath
+                ? (compiled, authored) => {
+                    observeRulePath(["rules", name, ...compiled], ["rules", name, ...authored]);
+                  }
+                : undefined,
+            ),
+          ];
+        } catch (error) {
+          if (!(error instanceof ForeachExpansionError)) throw error;
+          throw new ForeachExpansionError(
+            error.message,
+            ["rules", name, ...error.path],
+            error.position,
+            { cause: error },
+          );
+        }
+      }),
     ),
     interpolation: {
       scalars: cloneObject(interpolation.scalars),

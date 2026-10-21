@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 import { historicalLoweringColumns } from "./historical-lowering-columns";
 import { expectFrameSource } from "./utils/frame-provenance";
@@ -133,7 +135,8 @@ function loadPolicyAndInventory(frontendId: string): {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
   if (
     !isPlainObject(spec) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.output) ||
     !isPlainObject(spec.output.lowering)
   ) {
@@ -149,14 +152,14 @@ function loadPolicyAndInventory(frontendId: string): {
     throw new Error("compiled lowering columns/timeline missing");
   }
   return {
-    inventoryPath: spec.inventory_path,
+    inventoryPath: spec.resources.inventory,
     policy: {
       columns: lowering.columns,
       transitions: transitions(lowering.transitions),
       timeline: {
         initial_silence_ms: citedNumber(lowering.timeline.initial_silence_ms, "initial_silence_ms"),
         final_silence_ms: citedNumber(lowering.timeline.final_silence_ms, "final_silence_ms"),
-        duration_floors: {
+        duration_floors: capturedFloors(frontendId, {
           stop_release_ms: citedNumber(
             lowering.timeline.duration_floors.stop_release_ms,
             "duration_floors.stop_release_ms",
@@ -165,10 +168,30 @@ function loadPolicyAndInventory(frontendId: string): {
             lowering.timeline.duration_floors.default_ms,
             "duration_floors.default_ms",
           ),
-        },
+        }),
         event_points: eventPoints(lowering.timeline.event_points),
       },
     },
+  };
+}
+
+// The DECtalk baseline was captured while dectalk-english floored a stop
+// release at 7 ms and every other Segment at 30 ms. That frontend has no
+// lowering floor now (its duration rules give DECtalk's frame counts), so the
+// capture is replayed under the floors it was made with.
+const CAPTURED_DECTALK_FLOORS = { stop_release_ms: 7, default_ms: 30 };
+
+function capturedFloors<
+  T extends { stop_release_ms: { value: number }; default_ms: { value: number } },
+>(frontendId: string, current: T): T {
+  if (frontendId !== "dectalk-english") return current;
+  return {
+    ...current,
+    stop_release_ms: {
+      ...current.stop_release_ms,
+      value: CAPTURED_DECTALK_FLOORS.stop_release_ms,
+    },
+    default_ms: { ...current.default_ms, value: CAPTURED_DECTALK_FLOORS.default_ms },
   };
 }
 

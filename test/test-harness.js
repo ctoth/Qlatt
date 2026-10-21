@@ -1,11 +1,20 @@
 // test/test-harness.js — Entry point: imports modules, wires DOM events, runs init
 
+import { defaultExperimentFor } from "../src/experiments/frontend-pairing.ts";
 import { applyUrlParams, bindControls, renderControls } from "./harness/controls.js";
 import { updateDiagnostics } from "./harness/diagnostics.js";
-import { loadExperimentManifest, onExperimentChange } from "./harness/experiment.js";
+import {
+  loadExperimentManifest,
+  loadFrontendManifest,
+  onExperimentChange,
+} from "./harness/experiment.js";
 import { refreshSpeakerOptions } from "./harness/speaker.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { state } from "./harness/state.js";
+// `?tap=1`: window.__qlattTap from the start (harness/tap.js); nothing otherwise.
+import "./harness/tap.js";
+import { warmFrontendOnce } from "./harness/warmup.js";
+import { waitForWarmup } from "./harness/warmup-wait.js";
 
 let runtimeModulePromise = null;
 
@@ -24,7 +33,24 @@ async function stopRuntime() {
   await stop();
 }
 
+function selectedFrontendId() {
+  return document.getElementById("frontendSelect")?.value || "qlatt-english";
+}
+
+// Get the selected frontend ready ahead of the first Speak (harness/warmup.js).
+// `?warmup=0` in the page URL turns this off, so that the first Speak loads
+// everything itself: the comparison case when measuring.
+const warmupEnabled = new URLSearchParams(location.search).get("warmup") !== "0";
+function warmSelectedFrontend() {
+  if (!warmupEnabled) return Promise.resolve(null);
+  return warmFrontendOnce(selectedFrontendId(), loadRuntimeModule);
+}
+
 async function speakWithRuntime() {
+  // If the frontend is still being prepared, let that finish: it is the same
+  // work Speak would otherwise repeat with blocking requests. The wait has a
+  // limit (harness/warmup-wait.js): Speak never depends on the warm-up.
+  await waitForWarmup(warmSelectedFrontend(), selectedFrontendId());
   const { speak } = await loadRuntimeModule();
   await speak();
 }
@@ -32,30 +58,43 @@ async function speakWithRuntime() {
 // Render controls immediately
 renderControls();
 
-// Load experiment manifest independently — not gated on runtime init
-loadExperimentManifest().then(() => {
+// Load the experiment and frontend manifests independently — not gated on
+// runtime init
+Promise.all([loadExperimentManifest(), loadFrontendManifest()]).then(() => {
   const experimentSelect = document.getElementById("experimentSelect");
   if (experimentSelect) {
     experimentSelect.addEventListener("change", onExperimentChange);
   }
-  // Auto-pair frontend -> experiment on load (e.g. dectalk-english frontend
-  // selects the dectalk-english synth graph) and populate the voice dropdown.
+  // Auto-pair frontend -> experiment on load and populate the voice dropdown,
+  // then prepare the frontend with the voice the dropdown shows.
   pairExperimentToFrontend();
-  refreshSpeakerOptions();
+  refreshSpeakerOptions().then(warmSelectedFrontend);
 });
 
-// Generic frontend -> experiment auto-pairing: when an experiment exists whose
-// id equals the selected frontend id, select it (and fire its change handler so
-// the matching synth graph is loaded). Otherwise leave the experiment as-is, so
-// qlatt-english keeps whatever experiment is selected (default klatt80-baseline).
+// Generic frontend -> experiment auto-pairing, from data: the frontend's
+// manifest entry may name a defaultExperiment (dectalk-english names
+// dectalk-vtm); without one, the experiment whose id equals the frontend id.
+// A frontend with neither leaves the experiment as-is, so qlatt-english keeps
+// whatever experiment is selected (default klatt80-baseline). Selecting fires
+// the change handler so the matching synth graph is loaded.
 function pairExperimentToFrontend() {
   const frontendSelect = document.getElementById("frontendSelect");
   const experimentSelect = document.getElementById("experimentSelect");
   if (!frontendSelect || !experimentSelect) return;
-  const frontendId = frontendSelect.value;
-  const hasMatch = Array.from(experimentSelect.options).some((o) => o.value === frontendId);
-  if (hasMatch && experimentSelect.value !== frontendId) {
-    experimentSelect.value = frontendId;
+  let experimentId;
+  try {
+    experimentId = defaultExperimentFor(
+      frontendSelect.value,
+      state.frontendManifest,
+      Array.from(experimentSelect.options).map((o) => o.value),
+    );
+  } catch (err) {
+    state.status.textContent = `Status: ${err.message}`;
+    console.error("[QLATT] Frontend pairing failed:", err);
+    return;
+  }
+  if (experimentId && experimentSelect.value !== experimentId) {
+    experimentSelect.value = experimentId;
     experimentSelect.dispatchEvent(new Event("change"));
   }
 }
@@ -63,7 +102,7 @@ function pairExperimentToFrontend() {
 // Frontend change: re-pair the experiment graph and repopulate the voices.
 document.getElementById("frontendSelect")?.addEventListener("change", () => {
   pairExperimentToFrontend();
-  refreshSpeakerOptions();
+  refreshSpeakerOptions().then(warmSelectedFrontend);
 });
 
 // Initialize

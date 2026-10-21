@@ -3,6 +3,18 @@ import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 
+describe("executable syllabification requirement", () => {
+  it("keeps low-level programmatic rule fixtures independent", () => {
+    expect(() => compileRuleEngineSpec({ rules: {}, phases: [] })).not.toThrow();
+    const spec = parseDslSpec({ rules: {}, phases: [] });
+    expect(
+      validateDslSpec(spec, { requireSyllabification: true }).some(
+        (diagnostic) => diagnostic.code === "E_SYLLABIFICATION_INVALID",
+      ),
+    ).toBe(true);
+  });
+});
+
 const loweringOutput = {
   lowering: {
     id: "test-track-lowering",
@@ -680,6 +692,91 @@ rules:
     const codes = diagnostics.map((d) => d.code);
     expect(codes.includes("E_POLICY_PARAM_UNKNOWN")).toBe(true);
     expect(codes.includes("E_POLICY_LITERAL_CRITICAL")).toBe(true);
+  });
+
+  it("marks a cited policy group used by a child read without marking prefix siblings", () => {
+    const spec = parseDslSpec({
+      parameters: {
+        policy: {
+          timing: { frame_ms: 6.4, citations: ["engineering estimate: fixture"] },
+          time: { value: 1, citations: ["engineering estimate: fixture"] },
+          timing_extra: { value: 1, citations: ["engineering estimate: fixture"] },
+        },
+      },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        use_policy_group: {
+          kind: "scalar",
+          select: { relation: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "set",
+              value: "params.policy.timing.frame_ms",
+              tag: "policy",
+            },
+          ],
+          citations: ["engineering estimate: fixture"],
+        },
+      },
+      phases: [{ name: "duration", rules: ["use_policy_group"] }],
+    });
+    const diagnostics = validateDslSpec(spec);
+    expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+    expect(
+      diagnostics.filter((d) => d.code === "W_POLICY_PARAM_UNUSED").map((d) => d.path),
+    ).toEqual(["parameters.policy.time", "parameters.policy.timing_extra"]);
+  });
+
+  it.each([false, true])("marks evaluated splice policy reads, wrapped=%s", (wrapped) => {
+    const cited = (value: unknown) => ({ value, citations: ["engineering estimate: fixture"] });
+    const fields = {
+      duration: "params.policy.duration",
+      payload: [{ value: "params.policy.nested" }],
+    };
+    const metadata = {
+      copy_from: "current",
+      copy_fields: ["params.policy.metadata"],
+      outside_structure: false,
+      target: "params.policy.target",
+      phoneme: "params.policy.phone",
+    };
+    const spec = parseDslSpec({
+      parameters: {
+        policy: {
+          duration: cited(30),
+          nested: cited(1),
+          target: cited({ duration: 30 }),
+          phone: cited("DX"),
+          metadata: cited(1),
+          ignored: cited(1),
+        },
+      },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        use_splice: {
+          kind: "postlexical",
+          select: { relation: "phone", where: "true" },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: "current.sync_right",
+            insert: [
+              wrapped
+                ? { ignored: "params.policy.ignored", segment: { ...metadata, fields } }
+                : { ...metadata, ...fields, fields: { ignored: "params.policy.ignored" } },
+            ],
+          },
+          citations: ["engineering estimate: fixture"],
+        },
+      },
+      phases: [{ name: "postlexical", rules: ["use_splice"] }],
+    });
+    const diagnostics = validateDslSpec(spec);
+    expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+    expect(
+      diagnostics.filter((d) => d.code === "W_POLICY_PARAM_UNUSED").map((d) => d.path),
+    ).toEqual(["parameters.policy.metadata", "parameters.policy.ignored"]);
   });
 
   it("emits uncited and unused policy warnings", () => {

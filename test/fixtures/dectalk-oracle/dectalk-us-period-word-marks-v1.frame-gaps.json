@@ -1,0 +1,12 @@
+{
+  "pw-ibid": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-see-ibid": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-et-al": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-semicolon": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-number-after": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-op-cit": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-cf": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pw-after-comma": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "pw-period-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pw-word-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+}

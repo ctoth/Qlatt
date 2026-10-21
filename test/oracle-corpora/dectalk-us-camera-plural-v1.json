@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-camera-plural-v1",
+  "description": "Words of three syllables read by the letter-to-sound rules that end in the letter a, with and without an s after it. The stress pass lets the last vowel reduce in such a word (\"camera\"), and, as compiled, also when a [z] follows it (\"cameras\": LTS/ls_adju.c:980-988 under DGC, which LTS/ls_defs.h:681 defines). From the fifth messy sweep's m5-143 (\"Tanaka's\": DECtalk has AX Z). Controls: the bare word, another consonant after the vowel, a written z, words of two and of four syllables, and another vowel letter.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "cam-possessive", "text": "Tanaka's shop moved.", "group": "final-s", "tags": ["messy-sweep-5-m5-143", "possessive"], "expectedFocus": ["trace"] },
+    { "id": "cam-plural", "text": "The Tanakas moved.", "group": "final-s", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "cam-plural-2", "text": "The banakas moved.", "group": "final-s", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "cam-plural-3", "text": "The tanagas moved.", "group": "final-s", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "cam-bare", "text": "Tanaka moved.", "group": "control", "tags": ["no-s"], "expectedFocus": ["trace"] },
+    { "id": "cam-final-d", "text": "Tanakad moved.", "group": "control", "tags": ["other-consonant"], "expectedFocus": ["trace"] },
+    { "id": "cam-written-z", "text": "Tanakaz moved.", "group": "control", "tags": ["written-z"], "expectedFocus": ["trace"] },
+    { "id": "cam-two-syllables", "text": "The Volkas moved.", "group": "control", "tags": ["two-syllables"], "expectedFocus": ["trace"] },
+    { "id": "cam-four-syllables", "text": "Okafora's shop moved.", "group": "control", "tags": ["four-syllables"], "expectedFocus": ["trace"] },
+    { "id": "cam-other-vowel", "text": "The Tanakos moved.", "group": "control", "tags": ["final-o"], "expectedFocus": ["trace"] }
+  ]
+}

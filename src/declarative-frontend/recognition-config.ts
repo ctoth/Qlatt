@@ -13,6 +13,15 @@ export type RecognitionRule = SpeakingDeclaration & {
   class: string;
   captures: Record<string, string>;
   when: string;
+  /**
+   * Whether the rule runs at all for a text: an expression over `source`,
+   * `maps` and `sets`, evaluated once before any match is sought. A rule
+   * that does not run matches nothing and leaves no decision record, where
+   * `when` leaves an "ineligible" record for each match it rejects. For a
+   * rule that belongs to a state of the whole text (a mode a command turns
+   * on) and would otherwise match in every text.
+   */
+  enabled?: string;
 };
 export type RecognitionConfig = {
   rules: RecognitionRule[];
@@ -49,6 +58,14 @@ function expression(value: unknown, path: string): string {
   const error = validateExpressionSyntax(text, {
     variables: ["current", "captures", "source", "maps", "sets"],
   });
+  if (error) invalid(path, error);
+  return text;
+}
+
+/** An expression about the whole text: no match is at hand when it is evaluated. */
+function textExpression(value: unknown, path: string): string {
+  const text = string(value, path);
+  const error = validateExpressionSyntax(text, { variables: ["source", "maps", "sets"] });
   if (error) invalid(path, error);
   return text;
 }
@@ -134,6 +151,7 @@ export function parseRecognitionConfig(
           "class",
           "captures",
           "when",
+          "enabled",
           "speak",
           "vocabulary_keys",
           "citations",
@@ -181,6 +199,9 @@ export function parseRecognitionConfig(
       class: string(entry.class, `${path}.class`),
       captures,
       when: expression(entry.when, `${path}.when`),
+      ...(Object.hasOwn(entry, "enabled")
+        ? { enabled: textExpression(entry.enabled, `${path}.enabled`) }
+        : {}),
       ...speaking(entry, path),
     };
   });

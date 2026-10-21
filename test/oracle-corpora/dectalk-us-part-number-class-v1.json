@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-part-number-class-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pc-path", "text": "It is in the folder Documents/2024/taxes.", "group": "part-number-class", "tags": ["first-run-verb", "suffixed-first-run"], "expectedFocus": ["trace"] },
+    { "id": "pc-path-plain-words", "text": "It is in the folder dogs/2024/cats.", "group": "part-number-class", "tags": ["first-run-verb"], "expectedFocus": ["trace"] },
+    { "id": "pc-hyphen", "text": "It is in the folder walks-10.", "group": "part-number-class", "tags": ["first-run-verb", "hyphen"], "expectedFocus": ["trace"] },
+    { "id": "pc-first-run-noun", "text": "It is in the folder music/2024.", "group": "part-number-class", "tags": ["first-run-noun", "promotion-stays"], "expectedFocus": ["trace"] },
+    { "id": "pc-first-run-noun-hyphen", "text": "It is in the folder cat-10.", "group": "part-number-class", "tags": ["first-run-noun", "promotion-stays"], "expectedFocus": ["trace"] },
+    { "id": "pc-first-run-spelled", "text": "It is in the folder ab/2024/taxes.", "group": "part-number-class", "tags": ["first-run-spelled", "no-class"], "expectedFocus": ["trace"] },
+    { "id": "pc-first-run-digits", "text": "It is in the folder 10-taxes.", "group": "part-number-class", "tags": ["first-run-digits", "no-class"], "expectedFocus": ["trace"] },
+    { "id": "pc-plain-word-control", "text": "It is in the folder taxes.", "group": "part-number-class", "tags": ["control", "plain-word"], "expectedFocus": ["trace"] },
+    { "id": "pc-no-path-control", "text": "It is in the folder.", "group": "part-number-class", "tags": ["control", "one-verb"], "expectedFocus": ["trace"] }
+  ]
+}

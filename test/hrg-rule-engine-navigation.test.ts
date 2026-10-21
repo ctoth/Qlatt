@@ -101,6 +101,119 @@ describe("graph-native predicate navigation", () => {
     );
   });
 
+  it("moves ahead and behind by a literal integer distance", () => {
+    // A CEL integer literal reaches a navigation function as a bigint.
+    const utterance = new Utterance(SCHEMA);
+    for (const [id, phoneme] of [
+      ["p", "P"],
+      ["eh", "EH"],
+      ["ih", "IH"],
+      ["k", "K"],
+    ] as const) {
+      const item = utterance.createItem("segment", id);
+      item.set("phoneme", phoneme, INPUT);
+      item.set("stress", 0, INPUT);
+      item.set("duration", 0, INPUT);
+      utterance.relation("Segment").append(item, INPUT);
+    }
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], stress: [] },
+          scalars: { duration: {} },
+        },
+      },
+      rules: {
+        reach: {
+          select: { relation: "Segment", where: "current.phoneme == 'P'" },
+          define: {
+            one: "ahead(current, 1)",
+            two: "ahead(current, 2)",
+            three: "ahead(current, 3)",
+            past_end: "ahead(current, 4)",
+            back: "behind(ahead(current, 3), 2)",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value:
+                "(one.phoneme == 'EH' ? 1 : 0) + (two.phoneme == 'IH' ? 10 : 0) + (three.phoneme == 'K' ? 100 : 0) + (past_end == null ? 1000 : 0) + (back.phoneme == 'EH' ? 10000 : 0)",
+              tag: "navigation",
+            },
+          ],
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "rules", rules: ["reach"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    expect(utterance.getItem("p")?.get("duration")).toBe(11111);
+  });
+
+  it("counts the Items a predicate holds for, up to a stopping predicate", () => {
+    const utterance = new Utterance(SCHEMA);
+    for (const [id, phoneme, stress] of [
+      ["sil0", "SIL", 0],
+      ["a", "AA", 1],
+      ["p", "P", 0],
+      ["b", "IY", 1],
+      ["k", "K", 0],
+      ["c", "UW", 0],
+      ["sil1", "SIL", 0],
+      ["d", "EH", 1],
+    ] as const) {
+      const item = utterance.createItem("segment", id);
+      item.set("phoneme", phoneme, INPUT);
+      item.set("stress", stress, INPUT);
+      item.set("duration", 0, INPUT);
+      utterance.relation("Segment").append(item, INPUT);
+    }
+    const spec = compileRuleEngineSpec({
+      predicates: {
+        is_silence: "current.phoneme == 'SIL'",
+        is_stressed: "current.stress == 1",
+      },
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], stress: [] },
+          scalars: { duration: {} },
+        },
+      },
+      rules: {
+        count: {
+          select: { relation: "Segment", where: "current.phoneme == 'K'" },
+          define: {
+            // Stressed Items before K within the clause: AA and IY.
+            before: "count_back_pred(current, 100, 'is_silence', 'is_stressed')",
+            // After K the clause ends at the silence, so EH is not reached.
+            after: "count_ahead_pred(current, 100, 'is_silence', 'is_stressed')",
+            // A step limit stops the walk before AA.
+            limited: "count_back_pred(current, 2, 'is_silence', 'is_stressed')",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "before * 100 + after * 10 + limited",
+              tag: "navigation",
+            },
+          ],
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "rules", rules: ["count"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    expect(utterance.getItem("k")?.get("duration")).toBe(201);
+  });
+
   it("derives word, syllable, role, position, and span queries from shared tree identity", () => {
     const utterance = new Utterance(TREE_SCHEMA);
     const transaction = utterance.beginTransaction({

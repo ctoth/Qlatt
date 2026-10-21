@@ -6,10 +6,20 @@ import { dump, load } from "js-yaml";
 import { expect, it } from "vitest";
 import { areaDocumentSchema, generate } from "../scripts/generate-formants-from-area";
 import { parseInventorySpec } from "../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
+import { parseSpeakerProfileDocument } from "../src/speaker-profile";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const profileSpec = parseSpeakerProfileDocument(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/speaker-profile.yaml"),
+);
 
 const sourcePath = "data/area-functions/story-1996.yaml";
 const source = readFileSync(sourcePath, "utf8");
 const inventory = readFileSync("public/rules/frontends/qlatt-english/inventory.yaml", "utf8");
+const inventorySpec = loadInventorySpecFromPath(
+  "public/rules/frontends/qlatt-english/inventory.yaml",
+);
 
 it("preserves the verified Story table endpoints and P&B column alignment", () => {
   const data = areaDocumentSchema.parse(load(source));
@@ -53,7 +63,7 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
         expect(target[key]).toBeGreaterThan(0);
       expect(Number(target.F4)).toBeGreaterThan(Number(target.F3));
     }
-    const parsed = parseInventorySpec(inventory);
+    const parsed = structuredClone(inventorySpec);
     // A generated fragment augments target features; it is not a replacement inventory.
     for (const [key, target] of Object.entries(result.phoneme_targets))
       Object.assign(parsed.phoneme_targets[key], target);
@@ -68,7 +78,7 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
     expect(text).toContain("ΔP&B");
     expect(text).toContain("| IY (IY1) | 4 |");
     expect(text).toContain("radiation resistance");
-    const scaled = generate(source, inventory, sourcePath, {
+    const scaled = generate(source, inventory, inventorySpec, sourcePath, profileSpec, {
       tract_length_scale: 0.8,
       pharynx_scale: 0.65,
       mouth_scale: 0.95,
@@ -81,9 +91,19 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
 }, 30000);
 
 it("rejects invalid scales and missing geometry instead of silently defaulting", () => {
-  expect(() => generate(source, inventory, sourcePath, { pharynx_scale: 0 })).toThrow(/scale/);
-  expect(() => generate(source, inventory, sourcePath, { pharynx_sclae: 0.8 })).toThrow(/scale/);
   expect(() =>
-    generate(source.replace("areas_cm2: [0.33", "areas_cm2: [0"), inventory, sourcePath),
+    generate(source, inventory, inventorySpec, sourcePath, profileSpec, { pharynx_scale: 0 }),
+  ).toThrow(/scale/);
+  expect(() =>
+    generate(source, inventory, inventorySpec, sourcePath, profileSpec, { pharynx_sclae: 0.8 }),
+  ).toThrow(/scale/);
+  expect(() =>
+    generate(
+      source.replace("areas_cm2: [0.33", "areas_cm2: [0"),
+      inventory,
+      inventorySpec,
+      sourcePath,
+      profileSpec,
+    ),
   ).toThrow();
 });

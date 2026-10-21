@@ -1,11 +1,14 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
-import { expandFormantBanks } from "./formant-bank";
-import type { BaconGraph } from "./klatt-runtime";
+import { isVoicedFrame } from "./analysis/track-metrics";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
-import type { ParamValue, SemanticsDocument } from "./semantics/types";
-import { loadYamlDocumentSync } from "./yaml-loader";
+import type {
+  ParamValue,
+  SemanticsDocument,
+  TrackAnalysisPolicy,
+  TrackMetricsPolicy,
+} from "./semantics/types";
 
 type Range = { min: number; max: number };
 type TrackNumeric = number | bigint | undefined;
@@ -114,32 +117,23 @@ function getParam(params: TrackParams | undefined, key: string, fallback = 0): n
   return toFiniteNumber(params?.[key], fallback);
 }
 
-type TrackReference = {
+export type TrackReference = {
   citations: string[];
   targets: Record<string, StopReleaseExpected>;
   conformance: Record<
-    | "durationToleranceMs"
-    | "amplitudeToleranceDb"
-    | "plstepWindowSeconds"
-    | "plstepAfGateDb"
-    | "maxVoicingIssues"
-    | "lowParallelScale"
-    | "lowParallelGain",
+    "durationToleranceMs" | "amplitudeToleranceDb" | "plstepWindowSeconds" | "plstepAfGateDb",
     { value: number; basis: string }
   >;
 };
-const reference = loadYamlDocumentSync<TrackReference>(
-  "/experiments/klatt80-baseline/reference/table-iii.yaml",
-);
-export const KLATT80_EXPECTED = reference.targets;
-const conformance = reference.conformance;
 
 // Analyze stop releases in track
 export function analyzeStopReleases(
   track: TrackEvent[],
+  reference: TrackReference,
   plstepEvents: unknown[] = [],
   runStartTime = 0,
 ): StopReleaseAnalysis[] {
+  const conformance = reference.conformance;
   const releases: StopReleaseAnalysis[] = [];
   const isStopRelease = (ph: string | undefined): ph is string =>
     ph?.includes("_REL") || ph?.includes("_ASP") || false;
@@ -151,7 +145,7 @@ export function analyzeStopReleases(
 
     const nextEvent = track[i + 1];
     const duration = nextEvent ? (nextEvent.time - event.time) * 1000 : 0;
-    const expected = phoneme ? KLATT80_EXPECTED[phoneme] : undefined;
+    const expected = phoneme ? reference.targets[phoneme] : undefined;
     const p = event.params || {};
 
     const plstepMatch = plstepEvents.find((candidate): candidate is PlstepEvent => {
@@ -283,7 +277,10 @@ export function buildTimeline(track: TrackEvent[]): string[] {
   return lines;
 }
 
-export function summarizeTrack(track: TrackEvent[]): {
+export function summarizeTrack(
+  track: TrackEvent[],
+  policy: TrackMetricsPolicy,
+): {
   events: number;
   totalTime: number;
   voicedEvents: number;
@@ -291,7 +288,7 @@ export function summarizeTrack(track: TrackEvent[]): {
   f0Max: number;
 } {
   const totalTime = track.length ? track[track.length - 1].time : 0;
-  const voiced = track.filter((e) => getParam(e.params, "AV") > 0 || getParam(e.params, "AVS") > 0);
+  const voiced = track.filter((frame) => isVoicedFrame(frame, policy));
   const f0Values = track.map((e) => getParam(e.params, "F0")).filter((v) => v > 0);
   return {
     events: track.length,
@@ -302,62 +299,57 @@ export function summarizeTrack(track: TrackEvent[]): {
   };
 }
 
-export function summarizeParallel(track: TrackEvent[]): {
-  swOn: number;
-  swOff: number;
-  parallelEvents: number;
-  swOnSeconds: number;
-  swOnShare: number;
+export function summarizeBranchSwitch(
+  track: TrackEvent[],
+  policy: NonNullable<TrackAnalysisPolicy["branch_switch"]>,
+): {
+  selectedEvents: number;
+  otherEvents: number;
+  selectedSeconds: number;
+  selectedShare: number;
 } {
-  let swOn = 0,
-    swOff = 0,
-    parallelEvents = 0,
-    swOnSeconds = 0,
-    swTotalSeconds = 0;
+  let selectedEvents = 0,
+    otherEvents = 0,
+    selectedSeconds = 0,
+    totalSeconds = 0;
   for (const event of track) {
     const params = event.params;
     if (!params) continue;
-    const sw = getParam(params, "SW", Number.NaN);
-    if (sw === 1) swOn += 1;
-    else if (Number.isFinite(sw)) swOff += 1;
-    const hasParallel =
-      getParam(params, "AN") > 0 ||
-      getParam(params, "AB") > 0 ||
-      ["A1", "A2", "A3", "A4", "A5", "A6"].some((key) => getParam(params, key) > 0) ||
-      getParam(params, "AVS") > 0 ||
-      getParam(params, "AF") > 0;
-    if (hasParallel) parallelEvents += 1;
+    const value = getParam(params, policy.param, Number.NaN);
+    if (value === policy.value) selectedEvents += 1;
+    else if (Number.isFinite(value)) otherEvents += 1;
   }
   for (let i = 0; i < track.length - 1; i += 1) {
     const params = track[i]?.params;
     const duration = track[i + 1].time - track[i].time;
     if (!Number.isFinite(duration) || duration <= 0) continue;
-    const sw = getParam(params, "SW", Number.NaN);
-    if (Number.isFinite(sw)) {
-      swTotalSeconds += duration;
-      if (sw === 1) swOnSeconds += duration;
+    const value = getParam(params, policy.param, Number.NaN);
+    if (Number.isFinite(value)) {
+      totalSeconds += duration;
+      if (value === policy.value) selectedSeconds += duration;
     }
   }
   return {
-    swOn,
-    swOff,
-    parallelEvents,
-    swOnSeconds,
-    swOnShare: swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0,
+    selectedEvents,
+    otherEvents,
+    selectedSeconds,
+    selectedShare: totalSeconds > 0 ? (selectedSeconds / totalSeconds) * 100 : 0,
   };
 }
 
-export function summarizeLfMode(
+export function summarizeSourceControl(
   track: TrackEvent[],
-  fallbackMode = 0,
+  parameter: string,
+  fallbackMode: number,
 ): { counts: Record<number, number>; seconds: Record<number, number> } {
-  const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
-  const seconds: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
-  let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : 0;
+  const counts: Record<number, number> = {};
+  const seconds: Record<number, number> = {};
+  let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : undefined;
   for (let i = 0; i < track.length; i += 1) {
     const event = track[i];
-    const lfMode = getParam(event.params, "lfMode", Number.NaN);
-    if (Number.isFinite(lfMode)) current = Math.round(lfMode);
+    const value = getParam(event.params, parameter, Number.NaN);
+    if (Number.isFinite(value)) current = Math.round(value);
+    if (current === undefined) continue;
     counts[current] = (counts[current] || 0) + 1;
     const duration = i < track.length - 1 ? track[i + 1].time - event.time : 0;
     if (Number.isFinite(duration) && duration > 0)
@@ -388,6 +380,7 @@ export function collectParamRange(
 export function findVoicingIssues(
   track: TrackEvent[],
   fallback: Partial<Record<string, number>> | undefined,
+  conformance: TrackAnalysisPolicy,
 ): string[] {
   const issues: string[] = [];
   const state: Record<string, number> = {
@@ -492,26 +485,13 @@ export function updateRange(range: Range | null, value: number): Range | null {
   return range;
 }
 
-let baselineSemantics: SemanticsDocument | undefined;
-
-function getBaselineSemantics(): SemanticsDocument {
-  if (!baselineSemantics) {
-    const semantics = loadYamlDocumentSync<SemanticsDocument>(
-      "/experiments/klatt80-baseline/semantics.yaml",
-    );
-    const graph = loadYamlDocumentSync<BaconGraph>("/experiments/klatt80-baseline/graph.yaml");
-    expandFormantBanks(graph, semantics);
-    baselineSemantics = semantics;
-  }
-  return baselineSemantics;
-}
-
 /** Report magnitudes from the selected experiment's expanded realization rules. */
 export function analyzeTrackGains(
   track: TrackEvent[],
   synthParams: Record<string, TrackNumeric>,
   sampleRate = 48000,
-  semantics: SemanticsDocument = getBaselineSemantics(),
+  semantics: SemanticsDocument,
+  conformance: TrackAnalysisPolicy,
 ): { ranges: TrackGainRanges; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: TrackGainRanges = {
@@ -588,40 +568,6 @@ export function analyzeTrackGains(
   )
     warnings.add(`Parallel gains < ${conformance.lowParallelGain.value}`);
   return { ranges, warnings: [...warnings], parallelScale };
-}
-
-export function findTimingMismatches(track: TrackEvent[], telemetryMax: TelemetryLike): string[] {
-  if (!track || track.length === 0) return [];
-  const mismatches = [];
-  const swRanges = track.map((e, i) => ({
-    startTime: e.time,
-    endTime: track[i + 1]?.time ?? e.time + 0.5,
-    sw: e.params?.SW ?? 0,
-    phoneme: e.phoneme ?? "",
-  }));
-  const findSwAt = (time: number) => {
-    for (let i = swRanges.length - 1; i >= 0; i--)
-      if (time >= swRanges[i].startTime) return swRanges[i];
-    return swRanges[0] ?? { startTime: 0, endTime: 0, sw: 0, phoneme: "" };
-  };
-
-  const cascadeMax = telemetryMax?.get?.("cascade-out");
-  if (isTelemetryDatum(cascadeMax) && cascadeMax.rmsTime != null) {
-    const range = findSwAt(cascadeMax.rmsTime);
-    if (range?.sw === 1 && cascadeMax.rms > 0.001)
-      mismatches.push(
-        `!! cascade-out max @${cascadeMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=1)`,
-      );
-  }
-  const parallelMax = telemetryMax?.get?.("parallel-out");
-  if (isTelemetryDatum(parallelMax) && parallelMax.rmsTime != null) {
-    const range = findSwAt(parallelMax.rmsTime);
-    if (range?.sw === 0 && parallelMax.rms > 0.001)
-      mismatches.push(
-        `!! parallel-out max @${parallelMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=0)`,
-      );
-  }
-  return mismatches;
 }
 
 export function formatTelemetry(

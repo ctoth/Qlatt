@@ -8,6 +8,7 @@
 import { applyParamValue, getAudioParam } from "./audio-param-utils";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import { expandFormantBanks } from "./formant-bank";
+import type { ProvenanceCollector } from "./provenance";
 import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
 import type { RuntimeAssetLoader } from "./runtime-assets/types";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
@@ -322,6 +323,8 @@ function getNodeId(ref: PortRef): string {
 
 // Runtime options
 export interface KlattRuntimeOptions {
+  /** Records successful graph connections, without playback time or signal ancestry. */
+  provenance?: ProvenanceCollector;
   audioContext: AudioContext;
   semantics: SemanticsDocument;
   graph: BaconGraph;
@@ -335,6 +338,7 @@ export interface KlattRuntimeOptions {
   telemetry?: boolean; // Enable worklet debug metrics (default: false)
   telemetryHandler?: (data: unknown) => void; // Callback for worklet telemetry messages
   diagnostics?: Diagnostics;
+  onTiming?: (stage: string, milliseconds: number) => void;
 }
 
 // Binding information for interpreter use
@@ -377,6 +381,13 @@ export interface KlattRuntime {
  * Create a Klatt runtime instance (async to support worklet loading)
  */
 export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<KlattRuntime> {
+  let stageStart = options.onTiming ? performance.now() : 0;
+  const mark = (stage: string) => {
+    if (!options.onTiming) return;
+    const now = performance.now();
+    options.onTiming(stage, now - stageStart);
+    stageStart = now;
+  };
   const {
     audioContext,
     semantics,
@@ -512,6 +523,13 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     }
     return index;
   }
+  // Describe the authored choice only after the resolved connection succeeds.
+  function portSelection(ref: PortRef): string {
+    const requested = typeof ref === "string" ? undefined : ref.port;
+    if (requested === undefined) return "omitted port defaults to 0";
+    if (typeof requested === "number") return `explicit numeric port ${requested}`;
+    return `named port '${requested}' in primitive '${graph.nodes[getNodeId(ref)].type}'`;
+  }
   for (const connection of graph.connections ?? []) {
     const [from, to] = Array.isArray(connection) ? connection : [connection.from, connection.to];
     portIndex(from, "out");
@@ -555,6 +573,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   });
 
   // Load WASM if not provided and needed
+  mark("validation");
   let wasmModules = options.wasmModules;
   if (!wasmModules && needsWasm) {
     try {
@@ -573,6 +592,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Determine which worklets are needed based on graph nodes and registry
+  mark("wasmAssets");
   const needsWorklets = Object.values(graph.nodes).some((n) => {
     const primitive = registry.primitives[n.type];
     return primitive?.worklet !== undefined;
@@ -587,6 +607,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Create CEL + topological evaluator pair with all standard builtins
+  // Includes the host's worker startup; addModule owns that lifecycle.
+  mark("workletRegistration");
   const { topoEvaluator } = createConfiguredEvaluator();
 
   // Current input values
@@ -800,6 +822,19 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
           fromNode.connect(toNode, fromPort, toPort);
           log(`  Connected ${fromId}[${fromPort}] -> ${toId}[${toPort}]`);
         }
+        options.provenance?.add({
+          stage: "runtime",
+          type: "connection_resolved",
+          subject: `connection:${fromId}->${toId}`,
+          reason: `${graph.name ?? "unnamed graph"}: connected ${fromId}[${fromPort}] -> ${
+            toParamName !== undefined ? `${toId}.${toParamName} (AudioParam)` : `${toId}[${toPort}]`
+          }; source: ${portSelection(fromRef)}${
+            toParamName === undefined ? `; destination: ${portSelection(toRef)}` : ""
+          }`,
+          citations: [
+            "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+          ],
+        });
       } catch (error) {
         fail(
           "runtime.connection_failed",
@@ -833,9 +868,12 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Initialize
+  mark("evaluatorAndBindings");
   log("Evaluating semantics");
   evaluate();
+  mark("initialSemantics");
   createNodes();
+  mark("nodeCreation");
   log(`Created nodes: ${Array.from(nodes.keys()).join(", ")}`);
   log(`Built ${bindingMap.size} unique bindings`);
   try {
@@ -851,12 +889,15 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     throw error;
   }
   log(`Total connections: ${graph.connections?.length ?? 0}`);
+  mark("connections");
 
   // Wait for worklets to be ready before applying values
   await awaitWorkletReady(nodes, audioWorkletNodeCtor, 2000, log);
+  mark("processorReady");
 
   log("Applying realized values to nodes");
   applyValues();
+  mark("applyValues");
 
   // Domain observations must reach diagnostics even when telemetry is disabled.
   for (const [, node] of nodes) {
@@ -864,6 +905,13 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     node.port.addEventListener("message", (event: MessageEvent) => {
       if (event.data?.type === "source-domain-projection") {
         diagnostics.warn(event.data.message, { node: event.data.node }, "source-domain-projection");
+      } else if (event.data?.type === "diagnostic") {
+        // A worklet's own diagnostic entry: { level, code, message, node, data }.
+        const { level, code, message, node: nodeId, data } = event.data;
+        const entryData = { ...(data ?? {}), node: nodeId };
+        if (level === "error") diagnostics.error(String(message), entryData, String(code));
+        else if (level === "warn") diagnostics.warn(String(message), entryData, String(code));
+        else diagnostics.info(String(message), entryData, String(code));
       }
     });
     node.port.start();
@@ -944,7 +992,17 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         );
       }
       log(`Connecting ${nodeId} to destination`);
-      outputNode.connect(audioContext.destination, portIndex(outputRef, "out"));
+      const outputPort = portIndex(outputRef, "out");
+      outputNode.connect(audioContext.destination, outputPort);
+      options.provenance?.add({
+        stage: "runtime",
+        type: "connection_resolved",
+        subject: `connection:${nodeId}->destination`,
+        reason: `${graph.name ?? "unnamed graph"}: connected ${nodeId}[${outputPort}] -> audioContext.destination; source: ${portSelection(outputRef)}`,
+        citations: [
+          "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+        ],
+      });
     },
 
     disconnect(): void {

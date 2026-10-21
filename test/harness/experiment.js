@@ -1,7 +1,7 @@
 // test/harness/experiment.js — Experiment manifest loading and config management
 
 import { assertFrontendVocabulary } from "../../src/experiments/frontend-vocabulary.ts";
-import { loadYamlDocument, loadYamlDocumentOrNull } from "../../src/yaml-loader.ts";
+import { loadExperimentConfig } from "../../src/experiments/load-experiment-config.ts";
 import { state } from "./state.js";
 
 let validatedSemantics = null;
@@ -58,6 +58,22 @@ export async function loadExperimentManifest() {
   }
 }
 
+/**
+ * Load the frontend manifest, which says which experiment each frontend is
+ * paired with by default (src/experiments/frontend-pairing.ts). Without it the
+ * pairing falls back to the same-id rule.
+ */
+export async function loadFrontendManifest() {
+  try {
+    const res = await fetch("./rules/frontends/manifest.json");
+    if (!res.ok) throw new Error("Failed to fetch frontend manifest");
+    state.frontendManifest = await res.json();
+  } catch (err) {
+    console.error("[QLATT] Failed to load frontend manifest:", err);
+    state.frontendManifest = null;
+  }
+}
+
 export function onExperimentChange() {
   const selected = getSelectedExperiment();
   if (selected !== state.currentExperimentId) {
@@ -80,48 +96,6 @@ export function onExperimentChange() {
   }
 }
 
-/**
- * Merge parent and child registry configs. Child primitives override parent primitives
- * by name; parent primitives not in child are preserved.
- */
-function mergeRegistry(parent, child) {
-  if (!child) return parent;
-  return { ...parent, primitives: { ...parent.primitives, ...(child.primitives || {}) } };
-}
-
-/**
- * Merge parent and child semantics configs.
- * - params: shallow merge, child wins
- * - constants: deep merge, child wins
- * - realize: shallow merge, child wins
- */
-function mergeSemantics(parent, child) {
-  if (!child) return parent;
-  return {
-    ...parent,
-    ...child,
-    params: { ...parent.params, ...(child.params || {}) },
-    constants: deepMerge(parent.constants || {}, child.constants || {}),
-    realize: { ...parent.realize, ...(child.realize || {}) },
-  };
-}
-
-/**
- * Recursively merge source into target. Source values win.
- * Arrays are replaced wholesale, not merged.
- */
-function deepMerge(target, source) {
-  const result = { ...target };
-  for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key] || {}, source[key]);
-    } else {
-      result[key] = source[key];
-    }
-  }
-  return result;
-}
-
 export async function loadNewRuntimeConfig() {
   const experimentId = getSelectedExperiment();
   // Check if already loaded for current experiment
@@ -138,33 +112,10 @@ export async function loadNewRuntimeConfig() {
   try {
     // Find this experiment's manifest entry
     const manifest = state.experimentManifest?.experiments?.find((e) => e.id === experimentId);
-    const basePath = `./experiments/${experimentId}`;
-
-    // Load child configs (some may be absent for inheriting experiments)
-    const [childGraph, childSemantics, childRegistry] = await Promise.all([
-      loadYamlDocumentOrNull(`${basePath}/graph.yaml`),
-      loadYamlDocumentOrNull(`${basePath}/semantics.yaml`),
-      loadYamlDocumentOrNull(`${basePath}/registry.yaml`),
-    ]);
-
-    if (manifest && manifest.extends) {
-      // Load parent configs
-      const parentBase = `./experiments/${manifest.extends}`;
-      const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
-        loadYamlDocument(`${parentBase}/graph.yaml`),
-        loadYamlDocument(`${parentBase}/semantics.yaml`),
-        loadYamlDocument(`${parentBase}/registry.yaml`),
-      ]);
-
-      // Merge: child overrides parent
-      state.newRuntimeRegistry = mergeRegistry(parentRegistry, childRegistry);
-      state.newRuntimeSemantics = mergeSemantics(parentSemantics, childSemantics);
-      state.newRuntimeGraph = childGraph || parentGraph; // graph: full replacement or inherit
-    } else {
-      state.newRuntimeGraph = childGraph;
-      state.newRuntimeSemantics = childSemantics;
-      state.newRuntimeRegistry = childRegistry;
-    }
+    const config = await loadExperimentConfig(experimentId);
+    state.newRuntimeGraph = config.graph;
+    state.newRuntimeSemantics = config.semantics;
+    state.newRuntimeRegistry = config.registry;
 
     await validateSelectedFrontend();
     state.currentExperimentId = experimentId;

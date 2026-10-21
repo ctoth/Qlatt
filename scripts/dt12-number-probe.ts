@@ -22,12 +22,17 @@
  * actual source behavior.
  */
 
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
 const DECTALK_CONFIG = loadBundledRulepackSpec("dectalk-english");
 const QLATT_CONFIG = loadBundledRulepackSpec("qlatt-english");
+const dectalkResources = loadFrontendResources(DECTALK_CONFIG);
+const qlattResources = loadFrontendResources(QLATT_CONFIG);
 
 // Expected dectalk-english output per DECtalk source (full normalized string).
 const dectalkExpect: Record<string, string> = {
@@ -70,7 +75,7 @@ let failures = 0;
 
 console.log("=== dectalk-english (fractions ON) ===");
 for (const input of Object.keys(dectalkExpect)) {
-  const out = normalizeText(input, DECTALK_CONFIG);
+  const out = normalizeText(input, DECTALK_CONFIG, { lts: dectalkResources.lts });
   const expected = dectalkExpect[input];
   const status = out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;
@@ -80,7 +85,7 @@ for (const input of Object.keys(dectalkExpect)) {
 
 console.log("\n=== qlatt-english (default; NO fraction step — must not expand fractions) ===");
 for (const input of Object.keys(qlattExpect)) {
-  const out = normalizeText(input, QLATT_CONFIG);
+  const out = normalizeText(input, QLATT_CONFIG, { lts: qlattResources.lts });
   const expected = qlattExpect[input];
   const status = out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;

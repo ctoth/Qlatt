@@ -34,7 +34,9 @@
     "preview": "vite preview",
     "build:worklets": "tsc -p tsconfig.worklets.json",
     "check:registry-bindings": "node --experimental-strip-types scripts/check-registry-bindings.ts",
+    "check:citations": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/check-strict-citations.ts",
     "test": "npm run check:registry-bindings && vitest run",
+    "test:audit": "vitest run --config vitest.audit.config.ts",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "typecheck:audio": "tsc -p tsconfig.audio.json --noEmit",
     "typecheck:golden": "tsc -p tsconfig.golden.json --noEmit",
@@ -67,21 +69,22 @@
     "cmu-pronouncing-dictionary": "^3.0.0",
     "fft.js": "^4.0.4",
     "jmespath": "^0.16.0",
-    "js-yaml": "^5.4.1",
+    "js-yaml": "^5.4.3",
     "node-web-audio-api": "https://codeload.github.com/ctoth/node-web-audio-api/tar.gz/ce3ed1d487a9c2ad4d3090119c208f386a3123f0",
     "toposort": "^2.0.2",
-    "zod": "^4.5.4"
+    "yaml": "2.9.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.12",
+    "@biomejs/biome": "2.5.15",
     "@types/js-yaml": "^4.0.9",
     "husky": "9.1.7",
-    "lint-staged": "17.4.1",
-    "playwright-core": "^1.62.1",
+    "lint-staged": "17.6.0",
+    "playwright-core": "^1.63.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
   },
   "overrides": {
     "rollup": "^4.59.0"

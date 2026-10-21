@@ -32,6 +32,27 @@ describe("harness runtime replacement", () => {
     expect(state.newRuntime).toBeNull();
   });
 
+  it("loads inherited config without the UI manifest cache", async () => {
+    vi.stubGlobal("AudioContext", class MockAudioContext {});
+    vi.stubGlobal("window", {});
+    const status = { textContent: "" };
+    vi.stubGlobal("document", {
+      getElementById: vi.fn((id: string) =>
+        id === "experimentSelect" ? { value: "test-inherit" } : id === "status" ? status : null,
+      ),
+    });
+    const { state } = await import("./harness/state.js");
+    const { loadNewRuntimeConfig } = await import("./harness/experiment.js");
+
+    await loadNewRuntimeConfig();
+
+    expect(state.newRuntimeSemantics?.params?.AV.default).toBe(50);
+    expect(state.newRuntimeGraph?.name).toBe("klatt80-synth");
+    expect(state.newRuntimeRegistry?.primitives["tilt-filter"]).toBeDefined();
+    expect(state.currentExperimentId).toBe("test-inherit");
+    expect(status.textContent).toBe("Status: test-inherit config loaded");
+  });
+
   it("rejects an incompatible frontend even when the experiment config is cached", async () => {
     vi.stubGlobal("AudioContext", class MockAudioContext {});
     vi.stubGlobal("window", {});

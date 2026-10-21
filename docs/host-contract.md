@@ -10,7 +10,7 @@ without reading the TypeScript reference implementation.
 
 Reference hosts today: the browser (WebAudio + AudioWorklet,
 `src/klatt-runtime.ts` / `src/klatt-interpreter.ts`) and Node
-(`node-web-audio-api`, `scripts/rendering/backends/node-runtime.ts`). A native
+(`node-web-audio-api`, `src/rendering/backends/node-runtime.ts`). A native
 host (e.g. Rust + miniaudio) is the intended third.
 
 ## 1. Document set
@@ -26,7 +26,16 @@ A synthesizer is defined by:
 
 Experiments may `extends` a parent (see `public/experiments/manifest.json`);
 registries, graphs, and semantics merge child-over-parent
-(`src/experiments/load-experiment-config.ts`).
+(`src/experiments/load-experiment-config.ts`). Each semantics document's
+`realize_each` templates (§4) are expanded before that merge.
+
+A frontend is played through one experiment. Its entry in
+`public/rules/frontends/manifest.json` may name a `defaultExperiment`
+(`dectalk-english` names `dectalk-vtm`); without one, its default is the
+experiment with its own id, and a frontend with neither keeps whatever
+experiment is selected (`src/experiments/frontend-pairing.ts`). An experiment
+must declare every column the frontend lowers
+(`src/experiments/frontend-vocabulary.ts`), including columns it does not read.
 
 ## 2. The frames boundary
 
@@ -151,6 +160,53 @@ predicates/patterns, are added to the calling rule's citations for provenance.
 Rules still require their own citations and application tags. A native host
 consuming the expanded, validated rulepack needs no runtime macro facility;
 a host loading raw YAML must perform equivalent expansion and validation.
+
+**`realize_each` (load-time expansion).** A semantics document may write a
+family of realize rules that differ only in one scalar index once, under the
+optional top-level key `realize_each`
+(reference implementation: `src/semantics/realize-each.ts`):
+
+```yaml
+realize_each:
+  - index: n
+    over: [2, 3, 4]
+    rules:
+      "gain{n}":
+        expr: "active ? dbToLinear(A{n}) : a{n}Linear"
+        deps: [active, "A{n}", "a{n}Linear"]
+        ramp: true
+```
+
+A host loading raw YAML must expand it before step 3 below; a host given an
+already-expanded document needs no such facility. For each entry, for each
+value in `over`, in order:
+
+- Substitute the placeholder `{<index>}` textually in the rule name and in
+  every string field of the rule (`expr`, each `deps` item, `description`).
+  Copy non-string fields (`ramp`, `step`) unchanged. A rule may be a bare CEL
+  string, as under `realize`. `over` values are finite numbers or non-empty
+  strings and are substituted in their string form.
+- Add the generated rule to the document's `realize` map and drop the
+  `realize_each` key. Generated rules follow the authored ones, in entry
+  order, then rule order, then `over` order. Nothing downstream may
+  distinguish a generated rule from an authored one.
+
+Expansion is per document and precedes the `extends` merge (§1): a child
+experiment's concrete rule overrides a parent's generated rule by key, and a
+child's generated rule overrides a parent's rule of the same name.
+
+An entry has exactly the keys `index` (an identifier), `over` and `rules`.
+There is one index per entry; ranges, map-valued items and nesting are not
+part of the construct. A placeholder is a brace pair around one identifier,
+so CEL map literals (`{a: 1}`) pass through. These are load errors:
+
+| Code | Condition |
+| --- | --- |
+| `E_REALIZE_EACH_SHAPE` | `realize_each` is not a list; an entry is not a mapping, has an unknown key, a non-identifier `index`, or an empty or non-mapping `rules`; a rule is neither a string nor a mapping with a string `expr`; `deps` is not a list of strings |
+| `E_REALIZE_EACH_OVER` | `over` is missing, not a list, or empty; an item is not a finite number or non-empty string |
+| `E_REALIZE_EACH_NAME` | A rule name does not contain the entry's placeholder |
+| `E_REALIZE_EACH_PLACEHOLDER` | A string in the entry contains `{name}` for a name other than the entry's `index` |
+| `E_REALIZE_EACH_COLLISION` | A generated name is already authored under `realize` in the same document, or was already generated in it (a repeated `over` value included) |
 
 Per frame, the host derives realized parameter values from the semantics
 document:
@@ -292,7 +348,7 @@ not established by the paper's aperture-dependent impedance measurements.
   for screen-reader use; end-to-end latency is a feature.)
 - Noise-generating primitives take an explicit seed (`noise-source` derives
   per-node seeds from a base seed; see
-  `scripts/rendering/backends/node-runtime.ts`) so renders are reproducible.
+  `src/rendering/backends/node-runtime.ts`) so renders are reproducible.
 
 ## 7. Conformance
 
@@ -427,6 +483,91 @@ tract, viscous glottal losses, cubic tissue springs, and a body-cover layer.
 It provides self-oscillation and asymmetry-driven period doubling; it does not
 implement Story's three-mass model or the bilateral tract of Ishizaka–Flanagan.
 See the [corrected Steinecke–Herzel notes](../papers/Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md).
+
+## DECtalk synthesizer node
+
+The `dectalk-vtm` experiment is one node, `dectalk-vtm`, with no inputs: the
+per-packet path of DECtalk 4.63's VTM thread (hlsyn, the `vtmiont.c`
+overrides, the integer vocal tract model), ported in `crates/dectalk-vtm`.
+The doc comment of `crates/dectalk-vtm/src/backend.rs` is the normative
+definition; this section is what a host has to do.
+
+**Track.** A frame carries DECtalk's PH packet words and the speaker
+definition, each the 16-bit word itself, an integer. Index, meaning and scale
+of every word are in `scripts/oracle/dectalk-debug/ph-contract.md`. The node's
+parameters have DECtalk's names (`OUT_F1`, `OUT_AG`, ..., `SPD_R4CB`, ...).
+The track keys of the packet words are the `dectalk-english` frontend's
+columns: the `OUT_` name without its prefix (`F1`, `AG`, `PS`, ...), except
+`A2_CODE` for `OUT_A2` and `AREA_N` for `OUT_AN` (whose plain names are Klatt
+dB levels in that frontend), and `F0` in Hz, from which the semantics
+document's one realize rule forms `OUT_T0 = round(F0 * 10)`. The speaker
+definition words keep their `SPD_*` names. Frame `n` is at `n * 71 / 11025` s
+(DECtalk's frame, 71 samples at 11025 Hz). `run` is 1 on every frame and 0 on
+a final frame after the last packet. `speaker_epoch` counts the speaker
+definition packets sent so far. Every parameter is scheduled as a step.
+`src/dectalk-vtm-track.ts` builds such a track from recorded packets.
+
+**Speaker from the frontend.** The `dectalk-english` frontend gives the node
+the selected voice's speaker definition by the path every voice value takes:
+each voice file (`public/rules/frontends/dectalk-english/speakers/`) has the
+packet's words as fields named like the node's parameters, the frontend
+declares them in `speakers.rule_fields`, and its articulation frame program
+emits them on every frame. `scripts/oracle/import-dectalk-voices.ts` derives
+the values from DECtalk's voice definitions and tuning tables as `setspdef()`
+does, and `test/dectalk-speaker-packets.test.ts` holds them to the packets
+DECtalk's `say.exe` sent for each voice. The frontend takes one voice per
+utterance, so the definition is loaded once per run and no `speaker_epoch` is
+emitted. A track that carries no speaker words gets the semantics defaults,
+which are Paul's.
+
+**Parameters are a-rate.** Unlike the k-rate rule of section 6, this node
+reads its parameters at single output samples, so a host must make a scheduled
+step visible at its own sample. `run` going high starts a run at that sample,
+from DECtalk's start-up state. Counting output samples `m` from there at rate
+`R`, frame `n`'s packet is the parameter values at
+`m = floor(n * 71 * R / 11025) + 2`. At the first frame, and at any frame where
+`speaker_epoch` differs from the value last loaded, the speaker definition is
+loaded first, as DECtalk does for a speaker packet. `run` read low at a frame
+instant ends the run.
+
+**Declared latency.** Output sample `m` of a run is DECtalk's signal at input
+position `(m - delay) * 11025 / R`, with `delay = 2` samples at 11025 Hz and
+`2 + ceil(16 * R / 11025)` samples otherwise (66 at 44100 Hz, 72 at 48000 Hz,
+1.5 ms). The 2 samples let a step scheduled for a frame boundary land whichever
+way the host rounded its time (engineering estimate); the rest is the
+lookahead of the sample-rate converter.
+
+**Sample rate.** DECtalk produces 11025 Hz and that is where exactness against
+`say.exe` is defined: at a context rate of 11025 Hz the node's output is
+DECtalk's 16-bit samples divided by 32768. At a higher whole-number rate the
+samples are converted by band-limited interpolation, a Kaiser-windowed sinc
+with its zero crossings on the input samples (Smith & Gossett 1984; Kaiser
+1974), 16 input samples on each side and designed for 80 dB (both engineering
+estimates); see `crates/dectalk-vtm/src/resample.rs`. Rates below 11025 Hz and
+fractional rates are not supported: the node is silent and reports
+`dectalk-vtm.unsupported_sample_rate`.
+
+**Faults and fallbacks.** Where DECtalk's C would read a table out of bounds
+or divide by zero, the frame is silent and the model is put back to its state
+before the frame; a speaker definition that faults is not loaded. A parameter
+that is not an integer is rounded; one that is not finite or does not fit a
+16-bit word silences the frame. Each of these is posted on the node's port as
+`{ type: "diagnostic", level, code, message, node, data }` with a
+`dectalk-vtm.*` code, once per code and run with a summary of repeats at the
+end of the run, and a host must forward such messages to its diagnostic sink
+(`createKlattRuntime` does). The node also reports each run start (rate,
+delay, conversion method with its citations) and each speaker definition load
+at level `info`; `src/rendering/dectalk-vtm-render.ts` turns those into
+provenance decisions. The run start carries `startFrame`, the number of
+samples the node had produced when the run began: hosts round a scheduled
+start time to a sample differently (for a start at 551.25 samples the Node
+host begins the run at sample 551, Chrome at 552), so the run's position in
+the output is the node's to state.
+
+`test/dectalk-vtm-wasm.test.ts` holds the wasm32 build to DECtalk's frames and
+samples; `test/dectalk-vtm-render.test.ts` renders the recorded packets
+through this contract on the Node host and requires the stock WAV at 11025 Hz;
+`scripts/render-dectalk-packets.ts` measures the converted output.
 
 ## Text normalization actions and CEL operations
 

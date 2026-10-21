@@ -1,9 +1,6 @@
-import { afterEach, expect, it, vi } from "vitest";
-
-afterEach(() => {
-  vi.doUnmock("../src/yaml-loader");
-  vi.resetModules();
-});
+import { expect, it } from "vitest";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
+import { isPlainObject, loadYamlDocumentSync } from "../src/yaml-loader";
 
 it.each([
   ["algebra", undefined],
@@ -16,27 +13,19 @@ it.each([
   ["citations", [""]],
   ["unit", ""],
   ["backend_param", ""],
-] as const)("rejects invalid %s at consumer load time (%s)", async (field, value) => {
-  vi.resetModules();
-  vi.doMock("../src/yaml-loader", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("../src/yaml-loader")>();
-    return {
-      ...actual,
-      loadYamlDocumentSync: (path: string) => {
-        const document = actual.loadYamlDocumentSync(path);
-        if (path !== "/rules/policy/vq-channels.yaml") return document;
-        if (!actual.isPlainObject(document) || !Array.isArray(document.channels)) {
-          throw new Error("expected channels document");
-        }
-        const first: unknown = document.channels[0];
-        if (!actual.isPlainObject(first)) throw new Error("expected channel record");
-        expect(first[field]).not.toEqual(value);
-        return {
-          ...document,
-          channels: [{ ...first, [field]: value }, ...document.channels.slice(1)],
-        };
-      },
-    };
-  });
-  await expect(import("../src/input/direction-track")).rejects.toThrow("E_VQ_CHANNEL_SCHEMA");
+] as const)("rejects invalid %s when parsing the selected resource (%s)", (field, value) => {
+  const document = loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml");
+  if (!isPlainObject(document) || !Array.isArray(document.channels)) {
+    throw new Error("expected channels document");
+  }
+  const channels = document.channels;
+  const first: unknown = channels[0];
+  if (!isPlainObject(first)) throw new Error("expected channel record");
+  expect(first[field]).not.toEqual(value);
+  expect(() =>
+    parseVoiceQualityChannels({
+      ...document,
+      channels: [{ ...first, [field]: value }, ...channels.slice(1)],
+    }),
+  ).toThrow("E_VQ_CHANNEL_SCHEMA");
 });

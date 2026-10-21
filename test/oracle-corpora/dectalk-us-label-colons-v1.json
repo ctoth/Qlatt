@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-label-colons-v1",
+  "description": "Short labels that end in a colon, one after another with no sentence end between them, from the third messy sweep's m3-124 (\"From: Anna To: Mark Subject: Friday\": 22 of its 579 packets differed, from about packet 195). The parts are listed alone to find which of them carries the difference.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "label-colons-three", "text": "From: Anna To: Mark Subject: Friday", "group": "label", "tags": ["messy-sweep-3-m3-124", "three-labels"], "expectedFocus": ["trace"] },
+    { "id": "label-colons-from", "text": "From: Anna", "group": "label", "tags": ["one-label"], "expectedFocus": ["trace"] },
+    { "id": "label-colons-to", "text": "To: Mark", "group": "label", "tags": ["one-label"], "expectedFocus": ["trace"] },
+    { "id": "label-colons-name-to", "text": "Anna To: Mark", "group": "label", "tags": ["label-after-a-word"], "expectedFocus": ["trace"] },
+    { "id": "label-colons-subject", "text": "Subject: Friday", "group": "label", "tags": ["one-label"], "expectedFocus": ["trace"] },
+    { "id": "label-colons-name-subject", "text": "Mark Subject: Friday", "group": "label", "tags": ["label-after-a-word"], "expectedFocus": ["trace"] }
+  ]
+}

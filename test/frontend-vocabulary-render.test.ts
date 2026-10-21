@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import type { RenderRequest } from "../src/rendering/types";
 
 function request(overrides: Partial<RenderRequest> = {}): RenderRequest {

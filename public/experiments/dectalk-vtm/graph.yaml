@@ -1,0 +1,68 @@
+bacon: "0.1"
+name: dectalk-vtm-synth
+meta:
+  primitives: ./registry.yaml
+  semantics: ./semantics.yaml
+  description: |
+    DECtalk 4.63's synthesizer as a single node: the VTM thread's per-packet
+    path (hlsyn, the vtmiont overrides, the integer vocal tract model), ported
+    in crates/dectalk-vtm. The track carries DECtalk's PH packet words and the
+    speaker definition, one frame per 71/11025 s; the words and their scales
+    are in scripts/oracle/dectalk-debug/ph-contract.md, the track keys in
+    semantics.yaml.
+
+nodes:
+  vtm:
+    type: dectalk-vtm
+    params:
+      run: { bind: run }
+      speaker_epoch: { bind: speaker_epoch }
+      lang_curr: { bind: lang_curr }
+      vol_att: { bind: vol_att }
+      OUT_F1: { bind: F1 }
+      OUT_A2: { bind: A2_CODE }
+      OUT_T0: { bind: OUT_T0 } # realized from F0 in semantics.yaml
+      OUT_F2: { bind: F2 }
+      OUT_F3: { bind: F3 }
+      OUT_B2: { bind: B2 }
+      OUT_B3: { bind: B3 }
+      OUT_PH: { bind: PH }
+      OUT_F4: { bind: F4 }
+      OUT_AG: { bind: AG }
+      OUT_AL: { bind: AL }
+      OUT_AN: { bind: AREA_N }
+      OUT_ABLADE: { bind: ABLADE }
+      OUT_PS: { bind: PS }
+      OUT_CNK: { bind: CNK }
+      OUT_DC: { bind: DC }
+      OUT_UE: { bind: UE }
+      OUT_BRST: { bind: BRST }
+      OUT_ATB: { bind: ATB }
+      OUT_PLACE: { bind: PLACE }
+      last_voice: { bind: last_voice }
+      NOM_Open_Quo: { bind: NOM_Open_Quo }
+      Tiltm: { bind: Tiltm }
+      SPD_R4CB: { bind: SPD_R4CB }
+      SPD_R4CC: { bind: SPD_R4CC }
+      SPD_R5CB: { bind: SPD_R5CB }
+      SPD_R5CC: { bind: SPD_R5CC }
+      SPD_R4PB: { bind: SPD_R4PB }
+      SPD_R5PB: { bind: SPD_R5PB }
+      SPD_T0JIT: { bind: SPD_T0JIT }
+      SPD_R5CA: { bind: SPD_R5CA }
+      SPD_R4CA: { bind: SPD_R4CA }
+      SPD_R3CA: { bind: SPD_R3CA }
+      SPD_R2CA: { bind: SPD_R2CA }
+      SPD_R1CA: { bind: SPD_R1CA }
+      SPD_NOPEN1: { bind: SPD_NOPEN1 }
+      SPD_NOPEN2: { bind: SPD_NOPEN2 }
+      SPD_ATURB: { bind: SPD_ATURB }
+      SPD_AFGAIN: { bind: SPD_AFGAIN }
+      SPD_AZGAIN: { bind: SPD_AZGAIN }
+      SPD_APGAIN: { bind: SPD_APGAIN }
+      SPD_SEX: { bind: SPD_SEX }
+
+connections: []
+
+outputs:
+  - vtm

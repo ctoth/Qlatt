@@ -5,15 +5,18 @@ import { fileURLToPath } from "node:url";
 import {
   explainFeature,
   type FieldExplanation,
+  frameIndexAt,
   type PhaseCheckpoint,
   replayJournal,
   replayPhaseView,
   type WhyNotRuleResult,
   whyNotRule,
+  whyParamAt,
 } from "../src/declarative-frontend/hrg";
 import {
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  rulepackRuleDocumentSpans,
 } from "../src/declarative-frontend/rule-pack";
 import {
   applyRange,
@@ -23,8 +26,9 @@ import {
   parseRangeSpec,
 } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { YamlDocumentSpan } from "../src/yaml-loader";
 
-type ExplainFormat = "text" | "json";
+type ExplainFormat = "text" | "json" | "dot" | "html";
 
 type ParsedArgs = {
   phrase: string;
@@ -35,10 +39,12 @@ type ParsedArgs = {
   subjectFilter: string | null;
   rangeRaw: string | null;
   outPath: string | null;
-  baseF0: number;
-  transitionMs: number;
+  baseF0: number | undefined;
+  transitionMs?: number;
   verbose: boolean;
   whyDecisionId: string | null;
+  whyParam: string | null;
+  atMs: number | null;
   frontendId: string;
   speaker: string | null;
   itemId: string | null;
@@ -77,6 +83,19 @@ type ExplainPayload = {
   decisions: DecisionRecord[];
   summary: ExplainSummary;
   tooling: {
+    parameter: {
+      layer: "lowered";
+      name: string;
+      requestedTimeMs: number;
+      frameTimeMs: number | null;
+      value: number | null;
+    } | null;
+    ruleSources: Record<string, YamlDocumentSpan>;
+    vocabularySources: Record<string, YamlDocumentSpan>;
+    ruleExpressions: Record<
+      string,
+      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
+    >;
     field: FieldExplanation | null;
     whyNot: WhyNotRuleResult | null;
     checkpoints: readonly PhaseViewSummary[] | null;
@@ -89,14 +108,6 @@ type CliIo = {
   stderr: (text: string) => void;
 };
 
-const COMPACT_PRIORITY_TYPES = new Set([
-  "fallback_pronunciation_selected",
-  "rule_rewrite_applied",
-  "semantics_rule_error_fallback",
-  "schedule_mode_selected",
-  "binding_resolved",
-]);
-
 function defaultIo(): CliIo {
   return {
     stdout: (text) => process.stdout.write(text),
@@ -107,6 +118,14 @@ function defaultIo(): CliIo {
 function parseArgv(argv: string[]): ParsedArgs {
   const flags = new Map<string, string>();
   const positional: string[] = [];
+  const booleanFlags = new Set([
+    "strict",
+    "strict-citations",
+    "verbose",
+    "phase-views",
+    "verify-replay",
+    "tooling-only",
+  ]);
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -114,7 +133,17 @@ function parseArgv(argv: string[]): ParsedArgs {
       positional.push(arg);
       continue;
     }
-    const key = arg.slice(2);
+    const option = arg.slice(2);
+    const equals = option.indexOf("=");
+    if (equals !== -1) {
+      flags.set(option.slice(0, equals), option.slice(equals + 1));
+      continue;
+    }
+    const key = option;
+    if (booleanFlags.has(key)) {
+      flags.set(key, "true");
+      continue;
+    }
     const next = argv[i + 1];
     if (next != null && !next.startsWith("--")) {
       flags.set(key, next);
@@ -130,19 +159,20 @@ function parseArgv(argv: string[]): ParsedArgs {
   }
 
   const format = (flags.get("format") ?? "text").toLowerCase();
-  if (format !== "text" && format !== "json") {
-    throw new Error(`Unsupported format '${format}'. Use text or json.`);
+  if (format !== "text" && format !== "json" && format !== "dot" && format !== "html") {
+    throw new Error(`Unsupported format '${format}'. Use text, json, dot or html.`);
   }
 
-  const baseF0Raw = flags.get("base-f0") ?? "110";
-  const baseF0 = Number(baseF0Raw);
-  if (!Number.isFinite(baseF0) || baseF0 <= 0) {
+  // Absent: no base pitch is requested, and the frontend's voice keeps its own.
+  const baseF0Raw = flags.get("base-f0");
+  const baseF0 = baseF0Raw === undefined ? undefined : Number(baseF0Raw);
+  if (baseF0 !== undefined && (!Number.isFinite(baseF0) || baseF0 <= 0)) {
     throw new Error(`Invalid --base-f0 '${baseF0Raw}'`);
   }
 
-  const transitionMsRaw = flags.get("transition-ms") ?? "30";
-  const transitionMs = Number(transitionMsRaw);
-  if (!Number.isFinite(transitionMs) || transitionMs < 0) {
+  const transitionMsRaw = flags.get("transition-ms");
+  const transitionMs = transitionMsRaw === undefined ? undefined : Number(transitionMsRaw);
+  if (transitionMs !== undefined && (!Number.isFinite(transitionMs) || transitionMs < 0)) {
     throw new Error(`Invalid --transition-ms '${transitionMsRaw}'`);
   }
 
@@ -165,6 +195,17 @@ function parseArgv(argv: string[]): ParsedArgs {
   if ((field || whyNotRule) && !itemId) {
     throw new Error("--item is required with --field or --why-not");
   }
+  const whyParam = flags.get("why-param") ?? null;
+  const atMs = flags.has("at") ? Number(flags.get("at")) : null;
+  if ((whyParam === null) !== (atMs === null)) {
+    throw new Error("--why-param and --at must be supplied together");
+  }
+  if (atMs !== null && (!Number.isFinite(atMs) || atMs < 0)) {
+    throw new Error("--at must be finite nonnegative milliseconds");
+  }
+  if (whyParam !== null && flags.has("why")) {
+    throw new Error("Use --why-param or --why, not both");
+  }
 
   return {
     phrase,
@@ -179,6 +220,8 @@ function parseArgv(argv: string[]): ParsedArgs {
     transitionMs,
     verbose: flags.get("verbose") === "true",
     whyDecisionId: flags.get("why") ?? null,
+    whyParam,
+    atMs,
     // Which frontend to run (e.g. "dectalk-english"). Defaults to the
     // bundled default frontend so existing invocations are unchanged.
     frontendId: flags.get("frontend") ?? "qlatt-english",
@@ -260,7 +303,12 @@ function selectCompactDecisions(decisions: DecisionRecord[]): {
   displayed: DecisionRecord[];
   truncated: number;
 } {
-  const prioritized = decisions.filter((decision) => COMPACT_PRIORITY_TYPES.has(decision.type));
+  const prioritized = decisions.filter(
+    (decision) =>
+      decision.type === "fallback_pronunciation_selected" ||
+      (decision.type === "feature_overwrite" &&
+        (decision.stage === "rules" || decision.stage === "prosody")),
+  );
   const base = prioritized.length > 0 ? prioritized : decisions.slice(0, 20);
   const limit = 40;
   const displayed = base.slice(0, limit);
@@ -270,17 +318,156 @@ function selectCompactDecisions(decisions: DecisionRecord[]): {
   };
 }
 
+// Presentation colors only; stages and IDs remain explicit in both graph formats.
+const STAGE_COLORS: Record<ProvenanceStage, string> = {
+  transcribe: "#d9edf7",
+  rules: "#dff0d8",
+  prosody: "#fcf8e3",
+  semantics: "#eadcf4",
+  interpreter: "#fce5cd",
+  runtime: "#f2dede",
+  frontend: "#eeeeee",
+};
+
+function parameterLabel(payload: ExplainPayload): string {
+  const query = payload.tooling.parameter;
+  return query
+    ? `Lowered frame query: ${query.name} at ${query.requestedTimeMs} ms; selected frame ${query.frameTimeMs ?? "none"} ms; value ${query.value ?? "unavailable"}. No interpolation or scheduled audio value.`
+    : "";
+}
+
+function renderDot(payload: ExplainPayload): string {
+  // DOT quoted labels use escString, not JSON escape sequences.
+  const quote = (value: string) =>
+    `"${value
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\r\n|\r|\n/g, "\\n")}"`;
+  const selected = new Set(payload.decisions.map((decision) => decision.id));
+  const edges: string[] = [];
+  let omitted = 0;
+  for (const decision of payload.decisions) {
+    for (const parent of decision.parents ?? []) {
+      if (selected.has(parent)) edges.push(`  ${quote(parent)} -> ${quote(decision.id)};`);
+      else omitted += 1;
+    }
+  }
+  const label = `Selected decision subset: ${selected.size}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}\n${payload.phrase}${payload.tooling.parameter ? `\n${parameterLabel(payload)}` : ""}`;
+  const lines = [
+    "digraph provenance {",
+    `  graph [label=${quote(label)}];`,
+    '  node [shape="box", style="filled"];',
+  ];
+  for (const decision of payload.decisions) {
+    const nodeLabel = `${decision.id}\n${decision.stage}: ${decision.type}\n${decision.subject}`;
+    const tooltip = `${decision.reason} | citations: ${decision.citations.join("; ")}`;
+    lines.push(
+      `  ${quote(decision.id)} [label=${quote(nodeLabel)}, tooltip=${quote(tooltip)}, fillcolor="${STAGE_COLORS[decision.stage]}"];`,
+    );
+  }
+  return [...lines, ...edges, "}"].join("\n");
+}
+
+function renderHtml(payload: ExplainPayload): string {
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const stages = Object.keys(STAGE_COLORS) as ProvenanceStage[];
+  const decisions = [...payload.decisions].sort((left, right) => left.seq - right.seq);
+  // Fixed stage columns and sequence rows are presentation coordinates, not timing.
+  const positions = new Map(
+    decisions.map((decision, index) => [
+      decision.id,
+      { x: stages.indexOf(decision.stage) * 260 + 20, y: index * 80 + 50 },
+    ]),
+  );
+  const edges: string[] = [];
+  let omitted = 0;
+  for (const decision of decisions) {
+    const child = positions.get(decision.id)!;
+    for (const parentId of decision.parents ?? []) {
+      const parent = positions.get(parentId);
+      if (!parent) {
+        omitted += 1;
+        continue;
+      }
+      const x1 = parent.x + 110;
+      const y1 = parent.y + 48;
+      const x2 = child.x + 110;
+      const y2 = child.y;
+      edges.push(
+        `<path data-parent="${escapeHtml(parentId)}" data-child="${escapeHtml(decision.id)}" d="M${x1},${y1} C${x1},${y1 + 20} ${x2},${y2 - 20} ${x2},${y2}" fill="none" stroke="#555" marker-end="url(#arrow)"/>`,
+      );
+    }
+  }
+  const nodes = decisions.map((decision) => {
+    const { x, y } = positions.get(decision.id)!;
+    return `<a href="#detail-${escapeHtml(decision.id)}" aria-label="Details for ${escapeHtml(decision.id)}">
+<title>${escapeHtml(`${decision.id}: ${decision.type} — ${decision.subject}`)}</title>
+<rect x="${x}" y="${y}" width="220" height="48" rx="4" fill="${STAGE_COLORS[decision.stage]}" stroke="#333"/>
+<text x="${x + 8}" y="${y + 18}">${escapeHtml(decision.id)}</text>
+<text x="${x + 8}" y="${y + 36}">${escapeHtml(decision.type.slice(0, 26))}</text></a>`;
+  });
+  const details = decisions.map((decision) => {
+    const parents = (decision.parents ?? []).map((parent) =>
+      positions.has(parent)
+        ? `<a href="#detail-${escapeHtml(parent)}">${escapeHtml(parent)}</a>`
+        : `${escapeHtml(parent)} (outside selection)`,
+    );
+    return `<li id="detail-${escapeHtml(decision.id)}">
+<h3>${escapeHtml(`${decision.id} — ${decision.stage}: ${decision.type}`)}</h3>
+<p>Subject: ${escapeHtml(decision.subject)}</p><p>${escapeHtml(decision.reason)}</p>
+<p>Citations: ${escapeHtml(decision.citations.join("; ") || "(none)")}</p>
+<p>Parents: ${parents.join(", ") || "(none)"}</p></li>`;
+  });
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance decisions</title><style>
+body { font-family: system-ui, sans-serif; color: #222; background: white; margin: 1rem; }
+.graph { overflow: auto; border: 1px solid #777; max-height: 70vh; }
+svg text { font: 13px monospace; fill: #222; }
+a:focus { outline: 3px solid #005fcc; } li:target { outline: 3px solid #005fcc; }
+li { padding: .5rem; overflow-wrap: anywhere; } p { white-space: pre-wrap; }
+</style></head><body><h1>Provenance decisions</h1><p>${escapeHtml(payload.phrase)}</p>
+${payload.tooling.parameter ? `<p>${escapeHtml(parameterLabel(payload))}</p>` : ""}
+<p>Selected decision subset: ${decisions.length}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}.
+IDs belong to this run. Columns show stages; rows follow decision sequence, not elapsed time. Arrows point from parent to child.</p>
+<p><a href="#details">Skip graph to decision details</a></p><div class="graph" tabindex="0" role="region" aria-label="Scrollable decision graph">
+<svg xmlns="http://www.w3.org/2000/svg" width="${stages.length * 260}" height="${decisions.length * 80 + 60}" aria-label="Selected provenance DAG">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+${stages.map((stage, index) => `<text x="${index * 260 + 20}" y="25">${stage}</text>`).join("\n")}
+${edges.join("\n")}
+${nodes.join("\n")}
+</svg></div><h2 id="details">Decision details</h2><ol>${details.join("\n")}</ol></body></html>`;
+}
+
 function renderText(payload: ExplainPayload, verbose: boolean): string {
   const lines: string[] = [];
+  if (payload.tooling.parameter) lines.push(parameterLabel(payload));
   const compact = verbose
     ? { displayed: payload.decisions, truncated: 0 }
     : selectCompactDecisions(payload.decisions);
 
   for (const decision of compact.displayed) {
     const citations = decision.citations.length > 0 ? decision.citations.join("; ") : "<none>";
+    const span = payload.tooling.ruleSources[decision.id];
+    const location = span ? ` | rule: ${span.resource}:${span.line}:${span.column}` : "";
+    const vocabularySpan = payload.tooling.vocabularySources[decision.id];
+    const vocabularyLocation = vocabularySpan
+      ? ` | vocabulary: ${vocabularySpan.resource}:${vocabularySpan.line}:${vocabularySpan.column}`
+      : "";
     lines.push(
-      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}`,
+      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}${location}${vocabularyLocation}`,
     );
+    const expressions = payload.tooling.ruleExpressions[decision.id];
+    if (expressions) {
+      lines.push(
+        `  compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
+      );
+    }
   }
 
   if (!verbose && compact.truncated > 0) {
@@ -347,7 +534,11 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       (diagnostic) => diagnostic.severity === "warning",
     );
     for (const warning of warnings) {
-      io.stderr(`rulepack warning ${warning.code} at ${warning.path}: ${warning.message}\n`);
+      const span = warning.documentSpan;
+      const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
+      io.stderr(
+        `rulepack warning ${warning.code} at ${warning.path}: ${warning.message}${location}\n`,
+      );
     }
     if (args.strict && warnings.length > 0) {
       io.stderr(`strict failed: rulepack validation emitted ${warnings.length} warning(s)\n`);
@@ -392,8 +583,21 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     let decisions = allDecisions;
     let appliedRange: string | null = null;
     let subjectApplied: string | null = null;
+    let parameter: ExplainPayload["tooling"]["parameter"] = null;
 
-    if (args.whyDecisionId) {
+    if (args.whyParam !== null && args.atMs !== null) {
+      const track = { frames: detailed.track, utterance: detailed.utterance };
+      const timeSec = args.atMs / 1000;
+      const frame = track.frames[frameIndexAt(track, timeSec)];
+      decisions = whyParamAt(track, args.whyParam, timeSec);
+      parameter = {
+        layer: "lowered",
+        name: args.whyParam,
+        requestedTimeMs: args.atMs,
+        frameTimeMs: frame ? frame.time * 1000 : null,
+        value: frame?.params[args.whyParam] ?? null,
+      };
+    } else if (args.whyDecisionId) {
       decisions = buildWhyChain(allDecisions, args.whyDecisionId);
     } else {
       if (args.stages && args.stages.size > 0) {
@@ -414,6 +618,54 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       }
     }
 
+    const documentSpans = rulepackRuleDocumentSpans(rulepack);
+    const declarations = new Map<string, YamlDocumentSpan>();
+    for (const entry of documentSpans) {
+      const parts = entry.value.path;
+      if (parts.length === 2 && parts[0] === "rules" && typeof parts[1] === "string" && entry.key) {
+        declarations.set(parts[1], entry.key);
+      }
+    }
+    const selectedIds = new Set(decisions.map((decision) => decision.id));
+    const ruleSources: Record<string, YamlDocumentSpan> = {};
+    const vocabularySources: Record<string, YamlDocumentSpan> = {};
+    for (const decision of decisions) {
+      const lookup = decision.vocabularyLookup;
+      if (!lookup) continue;
+      const matches = documentSpans.filter(({ value }) => {
+        const parts = value.path;
+        return (
+          value.resource === lookup.resource &&
+          parts.length === 3 &&
+          parts[0] === "maps" &&
+          parts[1] === lookup.table &&
+          parts[2] === lookup.key
+        );
+      });
+      if (matches.length === 1) vocabularySources[decision.id] = matches[0].value;
+    }
+    const ruleExpressions: ExplainPayload["tooling"]["ruleExpressions"] = {};
+    // Join actual committed IDs; frame programs may contain several fired rules,
+    // so their synthetic rule IDs are not treated as individual rule names.
+    for (const transaction of detailed.utterance.journal()) {
+      const span = declarations.get(transaction.metadata.ruleId);
+      if (!span) continue;
+      for (const id of transaction.decisionIds) {
+        if (!selectedIds.has(id)) continue;
+        ruleSources[id] = span;
+        const ruleId = transaction.metadata.ruleId;
+        const rule = rulepack.rules[ruleId];
+        if ((args.whyDecisionId || args.whyParam) && rule) {
+          ruleExpressions[id] = {
+            ruleId,
+            rule,
+            pattern:
+              typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
+          };
+        }
+      }
+    }
+
     const payload = buildPayload(
       decisions,
       args.phrase,
@@ -422,6 +674,10 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       allDecisions.length,
       args.whyDecisionId,
       {
+        parameter,
+        ruleSources,
+        vocabularySources,
+        ruleExpressions,
         field: fieldExplanation,
         whyNot,
         checkpoints: args.includePhaseViews
@@ -439,7 +695,11 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     const rendered =
       args.format === "json"
         ? JSON.stringify(args.toolingOnly ? payload.tooling : payload, null, 2)
-        : renderText(payload, args.verbose);
+        : args.format === "dot"
+          ? renderDot(payload)
+          : args.format === "html"
+            ? renderHtml(payload)
+            : renderText(payload, args.verbose);
 
     if (args.outPath) {
       fs.mkdirSync(path.dirname(args.outPath), { recursive: true });
@@ -448,11 +708,12 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       io.stdout(`${rendered}\n`);
     }
 
-    if (args.strictCitations && payload.summary.uncitedCount > 0) {
+    const citationSummary = args.strictCitations ? buildSummary(allDecisions) : null;
+    if (citationSummary && citationSummary.uncitedCount > 0) {
       io.stderr(
-        `strict-citations failed: ${payload.summary.uncitedCount} uncited decisions in output window` +
-          ` | by-stage: ${formatBreakdown(payload.summary.uncitedByStage)}` +
-          ` | by-type: ${formatBreakdown(payload.summary.uncitedByType)}\n`,
+        `strict-citations failed: ${citationSummary.uncitedCount} uncited decisions in full run` +
+          ` | by-stage: ${formatBreakdown(citationSummary.uncitedByStage)}` +
+          ` | by-type: ${formatBreakdown(citationSummary.uncitedByType)}\n`,
       );
       return 2;
     }

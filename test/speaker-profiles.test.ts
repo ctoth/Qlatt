@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 import { isPlainObject } from "../src/yaml-loader";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 interface CitedSpeakerValue {
   value: number;
@@ -29,7 +34,7 @@ function readCitedSpeakerValue(value: unknown, path: string): CitedSpeakerValue 
 
 function readSpeakerPolicy(value: unknown): SpeakerPolicy {
   if (!isPlainObject(value)) {
-    throw new Error("parameters.policy.speaker must be an object");
+    throw new Error("speaker profile default_profile must be an object");
   }
   return {
     base_f0_hz: readCitedSpeakerValue(value.base_f0_hz, "speaker.base_f0_hz"),
@@ -42,13 +47,12 @@ function readSpeakerPolicy(value: unknown): SpeakerPolicy {
   };
 }
 
-const parameters = QLATT_ENGLISH_RULEPACK.parameters;
-const policy = isPlainObject(parameters) ? parameters.policy : undefined;
-const speaker = readSpeakerPolicy(isPlainObject(policy) ? policy.speaker : undefined);
+const resources = loadFrontendResources(qlattRulepack);
+const speaker = readSpeakerPolicy(resources.speakerProfile?.spec.default_profile);
 
 describe("speaker profile context", () => {
   describe("YAML configuration", () => {
-    it("parameters.policy.speaker section exists with paper-backed defaults", () => {
+    it("speaker profile resource contains paper-backed defaults", () => {
       expect(speaker).toBeDefined();
       expect(speaker.base_f0_hz).toBeDefined();
       expect(speaker.base_f0_hz.value).toBe(110);

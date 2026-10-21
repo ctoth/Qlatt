@@ -37,14 +37,106 @@ rules:
   #   - DECtalk 4.63 Ph_drwt02.c (17-point baseline profile)
   #   - Klatt 1982 (declination as baseline component)
   # --------------------------------------------------------------------------
+  #
+  # Which of the five baselines a clause gets is decided where pht0draw starts
+  # the clause (Ph_drwt02.c:1657-1700) from the clause's closing mark
+  # (clausetype, ph_sort.c:1513-1567) and its word count:
+  #   period:       f0basetypes[0] with more than 3 words, else [4]
+  #   comma:        [1]
+  #   exclamation:  [0] with more than 2 words, else [2]
+  #   question:     [3]
+  # The tables are the ENGLISH_US block, Ph_drwt02.c:1293-1392.
+  #
+  # number_words is counted once for each clause, on its first phone; the
+  # rules below read it there.
+  dectalk_clause_number_words:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    apply:
+      - field: number_words
+        op: set
+        # One for each word that comes in with a word boundary; a verb-phrase
+        # start replaces that boundary, so its word is not counted, except the
+        # clause's first word. A clause-final "to", "and" or "for" has two
+        # boundaries and counts twice.
+        value: >-
+          (dectalk_word_start(current) ? 1.0 : 0.0)
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+          + (dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_sort.c:439-441, 1462-1464 (number_words: reset for a clause, one more at each WBOUND)"
+      - "DECtalk 4.63 ph_sort.c:1055-1070 (a clause-final PPSTART becomes a second WBOUND)"
+  # Three things phinton knows at each allophone because it walks the clause
+  # in order, kept here as running values, each phone taking the one before it:
+  #   intonation_position  nphon, the allophone's place in its clause from 1;
+  #   intonation_reached   the walk has not left its loop at or before it
+  #                        (Ph_inton2.c:809-819, dectalk_intonation_stops);
+  #   stressed_before      the stressed syllabics of the clause before it, from
+  #                        which the stress impulse takes nrises_sofar.
+  dectalk_clause_running_state:
+    kind: scalar
+    select:
+      relation: Segment
+      # A silence phonemic text wrote is one of the clause's allophones: the
+      # walk passes it, counts it, and at it sets nrises_sofar to 1 (Rule 7's
+      # "soft reset", Ph_inton2.c:1622-1634).
+      where: { predicate: is_clause_allophone }
+    define:
+      before: dectalk_prev(current)
+      first: "before == null || (before.phoneme == 'SIL' && !isTrue(before, 'written_silence'))"
+    apply:
+      - field: intonation_position
+        op: set
+        value: "first ? 1.0 : get(before, 'intonation_position', 0.0) + 1.0"
+        tag: boundary
+      - field: intonation_reached
+        op: set
+        value: >-
+          !isTrue(current, 'intonation_stops') && (first || isTrue(before, 'intonation_reached'))
+        tag: boundary
+      - field: stressed_before
+        op: set
+        value: >-
+          first ? 0.0
+          : (isTrue(before, 'written_silence') ? 1.0
+          : get(before, 'stressed_before', 0.0)
+            + ((before.type == 'vowel' || before.phoneme in ['EL', 'EM', 'EN'])
+               && get(before, 'stress', 0) > 0 ? 1.0 : 0.0))
+        tag: stress
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:632 (the loop over the clause's allophones, nphon)"
+      - "DECtalk 4.63 Ph_inton2.c:480, 1059 (nrises_sofar: 0 at the clause's start, one more at each stress impulse)"
+      - "DECtalk 4.63 Ph_inton2.c:1622-1634 Rule 7 (at a silence after the clause's first allophone, nrises_sofar = 1)"
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (the loop is left at a syllabic that begins and ends the hat)"
   dectalk_baseline_declination:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
-        && word_count() > 3
+        dectalk_clause_first(current)
+    define: &baseline_clause
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      mark: "clause_end == null ? '.' : clause_end.punctuationSymbol"
+      # number_words, as dectalk_clause_number_words counted it.
+      words: "get(current, 'number_words', 0.0)"
+      # pht0draw is two routines, one for each sex (Ph_drwt02.c:771, 2445).
+      male: "params.policy.voice.sex == 'male'"
+      comma: "mark in [',', ';', ':']"
+      # dcommacnt (Ph_drwt02.c:3231-3256): comma clauses since the last clause
+      # that ended otherwise. This is the first when the clause before it did
+      # not end in a comma.
+      first_comma: >-
+        !(prev != null && get(prev, 'punctuationSymbol', '') in [',', ';', ':'])
+    constraint: >-
+      male && ((mark == '.' && words > params.policy.f0.baseline_long_declarative_words)
+      || (mark == '!' && words > params.policy.f0.baseline_long_exclamation_words))
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -84,9 +176,9 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
-        && word_count() <= 3
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "male && mark == '.' && words <= params.policy.f0.baseline_long_declarative_words"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -115,534 +207,975 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c f0basetypes[4][] (short declarative baseline, number_words <= 3)"
       - "Klatt 1982 (baseline declination component)"
 
+  # A clause that ends in a comma (clausetype COMMACLAUSE). DECtalk's text
+  # stage sends a semicolon and a colon to the phonetic stage as commas, as
+  # dectalk_pause_duration assumes; that is not re-verified here.
+  dectalk_comma_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "male && comma"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1157, 1145, 1139, 1127, 1113, 1109, 1085, 1062, 1049, 1035, 1023, 1015, 1005, 1010, 1057, 1124, 1040]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1335-1352 f0basetypes[1][] (comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1669-1681 (clausetype 1 selects f0basetypes[1])"
+
+  # An exclamation of one or two words. The source writes each entry as a
+  # value plus 50 (1057+50, 1085+50, ...); the sums are given here.
+  dectalk_short_exclamation_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "male && mark == '!' && words <= params.policy.f0.baseline_long_exclamation_words"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1107, 1135, 1159, 1167, 1163, 1199, 1145, 1132, 1129, 1115, 1103, 1090, 1088, 1074, 1030, 902, 893]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1354-1373 f0basetypes[2][] (exclamatory clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1683-1692 (clausetype 2: f0basetypes[2] unless number_words > 2)"
+
+  dectalk_question_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1187, 1165, 1139, 1127, 1113, 1109, 1095, 1082, 1079, 1065, 1053, 940, 938, 924, 1010, 1014, 1018]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1375-1391 f0basetypes[3][] (question)"
+      - "DECtalk 4.63 Ph_drwt02.c:1695-1699 (clausetype 3 selects f0basetypes[3])"
+
   # --------------------------------------------------------------------------
-  # Rule 2: Hat Rise (STEP into hat layer)
+  # The baselines of a female voice: the second copy of pht0draw
+  # (Ph_drwt02.c:2445 on) fills f0basetypes with other numbers (2462-2556)
+  # and chooses among them otherwise (3223-3257):
+  #   period:       [0] whatever the word count
+  #   comma:        [1] for the first comma clause in a row, unless it has more
+  #                 than 4 words; [0] for that one and for the later ones
+  #   exclamation:  [0] with more than 2 words, else [2]
+  #   question:     [3]
+  # Rows 0, 2 and 3 hold the same seventeen numbers.
   #
-  # Fires at the first stressed vowel in each phrase.  Detection: current is
-  # a primary-stressed vowel AND looking backward, the nearest stressed vowel
-  # or SIL is either SIL or not found (meaning no prior stressed vowel in
-  # this phrase).
+  # Each list below has an eighteenth number. The female copy steps its
+  # baseline counter while `basecntr <= 15` (3530; the male copy has 14,
+  # 2013), so at the clause's end it reads f0baseline[17], one past the row:
+  # in f0basetypes[5][17] (ph_data.h:863) that is the next row's first number.
+  # --------------------------------------------------------------------------
+  dectalk_female_baseline_declination:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: >-
+      !male && (mark == '.' || mark == '!'
+        || (comma && (!first_comma || words > params.policy.f0.baseline_long_comma_words)))
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2462-2478, 2501-2517 f0basetypes[0][] and [2][] (female; the same numbers)"
+      - "DECtalk 4.63 Ph_drwt02.c:2482, 2520 (f0basetypes[1][0] and [3][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3223-3252 (clausetype 0, 1 and 2 in the female routine)"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  dectalk_female_comma_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: >-
+      !male && comma && first_comma && words <= params.policy.f0.baseline_long_comma_words
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1785, 1762, 1749, 1725, 1703, 1710, 1718, 1764, 1810, 1864, 1928, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2482-2498 f0basetypes[1][] (female comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:2501 (f0basetypes[2][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3233-3242 (dcommacnt == 1 selects f0basetypes[1] unless number_words > 4)"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  dectalk_female_question_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "!male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1890]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2520-2536 f0basetypes[3][] (female question)"
+      - "DECtalk 4.63 Ph_drwt02.c:2540 (f0basetypes[4][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3253-3257 (clausetype 3 selects f0basetypes[3])"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  # The female routine scales an exclamation's F0 over a wider range:
+  #   f0prime = f0minimum + frac4mul(f0prime - 2100, f0scalefac + 500)
+  # (Ph_drwt02.c:3805-3808). The male routine has no such case (2306-2312).
+  dectalk_female_exclamation_range:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        dectalk_clause_first(current)
+    define: *baseline_clause
+    constraint: "!male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: range
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.exclamation_range_added
+      tag: f0_exclamation_range
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
+
+  # --------------------------------------------------------------------------
+  # The F0 floor around a clause break the text stage inserts. This is a
+  # defect of DECtalk 4.63 that its output depends on, reproduced as it is.
   #
-  # Source: Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS -> STEP command).
-  # ph_aloph.c (FHAT_BEGINS placed on first stressed syllabic in phrase).
+  # LTS/ls_util.c:829-837 means to shorten the comma pause of such a break:
+  #   pause = pDph_t->compause;  pDph_t->compause = -12;
+  #   <send the COMMA: the clause before the break is spoken here>
+  #   pDph_t->compause = pause;
+  # but the field it reaches is the phonetic stage's f0minimum (an
+  # instrumented build prints 1100, Paul's floor, for that "compause", and
+  # -12 for f0minimum in the clause spoken meanwhile). The first clause of a
+  # run loads the voice when it starts, which puts its floor right again. So:
+  #   - a clause that ends at an inserted break, other than the run's first,
+  #     is spoken with a floor of -12;
+  #   - if the run's first clause ended at one, the value saved and put back
+  #     was the floor before any voice was loaded, 0, and every later clause
+  #     has that (or -12, as above).
+  # With such a floor F0 comes out at pht0draw's lower clamp, 50 Hz, wherever
+  # the scaled contour is below it (Ph_drwt02.c:2312-2324).
+  # DECtalk's packets are recorded one phrase to a process; in a process that
+  # has already spoken, the saved value is the voice's floor and only the
+  # first case arises.
+  # --------------------------------------------------------------------------
+  dectalk_break_f0_floor:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL" && prev != null && prev.phoneme == "SIL"
+        && get(prev, "punctuationSymbol", null) != null
+    define:
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      after: "clause_end == null ? null : ahead(clause_end, 1)"
+      ends_at_break: >-
+        after != null && after.phoneme != 'SIL'
+        && isTrue(path(after, 'R:SylStructure.parent.parent'), 'clause_break_before')
+      # Whether the run's first clause ended at an inserted break: this is the
+      # second clause and starts after one, or an earlier clause was that.
+      first_clause_broke: >-
+        (isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
+          && count_back_pred(current, 1000, 'is_never', 'is_clause_silence') == 1.0)
+        || count_back_pred(current, 1000, 'is_never', 'is_first_clause_break_start') > 0.0
+      # Each case has its switch in policy; the second is what say.exe does
+      # as a fresh process.
+      in_break_clause: "ends_at_break && params.policy.f0.break_floor_applies"
+      after_first_break: "first_clause_broke && params.policy.f0.unloaded_floor_applies"
+    constraint: in_break_clause || after_first_break
+    insert:
+      relation: PhraseCommand
+      layer: floor
+      at: at_sync(current.sync_left)
+      value: "in_break_clause ? params.policy.f0.break_floor : params.policy.f0.unloaded_floor"
+      tag: f0_break_floor
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:829-837, 842-849 (compause saved, set to -12 and restored around the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_data.h:841-851 (f0minimum three shorts before compause)"
+      - "DECtalk 4.63 PH/ph_vset.c:683 (f0minimum is set when a voice is loaded)"
+      - "DECtalk 4.63 PH/Ph_drwt02.c:2312-2324 (f0prime = f0minimum + ...; clamped to LOWEST_F0)"
+
+  # --------------------------------------------------------------------------
+  # Rule 1 (Ph_inton2.c:809-908): the hat rise, a STEP at the syllabic that
+  # carries FHAT_BEGINS, unless phinton's walk has stopped at or before it
+  # (annotation.yaml, dectalk_intonation_stops).
   #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c Rule 1 (hat rise generation)
-  #   - DECtalk 4.63 ph_aloph.c (FHAT_BEGINS placement)
-  #   - Klatt 1982 (hat-pattern: rise at first accent)
+  #   hatsize = size_hat_rise, +15 past the tenth allophone, +70 on the first
+  #             or second allophone (820-833);
+  #   delay   = -2 frames, or half the frames of allophone `gesture_ref` when
+  #             that is past the second (854-861). gesture_ref is the previous
+  #             allophone when it is FSON1; otherwise the routine keeps the
+  #             one an earlier rise of the clause set (849-852).
+  #
+  # A command's time is its allophone's start, less the six frames the routine
+  # starts its clock at (cumdur = -6, :488), plus the delay.
   # --------------------------------------------------------------------------
   dectalk_hat_rise:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
+      where: { predicate: is_dectalk_syllabic }
     define:
-      # Look backward for the nearest token that is either a stressed vowel
-      # or a SIL boundary.  If the result is SIL or null, current is the
-      # first stressed vowel in the phrase (hat begins).
-      nearest_back: >-
-        look_back_where(current, 100, '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
-      is_hat_begins: >-
-        nearest_back == null || nearest_back.phoneme == "SIL"
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      prior_vowel_or_boundary: >-
-        look_back_where(current, 100, 'candidate.type == "vowel" || candidate.phoneme == "SIL"')
-      is_first_syllable: >-
-        prior_vowel_or_boundary == null || prior_vowel_or_boundary.phoneme == "SIL"
-      rise_offset_ms: >-
-        is_hat_ends ? -params.policy.f0.hat_rise_same_vowel_early_offset_ms : 0
+      reached: "isTrue(current, 'intonation_reached')"
+      position: "get(current, 'intonation_position', 1.0)"
+      la: dectalk_prev(current)
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
+      delay_frames: >-
+        gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
+        ? -params.policy.f0.hat_rise_early_frames
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       rise_hz: >-
-        params.policy.f0.hat_rise_hz
-        + (is_first_syllable ? params.policy.f0.hat_first_syllable_bonus_hz : 0)
-    constraint: is_hat_begins
+        params.policy.voice.hat_rise_hz10
+        + (position > params.policy.f0.hat_late_after_allophone ? params.policy.f0.hat_late_bonus_hz : 0.0)
+        + (position <= params.policy.f0.hat_first_syllable_through_allophone ? params.policy.f0.hat_first_syllable_bonus_hz : 0.0)
+    constraint: "reached && isTrue(current, 'hat_begins')"
     insert:
       relation: Tilt
       layer: hat
-      at: at_offset(current.sync_left, rise_offset_ms)
+      at: >-
+        at_offset(current.sync_left,
+          (delay_frames - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
       value: rise_hz
-      # The citation-mode generator emits a STEP. The hat layer is persistent;
-      # duration_frames preserves the source descriptor length for diagnostics.
+      # A STEP has no length of its own; this is the descriptor's.
       duration_frames: params.policy.f0.hat_rise_glide_frames
       tag: f0_hat_rise
     citations:
-      - "DECtalk 4.63 Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS STEP, Paul HR*10 plus first-syllable 70)"
+      - "DECtalk 4.63 Ph_inton2.c:809-908 Rule 1 (STEP of size_hat_rise, +15 when nphon > 10, +70 when nphon <= 2; delay -2 or allodurs[gesture_ref] >> 1)"
+      - "DECtalk 4.63 Ph_inton2.c:488 (cumdur starts at -6)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (the copy at Ph_inton2.c:1753-1791 is under #if 0)"
       - "Klatt 1982 (hat rise at first accent in phrase)"
 
   # --------------------------------------------------------------------------
-  # Rule 3b: Question Terminal Rise (boundary IMPULSE pair)
+  # Rule 4 (Ph_inton2.c:1218-1300): the question gestures.
   #
-  # Fires on the clause-final STRESSED vowel of a phrase that ends in '?'.
-  # Emits the DECtalk yes/no-question gesture pair into the `boundary` impulse
-  # layer: a small dip (-151) earlier in the vowel, then a large rise (+451) at
-  # the very end of the vowel.  Combined with the reduced question hat-fall
-  # (question_fall_hz=80, applied by dectalk_hat_fall above), the +451 rise
-  # dominates and the contour RISES at the clause end -- DECtalk's signature
-  # yes/no terminal rise.
+  # On the syllabic whose rime stands before a question mark (FBOUNDARY ==
+  # FQUENEXT), stressed or not, phinton issues two IMPULSE commands:
+  #   one word:   F0_QGesture1 at -5 frames, length 15;
+  #               F0_QGesture2 - 100 at the syllabic's end, length 24
+  #   otherwise:  F0_QGesture1 at -6 frames, length 15;
+  #               F0_QGesture2 at (allodurs >> 2) - 4, length 20
+  # They are IMPULSEs like the stress impulse and go on its layer: DECtalk
+  # keeps one impulse at a time (Ph_drwt02.c:1908-1957), so each replaces the
+  # one before it.
   #
-  # The live DECtalk path (ph_inton1.c:1308-1378, guarded FCBNEXT||FQUENEXT)
-  # requires a STRESSED final syllable; the unstressed-final question rise
-  # (Rule 6) is #ifdef CUT_THIS_RULE and dead in 4.63.  So this rule, like the
-  # live source, fires only on the final STRESSED vowel (is_hat_ends).
-  # wh- vs yes/no is NOT distinguished by ph_inton1.c -- all '?' rise.
-  #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4 comment: positive pulse for
-  #     question terminal rise)
-  #   - DECtalk 4.63 ph_inton1.c:1351-1352 (F0_QGesture1=-151, F0_QGesture2=+451
-  #     IMPULSE pair on the final stressed vowel, length 24)
+  # The same block's comma gestures (1272-1297) are the `else` of
+  # `if (lang_curr != LANG_german)` at 1251: English never issues them.
+  # Each f0_layer rule inserts one command, so the pair is two rules.
   # --------------------------------------------------------------------------
-  # The f0_layer rule kind emits exactly one impulse per rule (parser maps a
-  # single `insert:` to insert_f0_layer).  DECtalk's gesture is a PAIR of
-  # impulses, so each gesture is two rules: a dip then a rise.  Both share the
-  # same final-stressed-vowel selector and clause-terminal detection.
   dectalk_question_dip:
     kind: f0_layer
-    select:
+    select: &question_syllabic
       relation: Segment
+      # The syllabic before a question mark; tested here so that nothing
+      # else is worked out for the other syllabics.
       where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
-    define:
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      terminal: >-
-        nearest_forward != null && nearest_forward.phoneme == "SIL"
-        && has(nearest_forward.punctuationSymbol)
-        ? nearest_forward.punctuationSymbol
-        : null
-    constraint: 'is_hat_ends && terminal == "?"'
-    # Small dip earlier in the vowel (DECtalk F0_QGesture1=-151).
+        (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+        && get(current, 'rime_boundary', '') == 'question'
+    define: &question_gesture
+      reached: "isTrue(current, 'intonation_reached')"
+      # number_words == 1, counted as the baseline rules count it.
+      one_word: >-
+        (dectalk_word_start(current)
+          && ((dectalk_phrase_start(current) != 'vp' && !dectalk_phrase_unbounded(current))
+              || prev == null || prev.phoneme == 'SIL')
+          ? 1.0 : 0.0)
+        + count_back_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+        + (dectalk_word_start(current) && dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+        + count_back_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start') == 1.0
+      frames: "get(current, 'timing_frames', 0.0)"
+      stress_now: "get(current, 'stress', 0)"
+      # The commands issued before these on the same syllabic (Rules 1 and 2):
+      # make_f0_command lets neither gesture start before them
+      # (ph_inton1.c:1880-1883).
+      position: "get(current, 'intonation_position', 1.0)"
+      la: dectalk_prev(current)
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
+      hat_delay: >-
+        gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
+        ? -params.policy.f0.hat_rise_early_frames
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+      stress_delay: >-
+        stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
+        : (isTrue(current, 'hat_ends') || get(current, 'rime_boundary', '') in ['period', 'question', 'exclaim']
+           ? -params.policy.f0.stress_final_early_frames
+           : floor(frames / params.policy.f0.stress_delay_divisor))
+      hat_here: "isTrue(current, 'hat_begins')"
+      floor_delay: >-
+        stress_now > 0 ? (hat_here ? max(stress_delay, hat_delay) : stress_delay)
+        : (hat_here ? hat_delay : -params.policy.f0.command_clock_lead_frames)
+      dip_delay: >-
+        max(floor_delay, one_word ? -params.policy.f0.question_dip_early_frames_one_word
+                                  : -params.policy.f0.question_dip_early_frames)
+      rise_delay: >-
+        max(dip_delay, one_word ? frames
+                                : floor(frames / params.policy.f0.stress_delay_divisor)
+                                  - params.policy.f0.question_rise_back_frames)
+    constraint: "reached && get(current, 'rime_boundary', '') == 'question'"
     insert:
       relation: Tilt
-      layer: boundary
-      at: 'at_ratio(current, 0.75)'
+      layer: stress
+      at: >-
+        at_offset(current.sync_left,
+          (dip_delay - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
       value: params.policy.f0.question_gesture_dip_hz
-      duration_frames: params.policy.f0.boundary_gesture_duration_frames
+      duration_frames: params.policy.f0.question_dip_frames
       tag: f0_question_dip
     citations:
-      - "DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4: positive pulse for question terminal rise)"
-      - "DECtalk 4.63 ph_inton1.c:1351 (F0_QGesture1=-151 IMPULSE on final stressed vowel)"
+      - "DECtalk 4.63 Ph_inton2.c:1238-1263 Rule 4 (IMPULSE F0_QGesture1 at -5 or -6 frames, length 15)"
+      - "DECtalk 4.63 Ph_inton2.c:580-581 (US F0_QGesture1 = -151, F0_QGesture2 = 451)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command"
 
   dectalk_question_rise:
     kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
-    define:
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      terminal: >-
-        nearest_forward != null && nearest_forward.phoneme == "SIL"
-        && has(nearest_forward.punctuationSymbol)
-        ? nearest_forward.punctuationSymbol
-        : null
-    constraint: 'is_hat_ends && terminal == "?"'
-    # Large rise toward the end of the vowel (DECtalk F0_QGesture2=+451).
-    # Rendered as a GLIDE on the dedicated `question_glide` layer: F0 ramps
-    # linearly up to the +451 target over question_rise_glide_frames and HOLDS,
-    # giving a smooth, sustained terminal RISE that dominates the reduced
-    # question hat-fall -- rather than a transient impulse spike that decays
-    # away. (DECtalk's GLIDE-form question gesture, ph_inton1.c:1635.)
+    select: *question_syllabic
+    define: *question_gesture
+    constraint: "reached && get(current, 'rime_boundary', '') == 'question'"
     insert:
       relation: Tilt
-      layer: question_glide
-      at: 'at_ratio(current, 0.5)'
-      value: params.policy.f0.question_gesture_rise_hz
-      duration_frames: params.policy.f0.question_rise_glide_frames
+      layer: stress
+      at: >-
+        at_offset(current.sync_left,
+          (rise_delay - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
+      value: >-
+        one_word ? params.policy.f0.question_gesture_rise_hz - params.policy.f0.question_rise_one_word_reduction_hz
+        : params.policy.f0.question_gesture_rise_hz
+      duration_frames: >-
+        one_word ? params.policy.f0.question_rise_frames_one_word : params.policy.f0.question_rise_frames
       tag: f0_question_rise
     citations:
-      - "DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4: positive pulse for question terminal rise)"
-      - "DECtalk 4.63 ph_inton1.c:1352 (F0_QGesture2=+451 on final stressed vowel)"
-      - "DECtalk 4.63 ph_inton1.c:1635 (GLIDE-form question rise: F0_QGesture2 ramped over the final vowel)"
+      - "DECtalk 4.63 Ph_inton2.c:1253-1262 Rule 4 (one word: F0_QGesture2 - 100 at the vowel's end, length 24; otherwise F0_QGesture2 at (allodurs >> 2) - 4, length 20)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command"
 
   # --------------------------------------------------------------------------
-  # Rule 3b-reset: Question-glide clause-local reset
+  # Rule 2 (Ph_inton2.c:924-1062): a stress IMPULSE on every stressed
+  # syllabic the walk reaches, primary, secondary or emphatic.
   #
-  # The question_glide layer is a GLIDE (ramped persistent) that HOLDS its
-  # accumulated +451 after the ramp completes.  At the next SIL boundary, emit a
-  # canceling glide command (-question_gesture_rise_hz, span 0 = instant) so the
-  # elevated F0 does not bleed into the following clause -- the question rise is
-  # a clause-local terminal gesture (DECtalk re-derives F0 fresh per clause via
-  # F0_RESET, ph_inton1.c Rules 7-8).
-  # --------------------------------------------------------------------------
-  dectalk_question_glide_reset:
-    kind: f0_layer
-    select:
-      relation: Segment
-      # Only at a question boundary SIL: that is the only place a +451 question
-      # rise was added to question_glide (dectalk_question_rise fires when the
-      # final stressed vowel looks ahead to THIS '?' SIL).  Resetting elsewhere
-      # would push the layer to a spurious -451.
-      where: >-
-        current.phoneme == "SIL"
-        && prev != null && prev.phoneme != "SIL"
-        && has(current.punctuationSymbol) && current.punctuationSymbol == "?"
-    insert:
-      relation: Tilt
-      layer: question_glide
-      at: at_sync(current.sync_left)
-      value: "-(params.policy.f0.question_gesture_rise_hz)"
-      duration_frames: 0
-      tag: f0_boundary_reset
-    citations:
-      - "DECtalk 4.63 ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL: clause-local gestures)"
-      - "Klatt 1982 (hat state reset at clause boundaries)"
-
-  # --------------------------------------------------------------------------
-  # Rule 3c: Comma Continuation Rise (boundary IMPULSE pair)
+  #   size  = us_f0_mstress_level[stress] + us_f0_mphrase_position[nrises_sofar]
+  #           (935-942); a quarter of that in a clause that ends in "?" (955-958);
+  #           50 less, and never below 30, on the syllabic where the hat ends or
+  #           before a period (963-972); then times scale_str_rise / 32, the
+  #           scale taken as at least 16 under emphasis (1005-1012).
+  #   delay = a quarter of the syllabic's frames (961); -3 frames in the
+  #           hat-end or period case; 1 frame under emphasis (976-979).
+  #   nrises_sofar counts the clause's stress impulses so far; at 7 it goes
+  #           back to 1 (1059-1062).
   #
-  # Fires on the clause-final STRESSED vowel of a clause that ends in ','.
-  # Emits the DECtalk comma gesture pair (+171, +250) into the `boundary`
-  # impulse layer, producing a continuation rise at the comma so the contour
-  # signals "more to come" rather than falling fully.  Paired with the reduced
-  # comma hat-fall (comma_fall_hz=120, applied by dectalk_hat_fall above).
-  #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c:1367-1368 (F0_CGesture1=+171, F0_CGesture2=+250
-  #     IMPULSE pair on the final stressed vowel for a comma boundary)
-  #   - DECtalk 4.63 ph_inton1.c:1364 (comma gesture timed delayf0 -= NF20MS)
-  # --------------------------------------------------------------------------
-  dectalk_comma_rise1:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
-    define:
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      terminal: >-
-        nearest_forward != null && nearest_forward.phoneme == "SIL"
-        && has(nearest_forward.punctuationSymbol)
-        ? nearest_forward.punctuationSymbol
-        : null
-    constraint: 'is_hat_ends && terminal == ","'
-    insert:
-      relation: Tilt
-      layer: boundary
-      at: 'at_ratio(current, 0.75)'
-      value: params.policy.f0.comma_gesture1_hz
-      duration_frames: params.policy.f0.boundary_gesture_duration_frames
-      tag: f0_comma_rise
-    citations:
-      - "DECtalk 4.63 ph_inton1.c:1367 (F0_CGesture1=+171 comma IMPULSE)"
-      - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
-
-  dectalk_comma_rise2:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
-    define:
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      terminal: >-
-        nearest_forward != null && nearest_forward.phoneme == "SIL"
-        && has(nearest_forward.punctuationSymbol)
-        ? nearest_forward.punctuationSymbol
-        : null
-    constraint: 'is_hat_ends && terminal == ","'
-    insert:
-      relation: Tilt
-      layer: boundary
-      at: 'at_ratio(current, 1.0)'
-      value: params.policy.f0.comma_gesture2_hz
-      duration_frames: params.policy.f0.boundary_gesture_duration_frames
-      tag: f0_comma_rise
-    citations:
-      - "DECtalk 4.63 ph_inton1.c:1368 (F0_CGesture2=+250 comma IMPULSE)"
-      - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
-
-  # --------------------------------------------------------------------------
-  # Rule 4: Stress Impulse (sustained step-plus-ramp into stress layer)
-  #
-  # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
-  # is stress_level_primary + a phrase-position component. Citation-mode
-  # Ph_inton2.c leaves its one-word reduction commented out and subtracts 50
-  # for the final stress: 81 + 160 - 50 = 191.
-  #
-  # The impulse lasts stress_impulse_duration_frames (20 frames = 128ms at
-  # DECtalk's 6.4ms controller cadence) using the US non-reading IMPULSE
-  # step-plus-ramp in Ph_drwt02.c.
-  #
-  # Simplification: DECtalk tracks nrises_sofar to index into
-  # f0_mphrase_position[], which requires stateful counting.  We use a fixed
-  # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
-  #
-  # Source: Ph_inton2.c Rule 2 (citation-mode stress impulse at FSTRESS_1);
-  # Ph_drwt02.c IMPULSE case (sustained step-plus-ramp).
-  #
-  # Citations:
-  #   - DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode stress impulse)
-  #   - Klatt 1982 (stress component: impulse at stressed syllables)
+  # make_f0_command never lets a command precede the one before it
+  # (ph_inton1.c:1880-1883): on a syllabic that also carries the hat rise the impulse
+  # cannot start before the rise.
   # --------------------------------------------------------------------------
   dectalk_stress_impulse:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
+      where: { predicate: is_dectalk_syllabic }
     define:
-      # Impulse magnitude = stress level + phrase position component.
-      # Scaled by scale_str_rise / 32 (Paul: 32/32 = 1.0).
-      stress_component: >-
-        params.policy.f0.stress_level_primary_hz
-      position_component: >-
-        params.policy.f0.stress_phrase_position_hz
-      scale_factor: >-
-        params.policy.speaker.scale_str_rise / 32.0
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_final_stress: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      stress_offset_ms: >-
-        is_final_stress ? -params.policy.f0.stress_final_early_offset_ms : 0
+      reached: "isTrue(current, 'intonation_reached')"
+      stress_now: "get(current, 'stress', 0)"
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      question: "clause_end != null && clause_end.punctuationSymbol == '?'"
+      rises: "get(current, 'stressed_before', 0.0)"
+      rise_index: >-
+        rises < params.policy.f0.stress_max_rises ? rises
+        : 1.0 + mod(rises - params.policy.f0.stress_max_rises, params.policy.f0.stress_max_rises - 1.0)
+      raw_hz: >-
+        params.policy.f0.stress_level[params.policy.voice.sex][stress_now]
+        + params.policy.f0.stress_phrase_position[params.policy.voice.sex][rise_index]
+      question_hz: "question ? floor(raw_hz / params.policy.f0.stress_question_divisor) : raw_hz"
+      # (struccur & FPERNEXT) IS_PLUS tests one bit, 0400, which the question
+      # and exclamation boundary values (0440, 0500) carry too.
+      final: >-
+        isTrue(current, 'hat_ends')
+        || get(current, 'rime_boundary', '') in ['period', 'question', 'exclaim']
+      reduced_hz: "question_hz - params.policy.f0.stress_final_reduction_hz"
+      final_hz: >-
+        !final ? question_hz
+        : (reduced_hz < 0.0 ? params.policy.f0.stress_final_floor_hz : reduced_hz)
+      # Under emphasis a voice's stress scale counts as at least 16
+      # (Ph_inton2.c:1005-1009).
+      stress_scale: >-
+        stress_now == params.policy.f0.stress_emphasis_level
+          && params.policy.voice.scale_str_rise < params.policy.f0.stress_emphasis_scale_minimum
+        ? params.policy.f0.stress_emphasis_scale_minimum
+        : params.policy.voice.scale_str_rise
       impulse_hz: >-
-        word_count() == 1
-        ? params.policy.f0.stress_single_word_final_primary_hz * scale_factor
-        : (stress_component + position_component) * scale_factor
+        floor(stress_scale * final_hz / params.policy.f0.stress_scale_divisor)
+      own_delay: >-
+        stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
+        : (final ? -params.policy.f0.stress_final_early_frames
+           : floor(get(current, 'timing_frames', 0.0) / params.policy.f0.stress_delay_divisor))
+      # The hat rise issued just before it on the same syllabic (Rule 1).
+      position: "get(current, 'intonation_position', 1.0)"
+      la: dectalk_prev(current)
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
+      hat_delay: >-
+        gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
+        ? -params.policy.f0.hat_rise_early_frames
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+      delay_frames: >-
+        isTrue(current, 'hat_begins') ? max(own_delay, hat_delay) : own_delay
+    constraint: "reached && stress_now > 0"
     insert:
       relation: Tilt
       layer: stress
-      at: at_offset(current.sync_left, stress_offset_ms)
+      at: >-
+        at_offset(current.sync_left,
+          (delay_frames - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
       value: impulse_hz
       duration_frames: params.policy.f0.stress_impulse_duration_frames
       tag: f0_stress_impulse
     citations:
-      - "DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode first primary stress 81+160, final reduction 50, command 191)"
-      - "DECtalk 4.63 Ph_drwt02.c US non-reading IMPULSE case (duration-controlled step-plus-ramp tarimp)"
-      - "Klatt 1982 (stress-component F0 impulse)"
+      - "DECtalk 4.63 Ph_inton2.c:924-1062 Rule 2 (stress impulse: us_f0_mstress_level + us_f0_mphrase_position[nrises_sofar], length 20)"
+      - "DECtalk 4.63 Ph_inton2.c:313, 323-324, 328-329, 333 (the US tables, male and female); 936-946 (chosen by malfem)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (a command is never earlier than the one before)"
+      - "DECtalk 4.63 Ph_drwt02.c:1908-1957 US non-reading IMPULSE (step plus ramp)"
 
   # --------------------------------------------------------------------------
-  # Active US male segmental F0 for the first exact word target, `cake`.
+  # Rule 0 (Ph_inton2.c:733-741): "User-specified commands for phoneme f0
+  # targets or singing". In a clause whose f0mode is SINGING or
+  # PHONE_TARGETS_SPECIFIED each allophone with a pitch issues one command,
+  # make_f0_command(USER, 0, 1000 + f0, 0, 0), on the command clock at the
+  # allophone's start, and no other rule of the walk is tried.
   #
-  # DECtalk feeds an ordered controller-allophone stream into a separately
-  # filtered segmental path. These five declarative commands preserve the exact
-  # SI/K/EY/K/IX controller identity and duration for that word; the DSP layer
-  # owns the fixed-point state machine and timing delays.
-  # profile_points encodes [voiceless, plosive, stressed] source flags.
+  # The command's value is its target in Hz * 10 as set_user_target() reads
+  # it (Ph_drwt02.c:3972-3994): the number modulo 1000; up to 37 the note of
+  # that number from notetab[], above that the number times ten, held between
+  # LOWEST_F0 and HIGHEST_F0. The first flag says the number is a note (the
+  # target then has a vibrato and is reached in sixteen frames, not over the
+  # allophone); the second that the clause is a sung one (its F0 is then
+  # rescaled, 2325-2328). The drawing is the user_target layer of the F0
+  # model (frontend.yaml).
+  #
+  # The other F0 rules still issue their commands in such a clause; the layer
+  # draws from its own commands alone, as pht0draw() does in these modes.
+  #
+  # Not ported: the subglottal pressure set_user_target() takes from a
+  # command above 1500 (3959-3970), which a pitch of 500 or more would give.
   # --------------------------------------------------------------------------
-  dectalk_segmental_k_ey_k_initial_silence:
+  dectalk_user_pitch_command:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: "get(current, 'pitch_command', 0.0) != 0.0"
+    define:
+      number: "get(current, 'pitch_command', 0.0) % params.policy.f0.user_pitch.number_modulus"
+      is_note: "number <= params.policy.f0.user_pitch.note_maximum"
+      hertz_target: "number * 10.0"
+    # notetab[number - 1] has no entry for a number below 1.
+    constraint: "number >= 1.0"
+    insert:
+      relation: Tilt
+      layer: user_target
+      at: >-
+        at_offset(current.sync_left,
+          (0.0 - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
+      value: >-
+        is_note ? params.policy.f0.user_pitch.note_table[number - 1.0]
+        : (hertz_target < params.policy.f0.user_pitch.target_lowest ? params.policy.f0.user_pitch.target_lowest
+        : (hertz_target > params.policy.f0.user_pitch.target_highest ? params.policy.f0.user_pitch.target_highest
+        : hertz_target))
+      profile_points:
+        - "is_note ? 1 : 0"
+        - "dectalk_clause_pitch_mode(current) == 'singing' ? 1 : 0"
+      tag: f0_user_target
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:733-741 Rule 0 (make_f0_command(USER, 0, 1000 + user_f0[nphon]); goto skiprules)"
+      - "DECtalk 4.63 Ph_drwt02.c:3953-4026 set_user_target (the number modulo 1000; a note up to 37, else Hz times ten between LOWEST_F0 and HIGHEST_F0)"
+      - "DECtalk 4.63 PH/ph_romi.c:95-134 notetab (notes C2 to C5)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (the command clock)"
+
+  # --------------------------------------------------------------------------
+  # Segmental F0 (Ph_drwt02.c pht0draw, 2080-2150).
+  #
+  # DECtalk steps through the clause's allophones (allophons[], allodurs[]) and
+  # feeds each one's incremental target, us_f0msegtars[phone], into a separately
+  # filtered segmental path. One command is inserted here per DECtalk allophone,
+  # in order:
+  #   - the clause-initial silence,
+  #   - every phone (a stop's closure, release and aspiration are one allophone),
+  #   - the dummy vowel DECtalk appends after a clause-final stop,
+  #   - the clause-final silence.
+  # Each command carries the target, the allophone's duration in controller
+  # frames, and the three tests pht0draw makes on the phone:
+  #   profile_points = [voiceless (FVOICD minus), plosive (FPLOSV), stressed
+  #   (allofeats & FSTRESS)]. The last two are read only for a voiceless phone.
+  # A fourth entry says whether a glottal-stop gesture stands at the
+  # allophone's end (set_tglst, Ph_drwt02.c:4040-4128); absent, there is none.
+  # The f0-filters kernel owns the fixed-point filter and its delays, and the
+  # gesture's clock and its dip in F0 (2266-2275).
+  # --------------------------------------------------------------------------
+  # The clause's first allophone is a phone, or a silence phonemic text wrote
+  # ("[_<600>m'uwn]."): the opening pause stands before either.
+  dectalk_segmental_f0_initial_silence:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme == 'SIL'
-        && current.word == 'cake'
-        && has(current.dummy_vowel) && current.dummy_vowel == true
-        && behind(current, 4) != null && behind(current, 4).phoneme == 'K'
+        (current.phoneme != 'SIL' || isTrue(current, 'written_silence'))
+        && (prev == null || (prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null))
     insert:
       relation: Tilt
       layer: segmental
-      at: at_sync(behind(current, 4).sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.initial_silence_frames
-      profile_points: [1, 0, 0]
+      at: at_sync(current.sync_left)
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      duration_frames: dectalk_clause_initial_pause_frames(current)
+      # The fourth flag: a gesture at the pause's end when the clause's first
+      # allophone is glottalized (Ph_drwt02.c:4110-4114), or is a vowel with
+      # primary stress in its word's first syllable (4078-4098, the consonant
+      # case: the pause carries FWBNEXT, which the word boundary ahead of the
+      # first word gives the phone before it, ph_sort.c:1457-1466).
+      profile_points:
+        - 1
+        - 0
+        - 0
+        - >-
+          dectalk_name(current) in params.policy.articulation.place.glottal
+          || (dectalk_has(current, 'vowel') && dectalk_name(current) != 'YU'
+              && get(current, 'syllable_type', 'only') in ['first', 'only']
+              && get(current, 'stress', 0) in [1, params.policy.f0.stress_emphasis_level])
+          ? 1 : 0
       tag: f0_segmental_initial_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target and unvoiced fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (SI duration 4 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:4040-4128 set_tglst (where a glottal-stop gesture is placed)"
+      - "DECtalk 4.63 ph_sort.c:1457-1466 (WBOUND adds FWBNEXT to the phone before it)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
-  dectalk_segmental_k_ey_k_initial_stop:
+  # --------------------------------------------------------------------------
+  # A clause with no phone. A capital letter with a period ("A.") sends its
+  # period twice (LTS/ls_task.c:1516-1519, 1547-1549), and DECtalk speaks the
+  # second as a clause of two silences, an opening and a closing one. Here it
+  # is a clause silence that directly follows another. pht0draw starts it
+  # like any clause: its opening pause is an allophone of the segmental path
+  # (the closing one comes from dectalk_segmental_f0_final_silence), and it
+  # takes a baseline by its mark and its word count, which is 0: the short
+  # declarative row for a male voice, the declarative row for a female one.
+  # --------------------------------------------------------------------------
+  dectalk_empty_clause_f0_opening_silence:
     kind: f0_layer
-    select:
+    select: &empty_clause
       relation: Segment
       where: >-
-        current.phoneme == 'K'
-        && current.word == 'cake'
-        && next != null && next.phoneme == 'K_REL'
+        current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null
+        && prev != null && prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.k_target
-      duration_frames: params.policy.f0.segmental.initial_k_frames
-      profile_points: [1, 1, 1]
-      tag: f0_segmental_initial_k
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      duration_frames: dectalk_clause_initial_pause_frames(current)
+      profile_points: [1, 0, 0, 0]
+      tag: f0_segmental_initial_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless stressed plosive fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (initial K duration 17 frames)"
+      - "DECtalk 4.63 LTS/ls_task.c:1516-1519, 1547-1549 (a capital letter and a period: the period is sent twice)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
-  dectalk_segmental_k_ey_k_vowel:
+  # The mark of a clause with no phone is whatever the text stage sent: a
+  # period after an initial, or the mark after a parenthesis that closes
+  # inside a quotation (`"Stop (now)!"` is a comma clause and then an empty
+  # exclamation; LTS symbols 115 0 118 0 in an instrumented build). pht0draw
+  # picks the row by that mark as for any clause, with number_words 0:
+  #   male (Ph_drwt02.c:1658-1700): period [4], comma [1], exclamation [2],
+  #     question [3];
+  #   female (3223-3257): period and exclamation [0] and [2] (the same
+  #     numbers), question [3], comma [1] when the clause before it did not
+  #     end in a comma (dcommacnt 1) and [0] otherwise.
+  # Measured against DECtalk: the period and the exclamation, for Paul and for
+  # Betty (dectalk-us-empty-clause-v1, dectalk-us-betty-v1). The question and
+  # the comma are from the source alone: the frontend does not yet produce
+  # those two clauses from the texts that have them.
+  dectalk_empty_clause_baseline:
     kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'EY'
-        && current.word == 'cake'
-        && has(current.stress) && current.stress == 1
+    select: *empty_clause
+    define: &empty_clause_mark
+      male: "params.policy.voice.sex == 'male'"
+      mark: current.punctuationSymbol
+      comma: "mark in [',', ';', ':']"
+      first_comma: "!(get(prev, 'punctuationSymbol', '') in [',', ';', ':'])"
+    constraint: "male && mark == '.'"
     insert:
-      relation: Tilt
-      layer: segmental
+      relation: PhraseCommand
+      layer: baseline
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ey_target
-      duration_frames: params.policy.f0.segmental.ey_frames
-      profile_points: [0, 0, 1]
-      tag: f0_segmental_ey
+      value: 0
+      profile_points: [1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960, 950]
+      tag: f0_baseline
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (EY target and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (EY duration 37 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[4][] (short declarative baseline, number_words <= 3)"
+      - "DECtalk 4.63 Ph_drwt02.c:1660-1667 (clausetype 0: f0basetypes[4] unless number_words > 3)"
 
-  dectalk_segmental_k_ey_k_final_stop:
+  dectalk_empty_clause_comma_baseline:
     kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'K'
-        && current.word == 'cake'
-        && next != null && next.phoneme == 'SIL'
-        && has(next.dummy_vowel) && next.dummy_vowel == true
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && comma"
     insert:
-      relation: Tilt
-      layer: segmental
+      relation: PhraseCommand
+      layer: baseline
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.k_target
-      duration_frames: params.policy.f0.segmental.final_k_frames
-      profile_points: [1, 1, 0]
-      tag: f0_segmental_final_k
+      value: 0
+      profile_points: [1157, 1145, 1139, 1127, 1113, 1109, 1085, 1062, 1049, 1035, 1023, 1015, 1005, 1010, 1057, 1124, 1040]
+      tag: f0_baseline
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless unstressed plosive fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (final K duration 14 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:1335-1352 f0basetypes[1][] (comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1669-1681 (clausetype 1 selects f0basetypes[1])"
 
-  dectalk_segmental_k_ey_k_dummy_ix:
+  dectalk_empty_clause_exclamation_baseline:
     kind: f0_layer
-    select:
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1107, 1135, 1159, 1167, 1163, 1199, 1145, 1132, 1129, 1115, 1103, 1090, 1088, 1074, 1030, 902, 893]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1354-1373 f0basetypes[2][] (exclamatory clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1683-1692 (clausetype 2: f0basetypes[2] unless number_words > 2)"
+
+  dectalk_empty_clause_question_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1187, 1165, 1139, 1127, 1113, 1109, 1095, 1082, 1079, 1065, 1053, 940, 938, 924, 1010, 1014, 1018]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1375-1391 f0basetypes[3][] (question)"
+      - "DECtalk 4.63 Ph_drwt02.c:1695-1699 (clausetype 3 selects f0basetypes[3])"
+
+  dectalk_female_empty_clause_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && (mark == '.' || mark == '!' || (comma && !first_comma))"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2462-2478, 2501-2517 f0basetypes[0][] and [2][] (female; the same numbers)"
+      - "DECtalk 4.63 Ph_drwt02.c:2482, 2520 (f0basetypes[1][0] and [3][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3223-3252 (clausetype 0, 1 and 2 in the female routine)"
+
+  dectalk_female_empty_clause_comma_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && comma && first_comma"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1785, 1762, 1749, 1725, 1703, 1710, 1718, 1764, 1810, 1864, 1928, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2482-2498 f0basetypes[1][] (female comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:2501 (f0basetypes[2][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3233-3242 (dcommacnt == 1 selects f0basetypes[1] unless number_words > 4)"
+
+  dectalk_female_empty_clause_question_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1890]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2520-2536 f0basetypes[3][] (female question)"
+      - "DECtalk 4.63 Ph_drwt02.c:2540 (f0basetypes[4][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3253-3257 (clausetype 3 selects f0basetypes[3])"
+
+  dectalk_female_empty_clause_exclamation_range:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: range
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.exclamation_range_added
+      tag: f0_exclamation_range
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
+
+  # A clause with no phone is spoken with the F0 floor every clause has once
+  # the run's first clause has ended at an inserted break
+  # (dectalk_break_f0_floor, which starts at a clause's first phone and so
+  # does not reach it). `The sign said "Closed (back at two)."` is three
+  # clauses, the first ending at the break before "Closed" and the last
+  # holding only the period: its ten packets are at 50 Hz.
+  dectalk_empty_clause_break_f0_floor:
+    kind: f0_layer
+    select: *empty_clause
+    define:
+      # An earlier clause was the second one and began after an inserted break.
+      first_clause_broke: >-
+        count_back_pred(current, 1000, 'is_never', 'is_first_clause_break_start') > 0.0
+    constraint: params.policy.f0.unloaded_floor_applies && first_clause_broke
+    insert:
+      relation: PhraseCommand
+      layer: floor
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.unloaded_floor
+      tag: f0_break_floor
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:829-837, 842-849 (compause saved, set to -12 and restored around the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_data.h:841-851 (f0minimum three shorts before compause)"
+      - "DECtalk 4.63 PH/ph_vset.c:683 (f0minimum is set when a voice is loaded)"
+      - "DECtalk 4.63 PH/Ph_drwt02.c:2312-2324 (f0prime = f0minimum + ...; clamped to LOWEST_F0)"
+
+  # The baseline's clock is tcumdur, which phinton adds up one allophone at a
+  # time at the foot of its loop (Ph_inton2.c:1659-1671). Where the walk stops
+  # early (809-819) the allophones from the stopping syllabic on are never
+  # added: pht0draw still steps through them, but the baseline runs over the
+  # shorter span. Those get the second rule's tag, which lowering leaves out
+  # of the baseline's duration.
+  dectalk_segmental_f0_phone:
+    kind: f0_layer
+    select: &segmental_phone_select
       relation: Segment
       where: >-
-        current.phoneme == 'SIL'
-        && current.word == 'cake'
-        && has(current.dummy_vowel) && current.dummy_vowel == true
+        current.phoneme != 'SIL'
+        && !(current.type in ['stop_release', 'stop_aspiration'])
+    define: &segmental_phone_define
+      n1: next
+      n2: "ahead(current, 2)"
+      piece1: "n1 != null && n1.type in ['stop_release', 'stop_aspiration']"
+      piece2: "piece1 && n2 != null && n2.type in ['stop_release', 'stop_aspiration']"
+      allophone_ms: >-
+        current.duration + (piece1 ? n1.duration : 0) + (piece2 ? n2.duration : 0)
+      counted: "isTrue(current, 'intonation_reached')"
+      # set_tglst() (Ph_drwt02.c:4040-4128): whether a glottal-stop gesture
+      # stands at this allophone's end. The kernel times it and dips F0 around
+      # it (2266-2275).
+      gl_next: dectalk_next(current)
+      gl_prev: dectalk_prev(current)
+      gl_name: dectalk_name(current)
+      gl_next_name: dectalk_name(gl_next)
+      gl_boundary: dectalk_boundary(current)
+      # 4065-4077: no gesture after a function word's phone when this is the
+      # /n/ after its word-final EH, or a word-final schwa. The routine returns
+      # there, before the glottalized-phone tests below.
+      gl_function_word: >-
+        gl_prev != null && dectalk_has_class(gl_prev, 'func')
+        && ((gl_name == 'N' && dectalk_name(gl_prev) == 'EH'
+             && dectalk_boundary(gl_prev) >= params.policy.timing.boundary.word)
+            || (gl_name == 'AX' && gl_boundary >= params.policy.timing.boundary.word))
+      # FSTRESS_1 is the low bit: primary stress and emphasis.
+      gl_next_primary: >-
+        gl_next != null
+        && get(gl_next, 'stress', 0) in [1, params.policy.f0.stress_emphasis_level]
+      # 4078-4081: the next allophone is a vowel other than YU in its word's
+      # first or only syllable, and this one is word-final. (The source masks
+      # with FMEDIALSYL & FFINALSYL, which is the medial bit; a final syllable
+      # has it too.)
+      gl_before_word_vowel: >-
+        gl_next != null && dectalk_has(gl_next, 'vowel') && gl_next_name != 'YU'
+        && get(gl_next, 'syllable_type', 'only') in ['first', 'only']
+        && gl_boundary >= params.policy.timing.boundary.word
+      # 4083-4098: after a syllabic only between identical vowels, the second
+      # with primary stress, or at a verb-phrase boundary or stronger; after a
+      # consonant other than a plosive or flap only before a primary-stressed
+      # vowel that is not nasal.
+      gl_at_hiatus: >-
+        dectalk_has(current, 'syllabic')
+        ? ((gl_name == gl_next_name && gl_next_primary)
+           || gl_boundary >= params.policy.timing.boundary.vp)
+        : (!dectalk_has(current, 'plosive') && gl_name != 'DX' && gl_next_primary
+           && !dectalk_has(gl_next, 'nasal'))
+      # 4110-4119: at the start and the end of a glottalized allophone.
+      gl_glottalized: >-
+        gl_name in params.policy.articulation.place.glottal
+        || (gl_next != null && gl_next_name in params.policy.articulation.place.glottal)
+      glottal_gesture: >-
+        !gl_function_word && ((gl_before_word_vowel && gl_at_hiatus) || gl_glottalized)
+    constraint: counted
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ix_target
-      duration_frames: params.policy.f0.segmental.dummy_ix_frames
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], current.phoneme, 0)"
+      duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
+      profile_points: &segmental_phone_flags
+        # The allophone's own feature word: the glottalized /t/ is FVOICD.
+        - "dectalk_has(current, 'voiced') ? 0 : 1"
+        - "current.type == 'stop_closure' ? 1 : 0"
+        - "get(current, 'stress', 0) > 0 ? 1 : 0"
+        - "glottal_gesture ? 1 : 0"
+      tag: f0_segmental_phone
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
+      - "DECtalk 4.63 Ph_drwt02.c:4040-4128 set_tglst (where a glottal-stop gesture is placed)"
+      - "DECtalk 4.63 ph_sort.c:1305-1308 (F_FUNC on the phones of a function word)"
+
+  dectalk_segmental_f0_phone_after_intonation_stop:
+    kind: f0_layer
+    select: *segmental_phone_select
+    define: *segmental_phone_define
+    constraint: "!counted"
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], current.phoneme, 0)"
+      duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
+      profile_points: *segmental_phone_flags
+      tag: f0_segmental_uncounted_phone
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
+      - "DECtalk 4.63 Ph_inton2.c:809-819, 1659-1671 (tcumdur is not added to once the loop is left)"
+
+  # A silence phonemic text wrote is an allophone pht0draw steps through like
+  # any other, with the silence's target. phinton does not add it to tcumdur
+  # ("don't count" a silence after the clause's first allophone,
+  # Ph_inton2.c:1662-1671), so it has the tag lowering leaves out of the
+  # baseline's duration.
+  dectalk_segmental_f0_written_silence:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && isTrue(current, 'written_silence')"
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_uncounted_phone
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_inton2.c:1662-1671 (tcumdur: a silence is counted only as the clause's first allophone)"
+      - "DECtalk 4.63 PH/ph_sort.c:1331-1333 (a silence symbol in the input is a phone of the clause)"
+
+  dectalk_segmental_f0_dummy_vowel:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && isTrue(current, 'dummy_vowel')"
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], get(current, 'dummy_phone', 'IX'), 0)"
+      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
       profile_points: [0, 0, 0]
-      tag: f0_segmental_dummy_ix
+      tag: f0_segmental_dummy_vowel
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (IX target and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (dummy IX duration 6 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (IX and AX targets) and :2080-2150 pht0draw"
 
-  dectalk_segmental_k_ey_k_terminal_silence:
+  dectalk_segmental_f0_final_silence:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.phoneme == 'SIL'
-        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
-        && prev != null && prev.word == 'cake'
-        && has(prev.dummy_vowel) && prev.dummy_vowel == true
+      where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.terminal_silence_frames
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      # The Segment also holds the next clause's opening pause
+      # (dectalk_pause_duration); that pause has its own command above.
+      duration_frames: >-
+        round(current.duration / params.policy.f0.segmental.frame_ms)
+        - (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0)
       profile_points: [1, 0, 0]
       tag: f0_segmental_terminal_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (terminal GEN_SIL duration 94 frames)"
-
-  # Active US male segmental F0 controller stream for the exact `the` target.
-  # The first two commands are coincident on the speech clock: initialized SI
-  # establishes the filter state before pht0draw() advances to DH.
-  dectalk_segmental_dh_ax_initial_silence:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'DH'
-        && current.word == 'the'
-        && next != null && next.phoneme == 'AX'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.the_initial_silence_frames
-      profile_points: [1, 0, 0]
-      tag: f0_segmental_initial_silence
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target 50 and initialized segmental filter state)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (SI duration 4 frames)"
-
-  dectalk_segmental_dh_ax_initial_consonant:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'DH'
-        && current.word == 'the'
-        && next != null && next.phoneme == 'AX'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.dh_target
-      duration_frames: params.policy.f0.segmental.the_dh_frames
-      profile_points: [0, 0, 0]
-      tag: f0_segmental_dh
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US DH target 0 and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (DH duration 10 frames)"
-
-  dectalk_segmental_dh_ax_vowel:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: current.phoneme == 'AX' && current.word == 'the'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ax_target
-      duration_frames: params.policy.f0.segmental.the_ax_frames
-      profile_points: [0, 0, 1]
-      tag: f0_segmental_ax
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US AX target 30 and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (AX duration 32 frames)"
-
-  dectalk_segmental_dh_ax_terminal_silence:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'SIL'
-        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
-        && prev != null && prev.word == 'the'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.the_terminal_silence_frames
-      profile_points: [1, 0, 0]
-      tag: f0_segmental_terminal_silence
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (terminal GEN_SIL duration 94 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
 
   # --------------------------------------------------------------------------
   # Rule 6: Connected-speech source contour (Fant 1997)
@@ -681,18 +1214,18 @@ rules:
       declination_db: >-
         -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
       final_window_sec: >-
-        min([
+        min(
           params.policy.source_contour.ee_final_window_max_sec,
-          max([
+          max(
             params.policy.source_contour.ee_final_window_min_sec,
             contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
-          ])
-        ])
+          )
+        )
       final_window_start_sec: >-
-        max([
+        max(
           params.policy.source_contour.ee_onset_rise_sec,
           contour.phrase_duration_sec - final_window_sec
-        ])
+        )
       final_fall_db: >-
         contour.elapsed_sec > final_window_start_sec
         ? -(params.policy.source_contour.ee_final_fall_db_per_sec
@@ -702,7 +1235,7 @@ rules:
       final_progress: >-
         contour.elapsed_sec <= final_window_start_sec
         ? 0.0
-        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+        : min(1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec)
       ee_total_db: >-
         onset_rise_db + declination_db + final_fall_db
     citations:

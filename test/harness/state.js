@@ -17,11 +17,17 @@ export const state = {
   // Experiment
   currentExperimentId: null,
   experimentManifest: null,
+  // public/rules/frontends/manifest.json: frontend ids and default experiments
+  frontendManifest: null,
 
   // Session
   sessionId: 0,
   lastRun: null,
   runStartTime: 0,
+  // Stage timings (ms) of the last Speak click (harness/runtime.js) and of
+  // the last frontend warm-up (harness/warmup.js)
+  lastSpeakTimings: null,
+  lastWarmup: null,
 
   // DOM elements
   status: document.getElementById("status"),

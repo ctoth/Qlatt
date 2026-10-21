@@ -1,27 +1,49 @@
+import type { LtsContext } from "../../g2p/lts-document";
+import {
+  NUMBER_PHONEMIC_FORMS,
+  type NumberPhonemicForm,
+  numberPhonemicText,
+} from "../../g2p/number-phonemic-text";
 import { isPlainObject } from "../../yaml-loader";
 import { evaluateExpression } from "../cel-expressions";
 import {
   type InventoryParameterFallback,
+  type InventorySelection,
   type InventorySpec,
   materializePhonemeTarget,
 } from "../inventory";
 import { type CompiledRulepack, rulepackMapOrigins } from "../rule-pack";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
+import {
+  type FrameRegisterValue,
+  type FrameRule,
+  type FrameUnit,
+  type FrameUnitResult,
+  runFrameProgram,
+} from "./frame-program";
 import type { Item } from "./item";
+import { inheritParameterScope, PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { evalPath, isNavOp } from "./path";
 import type { HrgNode } from "./relation";
 import { applyScalarOp } from "./scalar-op";
 import { applyToneAssociation } from "./tone-association";
-import type { HrgTransaction } from "./transaction";
+import { type HrgTransaction, NOT_DERIVED } from "./transaction";
 import type { ConditionEvidence, FeatureValue, TransactionJournalEntry } from "./types";
 import type { Utterance } from "./utterance";
 
+export { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
+
 export interface GraphRuleEngineOptions {
+  lts?: LtsContext;
   phases?: readonly string[];
   parameters?: Readonly<Record<string, unknown>>;
+  /** The overlay of each parameter scope, by the scope's name (parameter-scope.ts). */
+  parameterScopes?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   inventory?: GraphInventoryResource;
   evaluationOwner?: GraphRuleEvaluationOwner;
   captureTooling?: boolean;
+  /** Called with a phase's name when the phase has run, for timing. */
+  onPhaseEnd?: (phase: string) => void;
 }
 
 export interface GraphInventoryResource {
@@ -44,16 +66,47 @@ function activeItems(items: readonly Item[]): Item[] {
   return items.filter((item) => item.get("active") !== false);
 }
 
-function projectPolicyValues(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(projectPolicyValues);
-  if (!isPlainObject(value)) return value;
-  if (Object.hasOwn(value, "value")) return projectPolicyValues(value.value);
-  return Object.fromEntries(
-    Object.entries(value).map(([key, nested]) => [key, projectPolicyValues(nested)]),
-  );
+/**
+ * The projection of each policy tree that cannot change, by tree: every run
+ * projects the compiled rulepack's parameters, which are frozen all the way
+ * down, and a phrase is several runs. A projection kept here is frozen too,
+ * because every later run's parameters share it.
+ */
+const policyProjections = new WeakMap<object, unknown>();
+
+export function projectPolicyValues(value: unknown): unknown {
+  if (!Array.isArray(value) && !isPlainObject(value)) return value;
+  if (policyProjections.has(value)) return policyProjections.get(value);
+  let read: readonly unknown[];
+  let projected: unknown;
+  if (Array.isArray(value)) {
+    read = value;
+    projected = value.map(projectPolicyValues);
+  } else if (Object.hasOwn(value, "value")) {
+    read = [value.value];
+    projected = projectPolicyValues(value.value);
+  } else {
+    read = Object.values(value);
+    projected = Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, projectPolicyValues(nested)]),
+    );
+  }
+  // Kept only when nothing it was made from can change: the tree is frozen
+  // and each tree below it was kept. What is not a tree is passed through.
+  if (
+    Object.isFrozen(value) &&
+    read.every(
+      (nested) =>
+        (!Array.isArray(nested) && !isPlainObject(nested)) || policyProjections.has(nested),
+    )
+  ) {
+    if (projected !== null && typeof projected === "object") Object.freeze(projected);
+    policyProjections.set(value, projected);
+  }
+  return projected;
 }
 
-function mergeParameterRecords(
+export function mergeParameterRecords(
   base: Readonly<Record<string, unknown>>,
   override: Readonly<Record<string, unknown>>,
 ): Record<string, unknown> {
@@ -68,6 +121,41 @@ function mergeParameterRecords(
   return merged;
 }
 
+/**
+ * The parameters of each scope, by name, carried on the parameters record of
+ * a run under a key no expression can name. Absent when no scope is declared.
+ */
+const SCOPED_PARAMETERS = Symbol("parameterScopes");
+type ScopedParameters = ReadonlyMap<string, Readonly<Record<string, unknown>>>;
+
+function scopedParametersOf(
+  params: Readonly<Record<string, unknown>>,
+): ScopedParameters | undefined {
+  return (params as { [SCOPED_PARAMETERS]?: ScopedParameters })[SCOPED_PARAMETERS];
+}
+
+/**
+ * The parameters an Item's scope gives it, read on `transaction` so that the
+ * decision that put the Item in its scope becomes a dependency. `params`
+ * itself for an Item in no scope, and when no scope is declared.
+ */
+function parametersFor(
+  params: Readonly<Record<string, unknown>>,
+  item: Item | undefined,
+  transaction: HrgTransaction,
+): Readonly<Record<string, unknown>> {
+  const scopes = scopedParametersOf(params);
+  if (!scopes || !item?.has(PARAMETER_SCOPE_FEATURE)) return params;
+  const name = transaction.read(item, PARAMETER_SCOPE_FEATURE);
+  const scoped = typeof name === "string" ? scopes.get(name) : undefined;
+  if (!scoped) {
+    throw new Error(
+      `E_HRG_PARAMETER_SCOPE: Item '${item.id}' is in the parameter scope '${String(name)}', which is not declared`,
+    );
+  }
+  return scoped;
+}
+
 function numericAggregate(args: unknown[], mode: "min" | "max"): number {
   const values = (args.length === 1 && Array.isArray(args[0]) ? args[0] : args).filter(
     (value): value is number => typeof value === "number" && Number.isFinite(value),
@@ -75,8 +163,42 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
   return mode === "min" ? Math.min(...values) : Math.max(...values);
 }
 
+/** Fixed computations shared by transactional and requested expression contexts. */
+export const PURE_GRAPH_MATH = {
+  max: (...args: unknown[]) => numericAggregate(args, "max"),
+  min: (...args: unknown[]) => numericAggregate(args, "min"),
+  exp: (value: unknown) => Math.exp(Number(value)),
+  sqrt: (value: unknown) => Math.sqrt(Number(value)),
+  abs: (value: unknown) => Math.abs(Number(value)),
+  log: (value: unknown) => Math.log(Number(value)),
+  pow: (value: unknown, exponent: unknown) => Number(value) ** Number(exponent),
+  contains: (container: unknown, candidate: unknown) =>
+    typeof container === "string"
+      ? container.includes(String(candidate))
+      : Array.isArray(container) && container.includes(candidate),
+};
+
 type EvaluationContext = {
   values: Record<string, unknown>;
+  /**
+   * Give every entry of a `define:` block a value that is computed, by
+   * `compute` from the entry's expression, when an expression first reads it,
+   * and once: an entry nothing reads is never computed.
+   */
+  defineLazily: (
+    definitions: Readonly<Record<string, unknown>>,
+    compute: (expression: unknown) => unknown,
+  ) => void;
+  /** Position of this context's Item in the scope's Item list. */
+  index: number;
+  /**
+   * Position of the Item the rule is evaluating on: this context's own Item,
+   * or, for a context a scan made for a candidate, the Item of the context
+   * the scan was called from. `params` is this Item's.
+   */
+  ruleIndex: number;
+  /** The scope's record of the Item being evaluated; see `evaluate`. */
+  cursor: { index: number; rule: number };
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
   owner: GraphRuleEvaluationOwner;
@@ -121,32 +243,54 @@ interface EvaluationContextOptions {
   inventory?: GraphInventoryResource;
 }
 
-function buildEvaluationContext(options: EvaluationContextOptions): EvaluationContext {
+/** The names an Item view answers beside the Item's features (`view` below). */
+const DERIVED_VIEW_NAMES: ReadonlySet<string> = new Set([
+  "sync_left",
+  "sync_right",
+  "syllable",
+  "word",
+  "parent",
+  "daughters",
+  "is_final",
+  "next_boundary",
+]);
+
+/** What every context of one transaction over one Item list shares. */
+type EvaluationScope = {
+  at: (
+    index: number,
+    extra: Readonly<Record<string, unknown>>,
+    bindings: Readonly<Record<string, Item>>,
+  ) => EvaluationContext;
+};
+
+/**
+ * Build the navigation functions, the views and the dependency recording for
+ * one transaction over one list of Items, once. A context (`at`) is then only
+ * the named values seen from one Item. A scope must not outlive its
+ * transaction or serve another Item list: its functions record what they read
+ * on that transaction and index into that list.
+ */
+function buildEvaluationScope(
+  options: Omit<EvaluationContextOptions, "index" | "extra" | "bindings">,
+): EvaluationScope {
   const {
     utterance,
     transaction,
     owner,
     items,
-    index,
     params,
-    extra = {},
-    bindings = {},
     relationName,
     predicates = {},
     inventory,
   } = options;
-  const recurseBase = {
-    utterance,
-    transaction,
-    owner,
-    items,
-    params,
-    relationName,
-    predicates,
-    inventory,
-  };
+  // The Item the expression being evaluated right now is about. One scope
+  // serves every context made from it, so the functions that speak of "the
+  // current Item" without naming it read this; `evaluate` sets it for the
+  // length of one evaluation and puts the outer one back.
+  const cursor = { index: -1, rule: -1 };
   const recurse = (index: number, extra: Readonly<Record<string, unknown>>): EvaluationContext =>
-    buildEvaluationContext({ ...recurseBase, index, extra });
+    at(index, extra, {}, cursor.rule >= 0 ? cursor.rule : index);
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const silenceSymbol = (): string => {
     if (!inventory)
@@ -213,9 +357,8 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     if (!item) return null;
     let result = views.get(item);
     if (!result) {
-      const featureView = transaction.view(item);
-      result = new Proxy(featureView, {
-        get: (target, property, receiver) => {
+      result = transaction.view(item, {
+        get: (property) => {
           if (property === "segment" && item.type === "frame") {
             const links = utterance.latestAssociationWrites(item, "segment");
             for (const link of links) transaction.dependOn(link.decisionId);
@@ -223,6 +366,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
             if (active.length > 1) throw new Error(`E_FRAME_SEGMENT_CARDINALITY: ${item.id}`);
             return view(active[0] ? utterance.getItem(active[0].toItemId) : undefined);
           }
+          if (!DERIVED_VIEW_NAMES.has(property)) return NOT_DERIVED;
           if (property === "sync_left" || property === "sync_right") {
             const anchor = utterance.temporalAnchor(item);
             if (!anchor) return null;
@@ -247,19 +391,19 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
             return isFinalSyllable(item);
           }
           if (property === "next_boundary") return view(nextBoundary(item));
-          return Reflect.get(target, property, receiver);
+          return NOT_DERIVED;
         },
-        has: (target, property) =>
+        has: (property) =>
           (property === "segment" && item.type === "frame") ||
-          property === "sync_left" ||
-          property === "sync_right" ||
-          (property === "syllable" && structureAncestor(item, "syllable") != null) ||
-          (property === "word" && structureAncestor(item, "word") != null) ||
-          (property === "parent" && structureRelation?.node(item)?.parent != null) ||
-          (property === "daughters" && structureChildren(item).length > 0) ||
-          (property === "is_final" && item.type === "syllable") ||
-          property === "next_boundary" ||
-          Reflect.has(target, property),
+          (DERIVED_VIEW_NAMES.has(property) &&
+            (property === "sync_left" ||
+              property === "sync_right" ||
+              (property === "syllable" && structureAncestor(item, "syllable") != null) ||
+              (property === "word" && structureAncestor(item, "word") != null) ||
+              (property === "parent" && structureRelation?.node(item)?.parent != null) ||
+              (property === "daughters" && structureChildren(item).length > 0) ||
+              (property === "is_final" && item.type === "syllable") ||
+              property === "next_boundary")),
       });
       views.set(item, result);
       itemByView.set(result, item);
@@ -277,7 +421,9 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
   const offset = (value: unknown, amount: unknown): Readonly<Record<string, unknown>> | null => {
     const source = resolveItem(value);
     const sourceIndex = source ? items.indexOf(source) : -1;
-    const distance = typeof amount === "number" ? Math.trunc(amount) : 1;
+    // A CEL integer literal arrives as a bigint, a double as a number.
+    const distance =
+      typeof amount === "number" || typeof amount === "bigint" ? Math.trunc(Number(amount)) : 1;
     const target = sourceIndex >= 0 ? items[sourceIndex + distance] : undefined;
     if (target && relationName) {
       const write = utterance.relation(relationName).node(target)?.write;
@@ -286,6 +432,13 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     return view(target);
   };
   const merge = (left: unknown, right: unknown): Record<string, unknown> => {
+    // A view is not a map of an Item's features: what it lists is a matter of
+    // how views are made, and copying it would read every feature unasked.
+    if (isItemView(left) || isItemView(right)) {
+      throw new Error(
+        `E_HRG_VIEW_NOT_A_MAP: rule '${transaction.metadata.ruleId}' passes an Item to merge(); merge takes maps, so name the features to copy`,
+      );
+    }
     return {
       ...(isPlainObject(left) ? left : {}),
       ...(isPlainObject(right) ? right : {}),
@@ -347,6 +500,47 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
     }
     return null;
+  };
+  /**
+   * Walk from the source (exclusive) until `stopPredicate` holds or the
+   * relation ends, at most `maxSteps` items, and count the items on the way
+   * for which `countPredicate` holds. The stopping item is not counted.
+   */
+  const countScan = (
+    sourceValue: unknown,
+    maxStepsValue: unknown,
+    stopPredicate: unknown,
+    countPredicate: unknown,
+    direction: -1 | 1,
+  ): number => {
+    const source = resolveItem(sourceValue);
+    const maxSteps = Math.trunc(Number(maxStepsValue));
+    const sourceIndex = source ? items.indexOf(source) : -1;
+    if (
+      sourceIndex < 0 ||
+      !Number.isFinite(maxSteps) ||
+      typeof stopPredicate !== "string" ||
+      typeof countPredicate !== "string"
+    )
+      return 0;
+    let count = 0;
+    for (let offsetIndex = 1; offsetIndex <= maxSteps; offsetIndex += 1) {
+      const candidateIndex = sourceIndex + direction * offsetIndex;
+      const candidate = items[candidateIndex];
+      if (!candidate) break;
+      if (relationName) {
+        const write = utterance.relation(relationName).node(candidate)?.write;
+        if (write) transaction.dependOn(write.decisionId);
+      }
+      const candidateContext = recurse(candidateIndex, {
+        source: view(source),
+        candidate: view(candidate),
+        scan_offset: direction * offsetIndex,
+      });
+      if (conditionMatches({ predicate: stopPredicate }, candidateContext, predicates)) break;
+      if (conditionMatches({ predicate: countPredicate }, candidateContext, predicates)) count += 1;
+    }
+    return count;
   };
   const relationItems = (nameValue: unknown): Item[] => {
     if (typeof nameValue !== "string") return [];
@@ -437,342 +631,461 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     if (endsInFeature) return result.node ? result.value : null;
     return view(result.node?.item);
   };
-  const bindingViews = Object.fromEntries(
-    Object.entries(bindings).map(([name, item]) => [name, view(item)]),
-  );
-  const navigationItems: Readonly<Record<string, Item | undefined>> = {
-    current: items[index],
-    prev: items[index - 1],
-    next: items[index + 1],
-    ...bindings,
-  };
-  const values = {
-    current: view(items[index]),
-    prev: view(items[index - 1]),
-    next: view(items[index + 1]),
-    current_index: index,
-    params,
-    sets: params.sets,
-    maps: params.maps,
-    transcription: params.transcription,
-    ...bindingViews,
-    ...extra,
-  };
-  return {
-    owner,
-    isItemView: (value) => value !== null && typeof value === "object" && itemByView.has(value),
-    values: new Proxy(values, {
-      get: (target, property, receiver) => {
-        if (typeof property === "string" && relationName) {
-          const item = navigationItems[property];
-          // A text item's value has its own source ancestry. Its append write
-          // also depends on preceding source spans for list ordering; reading
-          // current text must not make those spans pronunciation ancestors.
-          // Explicit prev/next navigation still records that ordering evidence.
-          const write =
-            item && !(property === "current" && item.type === "normalization")
-              ? utterance.relation(relationName).node(item)?.write
-              : undefined;
-          if (write) transaction.dependOn(write.decisionId);
-        }
-        return Reflect.get(target, property, receiver);
+  const isItemView = (value: unknown): boolean =>
+    value !== null && typeof value === "object" && itemByView.has(value);
+  // One context: the scope seen from one Item. Only the named values differ
+  // between the contexts of a scope.
+  const at = (
+    index: number,
+    extra: Readonly<Record<string, unknown>>,
+    bindings: Readonly<Record<string, Item>>,
+    ruleIndex: number = index,
+  ): EvaluationContext => {
+    const bindingViews = Object.fromEntries(
+      Object.entries(bindings).map(([name, item]) => [name, view(item)]),
+    );
+    const navigationItems: Readonly<Record<string, Item | undefined>> = {
+      current: items[index],
+      prev: items[index - 1],
+      next: items[index + 1],
+      ...bindings,
+    };
+    const values = {
+      current: view(items[index]),
+      prev: view(items[index - 1]),
+      next: view(items[index + 1]),
+      current_index: index,
+      params,
+      sets: params.sets,
+      maps: params.maps,
+      transcription: params.transcription,
+      ...bindingViews,
+      ...extra,
+    } as Record<string, unknown>;
+    // Definitions whose values are computed when first read (`defineLazily`).
+    let pending: {
+      definitions: Readonly<Record<string, unknown>>;
+      compute: (expression: unknown) => unknown;
+    } | null = null;
+    const started = new Set<string>();
+    return {
+      owner,
+      index,
+      ruleIndex,
+      cursor,
+      functions,
+      defineLazily: (definitions, compute) => {
+        pending = { definitions, compute };
       },
-    }),
-    functions: {
-      vocabulary: (table, key) => {
-        const invalidLookup = (message: string): never => {
-          utterance.diagnostics.error(
-            message,
-            { table, key, ruleId: transaction.metadata.ruleId },
-            "E_VOCABULARY_LOOKUP",
-          );
-          throw new Error(`E_VOCABULARY_LOOKUP: ${message}`);
-        };
-        if (typeof table !== "string" || typeof key !== "string" || !isPlainObject(params.maps))
-          return invalidLookup("table and key must be strings and maps must exist");
-        const entries = params.maps[table];
-        if (
-          !isPlainObject(entries) ||
-          !Object.hasOwn(entries, key) ||
-          typeof entries[key] !== "string"
-        )
-          return invalidLookup(`missing ${table}[${key}]`);
-        const origins = isPlainObject(params.mapOrigins) ? params.mapOrigins[table] : undefined;
-        const resource =
-          isPlainObject(origins) && typeof origins[key] === "string"
-            ? origins[key]
-            : "<programmatic rulepack>";
-        const source = items[index];
-        const parents = source
+      isItemView,
+      values: new Proxy(values, {
+        get: (target, property, receiver) => {
+          if (
+            pending !== null &&
+            typeof property === "string" &&
+            !started.has(property) &&
+            Object.hasOwn(pending.definitions, property)
+          ) {
+            // Marked first: a definition that reads itself finds no value.
+            started.add(property);
+            values[property] = pending.compute(pending.definitions[property]);
+          }
+          if (typeof property === "string" && relationName) {
+            const item = navigationItems[property];
+            // A text item's value has its own source ancestry. Its append write
+            // also depends on preceding source spans for list ordering; reading
+            // current text must not make those spans pronunciation ancestors.
+            // Explicit prev/next navigation still records that ordering evidence.
+            const write =
+              item && !(property === "current" && item.type === "normalization")
+                ? utterance.relation(relationName).node(item)?.write
+                : undefined;
+            if (write) transaction.dependOn(write.decisionId);
+          }
+          // The parameters of the scope of the Item the rule is evaluating on.
+          if (property === "params") return parametersFor(params, items[ruleIndex], transaction);
+          return Reflect.get(target, property, receiver);
+        },
+      }),
+    };
+  };
+  // The functions of every context of this scope. None of them closes over an
+  // Item position: those that mean "the current Item" read `cursor`.
+  const functions: EvaluationContext["functions"] = {
+    vocabulary: (table, key) => {
+      const invalidLookup = (message: string): never => {
+        utterance.diagnostics.error(
+          message,
+          { table, key, ruleId: transaction.metadata.ruleId },
+          "E_VOCABULARY_LOOKUP",
+        );
+        throw new Error(`E_VOCABULARY_LOOKUP: ${message}`);
+      };
+      if (typeof table !== "string" || typeof key !== "string" || !isPlainObject(params.maps))
+        return invalidLookup("table and key must be strings and maps must exist");
+      const entries = params.maps[table];
+      if (
+        !isPlainObject(entries) ||
+        !Object.hasOwn(entries, key) ||
+        typeof entries[key] !== "string"
+      )
+        return invalidLookup(`missing ${table}[${key}]`);
+      const origins = isPlainObject(params.mapOrigins) ? params.mapOrigins[table] : undefined;
+      const resource =
+        isPlainObject(origins) && typeof origins[key] === "string"
+          ? origins[key]
+          : "<programmatic rulepack>";
+      const source = items[cursor.index];
+      const parents = source
+        ? source.featureKeys().flatMap((field) => {
+            const write = source.latestWrite(field);
+            return write ? [write.decisionId] : [];
+          })
+        : [];
+      const decision = utterance.provenance.add({
+        stage: "rules",
+        type: "normalization_vocabulary_lookup",
+        subject: source?.id ?? table,
+        reason: `${transaction.metadata.ruleId} read ${resource}: ${table}[${JSON.stringify(key)}]`,
+        citations: [...transaction.metadata.citations],
+        parents,
+        vocabularyLookup: {
+          resource,
+          table,
+          key,
+          value: entries[key],
+          ruleId: transaction.metadata.ruleId,
+        },
+      });
+      transaction.dependOn(decision.id);
+      return entries[key];
+    },
+    // A whole number as phonemic text, from the number phone lists of the
+    // frontend's letter-to-sound table (src/g2p/number-phonemic-text.ts).
+    number_phonemes: (digits, form) => {
+      const invalid = (message: string): never => {
+        utterance.diagnostics.error(
+          message,
+          { digits, form, ruleId: transaction.metadata.ruleId },
+          "E_NUMBER_PHONEMES",
+        );
+        throw new Error(`E_NUMBER_PHONEMES: ${message}`);
+      };
+      if (typeof digits !== "string" || typeof form !== "string")
+        return invalid("digits and form must be strings");
+      if (!(NUMBER_PHONEMIC_FORMS as readonly string[]).includes(form))
+        return invalid(`unknown form '${form}'`);
+      if (!isPlainObject(params.lts) || typeof params.lts.path !== "string")
+        return invalid("selected LTS context was not supplied");
+      const lts = { path: params.lts.path, document: params.lts.document };
+      const text = numberPhonemicText(digits, form as NumberPhonemicForm, lts);
+      if (text === null) return invalid(`'${digits}' is not read as ${form}`);
+      const source = items[cursor.index];
+      const decision = utterance.provenance.add({
+        stage: "rules",
+        type: "normalization_number_composed",
+        subject: source?.id ?? digits,
+        reason: `${transaction.metadata.ruleId} read '${digits}' as ${form} from the number phone lists of ${lts.path}: ${text}`,
+        citations: [...transaction.metadata.citations],
+        parents: source
           ? source.featureKeys().flatMap((field) => {
               const write = source.latestWrite(field);
               return write ? [write.decisionId] : [];
             })
-          : [];
-        const decision = utterance.provenance.add({
-          stage: "rules",
-          type: "normalization_vocabulary_lookup",
-          subject: source?.id ?? table,
-          reason: `${transaction.metadata.ruleId} read ${resource}: ${table}[${JSON.stringify(key)}]`,
-          citations: [...transaction.metadata.citations],
-          parents,
-          vocabularyLookup: {
-            resource,
-            table,
-            key,
-            value: entries[key],
-            ruleId: transaction.metadata.ruleId,
-          },
-        });
-        transaction.dependOn(decision.id);
-        return entries[key];
-      },
-      ahead: (source, amount = 1) => offset(source, amount),
-      behind: (source, amount = 1) => offset(source, -Number(amount)),
-      total: (name) => relationItems(name).length,
-      max: (...args) => numericAggregate(args, "max"),
-      min: (...args) => numericAggregate(args, "min"),
-      exp: (value) => Math.exp(Number(value)),
-      sqrt: (value) => Math.sqrt(Number(value)),
-      abs: (value) => Math.abs(Number(value)),
-      log: (value) => Math.log(Number(value)),
-      pow: (value, exponent) => Number(value) ** Number(exponent),
-      contains: (container, candidate) =>
-        typeof container === "string"
-          ? container.includes(String(candidate))
-          : Array.isArray(container) && container.includes(candidate),
-      merge,
-      target: (phoneme) => {
-        if (!inventory)
-          throw new Error(
-            "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
-          );
-        transaction.dependOn(inventory.decisionId);
-        const materialized = materializePhonemeTarget(phoneme, {
-          inventorySpec: inventory.spec,
-          diagnostics: utterance.diagnostics,
-          onInvalidParameter: inventory.onInvalidParameter,
-        });
-        return Object.freeze({ ...materialized, ...materialized.params });
-      },
-      assoc: association,
-      midpoint: (source) => pointAnchor(source, 0.5),
-      at_ratio: pointAnchor,
-      at_sync: (markId) =>
-        typeof markId === "string" ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 } : null,
-      at_offset: (markId, offsetMs) => {
-        const offset = Number(offsetMs);
-        return typeof markId === "string" && Number.isFinite(offset)
-          ? { leftMarkId: markId, rightMarkId: markId, ratio: 0, offsetMs: offset }
-          : null;
-      },
-      prev_point: (name) => {
-        const candidates = relationItems(name);
-        const candidate = candidates[candidates.length - 1];
-        const anchor = candidate ? utterance.temporalAnchor(candidate) : undefined;
-        if (anchor) transaction.dependOn(anchor.decisionId);
-        return view(candidate);
-      },
-      look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
-      look_back_pred: (source, maxSteps, predicateName) =>
-        typeof predicateName === "string"
-          ? scan(source, maxSteps, { predicate: predicateName }, -1)
-          : null,
-      look_ahead_pred: (source, maxSteps, predicateName) =>
-        typeof predicateName === "string"
-          ? scan(source, maxSteps, { predicate: predicateName }, 1)
-          : null,
-      find_within_word: findWithinWord,
-      path: navigatePath,
-      span_ms: spanMs,
-      trajectory_control_windows: trajectoryControlWindows,
-      word_count: () => relationItems("Word").length,
-      phone_count: () =>
-        relationItems("Segment").filter((item) => {
-          const phoneme = transaction.read(item, "phoneme");
-          return phoneme !== silenceSymbol();
-        }).length,
-      clause_phone_count: () => {
-        let left = index;
-        let right = index;
-        while (left > 0 && transaction.read(items[left - 1], "phoneme") !== silenceSymbol())
-          left -= 1;
-        while (
-          right + 1 < items.length &&
-          transaction.read(items[right + 1], "phoneme") !== silenceSymbol()
-        )
-          right += 1;
-        let count = 0;
-        for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
-          if (transaction.read(items[itemIndex], "phoneme") !== silenceSymbol()) count += 1;
-        }
-        return count;
-      },
-      count_word_vowels: () => {
-        const source = items[index];
-        return source
-          ? wordSegments(source).filter((item) => isNucleus(transaction.read(item, "type"))).length
-          : 0;
-      },
-      cluster_position_in_word: () => {
-        const source = items[index];
-        if (!source) return 0;
-        const segments = wordSegments(source);
-        const sourceIndex = segments.indexOf(source);
-        if (sourceIndex < 0 || isNucleus(transaction.read(source, "type"))) return 0;
-        let position = 0;
-        for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
-          if (isNucleus(transaction.read(segments[itemIndex], "type"))) break;
-          position += 1;
-        }
-        return position;
-      },
-      // ---------------------------------------------------------------------
-      // Contiguous word-run accent helpers.
-      //
-      // Faithful port of the prosodic-annotator `assignAccent` word grouping:
-      // a "word run" is the maximal contiguous run of non-SIL selected items
-      // (suppressed items are already excluded from `items`) that share the
-      // same `word` string, bounded by a SIL token or a word-string change.
-      // Two ADJACENT words with identical orthography (e.g. "sip sip") merge
-      // into one run exactly as the imperative pass merged them by contiguous
-      // string equality — preserving byte-identical carrier placement rather
-      // than the SylStructure word split.
-      //
-      // Citations: O'Shaughnessy 1976 (accent by word class),
-      //   Allen, Hunnicutt & Klatt 1987 (accent levels).
-      // ---------------------------------------------------------------------
-      word_run_has_primary_stress: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        const word = transaction.read(source, "word");
-        let hasPrimaryStress = false;
-        for (let k = index; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
-        }
-        for (let k = index + 1; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
-        }
-        return hasPrimaryStress;
-      },
-      // Qlatt #152: authored metrical stress overrides word-class eligibility.
-      // Read the versioned stress provenance, keeping the rule's dependency DAG.
-      word_has_metrical_stress: () => {
-        const source = items[index];
-        return source
-          ? wordSegments(source).some((item) => {
-              transaction.read(item, "stress");
-              return item.latestWrite("stress")?.tag === "metrical_stress";
-            })
-          : false;
-      },
-      is_first_primary_stress_in_word_run: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        if (transaction.read(source, "stress") !== 1) return false;
-        const word = transaction.read(source, "word");
-        for (let k = index - 1; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) return false;
-        }
-        return true;
-      },
-      // True iff the current phone is the LAST phone of its contiguous word run
-      // (the next active item is a SIL, a different word, or the end of the
-      // utterance). This is the declarative-correct "last phone of the word" the
-      // imperative assignBreakIndices word-boundary pass computed by raw-order
-      // walking — but WITHOUT that walk's suppressed-SIL flush quirk (a suppressed
-      // punctuation SIL wedged mid-word made the old pass stamp a spurious
-      // word-INTERNAL breakIndex=1). Suppressed items are excluded from `items`,
-      // so the run is not split by them. Citation: Silverman et al. 1992.
-      is_last_in_word_run: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        const word = transaction.read(source, "word");
-        const next = items[index + 1];
-        if (!next) return true;
-        if (transaction.read(next, "phoneme") === silenceSymbol()) return true;
-        return transaction.read(next, "word") !== word;
-      },
-      // Terminal punctuation of the current item's intonational phrase.
-      //
-      // Scans forward (in selection order, over active items) to the first SIL
-      // that carries a punctuation symbol and returns that symbol — the phrase
-      // boundary the imperative `identifyPhrases` used to type the phrase
-      // (declarative/question/exclamation/continuation). Returns "" when no
-      // trailing punctuation SIL exists (the final phrase of unterminated text),
-      // which the caller maps to the default declarative tune. Suppressed SILs
-      // are excluded from `items`, matching the imperative !isSuppressedToken
-      // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
-      phrase_terminal_punctuation: () => {
-        for (let k = index; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) {
-            const punct = transaction.read(items[k], "punctuationSymbol");
-            if (typeof punct === "string" && punct !== "") return punct;
-          }
-        }
-        return "";
-      },
-      syllable_index: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        const word = source ? structureAncestor(source, "word") : undefined;
-        if (!syllable || !word) return null;
-        return structureChildren(word)
-          .filter((item) => item.type.toLowerCase() === "syllable")
-          .indexOf(syllable);
-      },
-      syllable_role: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        if (!source || !syllable) return null;
-        const segments = structureChildren(syllable).filter(
-          (item) => item.type.toLowerCase() === "segment",
+          : [],
+      });
+      transaction.dependOn(decision.id);
+      return text;
+    },
+    ahead: (source, amount = 1) => offset(source, amount),
+    behind: (source, amount = 1) => offset(source, -Number(amount)),
+    total: (name) => relationItems(name).length,
+    // The parameters as another Item's scope gives them (parameter-scope.ts).
+    params_of: (value) => parametersFor(params, resolveItem(value), transaction),
+    ...PURE_GRAPH_MATH,
+    merge,
+    // target(key) reads the inventory entry of that name. target(phoneme,
+    // stress) selects a phoneme's entry for a lexical stress the way the
+    // frontend does when it first makes a Segment: by the inventory's stress
+    // markers, and for a secondary stress with no entry of its own by the
+    // inventory's cited secondary_stress_fallback. A rule that spells the
+    // entry's name itself ("AH2") goes past that policy.
+    target: (...args) => {
+      const phoneme = args[0];
+      if (!inventory)
+        throw new Error(
+          "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
         );
-        const sourceIndex = segments.indexOf(source);
-        const nucleusIndex = segments.findIndex((item) =>
-          isNucleus(transaction.read(item, "type")),
-        );
-        if (sourceIndex < 0 || nucleusIndex < 0) return null;
-        return sourceIndex < nucleusIndex
-          ? "onset"
-          : sourceIndex === nucleusIndex
-            ? "nucleus"
-            : "coda";
-      },
-      syllable_position_in_word: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        const word = source ? structureAncestor(source, "word") : undefined;
-        if (!syllable || !word) return null;
-        const syllables = structureChildren(word).filter(
-          (item) => item.type.toLowerCase() === "syllable",
-        );
-        const syllableIndex = syllables.indexOf(syllable);
-        if (syllableIndex < 0) return null;
-        if (syllables.length === 1) return "only";
-        if (syllableIndex === 0) return "initial";
-        if (syllableIndex === syllables.length - 1) return "final";
-        return "medial";
-      },
+      transaction.dependOn(inventory.decisionId);
+      const byStress = args.length > 1;
+      const stress = args[1];
+      const materialized = materializePhonemeTarget(phoneme, {
+        inventorySpec: inventory.spec,
+        diagnostics: utterance.diagnostics,
+        onInvalidParameter: inventory.onInvalidParameter,
+        ...(byStress
+          ? {
+              stress: stress == null ? null : Number(stress),
+              onSelection: (selection: InventorySelection) => {
+                const fallback = inventory.spec.secondary_stress_fallback;
+                if (selection.secondaryStressFallback && fallback) {
+                  transaction.cite(fallback.citations);
+                }
+              },
+            }
+          : {}),
+      });
+      return Object.freeze({ ...materialized, ...materialized.params });
+    },
+    assoc: association,
+    midpoint: (source) => pointAnchor(source, 0.5),
+    at_ratio: pointAnchor,
+    at_sync: (markId) =>
+      typeof markId === "string" ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 } : null,
+    at_offset: (markId, offsetMs) => {
+      const offset = Number(offsetMs);
+      return typeof markId === "string" && Number.isFinite(offset)
+        ? { leftMarkId: markId, rightMarkId: markId, ratio: 0, offsetMs: offset }
+        : null;
+    },
+    prev_point: (name) => {
+      const candidates = relationItems(name);
+      const candidate = candidates[candidates.length - 1];
+      const anchor = candidate ? utterance.temporalAnchor(candidate) : undefined;
+      if (anchor) transaction.dependOn(anchor.decisionId);
+      return view(candidate);
+    },
+    look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
+    look_ahead_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, 1),
+    look_back_pred: (source, maxSteps, predicateName) =>
+      typeof predicateName === "string"
+        ? scan(source, maxSteps, { predicate: predicateName }, -1)
+        : null,
+    look_ahead_pred: (source, maxSteps, predicateName) =>
+      typeof predicateName === "string"
+        ? scan(source, maxSteps, { predicate: predicateName }, 1)
+        : null,
+    count_back_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+      countScan(source, maxSteps, stopPredicate, countPredicate, -1),
+    count_ahead_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+      countScan(source, maxSteps, stopPredicate, countPredicate, 1),
+    find_within_word: findWithinWord,
+    path: navigatePath,
+    span_ms: spanMs,
+    trajectory_control_windows: trajectoryControlWindows,
+    word_count: () => relationItems("Word").length,
+    phone_count: () =>
+      relationItems("Segment").filter((item) => {
+        const phoneme = transaction.read(item, "phoneme");
+        return phoneme !== silenceSymbol();
+      }).length,
+    clause_phone_count: () => {
+      let left = cursor.index;
+      let right = cursor.index;
+      while (left > 0 && transaction.read(items[left - 1], "phoneme") !== silenceSymbol())
+        left -= 1;
+      while (
+        right + 1 < items.length &&
+        transaction.read(items[right + 1], "phoneme") !== silenceSymbol()
+      )
+        right += 1;
+      let count = 0;
+      for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
+        if (transaction.read(items[itemIndex], "phoneme") !== silenceSymbol()) count += 1;
+      }
+      return count;
+    },
+    count_word_vowels: () => {
+      const source = items[cursor.index];
+      return source
+        ? wordSegments(source).filter((item) => isNucleus(transaction.read(item, "type"))).length
+        : 0;
+    },
+    cluster_position_in_word: () => {
+      const source = items[cursor.index];
+      if (!source) return 0;
+      const segments = wordSegments(source);
+      const sourceIndex = segments.indexOf(source);
+      if (sourceIndex < 0 || isNucleus(transaction.read(source, "type"))) return 0;
+      let position = 0;
+      for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
+        if (isNucleus(transaction.read(segments[itemIndex], "type"))) break;
+        position += 1;
+      }
+      return position;
+    },
+    // ---------------------------------------------------------------------
+    // Contiguous word-run accent helpers.
+    //
+    // Faithful port of the prosodic-annotator `assignAccent` word grouping:
+    // a "word run" is the maximal contiguous run of non-SIL selected items
+    // (suppressed items are already excluded from `items`) that share the
+    // same `word` string, bounded by a SIL token or a word-string change.
+    // Two ADJACENT words with identical orthography (e.g. "sip sip") merge
+    // into one run exactly as the imperative pass merged them by contiguous
+    // string equality — preserving byte-identical carrier placement rather
+    // than the SylStructure word split.
+    //
+    // Citations: O'Shaughnessy 1976 (accent by word class),
+    //   Allen, Hunnicutt & Klatt 1987 (accent levels).
+    // ---------------------------------------------------------------------
+    word_run_has_primary_stress: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      const word = transaction.read(source, "word");
+      let hasPrimaryStress = false;
+      for (let k = cursor.index; k >= 0; k -= 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+      }
+      for (let k = cursor.index + 1; k < items.length; k += 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+      }
+      return hasPrimaryStress;
+    },
+    // Qlatt #152: authored metrical stress overrides word-class eligibility.
+    // Read the versioned stress provenance, keeping the rule's dependency DAG.
+    word_has_metrical_stress: () => {
+      const source = items[cursor.index];
+      return source
+        ? wordSegments(source).some((item) => {
+            transaction.read(item, "stress");
+            return item.latestWrite("stress")?.tag === "metrical_stress";
+          })
+        : false;
+    },
+    is_first_primary_stress_in_word_run: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      if (transaction.read(source, "stress") !== 1) return false;
+      const word = transaction.read(source, "word");
+      for (let k = cursor.index - 1; k >= 0; k -= 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) return false;
+      }
+      return true;
+    },
+    // True iff the current phone is the LAST phone of its contiguous word run
+    // (the next active item is a SIL, a different word, or the end of the
+    // utterance). This is the declarative-correct "last phone of the word" the
+    // imperative assignBreakIndices word-boundary pass computed by raw-order
+    // walking — but WITHOUT that walk's suppressed-SIL flush quirk (a suppressed
+    // punctuation SIL wedged mid-word made the old pass stamp a spurious
+    // word-INTERNAL breakIndex=1). Suppressed items are excluded from `items`,
+    // so the run is not split by them. Citation: Silverman et al. 1992.
+    is_last_in_word_run: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      const word = transaction.read(source, "word");
+      const next = items[cursor.index + 1];
+      if (!next) return true;
+      if (transaction.read(next, "phoneme") === silenceSymbol()) return true;
+      return transaction.read(next, "word") !== word;
+    },
+    // Terminal punctuation of the current item's intonational phrase.
+    //
+    // Scans forward (in selection order, over active items) to the first SIL
+    // that carries a punctuation symbol and returns that symbol — the phrase
+    // boundary the imperative `identifyPhrases` used to type the phrase
+    // (declarative/question/exclamation/continuation). Returns "" when no
+    // trailing punctuation SIL exists (the final phrase of unterminated text),
+    // which the caller maps to the default declarative tune. Suppressed SILs
+    // are excluded from `items`, matching the imperative !isSuppressedToken
+    // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
+    phrase_terminal_punctuation: () => {
+      for (let k = cursor.index; k < items.length; k += 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) {
+          const punct = transaction.read(items[k], "punctuationSymbol");
+          if (typeof punct === "string" && punct !== "") return punct;
+        }
+      }
+      return "";
+    },
+    syllable_index: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      const word = source ? structureAncestor(source, "word") : undefined;
+      if (!syllable || !word) return null;
+      return structureChildren(word)
+        .filter((item) => item.type.toLowerCase() === "syllable")
+        .indexOf(syllable);
+    },
+    syllable_role: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      if (!source || !syllable) return null;
+      const segments = structureChildren(syllable).filter(
+        (item) => item.type.toLowerCase() === "segment",
+      );
+      const sourceIndex = segments.indexOf(source);
+      const nucleusIndex = segments.findIndex((item) => isNucleus(transaction.read(item, "type")));
+      if (sourceIndex < 0 || nucleusIndex < 0) return null;
+      return sourceIndex < nucleusIndex
+        ? "onset"
+        : sourceIndex === nucleusIndex
+          ? "nucleus"
+          : "coda";
+    },
+    syllable_position_in_word: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      const word = source ? structureAncestor(source, "word") : undefined;
+      if (!syllable || !word) return null;
+      const syllables = structureChildren(word).filter(
+        (item) => item.type.toLowerCase() === "syllable",
+      );
+      const syllableIndex = syllables.indexOf(syllable);
+      if (syllableIndex < 0) return null;
+      if (syllables.length === 1) return "only";
+      if (syllableIndex === 0) return "initial";
+      if (syllableIndex === syllables.length - 1) return "final";
+      return "medial";
     },
   };
+  return { at };
+}
+
+function buildEvaluationContext(options: EvaluationContextOptions): EvaluationContext {
+  return buildEvaluationScope(options).at(
+    options.index,
+    options.extra ?? {},
+    options.bindings ?? {},
+  );
 }
 
 function evaluate(expression: unknown, context: EvaluationContext): unknown {
   if (typeof expression !== "string") return expression;
-  return normalizeCelValue(
-    context.owner.evaluate(expression, context.values, context.functions),
-    context.isItemView,
-  );
+  // Evaluation is synchronous and nests (a scan evaluates its condition in
+  // the candidate's context), so the scope's cursor is set to this context's
+  // Item for this one evaluation and the outer Item put back afterwards.
+  const { cursor } = context;
+  const outer = cursor.index;
+  const outerRule = cursor.rule;
+  cursor.index = context.index;
+  cursor.rule = context.ruleIndex;
+  try {
+    return normalizeCelValue(
+      context.owner.evaluate(expression, context.values, context.functions),
+      context.isItemView,
+    );
+  } finally {
+    cursor.index = outer;
+    cursor.rule = outerRule;
+  }
 }
 
+/**
+ * A CEL result as the engine uses it: integers as numbers, maps as plain
+ * objects. A list or object with nothing to convert inside is returned as it
+ * is, not copied: most results that are objects are policy tables or targets,
+ * which are large and already in that form.
+ */
 function normalizeCelValue(value: unknown, isItemView: (value: unknown) => boolean): unknown {
+  if (value === null || (typeof value !== "object" && typeof value !== "bigint")) return value;
   if (isItemView(value)) return value;
   if (typeof value === "bigint") {
     const number = Number(value);
@@ -791,11 +1104,26 @@ function normalizeCelValue(value: unknown, isItemView: (value: unknown) => boole
       ]),
     );
   }
-  if (Array.isArray(value)) return value.map((entry) => normalizeCelValue(entry, isItemView));
+  if (Array.isArray(value)) {
+    let converted: unknown[] | null = null;
+    for (let index = 0; index < value.length; index += 1) {
+      const entry = value[index];
+      const normal = normalizeCelValue(entry, isItemView);
+      if (normal === entry) continue;
+      converted ??= [...value];
+      converted[index] = normal;
+    }
+    return converted ?? value;
+  }
   if (!isPlainObject(value)) return value;
-  return Object.fromEntries(
-    Object.entries(value).map(([key, nested]) => [key, normalizeCelValue(nested, isItemView)]),
-  );
+  let converted: Record<string, unknown> | null = null;
+  for (const [key, nested] of Object.entries(value)) {
+    const normal = normalizeCelValue(nested, isItemView);
+    if (normal === nested) continue;
+    converted ??= { ...value };
+    converted[key] = normal;
+  }
+  return converted ?? value;
 }
 
 function evaluateStructured(value: unknown, context: EvaluationContext): unknown {
@@ -995,8 +1323,14 @@ function applyEffects(
           : null;
     const mulResolution =
       typeof effect.resolution === "string" ? effect.resolution.toLowerCase() : resolution;
-    const round = scalarConfig?.unit === "ms";
-    const roundValue = (value: number): number => (round ? Math.round(value) : value);
+    // A scalar that declares `quantum` keeps every resolved value on a
+    // multiple of it; one that does not keeps the value its rules computed.
+    const quantum =
+      typeof scalarConfig?.quantum === "number" && scalarConfig.quantum > 0
+        ? scalarConfig.quantum
+        : null;
+    const roundValue = (value: number): number =>
+      quantum === null ? value : Math.round(value / quantum) * quantum;
     let floor = Number.NEGATIVE_INFINITY;
     let fallbackObservation: ScalarObservation | undefined;
     if (resolution === "klatt" && scalarConfig) {
@@ -1356,10 +1690,17 @@ function applyTextExpansion(
       if (
         typeof entry.text !== "string" ||
         !entry.text.length ||
-        /\s/.test(entry.text) ||
-        Object.keys(entry).some((key) => !["type", "text"].includes(key))
+        // `kind: 'word'` says the terminal is one word whatever its text is:
+        // a punctuation mark that is spoken by its name, or text with white
+        // space in it (phonemic text of several words). `kind: 'sent_mark'`
+        // says the terminal is a punctuation mark the rule itself sends: it
+        // was not read as the delimiter of the word before it.
+        (entry.kind !== undefined && entry.kind !== "word" && entry.kind !== "sent_mark") ||
+        (entry.kind !== "word" && /\s/.test(entry.text)) ||
+        !entry.text.trim().length ||
+        Object.keys(entry).some((key) => !["type", "text", "kind"].includes(key))
       )
-        fail("terminal requires text only");
+        fail("terminal requires text, and may say kind: 'word' or 'sent_mark'");
     } else if (entry.type === "request") {
       if (
         typeof entry.kind !== "string" ||
@@ -1379,6 +1720,7 @@ function applyTextExpansion(
   for (const [index, raw] of records.entries()) {
     const record = raw as Record<string, unknown>;
     const item = transaction.createItem("normalization", `${source.id}:${match.ruleName}:${index}`);
+    inheritParameterScope(transaction, item, source);
     for (const field of ["sourceStart", "sourceEnd", "sourceTextId"])
       transaction.set(item, field, transaction.read(source, field));
     transaction.read(source, "text");
@@ -1453,6 +1795,7 @@ function applySplice(
   );
   let previous = orderedSuppressed[orderedSuppressed.length - 1] ?? source;
   const inserted: Item[] = [];
+  const lastPlacedFor = new Map<Item, Item>();
   for (let index = 0; index < splice.insert.length; index += 1) {
     const rawTemplate = splice.insert[index];
     if (!isPlainObject(rawTemplate)) continue;
@@ -1462,8 +1805,15 @@ function applySplice(
       source.type,
       `${source.id}:${transaction.metadata.ruleId}:${index.toString()}`,
     );
+    inheritParameterScope(transaction, item, source);
     const copySourceName = typeof template.copy_from === "string" ? template.copy_from : null;
     const copySource = copySourceName ? resolveTarget(copySourceName) : undefined;
+    if (copySourceName && !copySource) {
+      // A `define` name is an expression value, not an Item a template can copy.
+      throw new Error(
+        `E_HRG_SPLICE_COPY_SOURCE: rule '${transaction.metadata.ruleId}' copy_from '${copySourceName}' is not current, next, prev or a pattern capture`,
+      );
+    }
     if (copySource) {
       const copyFields =
         Array.isArray(template.copy_fields) && Object.hasOwn(template, "target")
@@ -1476,6 +1826,11 @@ function applySplice(
     }
     const targetExpression = Object.hasOwn(template, "target") ? template.target : null;
     const target = targetExpression !== null ? evaluate(targetExpression, context) : null;
+    if (context.isItemView(target)) {
+      throw new Error(
+        `E_HRG_VIEW_NOT_A_MAP: rule '${transaction.metadata.ruleId}' target is an Item; a target is a map of fields, and an Item's features are copied with copy_from`,
+      );
+    }
     if (targetExpression !== null && !isPlainObject(target)) {
       throw new Error(
         `E_HRG_SPLICE_TARGET: rule '${transaction.metadata.ruleId}' target must evaluate to an object`,
@@ -1498,6 +1853,7 @@ function applySplice(
       if (
         field === "copy_from" ||
         field === "copy_fields" ||
+        field === "outside_structure" ||
         field === "target" ||
         field === "fields"
       )
@@ -1506,9 +1862,27 @@ function applySplice(
       if (value !== undefined) transaction.set(item, field, value);
     }
     transaction.insertAfter(match.relationName, previous, item);
-    const structure = utterance.getRelation("SylStructure");
-    const structuralParent = structure?.node(source)?.parent?.item;
-    if (structuralParent) transaction.addDaughter("SylStructure", structuralParent, item);
+    // A whole copy of another Item is that Item re-emitted, so it takes that
+    // Item's place in the tree (its own syllable and word, or none for a
+    // punctuation silence). Anything else is a new piece of the source, unless
+    // the template says `outside_structure: true`: an Item that belongs to no
+    // word (a silence put between two words).
+    const owner = copySource && targetExpression === null ? copySource : source;
+    const ownerNode =
+      template.outside_structure === true
+        ? undefined
+        : utterance.getRelation("SylStructure")?.node(owner);
+    if (ownerNode?.parent) {
+      const siblings = ownerNode.parent.daughters;
+      const ownerFollowsInsertion =
+        !suppressed.includes(owner) &&
+        match.items.indexOf(owner) > match.items.indexOf(orderedSuppressed.at(-1) ?? source);
+      const after =
+        lastPlacedFor.get(owner) ??
+        (ownerFollowsInsertion ? (siblings[siblings.indexOf(ownerNode) - 1]?.item ?? null) : owner);
+      transaction.addDaughter("SylStructure", ownerNode.parent.item, item, after);
+      lastPlacedFor.set(owner, item);
+    }
     inserted.push(item);
     previous = item;
   }
@@ -1627,6 +2001,7 @@ function applyPointActions(
       itemTypes[0],
       `${source.id}:${match.transaction.metadata.ruleId}:point:${index.toString()}`,
     );
+    inheritParameterScope(match.transaction, point, source);
     match.transaction.set(point, "value", evaluateDispatch(spec.value, context, predicates));
     if (typeof spec.tag === "string") match.transaction.set(point, "tag", spec.tag);
     if (f0Layer) {
@@ -1635,7 +2010,15 @@ function applyPointActions(
         match.transaction.set(point, "duration_frames", evaluate(spec.duration_frames, context));
       }
       if (Array.isArray(spec.profile_points)) {
-        match.transaction.set(point, "profile_points", spec.profile_points);
+        // An entry is a number or, like `value` and `duration_frames`, an
+        // expression over the matched item.
+        match.transaction.set(
+          point,
+          "profile_points",
+          spec.profile_points.map((entry) =>
+            typeof entry === "string" ? evaluate(entry, context) : entry,
+          ),
+        );
       }
     }
     match.transaction.append(relationName, point);
@@ -1679,13 +2062,8 @@ function executeMatch(
     ...(match.contour ? { contour: match.contour } : {}),
     ...(match.phrase ? { phrase: match.phrase } : {}),
   };
-  let context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
-  context = evaluateRuleDefinitions(rule, context, (definitions) =>
-    buildEvaluationContext({
-      ...contextBase,
-      extra: { ...scopeExtra, ...definitions },
-    }),
-  );
+  const context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
+  declareRuleDefinitions(rule, context);
   const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
   if (!constraintEvidence.matched) {
     if (captureTooling)
@@ -1786,19 +2164,34 @@ function executeMatch(
   }
 }
 
-function evaluateRuleDefinitions(
+/**
+ * Give a match's context the rule's `define:` entries. An entry is evaluated
+ * when an expression of this match first reads it (the constraint, an effect,
+ * another entry), once, and an entry nothing reads is not evaluated at all.
+ *
+ * A rule's `define:` block is often shared by many rules (a YAML anchor), and
+ * a rule reads a few of its entries: most matches fail a constraint that
+ * names one or two, and a rule that fires uses those its own effects name.
+ * Evaluating every entry for every match was most of the duration phase's
+ * time.
+ *
+ * Evaluation records what it reads on the rule's transaction, and those
+ * records become the parents of the decision a firing rule commits. So a
+ * decision's parents are what its rule read, not what the block it shares
+ * could have read. An entry that would throw, or that would record something
+ * of its own (`vocabulary`, `target`), does so only when it is read.
+ *
+ * The entries are added to the one context: building a context is the costly
+ * part of a match (every navigation function is a closure over it), and one
+ * context keeps one view per Item for the whole rule.
+ */
+function declareRuleDefinitions(
   rule: Readonly<Record<string, unknown>>,
-  initialContext: EvaluationContext,
-  rebuild: (definitions: Readonly<Record<string, unknown>>) => EvaluationContext,
-): EvaluationContext {
-  if (!isPlainObject(rule.define)) return initialContext;
-  const definitions: Record<string, unknown> = {};
-  let context = initialContext;
-  for (const [name, expression] of Object.entries(rule.define)) {
-    definitions[name] = evaluate(expression, context);
-    context = rebuild(definitions);
-  }
-  return context;
+  context: EvaluationContext,
+): void {
+  // A rule that defines nothing has an empty block; its reads need no check.
+  if (!isPlainObject(rule.define) || Object.keys(rule.define).length === 0) return;
+  context.defineLazily(rule.define, (expression) => evaluate(expression, context));
 }
 
 function selectMatches(
@@ -2062,6 +2455,357 @@ function finalizePhase(
   if (captureTooling) utterance.checkpoint(phase.name, "after");
 }
 
+/**
+ * Run one frame program (frame-program.ts) for the rules of kind `frame` a
+ * phase lists, and write each Item's frames to the program's feature.
+ *
+ * Units: the first Item starts one, and so does every Item the program's
+ * `unit` condition accepts; any other Item extends the unit before it. A
+ * unit owns the frames between its two ends, each rounded to the frame clock
+ * that starts at the first Item; an Item of the unit gets the frames it
+ * overlaps and need not start on one. Unit features are read once per
+ * unit through that unit's transaction, so the decision that records a unit's
+ * frames depends on the decisions behind every feature it read.
+ *
+ * Provenance is one transaction a unit and one write an Item, not one a
+ * frame or a rule: the write's citations are the program's and those of each
+ * rule that assigned in the unit, and the value written to the unit's first
+ * Item lists those rules with the first and last frame they assigned in
+ * (`fired`). A frame's column value points at that write.
+ */
+function runFrameRules(
+  utterance: Utterance,
+  owner: GraphRuleEvaluationOwner,
+  spec: CompiledRulepack,
+  phase: CompiledRulepack["phases"][number],
+  programName: string,
+  params: Readonly<Record<string, unknown>>,
+  predicates: Readonly<Record<string, unknown>>,
+  captureTooling: boolean,
+  inventory?: GraphInventoryResource,
+): void {
+  const program = spec.frame_programs[programName];
+  if (!isPlainObject(program) || typeof program.relation !== "string") {
+    throw new Error(`E_FRAME_PROGRAM_UNKNOWN: frame program '${programName}' is not declared`);
+  }
+  const relationName = program.relation;
+  const writeKey = String(program.write);
+  const tag = String(program.tag);
+  const programCitations = stringArray(program.citations);
+  const rules: FrameRule[] = [];
+  for (const ruleName of phase.rules) {
+    const rule = spec.rules[ruleName];
+    if (!isPlainObject(rule) || rule.kind !== "frame" || rule.program !== programName) continue;
+    rules.push({
+      name: ruleName,
+      unit: typeof rule.unit === "string" ? rule.unit : null,
+      start: rule.at === "start",
+      when: typeof rule.when === "string" ? rule.when : null,
+      set: (Array.isArray(rule.set) ? rule.set : []).filter(isPlainObject).map((assignment) => ({
+        register: String(assignment.register),
+        value: String(assignment.value),
+        tag: String(assignment.tag),
+      })),
+      citations: stringArray(rule.citations),
+    });
+  }
+  const items = activeItems(utterance.relation(relationName).listItems());
+  if (items.length === 0) return;
+
+  const begin = (reason: string): HrgTransaction =>
+    utterance.beginTransaction({
+      ruleId: `${phase.name}:${programName}`,
+      phase: phase.name,
+      tag,
+      reason,
+      citations: programCitations,
+    });
+  const contextAt = (transaction: HrgTransaction, index: number): EvaluationContext =>
+    buildEvaluationContext({
+      utterance,
+      transaction,
+      owner,
+      items,
+      index,
+      params,
+      relationName,
+      predicates,
+      inventory,
+    });
+
+  // Grouping reads belong to no unit's decision; this transaction is never
+  // committed, like the one of a select that does not match.
+  const grouping = begin(`group ${relationName} Items into units of ${programName}`);
+  const starts: number[] = [0];
+  for (let index = 1; index < items.length; index += 1) {
+    if (
+      program.unit == null ||
+      evaluateCondition(program.unit, contextAt(grouping, index), predicates).matched
+    ) {
+      starts.push(index);
+    }
+  }
+  const framePeriodMs = evaluate(program.frame_ms, contextAt(grouping, 0));
+  if (typeof framePeriodMs !== "number" || !(framePeriodMs > 0)) {
+    throw new Error(
+      `E_FRAME_PERIOD: frame program '${programName}' frame_ms is ${String(framePeriodMs)}`,
+    );
+  }
+  const leadFrames =
+    program.lead_in_frames == null ? 0 : evaluate(program.lead_in_frames, contextAt(grouping, 0));
+  if (typeof leadFrames !== "number" || !Number.isInteger(leadFrames) || leadFrames < 0) {
+    throw new Error(
+      `E_FRAME_LEAD_IN: frame program '${programName}' lead_in_frames is ${String(leadFrames)}`,
+    );
+  }
+
+  const featureSpecs = Object.entries(isPlainObject(program.features) ? program.features : {});
+  const edgeFeatures: Record<string, unknown> = {};
+  for (const [name, declaration] of featureSpecs) {
+    edgeFeatures[name] = isPlainObject(declaration) ? declaration.edge : null;
+  }
+  let cursorMs = 0;
+  const units = starts.map((start, unitIndex) => {
+    const members = items.slice(start, starts[unitIndex + 1] ?? items.length);
+    const transaction = begin(
+      `frames of ${members.map((item) => item.id).join(", ")} by ${programName}`,
+    );
+    const context = contextAt(transaction, start);
+    const features: Record<string, unknown> = {};
+    for (const [name, declaration] of featureSpecs) {
+      features[name] = evaluate(isPlainObject(declaration) ? declaration.value : null, context);
+    }
+    // Frame k of the run covers [k, k + 1) frame periods from the first
+    // Item's start. A unit owns the frames between its rounded ends; an Item
+    // inside it need not start on a frame.
+    const firstFrame = Math.round(cursorMs / framePeriodMs);
+    const memberSpans = members.map((item) => {
+      const duration = transaction.read(item, "duration");
+      if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0) {
+        throw new Error(
+          `E_FRAME_DURATION: Item '${item.id}' has no finite non-negative duration for frame program '${programName}'`,
+        );
+      }
+      const span = { startMs: cursorMs, endMs: cursorMs + duration };
+      cursorMs += duration;
+      return span;
+    });
+    const exactEnd = cursorMs / framePeriodMs;
+    const endFrame = Math.max(firstFrame, Math.round(exactEnd));
+    if (Math.abs(exactEnd - endFrame) > 1e-6) {
+      utterance.diagnostics.warn(
+        "Frame program rounded a unit that does not end on a frame",
+        {
+          itemId: members[members.length - 1]?.id,
+          program: programName,
+          endMs: cursorMs,
+          framePeriodMs,
+          endFrame,
+        },
+        "HRG_FRAME_DURATION_ROUNDED",
+      );
+    }
+    // The unit's last frames may be a unit of their own, with every feature
+    // at its edge value: a pause that belongs to what follows.
+    const tail =
+      program.tail_frames == null
+        ? 0
+        : evaluate(program.tail_frames, contextAt(transaction, start + members.length - 1));
+    if (typeof tail !== "number" || !Number.isInteger(tail) || tail < 0) {
+      throw new Error(
+        `E_FRAME_TAIL: frame program '${programName}' tail_frames is ${String(tail)} at Item '${members[members.length - 1]?.id}'`,
+      );
+    }
+    const tailFrames = Math.min(tail, endFrame - firstFrame);
+    // The unit's frames have the parameters of its first Item's scope.
+    const unitParams = parametersFor(params, members[0], transaction);
+    const first = members[0];
+    const unitScope =
+      unitParams !== params && first ? String(first.get(PARAMETER_SCOPE_FEATURE)) : "";
+    return {
+      members,
+      memberSpans,
+      firstFrame,
+      endFrame,
+      tailFrames,
+      transaction,
+      features,
+      unitParams,
+      unitScope,
+    };
+  });
+
+  // Machine units: the lead-in, then each unit and its tail if it has one.
+  // A unit whose parameters are the run's says nothing of them. The lead-in
+  // has the first unit's, and a tail, which belongs to what follows, those
+  // of the unit after it.
+  const scopedParams = (
+    unit: (typeof units)[number] | undefined,
+  ): { params?: Readonly<Record<string, unknown>> } =>
+    unit && unit.unitParams !== params ? { params: unit.unitParams } : {};
+  const machineUnits: FrameUnit[] = [];
+  // The scope each machine unit's frames ran in ("" for none), for the frame
+  // values of a run that has a scoped unit.
+  const machineScopes: string[] = [];
+  if (leadFrames > 0) {
+    machineUnits.push({ features: edgeFeatures, frames: leadFrames, ...scopedParams(units[0]) });
+    machineScopes.push(units[0]?.unitScope ?? "");
+  }
+  const mainIndex: number[] = [];
+  units.forEach((unit, unitIndex) => {
+    mainIndex.push(machineUnits.length);
+    machineUnits.push({
+      features: unit.features,
+      frames: unit.endFrame - unit.firstFrame - unit.tailFrames,
+      ...scopedParams(unit),
+    });
+    machineScopes.push(unit.unitScope);
+    if (unit.tailFrames > 0) {
+      const after = units[unitIndex + 1] ?? unit;
+      machineUnits.push({
+        features: edgeFeatures,
+        frames: unit.tailFrames,
+        ...scopedParams(after),
+      });
+      machineScopes.push(after.unitScope);
+    }
+  });
+  const runScopes = machineScopes.some((name) => name !== "")
+    ? machineUnits.flatMap((unit, index) =>
+        new Array<string>(unit.frames).fill(machineScopes[index] as string),
+      )
+    : undefined;
+  const results = runFrameProgram({
+    registers: program.registers as Record<string, FrameRegisterValue>,
+    outputs: program.outputs as Record<string, string>,
+    rules,
+    units: machineUnits,
+    edgeFeatures,
+    params,
+    ...(isPlainObject(program.group)
+      ? {
+          group: {
+            start: typeof program.group.start === "string" ? program.group.start : null,
+            totals: (isPlainObject(program.group.totals) ? program.group.totals : {}) as Record<
+              string,
+              string
+            >,
+          },
+        }
+      : {}),
+  });
+  // Every column over the whole run, lead-in first.
+  const runColumns: Record<string, number[]> = {};
+  for (const result of results) {
+    for (const [column, values] of Object.entries(result.columns)) {
+      runColumns[column] = (runColumns[column] ?? []).concat(values);
+    }
+  }
+  const runFrames = machineUnits.reduce((sum, unit) => sum + unit.frames, 0) - leadFrames;
+  const delayFrames = program.delay_frames == null ? 0 : Number(program.delay_frames);
+  if (!Number.isInteger(delayFrames) || delayFrames < 0) {
+    throw new Error(
+      `E_FRAME_DELAY: frame program '${programName}' delay_frames is ${String(program.delay_frames)}`,
+    );
+  }
+  const lead = leadFrames > 0 ? results[0] : undefined;
+  const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));
+  // The places in a run column of the frames an Item shows, `from` to `to`.
+  const columnFrames = (from: number, to: number): number[] =>
+    Array.from(
+      { length: Math.max(0, Math.max(from, to) - from) },
+      (_unused, index) => from + leadFrames + index,
+    );
+
+  units.forEach((unit, unitIndex) => {
+    const result = results[mainIndex[unitIndex] as number] as FrameUnitResult;
+    const tailResult =
+      unit.tailFrames > 0 ? results[(mainIndex[unitIndex] as number) + 1] : undefined;
+    const fired = [
+      ...(unitIndex === 0 && lead ? lead.fired : []),
+      ...result.fired,
+      ...(tailResult?.fired ?? []),
+    ];
+    unit.transaction.cite(fired.flatMap((firing) => citationsByRule.get(firing.rule) ?? []));
+    unit.members.forEach((item, memberIndex) => {
+      const span = unit.memberSpans[memberIndex] as { startMs: number; endMs: number };
+      const leadHere = unitIndex === 0 && memberIndex === 0 && lead ? leadFrames : 0;
+      // The frames shown while this Item lasts: those it overlaps, moved
+      // `delayFrames` earlier, and for the first Item the lead-in as well.
+      // Frame 0 is the first Item's first; the lead-in's are negative.
+      const from = Math.max(
+        -leadFrames,
+        leadHere > 0 ? -leadFrames : Math.floor(span.startMs / framePeriodMs + 1e-6) - delayFrames,
+      );
+      const to = Math.min(runFrames, Math.ceil(span.endMs / framePeriodMs - 1e-6) - delayFrames);
+      const columns: Record<string, number[]> = {};
+      for (const [column, values] of Object.entries(runColumns)) {
+        columns[column] = values.slice(from + leadFrames, Math.max(from, to) + leadFrames);
+      }
+      unit.transaction.set(
+        item,
+        writeKey,
+        {
+          period_ms: framePeriodMs,
+          origin_ms: (from + delayFrames) * framePeriodMs - span.startMs,
+          columns,
+          // In a run with a scoped unit: the parameter scope in force while
+          // each of these frames is shown. A frame is shown `delayFrames`
+          // after it was computed, so that is the scope of the frame being
+          // computed then, not of the frame shown; past the run's end, the
+          // last frame's.
+          ...(runScopes
+            ? {
+                scopes: columnFrames(from, to).map(
+                  (frame) =>
+                    runScopes[Math.min(frame + delayFrames, runScopes.length - 1)] as string,
+                ),
+              }
+            : {}),
+          // On the unit's first Item: the rules that assigned in this unit
+          // (and in the lead-in, when this Item carries it), by unit frame.
+          fired:
+            memberIndex === 0
+              ? [
+                  ...(leadHere > 0 ? (lead?.fired ?? []) : []).map((firing) => ({
+                    ...firing,
+                    lead_in: true,
+                  })),
+                  ...result.fired.map((firing) => ({ ...firing, lead_in: false })),
+                  // And in the unit's tail, by the tail's own frame numbers.
+                  ...(tailResult?.fired ?? []).map((firing) => ({
+                    ...firing,
+                    lead_in: false,
+                    tail: true,
+                  })),
+                ]
+              : [],
+          ...(isPlainObject(program.after) &&
+          unitIndex === units.length - 1 &&
+          memberIndex === unit.members.length - 1
+            ? { after: program.after }
+            : {}),
+        },
+        tag,
+      );
+    });
+    const committed = unit.transaction.commit();
+    if (captureTooling) {
+      const itemIds = Object.freeze(unit.members.map((item) => item.id));
+      for (const ruleName of new Set(fired.map((firing) => firing.rule))) {
+        utterance._recordRuleAttempt({
+          status: "fired",
+          phase: phase.name,
+          rule: ruleName,
+          itemIds,
+          journalLength: utterance.journal().length,
+          transactionId: committed.id,
+        });
+      }
+    }
+  });
+}
+
 export function runGraphRuleEngine(
   utterance: Utterance,
   spec: CompiledRulepack,
@@ -2074,13 +2818,36 @@ export function runGraphRuleEngine(
   if (!isPlainObject(specParameters) || !isPlainObject(optionParameters)) {
     throw new Error("E_HRG_PARAMETERS: compiled and runtime parameters must be objects");
   }
-  const params = Object.freeze({
-    ...mergeParameterRecords(specParameters, optionParameters),
+  const runParameters = mergeParameterRecords(specParameters, optionParameters);
+  const withResources = (
+    parameters: Readonly<Record<string, unknown>>,
+  ): Record<string | symbol, unknown> => ({
+    ...parameters,
     sets: spec.string_sets,
     maps: spec.maps,
     mapOrigins: rulepackMapOrigins(spec),
     transcription: spec.transcription,
+    lts: options.lts,
   });
+  // Each declared scope's parameters, made once: the run's with the scope's
+  // overlay laid over them. Every one of them, and the run's own, carries
+  // the whole table, so that `params_of` works from any of them.
+  const scopeOverlays = Object.entries(options.parameterScopes ?? {});
+  const scoped = new Map<string, Readonly<Record<string, unknown>>>();
+  const root = withResources(runParameters);
+  if (scopeOverlays.length > 0) {
+    root[SCOPED_PARAMETERS] = scoped;
+    for (const [name, overlay] of scopeOverlays) {
+      const projected = projectPolicyValues(overlay);
+      if (!isPlainObject(projected)) {
+        throw new Error(`E_HRG_PARAMETERS: parameter scope '${name}' must be an object`);
+      }
+      const own = withResources(mergeParameterRecords(runParameters, projected));
+      own[SCOPED_PARAMETERS] = scoped;
+      scoped.set(name, Object.freeze(own) as Readonly<Record<string, unknown>>);
+    }
+  }
+  const params = Object.freeze(root) as Readonly<Record<string, unknown>>;
   const predicates = spec.predicates;
   const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();
   const captureTooling = options.captureTooling ?? true;
@@ -2089,9 +2856,30 @@ export function runGraphRuleEngine(
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
     if (captureTooling) utterance.checkpoint(phase.name, "before");
+    const frameProgramsRun = new Set<string>();
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
       if (!isPlainObject(rule)) continue;
+      if (rule.kind === "frame") {
+        // The frame rules of a program run together, every frame, in the
+        // order the phase lists them; the first one met runs them all.
+        const programName = String(rule.program);
+        if (!frameProgramsRun.has(programName)) {
+          frameProgramsRun.add(programName);
+          runFrameRules(
+            utterance,
+            evaluationOwner,
+            spec,
+            phase,
+            programName,
+            params,
+            predicates,
+            captureTooling,
+            options.inventory,
+          );
+        }
+        continue;
+      }
       const matches = isPlainObject(rule.select)
         ? selectMatches(
             utterance,
@@ -2145,6 +2933,7 @@ export function runGraphRuleEngine(
       }
     }
     finalizePhase(utterance, spec, phase, captureTooling);
+    options.onPhaseEnd?.(phase.name);
     if (phase.compute_times) timingFinalized = true;
   }
   return {

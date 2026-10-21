@@ -1,5 +1,5 @@
 import { createDiagnostics, type Diagnostics } from "../diagnostics";
-import { isPlainObject, loadYamlDocumentSync } from "../yaml-loader";
+import { isPlainObject } from "../yaml-loader";
 
 export interface RdPolicy {
   min: number;
@@ -25,8 +25,6 @@ export function readRdPolicy(document: unknown): RdPolicy {
   return { min: value.min, max: value.max, citations: value.citations };
 }
 
-export const RD_POLICY = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
-
 export interface RdProjectionContext {
   speakerParams?: Readonly<Record<string, unknown>>;
   diagnostics?: Diagnostics;
@@ -37,6 +35,7 @@ export interface RdProjectionContext {
 export function projectRd(
   params: Readonly<Record<string, number>>,
   delta: number,
+  policy: RdPolicy,
   { speakerParams, diagnostics = createDiagnostics(), itemId }: RdProjectionContext = {},
 ): { Rd: number; RdPhraseOffset: number } {
   const base = params.Rd ?? speakerParams?.Rd;
@@ -55,11 +54,11 @@ export function projectRd(
   }
   const priorOffset = params.RdPhraseOffset ?? 0;
   const requested = base + priorOffset + delta;
-  const effective = Math.max(RD_POLICY.min, Math.min(RD_POLICY.max, requested));
+  const effective = Math.max(policy.min, Math.min(policy.max, requested));
   if (effective !== requested) {
     diagnostics.warn(
       "Affect projection clamped effective Rd to the declared range",
-      { itemId, key: "RdPhraseOffset", requested, clamped: effective, ...RD_POLICY },
+      { itemId, key: "RdPhraseOffset", requested, clamped: effective, ...policy },
       "HRG_LOWER_VALUE_CLAMPED",
     );
   }

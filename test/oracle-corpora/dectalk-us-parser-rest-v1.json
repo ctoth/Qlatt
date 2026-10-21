@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-parser-rest-v1",
+  "description": "Sentences for what DECtalk's letter-to-sound does with text its command parser has rewritten: a percent sign and other symbols standing alone, e-mail and web addresses, an ellipsis, nested quotes, a clock time before a word, a degree written with periods, and clauses of more than 300 characters. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pc-01", "text": "Prices went up 12% in March.", "group": "percent" },
+    { "id": "pc-02", "text": "Nearly 40% of the seats were empty.", "group": "percent" },
+    { "id": "pc-03", "text": "The tax is 7.5%.", "group": "percent" },
+    { "id": "pc-04", "text": "He is 100% right.", "group": "percent" },
+    { "id": "pc-05", "text": "We kept 25%, and they kept 75%.", "group": "percent" },
+    { "id": "pc-06", "text": "A 5% rise is small.", "group": "percent" },
+    { "id": "sy-01", "text": "Meet me @ the gate.", "group": "symbol" },
+    { "id": "sy-02", "text": "Bread & butter are on the table.", "group": "symbol" },
+    { "id": "sy-03", "text": "Two + two = four.", "group": "symbol" },
+    { "id": "sy-04", "text": "Press the # key twice.", "group": "symbol" },
+    { "id": "sy-05", "text": "Use the * key now.", "group": "symbol" },
+    { "id": "ad-01", "text": "Mail anna.brown@example.com today.", "group": "address" },
+    { "id": "ad-02", "text": "Go to www.example.org now.", "group": "address" },
+    { "id": "ad-03", "text": "The file is at http://example.com/news.", "group": "address" },
+    { "id": "ad-04", "text": "Ask help@example.net for a copy.", "group": "address" },
+    { "id": "ad-05", "text": "Their site, example.org, is new.", "group": "address" },
+    { "id": "ad-06", "text": "His address is tom_west42@post.example.co.uk.", "group": "address" },
+    { "id": "el-01", "text": "We waited and waited . . . and left.", "group": "ellipsis" },
+    { "id": "el-02", "text": "...but nobody came.", "group": "ellipsis" },
+    { "id": "el-03", "text": "She said yes... and then no.", "group": "ellipsis" },
+    { "id": "el-04", "text": "Well . . . maybe.", "group": "ellipsis" },
+    { "id": "qu-01", "text": "\"Is it really 'done'?\" she asked.", "group": "quotes" },
+    { "id": "qu-02", "text": "The note said \"Gone (back by noon).\"", "group": "quotes" },
+    { "id": "qu-03", "text": "'He told me \"soon\",' my brother said.", "group": "quotes" },
+    { "id": "qu-04", "text": "\"She called it 'odd'!\" he said.", "group": "quotes" },
+    { "id": "ti-01", "text": "Dinner is at 6:00 sharp.", "group": "time" },
+    { "id": "ti-02", "text": "The train leaves at 12:00 noon.", "group": "time" },
+    { "id": "ti-03", "text": "We close at 5:30 today.", "group": "time" },
+    { "id": "ti-04", "text": "It starts at 9:00 tonight.", "group": "time" },
+    { "id": "dg-01", "text": "Her brother has a Ph.D. too.", "group": "degree" },
+    { "id": "dg-02", "text": "He earned his Ph.D. in May.", "group": "degree" },
+    { "id": "dg-03", "text": "She holds a Ph.D.", "group": "degree" },
+    {
+      "id": "lg-01",
+      "text": "The old man who lived in the small white house beside the river walked every morning to the bakery at the far end of the village where he bought two loaves of brown bread and a jar of honey for his sister who was too ill to leave her bed and who waited for him by the window with a cup of tea that had long since gone cold",
+      "group": "long-clause"
+    },
+    {
+      "id": "lg-02",
+      "text": "When the children came home from school that afternoon they found the kitchen door open and the dog asleep on the step and a strange green bicycle leaning against the wall of the shed and none of them could say whose it was or how long it had been there or why the dog had not barked at whoever had left it and gone away again without a word to anyone in the house or the garden or the lane behind the church where their father was working on the roof of the barn with his two brothers.",
+      "group": "long-clause"
+    },
+    {
+      "id": "lg-03",
+      "text": "Yes. The woman who kept the small shop on the corner of the square for more than twenty years without ever closing it for a single day told the young man from the paper that she had seen the same grey cat sit on the same stone wall every evening at the hour when the lamps were lit and that nobody in the town had ever known whose cat it was or where it went when the rain came. No.",
+      "group": "long-clause"
+    }
+  ]
+}

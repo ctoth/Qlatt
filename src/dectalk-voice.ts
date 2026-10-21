@@ -2,19 +2,23 @@
 //
 // Voice DATA lives entirely in YAML under a frontend's speaker registry
 // (frontend.yaml `speakers:` block -> `dir` of per-voice YAML files). This
-// module contains ONLY generic infrastructure: it reads a voice name, loads
-// the corresponding YAML file, and exposes the raw parameter record plus the
+// module contains ONLY generic infrastructure: it reads a voice name, consumes
+// its supplied document, and exposes the raw parameter record plus the
 // speaker-profile override fields declared by the profile policy. There are NO per-voice
 // branches and NO hardcoded voice values here — every voice is just a file.
 //
 // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
 
 import {
-  loadSpeakerProfileSync,
-  type SpeakerProfileOverride,
-  type SpeakerProfileSpec,
-} from "./speaker-profile";
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
+  changeDefinition,
+  type DefinitionChange,
+  isSpeakerDefinition,
+  isSpeakerDefinitionData,
+  OWN_BLOCK_VOICE,
+  voiceFieldsOfDefinition,
+} from "./dectalk-speaker-definition";
+import type { SpeakerProfileOverride, SpeakerProfileSpec } from "./speaker-profile";
+import { isPlainObject } from "./yaml-loader";
 
 /** One declarative per-voice gain offset binding: the voice-YAML gain field
  *  `gain` is applied as a Paul-relative additive dB offset onto the per-frame
@@ -24,10 +28,40 @@ export interface SpeakerGainOffset {
   param: string;
 }
 
+/**
+ * One field of a voice file that rules may read as `params.policy.voice.<name>`:
+ * a number, or one of a closed list of strings. Declared in the frontend's
+ * `speakers.rule_fields`; every registered voice must give every field,
+ * unless the field is declared `optional: true`. An optional field a voice
+ * does not give is `null` in `params.policy.voice`, so a rule reads one as
+ * `get(params.policy.voice, '<name>', <its own default>)`. It is an explicit
+ * null and not a missing key because the selected voice's fields are laid
+ * over the default voice's (see `withVoiceRulePolicy`): a missing key would
+ * silently read the default voice's value. (DECtalk's voice setup leaves some
+ * values unassigned for some voices.)
+ */
+export type VoiceRuleFieldSpec =
+  | { kind: "number"; citations: string[]; optional?: true }
+  | { kind: "string"; values: string[]; citations: string[]; optional?: true };
+
+export type VoiceRuleFields = Record<string, number | string | null>;
+
+export interface SpeakerDefinitionContext {
+  path: string;
+  data: unknown;
+}
+
+export interface VoiceDocument {
+  path: string;
+  document: unknown;
+}
+
 export interface VoiceRegistry {
   dir: string;
   default: string;
   voices: string[];
+  /** Voice-file fields rules may read; empty when the frontend declares none. */
+  ruleFields: Record<string, VoiceRuleFieldSpec>;
   /** Declarative list of speaker fields stamped (absolute set) onto every
    *  frame's same-named Klatt param. Pure data — the TS applies it generically
    *  with no per-voice or per-field branches. Empty when not declared. */
@@ -36,6 +70,13 @@ export interface VoiceRegistry {
    *  param). Applied as Paul-relative additive offsets by generic infra with no
    *  per-voice or per-gain branches. Empty when not declared. */
   speakerGainOffsets: SpeakerGainOffset[];
+  /**
+   * The rule fields that are sent with a speaker definition
+   * (`speakers.definition_frame_params`): in a text whose voice changes
+   * inside it, each frame carries them for the voice in force when the frame
+   * is sent. Absent or empty when not declared.
+   */
+  definitionFrameParams?: string[];
 }
 
 export interface ResolvedVoice {
@@ -50,8 +91,145 @@ export interface ResolvedVoice {
   /** Full numeric parameter record for this voice (feeds the F0 speaker
    *  policy / speakerParams). Non-numeric keys (name, sex, citations) excluded. */
   params: Record<string, number>;
+  /** The registry's rule fields as this voice gives them: `params.policy.voice`. */
+  ruleFields: VoiceRuleFields;
   /** Source citations declared in the voice YAML. */
   citations: string[];
+}
+
+/**
+ * Parse `speakers.rule_fields`: `{ <name>: { kind: number } | { values: [...] },
+ * citations: [...] }`. A field needs a citation, as a rule does.
+ */
+function parseRuleFields(raw: unknown): Record<string, VoiceRuleFieldSpec> {
+  if (raw === undefined) return {};
+  if (!isPlainObject(raw)) {
+    throw new Error("E_VOICE_RULE_FIELDS: speakers.rule_fields must be a map of field specs");
+  }
+  const fields: Record<string, VoiceRuleFieldSpec> = {};
+  for (const [name, spec] of Object.entries(raw)) {
+    const where = `speakers.rule_fields.${name}`;
+    if (!isPlainObject(spec)) {
+      throw new Error(
+        `E_VOICE_RULE_FIELDS: ${where} must be { kind: number } or { values: [...] }`,
+      );
+    }
+    const citations = Array.isArray(spec.citations)
+      ? spec.citations.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+      : [];
+    if (citations.length === 0) {
+      throw new Error(`E_VOICE_RULE_FIELDS: ${where} requires citations`);
+    }
+    if (spec.optional !== undefined && spec.optional !== true && spec.optional !== false) {
+      throw new Error(`E_VOICE_RULE_FIELDS: ${where}.optional must be true or false`);
+    }
+    const optional = spec.optional === true ? { optional: true as const } : {};
+    if (spec.kind === "number" && spec.values === undefined) {
+      fields[name] = { kind: "number", citations, ...optional };
+    } else if (
+      spec.kind === undefined &&
+      Array.isArray(spec.values) &&
+      spec.values.length > 0 &&
+      spec.values.every((value) => typeof value === "string")
+    ) {
+      fields[name] = { kind: "string", values: spec.values as string[], citations, ...optional };
+    } else {
+      throw new Error(
+        `E_VOICE_RULE_FIELDS: ${where} must be { kind: number } or { values: [...] }`,
+      );
+    }
+  }
+  return fields;
+}
+
+/**
+ * The rule fields of one voice document: every declared field, of its kind;
+ * an optional field the document does not give is null.
+ */
+export function readVoiceRuleFields(
+  fields: Readonly<Record<string, VoiceRuleFieldSpec>>,
+  doc: Readonly<Record<string, unknown>>,
+  docPath: string,
+): VoiceRuleFields {
+  const values: VoiceRuleFields = {};
+  for (const [name, spec] of Object.entries(fields)) {
+    const value = doc[name];
+    if (value === undefined || value === null) {
+      if (spec.optional) {
+        values[name] = null;
+        continue;
+      }
+      throw new Error(`E_VOICE_RULE_FIELD: voice file '${docPath}' lacks rule field '${name}'`);
+    }
+    if (spec.kind === "number") {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        throw new Error(
+          `E_VOICE_RULE_FIELD: voice file '${docPath}' field '${name}' is ${JSON.stringify(value)}, not a number`,
+        );
+      }
+      values[name] = value;
+    } else {
+      if (typeof value !== "string" || !spec.values.includes(value)) {
+        throw new Error(
+          `E_VOICE_RULE_FIELD: voice file '${docPath}' field '${name}' is ${JSON.stringify(value)}, not one of ${spec.values.join(", ")}`,
+        );
+      }
+      values[name] = value;
+    }
+  }
+  return values;
+}
+
+function readVoiceDocument({
+  path: docPath,
+  document: doc,
+}: VoiceDocument): [string, Record<string, unknown>] {
+  if (!isPlainObject(doc)) {
+    throw new Error(`E_VOICE_SCHEMA: voice file '${docPath}' is not a mapping`);
+  }
+  return [docPath, doc];
+}
+
+/**
+ * Validate the declarations before acquisition. A source without rule fields
+ * needs no voice documents; a reserved voice policy fails before any load.
+ */
+export function voiceRuleRegistry(source: unknown): VoiceRegistry | null {
+  if (!isPlainObject(source)) return null;
+  const registry = getVoiceRegistry(source);
+  if (!registry || Object.keys(registry.ruleFields).length === 0) return null;
+  const parameters = isPlainObject(source.parameters) ? source.parameters : {};
+  const policy = isPlainObject(parameters.policy) ? parameters.policy : {};
+  if (policy.voice !== undefined) {
+    throw new Error(
+      "E_VOICE_POLICY_RESERVED: parameters.policy.voice is filled from the selected voice's " +
+        "rule fields (speakers.rule_fields) and may not be written in the rulepack",
+    );
+  }
+  return registry;
+}
+
+/** Check every registered document and supply the default voice's rule values. */
+export function withVoiceRulePolicy<T>(
+  source: T,
+  documents?: ReadonlyMap<string, VoiceDocument>,
+): T {
+  const registry = voiceRuleRegistry(source);
+  if (!registry || !isPlainObject(source)) return source;
+  const parameters = isPlainObject(source.parameters) ? source.parameters : {};
+  const policy = isPlainObject(parameters.policy) ? parameters.policy : {};
+  let defaults: VoiceRuleFields | null = null;
+  for (const name of new Set([registry.default, ...registry.voices])) {
+    const selected = documents?.get(name);
+    if (!selected) throw new Error(`E_VOICE_SCHEMA: voice document '${name}' was not supplied`);
+    const [docPath, doc] = readVoiceDocument(selected);
+    const values = readVoiceRuleFields(registry.ruleFields, doc, docPath);
+    if (name === registry.default) defaults = values;
+  }
+  return {
+    ...source,
+    parameters: { ...parameters, policy: { ...policy, voice: defaults } },
+  } as T;
 }
 
 /**
@@ -79,7 +257,55 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
         )
         .map((e) => ({ gain: e.gain, param: e.param }))
     : [];
-  return { dir, default: def, voices, speakerFrameParams, speakerGainOffsets };
+  const ruleFields = parseRuleFields(speakers.rule_fields);
+  return {
+    dir,
+    default: def,
+    voices,
+    ruleFields,
+    speakerFrameParams,
+    speakerGainOffsets,
+    definitionFrameParams: Array.isArray(speakers.definition_frame_params)
+      ? speakers.definition_frame_params.filter((v): v is string => typeof v === "string")
+      : [],
+  };
+}
+
+/**
+ * A voice document with entries of its speaker definition changed: the
+ * fields that come from the definition are derived again, as DECtalk's
+ * setspdef() does after setparam() (src/dectalk-speaker-definition.ts).
+ */
+function withDefinitionChanges(
+  context: SpeakerDefinitionContext | undefined,
+  docPath: string,
+  doc: Record<string, unknown>,
+  changes: readonly DefinitionChange[],
+): Record<string, unknown> {
+  if (context === undefined) {
+    throw new Error(
+      "E_VOICE_DEFINITION: selected speaker-definition context was not supplied, so a voice's definition cannot be changed",
+    );
+  }
+  const data = context.data;
+  if (!isSpeakerDefinitionData(data)) {
+    throw new Error(
+      `E_VOICE_DEFINITION: '${context.path}' does not hold the names and limits of a speaker definition`,
+    );
+  }
+  if (!isSpeakerDefinition(doc.definition)) {
+    throw new Error(`E_VOICE_DEFINITION: voice file '${docPath}' has no definition`);
+  }
+  const voiceNumber = typeof doc.last_voice === "number" ? doc.last_voice : -1;
+  const definition = changeDefinition(doc.definition, data, changes);
+  return {
+    ...doc,
+    ...voiceFieldsOfDefinition(definition.values, data, {
+      frank: voiceNumber === OWN_BLOCK_VOICE,
+      voiceNumber,
+    }),
+    definition,
+  };
 }
 
 function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
@@ -95,29 +321,27 @@ function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
 /**
  * Resolve a voice by name against a frontend's voice registry.
  *
- * Generic: loads `<registry.dir>/<voiceName>.yaml` and maps its numeric fields.
+ * Generic: consumes the selected document and maps its numeric fields.
  * Throws E_VOICE_UNKNOWN if the name is not in the registry.
  */
 export function resolveVoice(
   registry: VoiceRegistry,
   voiceName: string,
-  profileSpec: SpeakerProfileSpec = loadSpeakerProfileSync(),
+  profileSpec: SpeakerProfileSpec,
+  selectedDocument: VoiceDocument,
+  /** Changes to the voice's speaker definition, in the order they were asked. */
+  definitionChanges: readonly DefinitionChange[] = [],
+  definitionContext?: SpeakerDefinitionContext,
 ): ResolvedVoice {
-  const name = voiceName.trim().toLowerCase();
-  if (registry.voices.length > 0 && !registry.voices.includes(name)) {
-    throw new Error(
-      `E_VOICE_UNKNOWN: voice '${voiceName}' is not registered. ` +
-        `Available: ${registry.voices.join(", ")}`,
-    );
-  }
-
-  const docPath = `${registry.dir}/${name}.yaml`;
-  const doc = loadYamlDocumentSync<Record<string, unknown>>(docPath);
-  if (!isPlainObject(doc)) {
-    throw new Error(`E_VOICE_SCHEMA: voice file '${docPath}' is not a mapping`);
-  }
+  const name = voiceNameInRegistry(registry, voiceName);
+  const [docPath, loaded] = readVoiceDocument(selectedDocument);
+  const doc =
+    definitionChanges.length > 0
+      ? withDefinitionChanges(definitionContext, docPath, loaded, definitionChanges)
+      : loaded;
 
   const params = toNumberRecord(doc);
+  const ruleFields = readVoiceRuleFields(registry.ruleFields, doc, docPath);
 
   const override: SpeakerProfileOverride = {};
   for (const field of Object.keys(profileSpec.default_profile)) {
@@ -134,5 +358,18 @@ export function resolveVoice(
 
   const sex = typeof doc.sex === "string" ? doc.sex : undefined;
 
-  return { name, sex, override, params, citations };
+  return { name, sex, override, params, ruleFields, citations };
+}
+
+/** Preserve registered-name checking before a caller acquires a selected document. */
+export function voiceNameInRegistry(registry: VoiceRegistry, voiceName: string): string {
+  const name = voiceName.trim().toLowerCase();
+  if (registry.voices.length > 0 && !registry.voices.includes(name)) {
+    throw new Error(
+      `E_VOICE_UNKNOWN: voice '${voiceName}' is not registered. ` +
+        `Available: ${registry.voices.join(", ")}`,
+    );
+  }
+
+  return name;
 }

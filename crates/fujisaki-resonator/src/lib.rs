@@ -1,5 +1,9 @@
 //! Resonator with Fujisaki-style history compensation when formant frequency drops.
 //!
+//! This audio formant filter rescales its stored output history when frequency drops.
+//! It is used for the klsyn88 cascade F2/F3 filters, not as an F0 phrase or accent
+//! generator for the Fujisaki intonation model.
+//!
 //! Reference: klsyn88 parwv.c setabc + F2/F3 compensation blocks.
 
 #![allow(clippy::missing_safety_doc)]

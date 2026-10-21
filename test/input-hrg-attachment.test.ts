@@ -1,15 +1,25 @@
 import { describe, expect, it } from "vitest";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { Utterance, whyFeature } from "../src/declarative-frontend/hrg";
+import { parseAffectPresets } from "../src/input/affect-presets";
 import {
   attachDirectionsToUtterance,
-  DIRECTION_ITEM_SCHEMA,
+  buildDirectionItemSchema,
   parseDirectionInput,
 } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
 
 const SCHEMA = {
   itemTypes: {
-    direction: DIRECTION_ITEM_SCHEMA,
+    direction: buildDirectionItemSchema(channels),
   },
   relations: {
     Affect: { kind: "list", itemTypes: ["direction"] },
@@ -20,25 +30,28 @@ const SCHEMA = {
 
 describe("Direction Track attachment to static HRG fixtures", () => {
   it("attaches typed control records and parents every write to its input decision", () => {
-    const parsed = parseDirectionInput({
-      score: { text: "never stop now" },
-      directionTrack: {
-        version: "1",
-        global: { affect: { preset: "angry", degree: 0.7 } },
-        spans: [
-          {
-            id: "emphasis",
-            anchor: { unit: "word", start: 0 },
-            emphasis: { level: "strong" },
-          },
-          {
-            id: "break",
-            anchor: { unit: "word", start: 1 },
-            break: { strength: 3, timeMs: 120 },
-          },
-        ],
+    const parsed = parseDirectionInput(
+      {
+        score: { text: "never stop now" },
+        directionTrack: {
+          version: "1",
+          global: { affect: { preset: "angry", degree: 0.7 } },
+          spans: [
+            {
+              id: "emphasis",
+              anchor: { unit: "word", start: 0 },
+              emphasis: { level: "strong" },
+            },
+            {
+              id: "break",
+              anchor: { unit: "word", start: 1 },
+              break: { strength: 3, timeMs: 120 },
+            },
+          ],
+        },
       },
-    });
+      { affectLibrary: library, vqChannels: channels },
+    );
     const utterance = new Utterance(SCHEMA, parsed.provenance);
 
     const attached = attachDirectionsToUtterance(parsed, utterance);

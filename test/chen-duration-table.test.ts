@@ -3,9 +3,11 @@ import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   compileRuleEngineSpec,
-  QLATT_ENGLISH_RULEPACK,
+  loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 import { qlattInventoryResource } from "./utils/qlatt-english-inventory";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 function vowelBeforeStop(voiced: boolean, duration = 100, floor?: number) {
   const utterance = new Utterance({
@@ -41,8 +43,8 @@ function vowelBeforeStop(voiced: boolean, duration = 100, floor?: number) {
   runGraphRuleEngine(
     utterance,
     compileRuleEngineSpec({
-      ...QLATT_ENGLISH_RULEPACK,
-      phases: QLATT_ENGLISH_RULEPACK.phases.map((phase) =>
+      ...qlattRulepack,
+      phases: qlattRulepack.phases.map((phase) =>
         phase.name === "duration" ? { name: "duration", rules: ["vowel_shortening"] } : phase,
       ),
     }),

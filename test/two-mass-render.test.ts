@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 
 it("renders mode 3 through the experiment graph and responds to pressure removal", async () => {
   const rms: number[] = [];

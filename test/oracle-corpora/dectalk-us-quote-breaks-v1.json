@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-quote-breaks-v1",
+  "description": "A word that reaches letter-to-sound with an opening quotation mark on it is marked for a clause break like a conjunction (DECtalk 4.63 LTS/ls_task.c:5082-5106, PRO_OPEN_QUOTE). The command-stage parser leaves the mark on the word when the quotation ends in a parenthesis and a period; it removes both marks otherwise.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "quote-break", "text": "The sign said \"Closed (back at two).\"", "group": "open-quote", "tags": ["break", "fourth-word", "messy-sweep-ms-137"], "expectedFocus": ["trace"] },
+    { "id": "quote-break-after-preposition", "text": "The sign on the door said \"Closed (back at two).\"", "group": "open-quote", "tags": ["break", "marked-word-before"], "expectedFocus": ["trace"] },
+    { "id": "quote-no-break-next-marked", "text": "The old man said \"Stop and (wait).\"", "group": "open-quote", "tags": ["no-break", "next-word-marked"], "expectedFocus": ["trace"] },
+    { "id": "quote-no-break-short", "text": "The big sign said \"Closed (now).\"", "group": "open-quote", "tags": ["no-break", "too-few-words-after"], "expectedFocus": ["trace"] },
+    { "id": "quote-no-break-near-start", "text": "They said \"Go (home).\"", "group": "open-quote", "tags": ["no-break", "third-word"], "expectedFocus": ["trace"] },
+    { "id": "quote-marks-removed", "text": "The old sign said \"Come back (at two) today.\"", "group": "open-quote", "tags": ["no-break", "parser-removes-the-marks"], "expectedFocus": ["trace"] }
+  ]
+}

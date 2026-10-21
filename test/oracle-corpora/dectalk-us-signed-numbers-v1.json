@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-signed-numbers-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sg-minus", "text": "The answer is -7.", "group": "sign", "tags": ["minus", "digits", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "sg-plus", "text": "Add +3 to the score.", "group": "sign", "tags": ["plus", "digits"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-two-digits", "text": "It fell from 10 to -10.", "group": "sign", "tags": ["minus", "digits"], "expectedFocus": ["trace"] },
+    { "id": "sg-plus-decimal", "text": "The change was +2.5 points.", "group": "sign", "tags": ["plus", "decimal"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-decimal", "text": "It is -2.5 now.", "group": "sign", "tags": ["minus", "decimal"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-money", "text": "The balance is -$20.", "group": "sign", "tags": ["minus", "money"], "expectedFocus": ["trace"] },
+    { "id": "sg-plus-money", "text": "It is +$20 now.", "group": "sign", "tags": ["plus", "money"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-bare-decimal", "text": "It is -.5 now.", "group": "sign", "tags": ["minus", "bare-decimal"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-separators", "text": "It is -1,000 now.", "group": "sign", "tags": ["minus", "separators"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-plural", "text": "It is -7s now.", "group": "sign", "tags": ["minus", "plural"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-half", "text": "It is -1/2 now.", "group": "sign", "tags": ["minus", "fraction", "not-the-dictionary"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-fraction", "text": "It is -3/8 now.", "group": "sign", "tags": ["minus", "fraction"], "expectedFocus": ["trace"] },
+    { "id": "sg-minus-not-year", "text": "It is -1990 now.", "group": "sign", "tags": ["minus", "four-digits", "no-year"], "expectedFocus": ["trace"] },
+    { "id": "sg-degrees", "text": "The low was -5 degrees last night.", "group": "sign", "tags": ["minus", "in-sentence"], "expectedFocus": ["trace"] },
+    { "id": "sg-unsigned", "text": "The answer is 7.", "group": "sign", "tags": ["no-sign"], "expectedFocus": ["trace"] },
+    { "id": "sg-year-unsigned", "text": "It is 1990 now.", "group": "sign", "tags": ["no-sign", "year"], "expectedFocus": ["trace"] },
+    { "id": "sg-half-unsigned", "text": "It is 1/2 now.", "group": "sign", "tags": ["no-sign", "dictionary-entry"], "expectedFocus": ["trace"] },
+    { "id": "sg-not-ordinal", "text": "It is -5th now.", "group": "sign", "tags": ["part-number", "dash-named"], "expectedFocus": ["trace"] },
+    { "id": "sg-not-range", "text": "It is -10-15 now.", "group": "sign", "tags": ["part-number", "dash-named"], "expectedFocus": ["trace"] },
+    { "id": "sg-lone-dash", "text": "It is - 7 now.", "group": "sign", "tags": ["lone-dash"], "expectedFocus": ["trace"] },
+    { "id": "an-letter-capital", "text": "Seat 23 A is here.", "group": "a-after-number", "tags": ["letter", "capital"], "expectedFocus": ["trace"] },
+    { "id": "an-letter-lower", "text": "Take 2 a day.", "group": "a-after-number", "tags": ["letter", "lower-case"], "expectedFocus": ["trace"] },
+    { "id": "an-letter-after-ordinal", "text": "Take 2nd a day.", "group": "a-after-number", "tags": ["letter", "after-ordinal"], "expectedFocus": ["trace"] },
+    { "id": "an-article-two-after", "text": "Take 2 of a kind.", "group": "a-after-number", "tags": ["article", "second-word-after"], "expectedFocus": ["trace"] },
+    { "id": "an-article-after-money", "text": "Take $2 a day.", "group": "a-after-number", "tags": ["article", "after-money"], "expectedFocus": ["trace"] },
+    { "id": "an-article-after-time", "text": "At 9:30 a day.", "group": "a-after-number", "tags": ["article", "after-time"], "expectedFocus": ["trace"] },
+    { "id": "an-article", "text": "Vitamin A is good.", "group": "a-after-number", "tags": ["article", "no-number"], "expectedFocus": ["trace"] }
+  ]
+}

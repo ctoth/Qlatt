@@ -9,8 +9,11 @@ import type {
 } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { f0ModelForVoice, renderLayeredF0 } from "../src/declarative-frontend/hrg/lowering";
+import {
+  loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
 const META = {
@@ -20,6 +23,62 @@ const META = {
   reason: "captured layered-intonation fixture",
   citations: ["Klatt 1982"],
 };
+
+describe("DECtalk segmental profile declaration", () => {
+  it.each([
+    { field: "profile_roles", value: undefined },
+    { field: "profile_roles", value: "voiceless,plosive,stressed,glottal_gesture" },
+    { field: "profile_roles", value: ["voiceless", "plosive", "stressed"] },
+    { field: "profile_roles", value: ["plosive", "voiceless", "stressed", "glottal_gesture"] },
+    { field: "required_profile_count", value: undefined },
+    { field: "required_profile_count", value: 4 },
+  ])("rejects invalid $field declaration $value even without commands", ({ field, value }) => {
+    const { f0Model, speakerParams } = readFixture();
+    const segmental = { ...f0Model.layers.segmental };
+    Reflect.set(segmental, field, value);
+    const model = { ...f0Model, layers: { ...f0Model.layers, segmental } };
+    expect(() => renderLayeredF0([], model, 0.1, speakerParams)).toThrow(
+      `f0_model.layers.segmental.${field}`,
+    );
+  });
+
+  it("validates the voice's effective role order", () => {
+    const { f0Model, speakerParams } = readFixture();
+    const model = f0ModelForVoice(
+      {
+        ...f0Model,
+        by_sex: {
+          fixture: {
+            layers: {
+              segmental: {
+                profile_roles: ["plosive", "voiceless", "stressed", "glottal_gesture"],
+              },
+            },
+          },
+        },
+      },
+      "fixture",
+    );
+    expect(() => renderLayeredF0([], model, 0.1, speakerParams)).toThrow("profile_roles");
+  });
+
+  it("renders three flags identically to an explicit zero fourth flag", () => {
+    const { f0Model, speakerParams } = readFixture();
+    const render = (profilePoints: number[]) =>
+      renderLayeredF0(
+        [{ layer: "segmental", time: 0, value: 50, durationFrames: 20, profilePoints }],
+        f0Model,
+        0.1,
+        speakerParams,
+      );
+    const three = render([1, 0, 0]);
+    expect(three.length).toBeGreaterThan(0);
+    expect(three.every((point) => Number.isFinite(point.f0))).toBe(true);
+    expect(render([1, 0, 0, 0])).toEqual(three);
+    expect(() => render([1, 0])).toThrow("profilePoints requires 3 to 4");
+    expect(() => render([1, 0, 0, 0, 0])).toThrow("profilePoints requires 3 to 4");
+  });
+});
 
 type BaselineCommand = {
   durationFrames?: number;
@@ -99,14 +158,37 @@ function readFixture(): {
     !isPlainObject(parsed.oldProduction.controlScore) ||
     !Array.isArray(parsed.oldProduction.controlScore.f0_layer_commands) ||
     !isPlainObject(parsed.oldProduction.speakerParams) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.f0_model) ||
     !isPlainObject(spec.output)
   ) {
     throw new Error("layered-intonation fixture/spec invalid");
   }
-  const policy = readLowerOptions(spec.output.lowering);
-  const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
+  // The recorded graph holds Segment values. A column that only a frame
+  // program writes (hrg/frame-program.ts) has none and is not part of what
+  // this fixture reconstructs; F4, which a program also writes, stays.
+  const fullPolicy = readLowerOptions(spec.output.lowering);
+  const programColumns = new Set(
+    Object.values(isPlainObject(spec.frame_programs) ? spec.frame_programs : {}).flatMap(
+      (program) =>
+        isPlainObject(program) && isPlainObject(program.outputs)
+          ? Object.keys(program.outputs)
+          : [],
+    ),
+  );
+  const firstSegment = parsed.reconstructedGraph.items.find(
+    (item) => isPlainObject(item) && item.type === "segment",
+  );
+  const recorded = (column: string): boolean =>
+    isPlainObject(firstSegment) &&
+    isPlainObject(firstSegment.features) &&
+    Object.hasOwn(firstSegment.features, column);
+  const policy = {
+    ...fullPolicy,
+    columns: fullPolicy.columns.filter((column) => !programColumns.has(column) || recorded(column)),
+  };
+  const inventory = loadInventorySpecFromPath(spec.resources.inventory).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");

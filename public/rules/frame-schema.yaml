@@ -1,5 +1,17 @@
 # Shared event Frame vocabulary (#243). No stored segment feature: navigation
-# resolves the HRG association. Parameters remain absent until a producer writes them.
+# resolves the HRG association. Numeric outputs are evaluated, not Item writes.
+rules:
+  frame_copy:
+    select:
+      relation: Frames
+      where: "true"
+    define:
+      frame_segments: "assoc(current, 'segment')"
+      copied_f1: "size(frame_segments) > 0 && has(frame_segments[0].F1) ? frame_segments[0].F1 : null"
+    apply: []
+    citations:
+      - "Qlatt #243: preserve Segment F1 copying; frame_copy"
+      - "Taylor, Black & Caley 2001: shared HRG identity"
 relations:
   Frames:
     type: parallel

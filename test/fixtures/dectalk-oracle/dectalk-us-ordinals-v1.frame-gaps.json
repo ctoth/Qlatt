@@ -1,0 +1,15 @@
+{
+  "ordinal-42nd-street": ["B1","AV","AP","A2","A4","A5","AB","A2_AMPLITUDE"],
+  "ordinal-100th-day": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ordinal-4th-5th-11th": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ordinal-1st": ["B1","AV","AP","A2","A4","A5","AB"],
+  "ordinal-2nd": ["B1","AV","AP","A2","A4","A5","A2_AMPLITUDE"],
+  "ordinal-3rd": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ordinal-11th": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ordinal-12th": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ordinal-21st": ["B1","AV","AP","A2","A4","A5","AB"],
+  "ordinal-30th": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ordinal-101st": ["B1","AV","AP","A2","A4","A5","AB"],
+  "ordinal-upper": ["B1","AV","AP","A2","A4","A5","AB","A2_AMPLITUDE"],
+  "ordinal-final": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+}

@@ -1,7 +1,7 @@
 import { expect, it, type MockInstance, vi } from "vitest";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
 import { getAudioParam } from "../src/audio-param-utils";
 import * as interpreterModule from "../src/klatt-interpreter";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 
 it("the Node render backend writes exactly the host-neutral schedule", async () => {
   const createInterpreter = interpreterModule.createKlattInterpreter;

@@ -234,12 +234,16 @@ No HRG code is imported or modified; only the schema shapes line up.
 
 ## 6. Inline shorthand (demoted)
 
-`parseInline(source)` is the optional convenience input. Its *first act* is to
+`parseInline(source, policy)` is the optional convenience input. Pass the selected
+frontend's validated `loadFrontendResources(spec).inlineMarkers`; an absent table
+does not supply a default syntax. Its *first act* is to
 lift itself into a `DirectionTrack`:
 
 - `((preset))` / `((preset@degree))` → `global.affect` (first wins).
 - `*word*` → an emphasis span on that word.
-- The cleaned text (markers removed) is the score.
+- The cleaned text (complete valid markers removed) is the score; unmatched or
+  malformed markers remain ordinary text. These are the bundled defaults;
+  `inline_markers` declares literal delimiters, emphasis level and first/last global selection.
 
 The Direction Track, not the annotated string, is the source of truth and the
 thing provenance points at. Inline is a serializer and debug escape hatch only.

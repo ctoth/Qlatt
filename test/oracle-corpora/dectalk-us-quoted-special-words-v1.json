@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-quoted-special-words-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "qs-and-first", "text": "He left, 'and shut the door.'", "group": "quoted-special-word", "tags": ["and", "apostrophe-before"], "expectedFocus": ["trace"] },
+    { "id": "qs-and-then", "text": "They went, 'and then came back.'", "group": "quoted-special-word", "tags": ["and", "apostrophe-before"], "expectedFocus": ["trace"] },
+    { "id": "qs-to", "text": "He said 'to the left' twice.", "group": "quoted-special-word", "tags": ["to", "apostrophe-before"], "expectedFocus": ["trace"] },
+    { "id": "qs-for", "text": "It is 'for now' only.", "group": "quoted-special-word", "tags": ["for", "apostrophe-before"], "expectedFocus": ["trace"] },
+    { "id": "qs-and-both", "text": "She said 'and' twice.", "group": "quoted-special-word", "tags": ["and", "apostrophe-both-sides"], "expectedFocus": ["trace"] },
+    { "id": "qs-plain-control", "text": "He left and shut the door.", "group": "quoted-special-word", "tags": ["control", "no-apostrophe"], "expectedFocus": ["trace"] }
+  ]
+}

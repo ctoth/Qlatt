@@ -1,0 +1,8 @@
+{
+  "is-wh-initials-question": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "is-wh-initial-name-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "is-wh-initial-auxiliary": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "is-plain-initials-question": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "is-initial-first-auxiliary": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "is-period-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

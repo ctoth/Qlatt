@@ -1,10 +1,10 @@
-import { isPlainObject, loadYamlDocumentSync } from "../yaml-loader";
+import { isPlainObject } from "../yaml-loader";
 import type { AffectPreset } from "./affect";
-import { VQ_FIELDS } from "./vq-channels";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 export interface AffectLibrary {
-  presets: ReadonlyMap<string, AffectPreset>;
-  variants: ReadonlyMap<string, ReadonlyMap<string, string>>;
+  presets: Readonly<Record<string, AffectPreset>>;
+  variants: Readonly<Record<string, Readonly<Record<string, string>>>>;
   degree: { points: readonly (readonly [number, number])[]; citations: string[] };
 }
 
@@ -35,14 +35,13 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
   const root = object(document, "affect presets");
   if (!Array.isArray(root.presets) || root.presets.length === 0)
     throw new Error("presets must be nonempty");
-  const presets = new Map<string, AffectPreset>();
-  const fields = new Set(VQ_FIELDS);
+  const presets: Record<string, AffectPreset> = Object.create(null);
   for (const entry of root.presets) {
     const row = object(entry, "preset");
     if (typeof row.name !== "string" || row.name.trim().length === 0)
       throw new Error("preset name is required");
     const name = row.name;
-    if (presets.has(name)) throw new Error(`Duplicate affect preset name: ${name}`);
+    if (Object.hasOwn(presets, name)) throw new Error(`Duplicate affect preset name: ${name}`);
     if (
       row.group !== "emotion" &&
       row.group !== "epistemic" &&
@@ -59,7 +58,6 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
     const vq = object(row.vq, `${name}.vq`);
     const values: Record<string, number> = {};
     for (const [key, value] of Object.entries(vq)) {
-      if (!fields.has(key)) throw new Error(`${name}: unknown voice-quality channel ${key}`);
       values[key] = finite(value, `${name}.${key}`);
     }
     if (row.note !== undefined && typeof row.note !== "string")
@@ -68,7 +66,7 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
       throw new Error(`${name}: invalid requiresSex`);
     if (row.engineeringEstimate !== undefined && typeof row.engineeringEstimate !== "boolean")
       throw new Error(`${name}: invalid engineeringEstimate`);
-    presets.set(name, {
+    presets[name] = {
       name,
       group: row.group,
       dimensions: {
@@ -83,22 +81,22 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
       ...(typeof row.engineeringEstimate === "boolean"
         ? { engineeringEstimate: row.engineeringEstimate }
         : {}),
-    });
+    };
   }
-  const variants = new Map<string, ReadonlyMap<string, string>>();
+  const variants: Record<string, Readonly<Record<string, string>>> = Object.create(null);
   for (const [name, value] of Object.entries(object(root.variants, "variants"))) {
-    if (presets.has(name)) throw new Error(`Variant name shadows preset: ${name}`);
+    if (Object.hasOwn(presets, name)) throw new Error(`Variant name shadows preset: ${name}`);
     const mapping = object(value, `variants.${name}`);
-    const resolved = new Map<string, string>();
+    const resolved: Record<string, string> = Object.create(null);
     for (const sex of ["male", "female"]) {
       const target = mapping[sex];
-      if (typeof target !== "string" || !presets.has(target))
+      if (typeof target !== "string" || !Object.hasOwn(presets, target))
         throw new Error(`${name}: invalid ${sex} variant`);
-      resolved.set(sex, target);
+      resolved[sex] = target;
     }
-    if (Object.keys(mapping).some((key) => !resolved.has(key)))
+    if (Object.keys(mapping).some((key) => !Object.hasOwn(resolved, key)))
       throw new Error(`${name}: unknown variant selector`);
-    variants.set(name, resolved);
+    variants[name] = resolved;
   }
   const degree = object(root.degree, "degree");
   if (!Array.isArray(degree.points) || degree.points.length < 2)
@@ -128,12 +126,21 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
   };
 }
 
-export const AFFECT_LIBRARY = parseAffectPresets(
-  loadYamlDocumentSync("/rules/affect/presets.yaml"),
-);
+/** Check selected channels independently of the path-cached structural library. */
+export function validateAffectPresetChannels(
+  library: AffectLibrary,
+  channels: readonly VoiceQualityChannel[],
+): void {
+  const fields = new Set(channels.map((row) => row.channel));
+  for (const preset of Object.values(library.presets)) {
+    for (const key of Object.keys(preset.vq)) {
+      if (!fields.has(key)) throw new Error(`${preset.name}: unknown voice-quality channel ${key}`);
+    }
+  }
+}
 
 /** Piecewise linear evaluation; the asset declares the curve and endpoint clamp values. */
-export function affectDegree(value: number, curve = AFFECT_LIBRARY.degree): number {
+export function affectDegree(value: number, curve: AffectLibrary["degree"]): number {
   const points = curve.points;
   if (!Number.isFinite(value) || value <= points[0][0]) return points[0][1];
   for (let index = 1; index < points.length; index++) {

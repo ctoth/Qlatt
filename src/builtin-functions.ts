@@ -29,31 +29,6 @@ const klattAmpTables = {
 export const ndbCor: number[] = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 /**
- * ndbScale source amplitude scale factors keyed by Klatt parameter name.
- * Source: Klatt 1980 PARCOE.FOR NDBSCA, with Qlatt's -47 dB G0 compensation.
- * AH uses -87 before compensation (engineering estimate matching Qlatt's
- * lower aspiration inputs); A7-A10 are engineering extensions of the table.
- */
-export const ndbScale: Record<string, number> = {
-  AV: -119,
-  AH: -134,
-  AF: -119,
-  AVS: -91,
-  A1: -58,
-  A2: -65,
-  A3: -73,
-  A4: -78,
-  A5: -79,
-  A6: -80,
-  A7: -81,
-  A8: -82,
-  A9: -83,
-  A10: -84,
-  AN: -58,
-  AB: -84,
-};
-
-/**
  * klsyn88 amplitude lookup table — DBtoLIN(dB) = klsynAmpTable[dB] * 0.001.
  * Source: klsyn88 parwvt.h.
  */

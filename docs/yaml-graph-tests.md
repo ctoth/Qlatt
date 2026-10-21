@@ -191,6 +191,6 @@ This is intentional: they are fast, deterministic, and “math-first.”
 
 For waveform-level validation, use the offline rendering pipeline (`scripts/render-phrase.ts`) which supports two backends:
 - **node-web-audio-api**: headless Node.js rendering (default)
-- **Playwright**: headless browser rendering via `scripts/rendering/backends/`
+- **Playwright**: headless browser rendering via `src/rendering/backends/`
 
 The oracle comparison system (`scripts/oracle/`) renders phrases through both DECtalk and Qlatt and compares the audio output.

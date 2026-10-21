@@ -11,7 +11,7 @@ import { parseYamlString } from "../src/yaml-loader";
 
 function read(value: string, kind = "cardinal", hundreds = "hundred") {
   const component = parseYamlString(
-    readFileSync("public/rules/normalization/numbers.yaml", "utf8"),
+    readFileSync("public/rules/languages/english/normalization/numbers.yaml", "utf8"),
     "number component",
   ) as Record<string, unknown>;
   const spec = compileRuleEngineSpec({

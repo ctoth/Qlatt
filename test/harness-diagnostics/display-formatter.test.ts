@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { loadExperimentConfig } from "../../src/experiments/load-experiment-config";
+import { expandFormantBanks } from "../../src/formant-bank";
 import {
   type DisplayState,
   formatDisplay,
@@ -41,6 +43,26 @@ function makeCheckResult(overrides: Partial<CheckResult>): CheckResult {
 }
 
 const checkSection: DisplaySection = { id: "checks", source: "check_results" };
+
+it("uses selected metrics in the track display and marks undeclared metrics unavailable", async () => {
+  const run: RunInfo = {
+    phrase: "test",
+    baseF0: 100,
+    sessionId: 1,
+    startTime: 0,
+    track: [{ time: 0, params: { voice: 1, AV: 0 } }],
+  };
+  const section: DisplaySection = { id: "summary", source: "track_summary" };
+  const { semantics } = await loadExperimentConfig("klatt80-baseline");
+  const control = formatSection(section, makeState({ run, semantics }));
+  expect(control).toContain("Voiced events: 0");
+  semantics.analysis!.metrics!.voicing_params = ["voice"];
+  expect(formatSection(section, makeState({ run, semantics }))).toContain("Voiced events: 1");
+  const vtm = await loadExperimentConfig("dectalk-vtm");
+  expect(formatSection(section, makeState({ run, semantics: vtm.semantics }))).toEqual([
+    "(no experiment metrics policy)",
+  ]);
+});
 
 describe("display-formatter", () => {
   // 1. check_results section: pass shows [OK]
@@ -319,7 +341,8 @@ describe("display-formatter", () => {
     expect(text).toContain("F2 range: 1500.0 - 2322.0 Hz");
   });
 
-  it("signal_flow summarizes branch and lfMode usage", () => {
+  it("signal_flow summarizes branch and declared track source controls", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -332,12 +355,57 @@ describe("display-formatter", () => {
       ],
     };
     const section: DisplaySection = { id: "signal", source: "signal_flow" };
-    const text = formatSection(section, makeState({ run })).join("\n");
+    const text = formatSection(section, makeState({ run, semantics })).join("\n");
     expect(text).toContain("SW=1: 1 frames, 0.100s");
-    expect(text).toContain("LF modes:");
+    expect(text).toContain("SW other finite values: 2 frames");
+    expect(text).not.toContain("Parallel-marked events");
+    expect(text).toContain("Track source controls: lfMode=1: 0.200s");
+    expect(text).toContain("Track source controls: sourceMode=1: 0.200s");
+    expect(text).not.toContain("No branch timing mismatches detected");
+    semantics.analysis!.branch_switch = {
+      ...semantics.analysis!.branch_switch!,
+      param: "lfMode",
+      value: 1,
+    };
+    expect(formatSection(section, makeState({ run, semantics })).join("\n")).toContain(
+      "lfMode=1: 3 frames, 0.200s",
+    );
   });
 
-  it("gain_derivation formats computed gain ranges", () => {
+  it.each([
+    ["qlatt-beauty", "sourceMode=1: 1.000s"],
+    ["dectalk-english", "sourceMode=0: 1.000s"],
+    ["klsyn88", "ss=2: 1.000s"],
+    ["dectalk-vtm", "(no experiment source-control policy)"],
+  ])("%s displays its selected source control defaults", async (id, expected) => {
+    const { semantics } = await loadExperimentConfig(id);
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0 }, { time: 1 }],
+    };
+    const section: DisplaySection = { id: "signal", source: "signal_flow" };
+    const state = makeState({ run, semantics });
+    expect(formatSection(section, state).join("\n")).toContain(expected);
+    if (id === "klsyn88" || id === "dectalk-vtm") {
+      expect(formatSection(section, state)).toContain("(no experiment branch-switch policy)");
+      expect(formatSection(section, state).join("\n")).not.toContain("SW=1:");
+    }
+    if (id === "klsyn88") {
+      expect(formatSection(section, state).join("\n")).not.toContain("lfMode");
+      expect(semantics.analysis!.source_modes!.citations[0]).toContain("engineering convention");
+      state.sliderParams.ss = 4;
+      expect(formatSection(section, state).join("\n")).toContain("ss=4: 1.000s");
+      state.sliderParams.ss = Infinity;
+      expect(formatSection(section, state).join("\n")).toContain("ss=2: 1.000s");
+    }
+  });
+
+  it("gain_derivation formats computed gain ranges", async () => {
+    const { graph, semantics } = await loadExperimentConfig("klatt80-baseline");
+    expandFormantBanks(graph, semantics);
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -350,13 +418,45 @@ describe("display-formatter", () => {
     const section: DisplaySection = { id: "gains", source: "gain_derivation" };
     const text = formatSection(
       section,
-      makeState({ run, sliderParams: { parallelGainScale: 1, masterGain: 1 } }),
+      makeState({ run, semantics, sliderParams: { parallelGainScale: 1, masterGain: 1 } }),
     ).join("\n");
     expect(text).toContain("fricGain:");
     expect(text).toContain("parallelScale=1.000");
   });
 
-  it("voicing_issues reports clean track when none found", () => {
+  it("gain_derivation reports missing semantics after checking for track data", () => {
+    const section: DisplaySection = { id: "gains", source: "gain_derivation" };
+    expect(formatSection(section, makeState())).toEqual(["(no track data)"]);
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0, params: { AF: 55 } }],
+    };
+    expect(formatSection(section, makeState({ run }))).toEqual(["(no experiment semantics)"]);
+  });
+
+  it("reports unavailable analysis policy for the selected VTM experiment", async () => {
+    const { semantics } = await loadExperimentConfig("dectalk-vtm");
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0, params: { F0: 120, AF: 0 } }],
+    };
+    for (const source of ["gain_derivation", "voicing_issues"] as const) {
+      const section: DisplaySection = { id: source, source };
+      expect(formatSection(section, makeState({ semantics }))).toEqual(["(no track data)"]);
+      expect(formatSection(section, makeState({ run, semantics }))).toEqual([
+        "(no experiment analysis policy)",
+      ]);
+    }
+  });
+
+  it("voicing_issues reports clean track when none found", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -368,7 +468,7 @@ describe("display-formatter", () => {
       ],
     };
     const section: DisplaySection = { id: "voicing", source: "voicing_issues" };
-    const text = formatSection(section, makeState({ run })).join("\n");
+    const text = formatSection(section, makeState({ run, semantics })).join("\n");
     expect(text).toContain("No voicing inconsistencies detected");
   });
 });

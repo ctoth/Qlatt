@@ -14,12 +14,98 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // docs/klatt-1975-duration-review.md for the release/aspiration changes.
 // #61 regenerates only qlatt-english snapshots for per-phone duration floors;
 // the exact base 1af37573 passes the old snapshots. See docs/per-phone-duration-floors.md.
+// The single output clock regenerates only the four dectalk-english snapshots:
+// every frame keeps its fields, and only frame times and order change (segment
+// starts move onto the 71/11025 s packet clock with the F0 ticks). Checked by
+// hashing each track with times removed and frames sorted, before and after.
+// The ahead(item, n) distance fix regenerates three snapshots: qlatt-english
+// "Did Bob buy a blue balloon?" (place locus now finds the vowel after a stop's
+// release) and qlatt-beauty "Did Bob buy a blue balloon?" and "Gag, gang; go!"
+// (boundary-tone shaping now reaches a vowel two or three segments before the
+// boundary). dectalk-english is unchanged. See docs/ahead-distance-golden-review.md.
+// The DECtalk structure-word rules regenerate the four dectalk-english
+// snapshots, and these are real changes of content, not only of timing: onset
+// consonants now carry their syllabic's stress, every breath group gets a
+// primary stress, the segmental F0 path runs for every phrase, and the
+// word-keyed replay rules are gone. They are checked against DECtalk itself by
+// scripts/oracle/compare-structure-bits.ts and the oracle scoreboard, not here.
+// The splice tree-placement fix regenerates the "Did Bob buy a blue balloon?"
+// and "Gag, gang; go!" snapshots in qlatt-english and qlatt-beauty (cluster
+// position and syllable role of expanded stops) and dectalk-english "The cat
+// sat." (a word-initial phone re-emitted by a splice now sits in its own word).
+// See docs/splice-tree-golden-review.md.
+// The transcription of DECtalk's duration rules (p_us_tim.c) regenerates the
+// four dectalk-english snapshots: every duration changes. They are checked
+// against DECtalk's recorded frame counts by
+// scripts/oracle/compare-duration-frames.ts, not here.
+// Keeping the DECtalk dictionary's secondary stress, and raising the last
+// primary stress before "!" to emphasis, regenerate dectalk-english "Did Bob
+// buy a blue balloon?" and "Gag, gang; go!".
+// The syllabifier now knows this frontend's /l/ (it was keyed LL, so "bl" was
+// never an onset), which regenerates dectalk-english "Did Bob buy a blue
+// balloon?" again.
+// The dictionary's RR and IX vowels are no longer folded into ER and IH, which
+// regenerates dectalk-english "The cat sat." ("Saturday") and "Did Bob buy a
+// blue balloon?".
+// "balloon" is not in DECtalk's dictionary; it is now pronounced by DECtalk's
+// compiled letter-to-sound tables, which regenerates that snapshot once more.
+// DECtalk's clause-initial pauses and its dummy vowel regenerate dectalk-english
+// "Gag, gang; go!" (each pause after a clause holds the next clause's four
+// opening frames; the [g] before the comma is released into IX) and "sip sip."
+// (the dummy vowel is six frames, 38.4 ms, with aspiration at 39 dB). Both are
+// checked against DECtalk's packets by test/dectalk-frame-gate-<n>.test.ts.
+// The hat rise and stress impulses as Ph_inton2.c issues them (a stress
+// impulse on every stressed syllabic, sized by its place among the clause's
+// stresses) regenerate all four dectalk-english snapshots: only F0 changes.
+// The frame gate checks F0 packet by packet on 190 corpus phrases.
+// The clause-type baselines, the question gestures as Ph_inton2.c issues
+// them, and the removal of the comma rises (which the live routine never
+// issues in English) regenerate dectalk-english "Did Bob buy a blue
+// balloon?" and "Gag, gang; go!": F0 only, checked by the frame gate.
+// Rendering F0 clause by clause, as DECtalk restarts it at every clause,
+// regenerates dectalk-english "Gag, gang; go!", its only snapshot of more
+// than one clause.
+// The packet words of phases/articulation.yaml regenerate all four
+// dectalk-english snapshots: every frame gains PS, CNK and AG, and F4 becomes
+// the voice's 3500 on every frame. Nothing else changes: with those four
+// params dropped, scripts/review-track-fields.ts prints the same hashes, times
+// included, for this tree and for master 20b91b67 on all four phrases.
+// PH and run regenerate them again, checked the same way against 3db3a34c
+// with `--drop PH,run`: the two new keys are the only change.
+// The reset of pressure and glottis in a later clause's initial silence
+// regenerates "Gag, gang; go!" alone: against 062c027e the other three are
+// unchanged, and it is unchanged with `--drop PS,CNK,AG`.
+// Corrections to the glottal rules found by tracing DECtalk (the voice's
+// end-of-phrase spread, which initial-silence cases run every frame, when the
+// next phone's opening applies) regenerate three: against fc64b694 only AG
+// changes (`--drop AG` gives equal hashes) and "sip sip." not at all.
+// AL, ABLADE and ATB regenerate all four: against 3f603345 the tracks are
+// equal with `--drop AL,ABLADE,ATB`. Two corrections to those rules (a velar
+// stop sets no lip or blade target; the velar nasal closes the tongue body)
+// regenerate "Gag, gang; go!", again equal to e5fbed47 without those words.
+// The per-clause word count and the early exits of the glottal spread
+// regenerate "Gag, gang; go!" once more: equal to 21b80a5d with `--drop AG,PS`.
+// AREA_N, DC and UE regenerate all four: equal to f06eecfd without them.
+// A2_CODE, BRST and PLACE likewise: equal to e4ba44f4 without them.
+// The emphasis pulse regenerates "Gag, gang; go!": equal to f691f753 with
+// `--drop PS`.
+// Deciding "the same word" by the Word Item instead of its spelling
+// regenerates dectalk-english "sip sip.": the two words were read as one, so
+// the first had no word-final rime. Its durations are now DECtalk's (S 22,
+// IH 18, P 14, S 19, IH 22, P 14 frames), checked packet by packet by the
+// frame gate's dectalk-us-repeated-words-v1 "Sip sip.".
+// #205 corrects Qlatt syllable membership. The two "blue balloon" hashes change:
+// the final-syllable duration rule now reaches balloon's L/UW (English +95 ms,
+// Beauty +54 ms). The other ten hashes match d3759609, including all DECtalk cases.
+// See agent-notes/campaign-issue-205.md and scripts/review-syllabification-goldens.mjs.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(
       `${frontendId}: %s`,
       (phrase) => {
-        const { track } = textToKlattTrackDetailed(phrase, 110, 30, { frontendId });
+        // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+        const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+        const { track } = textToKlattTrackDetailed(phrase, baseF0, 30, { frontendId });
         // Decision identities necessarily change when association decisions are
         // inserted. Compare every original synthesis field; ancestry is tested separately.
         const payload = track.map(({ provenance: _provenance, ...frame }) => {

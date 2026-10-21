@@ -4,11 +4,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type HrgSchema, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import {
+  compileRuleEngineSpec,
   loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
-import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
@@ -83,7 +83,9 @@ function resolve(minimum: number, stress = 1, override?: number, allocated = 120
           duration_model: [],
           durationFloor: [],
         },
-        scalars: { duration: { unit: "ms", resolution: "klatt", floor_field: "durationFloor" } },
+        scalars: {
+          duration: { unit: "ms", quantum: 1, resolution: "klatt", floor_field: "durationFloor" },
+        },
       },
     },
     rules: { floor: phase.rules.duration_floor_from_inventory, first: shorten, second: shorten },

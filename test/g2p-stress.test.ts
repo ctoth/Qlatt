@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { stressPronunciation } from "../src/g2p/stress";
-import { assignStress, isVowel, syllabify } from "./g2p-fixture";
+import { assignStress, isVowel, resources, syllabify } from "./g2p-fixture";
 
 // ── Block 1: Vowel/Consonant Classification ────────────────────────────
 
@@ -232,7 +232,7 @@ describe("stress assignment — additional words", () => {
   it('"understand" with known verb category stresses its heavy final (Hayes 1982, p. 238)', () => {
     expect(
       stressPronunciation(["AH", "N", "D", "ER", "S", "T", "AE", "N", "D"], {
-        policyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
+        stress: resources.stress,
         category: "verb",
       }).phonemes,
     ).toEqual(["AH2", "N", "D", "ER0", "S", "T", "AE1", "N", "D"]);

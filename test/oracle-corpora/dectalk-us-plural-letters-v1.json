@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-plural-letters-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pl-and", "text": "Mind your p's and q's.", "group": "plural-letter", "tags": ["phrase-start-after", "period-word"], "expectedFocus": ["trace"] },
+    { "id": "pl-word-after", "text": "She got all A's and B's this term.", "group": "plural-letter", "tags": ["word-after", "capital"], "expectedFocus": ["trace"] },
+    { "id": "pl-cross", "text": "Dot your i's and cross your t's.", "group": "plural-letter", "tags": ["period-word"], "expectedFocus": ["trace"] },
+    { "id": "pl-wh-question", "text": "How many s's are in Mississippi?", "group": "plural-letter", "tags": ["word-after", "vowel-after"], "expectedFocus": ["trace"] },
+    { "id": "pl-period", "text": "He got two B's.", "group": "plural-letter", "tags": ["period-word", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "pl-verb-after", "text": "The x's mark it.", "group": "plural-letter", "tags": ["word-after"], "expectedFocus": ["trace"] },
+    { "id": "pl-comma", "text": "Two c's, then one d's worth.", "group": "plural-letter", "tags": ["comma-word", "word-after"], "expectedFocus": ["trace"] },
+    { "id": "pl-question", "text": "Did he get two B's? Yes.", "group": "plural-letter", "tags": ["question-mark-word"], "expectedFocus": ["trace"] },
+    { "id": "pl-question-end", "text": "Did he get two B's?", "group": "plural-letter", "tags": ["question-mark-word", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "pl-exclaim", "text": "He got two B's! Yes.", "group": "plural-letter", "tags": ["exclamation-point-word"], "expectedFocus": ["trace"] },
+    { "id": "pl-semicolon", "text": "He got two B's; then left.", "group": "plural-letter", "tags": ["semicolon-word"], "expectedFocus": ["trace"] },
+    { "id": "pl-digit-control", "text": "The 3's are here.", "group": "plural-letter", "tags": ["control", "digit"], "expectedFocus": ["trace"] },
+    { "id": "pl-written-control", "text": "She got all A's.", "group": "plural-letter", "tags": ["control", "left-as-written"], "expectedFocus": ["trace"] }
+  ]
+}

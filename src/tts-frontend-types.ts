@@ -1,5 +1,9 @@
 import type { Utterance } from "./declarative-frontend/hrg";
+import type { FrontendResources } from "./declarative-frontend/inventory";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
+import type { LtsContext } from "./g2p/lts-document";
+import type { MorphologyContext } from "./g2p/morphology";
+import type { StressContext } from "./g2p/stress-policy";
 import type { ProvenanceCollector } from "./provenance";
 
 /** One phoneme selected by transcription before inventory materialization. */
@@ -7,30 +11,193 @@ export interface TranscriptionToken {
   phoneme: string;
   stress: number | null;
   word: string;
+  /** The word's form classes, when the frontend's lexicon records them. */
+  formClasses?: readonly string[];
+  /** The classes as the text stage has them, before they are handed on. */
+  textFormClasses?: readonly string[];
+  /** A later word of one written word (a number spoken as several words). */
+  continuesWrittenWord?: boolean;
+  /**
+   * The word's part in a conjunction of several words, when the frontend's
+   * lexicon finds such ("as soon as"): its first word, or a later one.
+   */
+  conjunctionRole?: "first" | "rest";
+  /**
+   * The written word was read ahead by the routine that spoke the word
+   * before it, and is no word of its own where words are counted as spoken.
+   */
+  readAhead?: boolean;
+  /**
+   * The written word ends in a character that ends a stretch of words for
+   * the frontend, though no punctuation token follows (an abbreviation's
+   * period).
+   */
+  endsWordStretch?: boolean;
+  /**
+   * The marks the frontend names (`written_word_marks`) that the written
+   * word has at its start or its end: an opening quotation mark, say.
+   */
+  writtenMarks?: string[];
+  /** A punctuation token that is not in the text: a text rule supplied it. */
+  supplied?: boolean;
+  /** What is written in the source text where a supplied mark stands. */
+  suppliedFor?: string;
+  /**
+   * A punctuation token a text rule sent itself: no routine read the mark
+   * as the delimiter of the word before it (an initial's two periods).
+   */
+  sentMark?: boolean;
+  /** The phrase the word starts, when the frontend's lexicon marks one. */
+  phraseStart?: "vp" | "pp";
+  /**
+   * No word boundary stands before this word's phrase start: phonemic text,
+   * which has no boundary after it, is the word before.
+   */
+  phraseStartUnbounded?: boolean;
+  /**
+   * The first phone of the word's own text, when phones written before it
+   * (phonemic text) were joined to the word: the word's class arrives here.
+   */
+  wordTextStart?: boolean;
+  /** A morpheme boundary stands after this phone, inside its word. */
+  morphemeBoundaryAfter?: boolean;
+  /** The lexicon exempts this phone from the frontend's allophone rules. */
+  rulesBlocked?: boolean;
+  /**
+   * A duration in milliseconds written on this phone in phonemic text
+   * ("uw<400>").
+   */
+  writtenDurationMs?: number;
+  /** A pitch written on this phone in phonemic text ("uw<400,140>"). */
+  writtenPitch?: number;
+  /** A silence phonemic text wrote among a word's phones ("[m'uw_n]"). */
+  writtenSilence?: boolean;
+  /** The phone is of phonemic text, which letter-to-sound does not read as a word. */
+  phonemicText?: boolean;
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;
   _pronDecisionId?: string;
+  /**
+   * Inside transcription only: the phone is in the last word of phonemic
+   * text, which has no word boundary after it (transcribe-text.ts
+   * joinPhonemicText removes the mark).
+   */
+  _joinsNextWord?: boolean;
+  /**
+   * Inside transcription only: the token's reading ends in this phrase
+   * start, which is the next word's (transcribe-text.ts
+   * startPhraseAtNextWord removes the mark).
+   */
+  _phraseStartAfter?: "vp" | "pp";
+  /**
+   * Inside transcription only: phonemic text written against the word before
+   * it, with no word boundary between them (transcribe-text.ts
+   * joinPhonemicText removes the mark).
+   */
+  _joinsPreviousWord?: boolean;
   sourceTokenId: string;
 }
 
+export const LEXICON_SOURCE_KEYS = [
+  "dictionary",
+  "morphology",
+  "lts-rules",
+  "spelling",
+  "position",
+  "number-abbreviation",
+  "hyphenated",
+  "mode-character",
+  "diagnostic-symbol",
+  "number",
+  "phonemic",
+] as const;
+export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
+export type LexiconSource = { name: string; citation: string };
+
+export const DICTIONARY_CANDIDATE_OPERATIONS = [
+  "exact",
+  "prepend-apostrophe",
+  "append-apostrophe",
+  "strip-trailing-apostrophe",
+  "append-period",
+  "strip-alternate-suffix",
+] as const;
+export type DictionaryCandidateOperation = (typeof DICTIONARY_CANDIDATE_OPERATIONS)[number];
+
 export type TranscriptionConfig = {
+  compound_recovery?: { max_span: number; joiners: string[]; citations: string[] };
+  dictionary_candidates?: { order: DictionaryCandidateOperation[]; citations: string[] };
+  empty_pronunciation?: { duration_ms: number; citations: string[] };
+  diagnostic_symbol_delimiters?: { characters: string; citations: string[] };
   diagnostic_symbols?: Record<string, string[]>;
+  /**
+   * Whether a text made only of `diagnostic_symbols` is spoken as those
+   * phonemes. On unless a frontend says false: a frontend that ports a system
+   * with no such input turns it off, so "B." is the letter and not /b/.
+   */
+  diagnostic_symbol_input?: boolean;
+  /**
+   * Legacy flag selecting the written-word apostrophe handling path: false
+   * looks up the written word before stripping edge apostrophes on a miss.
+   * Candidate transformations and compound recovery have independent policies.
+   */
+  elided_apostrophe_lookup?: boolean;
+  /**
+   * What the frontend's lexicon is, per pronunciation source, for the decision
+   * record of a word: `name` goes into the record's reason and `citation` is
+   * its citation. Each frontend declares the sources for its selected resources;
+   * there is no implicit source metadata from another frontend.
+   */
+  sources?: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letter_names?: Record<string, string[]>;
   punctuation_tokens?: string[];
+  /**
+   * Characters that end a stretch of words when a written word ends in one,
+   * for a frontend that counts a word's place among the words up to such a
+   * character and not only up to a punctuation token. None when absent.
+   */
+  word_stretch_end_characters?: string;
+  /**
+   * Two lengths of text gathered since a stretch of words last ended: past
+   * the first a stretch ends at the next white space, past the second at
+   * once. None when absent.
+   */
+  word_stretch_length_limits?: number[];
+  /**
+   * Characters at the start (`open`) or the end (`close`) of a written word,
+   * each with the name its Word is given for it (`written_marks`). A written
+   * word is what stands between two white spaces in the text the frontend
+   * reads. None when absent.
+   */
+  written_word_marks?: { open?: Record<string, string>; close?: Record<string, string> };
 };
 
 export type TranscriptionOptions = {
+  /** Already acquired selected resources; transcription performs no acquisition. */
+  resources: FrontendResources;
+  /** Selected frontend identity for resource diagnostics. */
+  frontendId?: string;
   diagnostics?: import("./diagnostics").Diagnostics | null;
   provenance?: ProvenanceCollector | null;
   transcriptionConfig?: TranscriptionConfig;
-  ltsPath?: string;
-  morphologyPath?: string;
-  stressPolicyPath?: string;
+  /** Explicit parsed resource overrides; paths alone cannot select dependencies. */
+  lts?: LtsContext;
+  morphology?: MorphologyContext;
+  stress?: StressContext;
   dictLookup?: (word: string) => string[] | null;
   dictionaryMap?: Record<string, string | undefined>;
   utterance?: Utterance;
-  compiledSpec?: CompiledRulepack;
+  compiledSpec: CompiledRulepack;
+  /** The rule engine's option for the orthography phase; recorded unless false. */
+  captureTooling?: boolean;
+  /**
+   * The modes of the text a frontend's text parser turned on: for each mode,
+   * the stretches of the source text it is on in, each from an offset up to
+   * another. A word knows the modes on where it begins
+   * (ClauseContext.modes).
+   */
+  textModeSpans?: Readonly<Record<string, readonly (readonly number[])[]>>;
 };
 
 /** A final timestamped backend parameter frame emitted by HRG lowering. */

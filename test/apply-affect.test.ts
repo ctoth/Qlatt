@@ -1,8 +1,32 @@
 import { describe, expect, it } from "vitest";
 
 import { compileAffect, neutralAffect } from "../src/input/affect";
-import { applyAffectToTrack, isNeutralDelta } from "../src/input/apply-affect";
+import { parseAffectPresets } from "../src/input/affect-presets";
+import { applyAffectToTrack as applyWithPolicy, isNeutralDelta } from "../src/input/apply-affect";
+import { readRdPolicy } from "../src/input/rd-policy";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import type { KlattFrame } from "../src/tts-frontend-types";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const rdPolicy = readRdPolicy(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
+function applyAffectToTrack(
+  track: Parameters<typeof applyWithPolicy>[0],
+  affect: Parameters<typeof applyWithPolicy>[1],
+) {
+  return applyWithPolicy(track, affect, {
+    frontendId: "qlatt-beauty",
+    rdPolicy,
+    vqChannels: channels,
+  });
+}
 
 /**
  * A small synthetic two-vowel track that carries the parameters the affect
@@ -40,8 +64,8 @@ function f0Mean(track: KlattFrame[]): number {
 describe("applyAffectToTrack", () => {
   it("neutral affect leaves the track numerically unchanged (the (c) base case)", () => {
     const track = sampleTrack();
-    const neutral = neutralAffect();
-    expect(isNeutralDelta(neutral.vq)).toBe(true);
+    const neutral = neutralAffect(library, channels);
+    expect(isNeutralDelta(channels, neutral.vq)).toBe(true);
 
     const { track: out } = applyAffectToTrack(track, neutral);
     expect(out).toEqual(track);
@@ -53,7 +77,7 @@ describe("applyAffectToTrack", () => {
   it("does not mutate the input track", () => {
     const track = sampleTrack();
     const before = JSON.parse(JSON.stringify(track));
-    applyAffectToTrack(track, compileAffect("angry", 1));
+    applyAffectToTrack(track, compileAffect(library, channels, "angry", 1));
     expect(track).toEqual(before);
   });
 
@@ -65,7 +89,7 @@ describe("applyAffectToTrack", () => {
       { time: 0.5, phoneme: "IY", word: "bee", params: params(60) },
       { time: 0.7, phoneme: "SIL", word: "bee", params: params(0) },
     ];
-    const anxious = compileAffect("anxious", 1);
+    const anxious = compileAffect(library, channels, "anxious", 1);
 
     const { track: out } = applyAffectToTrack(track, anxious);
 
@@ -79,7 +103,7 @@ describe("applyAffectToTrack", () => {
     const track = sampleTrack();
     track[0].params.F0 = 100;
     track[1].params.F0 = 200;
-    const angry = compileAffect("angry", 1);
+    const angry = compileAffect(library, channels, "angry", 1);
 
     const { track: out } = applyAffectToTrack(track, angry);
 
@@ -96,7 +120,7 @@ describe("applyAffectToTrack", () => {
 
   it("tender: breathier (raises Rd channel), slower, quieter", () => {
     const track = sampleTrack();
-    const tender = compileAffect("tender", 1);
+    const tender = compileAffect(library, channels, "tender", 1);
     // Sanity on the compiled vector itself.
     expect(tender.vq.rdDelta).toBeGreaterThan(0); // +1.0 breathy
     expect(tender.vq.durationScale).toBeGreaterThan(1); // 1.1 slower
@@ -120,7 +144,7 @@ describe("applyAffectToTrack", () => {
 
   it("angry: pressed (lowers Rd channel), faster, louder, higher F0", () => {
     const track = sampleTrack();
-    const angry = compileAffect("angry", 1);
+    const angry = compileAffect(library, channels, "angry", 1);
     expect(angry.vq.rdDelta).toBeLessThan(0); // -0.5 pressed
     expect(angry.vq.durationScale).toBeLessThan(1); // 0.85 faster
     expect(angry.vq.intensityBoost).toBeGreaterThan(0); // +6 louder
@@ -144,14 +168,14 @@ describe("applyAffectToTrack", () => {
 
   it("tender is breathier than angry on the Rd channel (opposite directions)", () => {
     const track = sampleTrack();
-    const tender = applyAffectToTrack(track, compileAffect("tender", 1)).track;
-    const angry = applyAffectToTrack(track, compileAffect("angry", 1)).track;
+    const tender = applyAffectToTrack(track, compileAffect(library, channels, "tender", 1)).track;
+    const angry = applyAffectToTrack(track, compileAffect(library, channels, "angry", 1)).track;
     expect(tender[0].params.RdPhraseOffset).toBeGreaterThan(angry[0].params.RdPhraseOffset);
   });
 
   it("formants and bandwidths move by the compiled deltas (sad raises F1/F3, widens B1)", () => {
     const track = sampleTrack();
-    const sad = compileAffect("sad", 1);
+    const sad = compileAffect(library, channels, "sad", 1);
     const { track: out } = applyAffectToTrack(track, sad);
     const v = out[0].params;
     const base = track[0].params;
@@ -167,7 +191,7 @@ describe("applyAffectToTrack", () => {
     // soft has rdDelta +1.2; with Rd base 0.7 effective would be 1.9 (in range).
     // Force the clamp by stacking an existing positive offset.
     track[0].params.RdPhraseOffset = 1.5; // Rd=0.7 -> already 2.2 before delta
-    const soft = compileAffect("soft", 1); // +1.2 -> 3.4 desired, clamps to 2.7
+    const soft = compileAffect(library, channels, "soft", 1); // +1.2 -> 3.4 desired, clamps to 2.7
     const { track: out } = applyAffectToTrack(track, soft);
     const effective = track[0].params.Rd + out[0].params.RdPhraseOffset;
     expect(effective).toBeLessThanOrEqual(2.7 + 1e-9);
@@ -176,13 +200,13 @@ describe("applyAffectToTrack", () => {
 
   it("degree 0 is the identity for any preset", () => {
     const track = sampleTrack();
-    const { track: out } = applyAffectToTrack(track, compileAffect("angry", 0));
+    const { track: out } = applyAffectToTrack(track, compileAffect(library, channels, "angry", 0));
     expect(out).toEqual(track);
   });
 
   it("accepts a bare VoiceQualityDelta and folds in the affect record citations", () => {
     const track = sampleTrack();
-    const angry = compileAffect("angry", 1);
+    const angry = compileAffect(library, channels, "angry", 1);
     const fromVector = applyAffectToTrack(track, angry.vq);
     const fromRecord = applyAffectToTrack(track, angry);
     expect(fromVector.track).toEqual(fromRecord.track);

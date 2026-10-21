@@ -40,7 +40,6 @@ describe("standalone Klatt conversion constants", () => {
     ) as {
       constants: {
         ndbCor: number[];
-        ndbScale: Record<string, number>;
         klsynAmpTable: number[];
         ndbCorMinHz: number;
         ndbCorMaxHz: number;
@@ -54,7 +53,6 @@ describe("standalone Klatt conversion constants", () => {
     const builtins = await import("../src/builtin-functions");
 
     expect(builtins.ndbCor).toEqual(constants.ndbCor);
-    expect(builtins.ndbScale).toEqual(constants.ndbScale);
     expect(builtins.klsynAmpTable).toEqual(constants.klsynAmpTable);
     for (let db = constants.dbFloorDb; db <= constants.dbCeilingDb; db += 0.5) {
       const expected = db <= constants.dbFloorDb ? 0 : 2 ** (db / constants.dbPerDoubling);

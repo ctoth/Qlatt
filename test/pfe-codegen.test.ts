@@ -14,11 +14,12 @@ import { dbToLinear, resonatorMagnitudeDb } from "../src/builtin-functions";
 import { expandFormantBanks } from "../src/formant-bank";
 import type { BaconGraph } from "../src/klatt-runtime";
 import { createCelEvaluator } from "../src/semantics/cel-evaluator";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
 import type { PfeFormantSpec } from "../src/semantics/pfe-codegen";
 import { generatePfeRules } from "../src/semantics/pfe-codegen";
 import { registerNumericBuiltins } from "../src/semantics/register-builtins";
 import { createTopologicalEvaluator } from "../src/semantics/topological-evaluator";
-import type { EvaluationContext, SemanticsDocument } from "../src/semantics/types";
+import type { EvaluationContext } from "../src/semantics/types";
 import { parseYamlString } from "../src/yaml-loader";
 
 // A minimal 6-formant bank for unit tests (matches klatt80-baseline formants 1-6)
@@ -179,7 +180,7 @@ describe("PFE codegen integration: full pipeline produces identical results", ()
   const graphRaw = readFileSync(graphPath, "utf-8");
 
   function makeEvaluatorAndSemantics() {
-    const sem = parseYamlString<SemanticsDocument>(semanticsRaw, semanticsPath);
+    const sem = parseSemanticsDocument(semanticsRaw, semanticsPath);
     const g = parseYamlString<BaconGraph>(graphRaw, graphPath);
     expandFormantBanks(g, sem);
     const celEvaluator = createCelEvaluator();

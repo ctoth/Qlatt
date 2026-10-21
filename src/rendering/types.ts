@@ -1,6 +1,14 @@
+import type { TextToKlattTrackDetailedResult, TextToKlattTrackOptions } from "../tts-frontend.ts";
+
 export interface RenderMetrics {
   rms: number;
   peak: number;
+}
+
+export interface WavEncodingStats {
+  finitePeak: number;
+  clippedSamples: number;
+  invalidSamples: number;
 }
 
 export interface RenderTrackSummary {
@@ -17,7 +25,13 @@ export interface RenderTrackSummary {
   f0Span: number;
 }
 
-export interface RenderPayload {
+export interface RenderPayload
+  extends Pick<
+    TextToKlattTrackOptions,
+    "speaker" | "pitchScale" | "voiceQuality" | "directionTrack"
+  > {
+  /** The profile actually resolved by the frontend for this request. */
+  resolvedSpeaker?: TextToKlattTrackDetailedResult["resolvedSpeaker"];
   phrase: string;
   baseF0?: number;
   engine?: string;
@@ -30,23 +44,35 @@ export interface RenderPayload {
   tailTime: number;
   length: number;
   metrics: RenderMetrics;
-  trackSummary: RenderTrackSummary;
+  /** Present only after WAV encoding; absence does not certify unclipped audio. */
+  wavEncoding?: WavEncodingStats & { path: string };
+  /** Absent when the selected experiment declares no metrics policy. */
+  trackSummary?: RenderTrackSummary;
   diagnostics?: unknown;
   track?: unknown;
   samples: number[];
 }
 
-export interface RenderRequest {
+export interface RenderRequest
+  extends Pick<TextToKlattTrackOptions, "speaker" | "voiceQuality" | "directionTrack"> {
   /** Node-backend measurement controls, applied explicitly to every frame. */
   nodeParameterOverrides?: Record<string, number>;
   repoRoot: string;
   phrase: string;
+  /** A requested base pitch in Hz. Absent: the selected voice's own. */
   baseF0?: number;
+  /**
+   * A requested pitch as a ratio of the base pitch
+   * (the selected frontend's speaker-profile pitch_composition). Absent: 1.
+   */
+  pitchScale?: number;
   frontendId: string;
   experimentId: string;
   engine: string;
-  rate: number;
-  transitionMs: number;
+  /** Absent: the selected frontend's cited rate default. */
+  rate?: number;
+  /** Absent: the selected frontend's cited transition default. */
+  transitionMs?: number;
   sampleRate: number;
   leadTime: number;
   tailTime: number;

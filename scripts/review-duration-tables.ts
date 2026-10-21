@@ -30,6 +30,11 @@ if (mode === "capture" || mode === "golden") {
     const { summarizeTrackMetrics } = (await server.ssrLoadModule(
       "/src/analysis/track-metrics.ts",
     )) as typeof import("../src/analysis/track-metrics");
+    const { loadExperimentConfig } = (await server.ssrLoadModule(
+      "/src/experiments/load-experiment-config.ts",
+    )) as typeof import("../src/experiments/load-experiment-config");
+    const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!
+      .metrics!;
     const corpus = JSON.parse(
       readFileSync(resolve(root, "test/phrase-sets/linguistic.json"), "utf8"),
     ) as {
@@ -56,7 +61,13 @@ if (mode === "capture" || mode === "golden") {
             frontendId,
             phrase,
             rate,
-            segments: textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { frontendId, rate })
+            segments: textToKlattTrackDetailed(
+              phrase,
+              // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+              frontendId === "qlatt-beauty" ? undefined : corpus.baseF0,
+              30,
+              { frontendId, rate },
+            )
               .utterance.segments.listItems()
               .filter((item) => item.get("active") !== false)
               .map((item) => ({
@@ -76,6 +87,7 @@ if (mode === "capture" || mode === "golden") {
               phrase,
               ...summarizeTrackMetrics(
                 textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { rate }).track,
+                metricsPolicy,
               ),
             })),
           };

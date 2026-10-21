@@ -1,7 +1,7 @@
-import { Environment } from "@marcbachmann/cel-js";
+import { type ASTNode, Environment, type ParseResult } from "@marcbachmann/cel-js";
 import { builtinCeil, builtinFloor, builtinMod, builtinRound } from "../builtin-functions";
 
-type CompiledCelExpression = (context?: Record<string, unknown>) => unknown;
+type CompiledCelExpression = ParseResult;
 
 export type ExpressionValidationOptions = {
   relationNames?: Iterable<string>;
@@ -24,6 +24,7 @@ let _celCacheHitCount = 0;
 let _celCacheMissCount = 0;
 let _celEvalTimeMs = 0;
 let _celTimingEnabled = false;
+const _celExpressionProfile = new Map<string, { count: number; ms: number }>();
 
 /** Total number of CEL evaluations since last reset. */
 export function getCelEvalCount(): number {
@@ -45,12 +46,21 @@ export function getCelEvalTimeMs(): number {
 export function setCelTimingEnabled(enabled: boolean): void {
   _celTimingEnabled = enabled;
 }
+/**
+ * Per expression, how often it was evaluated and for how long while timing
+ * was enabled. An expression that evaluates others (a scan with a condition)
+ * includes their time; the counts are separate.
+ */
+export function getCelExpressionProfile(): ReadonlyMap<string, { count: number; ms: number }> {
+  return _celExpressionProfile;
+}
 /** Reset all CEL profiling counters to zero. */
 export function resetCelCounters(): void {
   _celEvalCount = 0;
   _celCacheHitCount = 0;
   _celCacheMissCount = 0;
   _celEvalTimeMs = 0;
+  _celExpressionProfile.clear();
 }
 
 type CelFunctionCatalogEntry = {
@@ -149,17 +159,28 @@ function concatValue(...values: unknown[]): unknown[] | string {
   return values.map(stringValue).join("");
 }
 
-const regexCache = new Map<string, RegExp>();
+// Compiled once per pattern and flags: rules pass the same few every time.
+const regexCache = new Map<string, Map<string, RegExp>>();
+
+function cachedRegex(source: string, flags = ""): RegExp {
+  let byFlags = regexCache.get(source);
+  if (!byFlags) {
+    byFlags = new Map();
+    regexCache.set(source, byFlags);
+  }
+  let regex = byFlags.get(flags);
+  if (!regex) {
+    regex = new RegExp(source, flags);
+    byFlags.set(flags, regex);
+  }
+  // A kept global or sticky expression remembers where its last match ended.
+  regex.lastIndex = 0;
+  return regex;
+}
 
 /** `matches(s, re)`: whether `s` contains a match of the regular expression `re`. */
 function matchesValue(value: unknown, pattern: unknown): boolean {
-  const source = stringValue(pattern);
-  let regex = regexCache.get(source);
-  if (!regex) {
-    regex = new RegExp(source);
-    regexCache.set(source, regex);
-  }
-  return regex.test(stringValue(value));
+  return cachedRegex(stringValue(pattern)).test(stringValue(value));
 }
 
 /**
@@ -183,10 +204,10 @@ const PURE_FUNCTIONS: Readonly<Record<string, (...args: unknown[]) => unknown>> 
   matches: (value, pattern) => matchesValue(value, pattern),
   regexReplace: (value, pattern, replacement, flags) =>
     stringValue(value).replace(
-      new RegExp(stringValue(pattern), stringValue(flags)),
+      cachedRegex(stringValue(pattern), stringValue(flags)),
       stringValue(replacement),
     ),
-  regexSplit: (value, pattern) => stringValue(value).split(new RegExp(stringValue(pattern))),
+  regexSplit: (value, pattern) => stringValue(value).split(cachedRegex(stringValue(pattern))),
   literalPattern: (values) => {
     if (
       !Array.isArray(values) ||
@@ -237,8 +258,10 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "ahead", arities: [1, 2], binding: "context" },
   { name: "behind", arities: [1, 2], binding: "context" },
   { name: "total", arities: [1], binding: "context" },
-  { name: "target", arities: [1], binding: "context" },
+  { name: "params_of", arities: [1], binding: "context" },
+  { name: "target", arities: [1, 2], binding: "context" },
   { name: "vocabulary", arities: [2], binding: "context" },
+  { name: "number_phonemes", arities: [2], binding: "context" },
   { name: "assoc", arities: [2], binding: "context" },
   { name: "max", arities: [1, 2, 3, 4], binding: "context" },
   { name: "min", arities: [1, 2, 3, 4], binding: "context" },
@@ -250,8 +273,11 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "contains", arities: [2], binding: "context" },
   { name: "merge", arities: [2], binding: "context" },
   { name: "look_back_where", arities: [3], binding: "context" },
+  { name: "look_ahead_where", arities: [3], binding: "context" },
   { name: "look_back_pred", arities: [3], binding: "context" },
   { name: "look_ahead_pred", arities: [3], binding: "context" },
+  { name: "count_back_pred", arities: [4], binding: "context" },
+  { name: "count_ahead_pred", arities: [4], binding: "context" },
   { name: "find_within_word", arities: [2, 3], binding: "context" },
   { name: "path", arities: [2], binding: "context" },
   { name: "span_ms", arities: [2], binding: "context" },
@@ -298,6 +324,16 @@ function createCelEnvironment(
     homogeneousAggregateLiterals: false,
     enableOptionalTypes: true,
   });
+  env.registerType("ItemView", ItemViewType);
+  // Two views are equal when they show the same Item, whichever context made
+  // them. (cel-js compares objects of a registered type by reference unless
+  // an `==` is registered; taken for maps, two views of one Item compared
+  // equal by content.)
+  env.registerOperator(
+    "ItemView == ItemView",
+    (a: { id?: unknown }, b: { id?: unknown }) =>
+      a === b || (typeof a.id === "string" && a.id === b.id),
+  );
 
   // Register mixed-type arithmetic operators.
   // @marcbachmann/cel-js follows the CEL spec strictly: int + double is not
@@ -350,8 +386,23 @@ function createCelEnvironment(
   return env;
 }
 
+/**
+ * The type cel-js sees for a live view of an Item. A view answers
+ * `constructor` with this class.
+ *
+ * Without it cel-js takes a view for a map, and to type a map it reads the
+ * map's first entry with `for (key in view)` (cel-js 8.0.0 lib/evaluator.js
+ * #firstMapElement, from debugTypeDeep) on every operator and function call
+ * that has the view as an operand. On a view that enumerates every feature of
+ * the Item through the view's traps. A registered object type is typed by its
+ * constructor alone; with no declared fields every property stays readable.
+ */
+export class ItemViewType {}
+
 const celEnv = createCelEnvironment();
 const boundExpressionCaches = new WeakMap<object, Map<string, CompiledCelExpression>>();
+const boundEnvironments = new WeakMap<object, Environment>();
+const checkEnvironments = new Map<string, Environment>();
 
 function compileBoundExpression(
   expression: string,
@@ -364,9 +415,32 @@ function compileBoundExpression(
   }
   const cached = cache.get(expression);
   if (cached) return cached;
-  const compiled = createCelEnvironment(functions).parse(expression);
+  // One environment per function registry: building one registers every
+  // catalog function, which costs far more than parsing an expression.
+  let env = boundEnvironments.get(functions);
+  if (!env) {
+    env = createCelEnvironment(functions);
+    boundEnvironments.set(functions, env);
+  }
+  const compiled = env.parse(expression);
   cache.set(expression, compiled);
   return compiled;
+}
+
+/**
+ * The environment that checks an expression against a set of declared
+ * variables. Validation asks for the same few sets thousands of times.
+ */
+function checkEnvironment(variables: Iterable<string>): Environment {
+  const names = [...new Set(variables)].sort();
+  const key = names.join("\u0000");
+  let env = checkEnvironments.get(key);
+  if (!env) {
+    env = createCelEnvironment(null, false);
+    for (const variable of names) env.registerVariable(variable, "dyn");
+    checkEnvironments.set(key, env);
+  }
+  return env;
 }
 
 /**
@@ -479,11 +553,7 @@ export function validateExpressionSyntax(
 
   if (options.variables) {
     try {
-      const env = createCelEnvironment(null, false);
-      for (const variable of options.variables) {
-        env.registerVariable(variable, "dyn");
-      }
-      const checked = env.check(expression);
+      const checked = checkEnvironment(options.variables).check(expression);
       if (!checked.valid) {
         const message =
           checked.error instanceof Error
@@ -514,8 +584,71 @@ export function evaluateExpression(
   if (_celTimingEnabled) {
     const t0 = performance.now();
     const result = coerceResult(compiled(isRecord(context) ? context : {}));
-    _celEvalTimeMs += performance.now() - t0;
+    const elapsed = performance.now() - t0;
+    _celEvalTimeMs += elapsed;
+    const entry = _celExpressionProfile.get(expression);
+    if (entry) {
+      entry.count += 1;
+      entry.ms += elapsed;
+    } else {
+      _celExpressionProfile.set(expression, { count: 1, ms: elapsed });
+    }
     return result;
   }
   return coerceResult(compiled(isRecord(context) ? context : {}));
+}
+
+/** Read-only HRG helpers and fixed maths; no effectful kernels. */
+export const PURE_ATTRIBUTE_HELPERS = [
+  "path",
+  "assoc",
+  "ahead",
+  "behind",
+  "midpoint",
+  "at_ratio",
+  "at_sync",
+  "at_offset",
+  "max",
+  "min",
+  "exp",
+  "sqrt",
+  "abs",
+  "log",
+  "pow",
+  "contains",
+] as const;
+
+export interface CheckedPureExpression {
+  readonly expression: string;
+  /** CEL may honestly infer dyn for an Item field; it is not a concrete type. */
+  readonly type: string;
+}
+
+/** Use the existing parser/checker, including its actual call nodes, for purity. */
+export function checkPureExpression(
+  expression: string,
+  variables: Iterable<string>,
+): CheckedPureExpression {
+  const parsed = compileExpression(expression);
+  const allowed = new Set<string>([
+    ...CEL_FUNCTION_CATALOG.filter((entry) => entry.binding !== "context").map(
+      (entry) => entry.name,
+    ),
+    ...PURE_ATTRIBUTE_HELPERS,
+  ]);
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const child of value) visit(child);
+    } else if (value && typeof value === "object" && "op" in value) {
+      const node = value as ASTNode;
+      if ((node.op === "call" || node.op === "rcall") && !allowed.has(node.args[0])) {
+        throw new Error(`E_ATTRIBUTE_IMPURE: '${node.args[0]}' is not a pure attribute operation`);
+      }
+      visit(node.args);
+    }
+  };
+  visit(parsed.ast);
+  const checked = checkEnvironment(variables).check(expression);
+  if (!checked.valid) throw checked.error ?? new Error("E_ATTRIBUTE_CEL: invalid expression");
+  return Object.freeze({ expression, type: checked.type ?? "dyn" });
 }

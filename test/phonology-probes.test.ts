@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import { PHONOLOGY_PROBE_CASES } from "./fixtures/phonology-probes";
 import {
@@ -9,11 +13,18 @@ import {
   maxTrackParam,
 } from "./utils/phonology-conformance";
 
+const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+const selected = {
+  compiledSpec,
+  resources: loadFrontendResources(compiledSpec),
+  dictionaryMap: loadFrontendResources(compiledSpec).lexicon?.dictionary,
+};
+
 describe("phonology probe suite", () => {
   for (const probe of PHONOLOGY_PROBE_CASES) {
     it(probe.name, () => {
       const normalized = normalizeText(probe.phrase);
-      const transcription = transcribeText(normalized);
+      const transcription = transcribeText(normalized, selected);
       const track = textToKlattTrack(probe.phrase, 110);
 
       for (const wordCase of probe.words ?? []) {

@@ -4,12 +4,27 @@ import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { decisionChain } from "../src/declarative-frontend/hrg/provenance-query";
 import { compileAffect } from "../src/input/affect";
+import { parseAffectPresets } from "../src/input/affect-presets";
 import {
   attachDirectionsToUtterance,
-  DIRECTION_ITEM_SCHEMA,
+  buildDirectionItemSchema,
   parseDirectionInput,
 } from "../src/input/parse";
 import { expectFrameSource } from "./utils/frame-provenance";
+import { readRdPolicy } from "../src/input/rd-policy";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const rdPolicy = readRdPolicy(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
+const context = { frontendId: "fixture", rdPolicy, vqChannels: channels };
 
 const META = {
   ruleId: "fixture",
@@ -46,7 +61,7 @@ function schema(): HrgSchema {
   for (const column of COLUMNS) segmentFeatures[column] = { kind: "number" };
   return {
     itemTypes: {
-      direction: DIRECTION_ITEM_SCHEMA,
+      direction: buildDirectionItemSchema(channels),
       f0Point: { features: { value: { kind: "number" } } },
       segment: { features: segmentFeatures },
       word: { features: { text: { kind: "string" } } },
@@ -64,13 +79,16 @@ function schema(): HrgSchema {
 }
 
 function varianceFixture(): Utterance {
-  const parsed = parseDirectionInput({
-    score: { text: "red moon" },
-    directionTrack: {
-      version: "1",
-      global: { affect: { preset: "angry", degree: 1 } },
+  const parsed = parseDirectionInput(
+    {
+      score: { text: "red moon" },
+      directionTrack: {
+        version: "1",
+        global: { affect: { preset: "angry", degree: 1 } },
+      },
     },
-  });
+    { affectLibrary: library, vqChannels: channels },
+  );
   const utterance = new Utterance(withFrameSchema(schema()), parsed.provenance);
   attachDirectionsToUtterance(parsed, utterance);
 
@@ -154,30 +172,33 @@ function params(): Record<(typeof COLUMNS)[number], number> {
   };
 }
 
-function fixture(): Utterance {
-  const parsed = parseDirectionInput({
-    score: { text: "red moon" },
-    directionTrack: {
-      version: "1",
-      global: { affect: { preset: "angry", degree: 1 } },
-      spans: [
-        {
-          id: "low",
-          anchor: { unit: "word", start: 1 },
-          precedence: 1,
-          voiceQuality: { intensityBoost: 10, f0Scale: 2 },
-        },
-        {
-          id: "high",
-          anchor: { unit: "word", start: 1 },
-          precedence: 2,
-          voiceQuality: { intensityBoost: -2, f0Scale: 0.5 },
-        },
-      ],
+function fixture(withAffect = true): Utterance {
+  const parsed = parseDirectionInput(
+    {
+      score: { text: "red moon" },
+      directionTrack: {
+        version: "1",
+        global: { affect: { preset: "angry", degree: 1 } },
+        spans: [
+          {
+            id: "low",
+            anchor: { unit: "word", start: 1 },
+            precedence: 1,
+            voiceQuality: { intensityBoost: 10, f0Scale: 2 },
+          },
+          {
+            id: "high",
+            anchor: { unit: "word", start: 1 },
+            precedence: 2,
+            voiceQuality: { intensityBoost: -2, f0Scale: 0.5 },
+          },
+        ],
+      },
     },
-  });
+    { affectLibrary: library, vqChannels: channels },
+  );
   const utterance = new Utterance(withFrameSchema(schema()), parsed.provenance);
-  attachDirectionsToUtterance(parsed, utterance);
+  if (withAffect) attachDirectionsToUtterance(parsed, utterance);
 
   const build = utterance.beginTransaction(META);
   const words = ["red", "moon"].map((text, index) => {
@@ -214,10 +235,94 @@ function fixture(): Utterance {
 }
 
 describe("HRG lowering Affect projection", () => {
-  it("composes global and field-wise winning local deltas over graph-linked Words", () => {
-    const angry = compileAffect("angry", 1).vq;
-    const utterance = fixture();
+  it("uses the supplied Rd bounds and names a missing consuming resource", () => {
+    const narrowed = readRdPolicy({
+      effective_rd: { min: 0.6, max: 0.8, citations: ["Fant_1997"] },
+    });
+    const lowered = lowerToFrames(fixture(), POLICY, { ...context, rdPolicy: narrowed });
+    const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
+    expect(first).toBeDefined();
+    if (!first) throw new Error("fixture segment missing");
+    expect(first.params.Rd + first.params.RdPhraseOffset).toBeCloseTo(0.6);
+    expect(() => lowerToFrames(fixture(), POLICY, { frontendId: "without-vq" })).toThrow(
+      "E_FRONTEND_CONFIG: frontend 'without-vq' requires vq_channels",
+    );
+  });
+
+  it.each([
+    { phoneme: "REST", type: "pause", declared: true, eligible: true },
+    { phoneme: "EH", type: "silence", declared: true, eligible: false },
+    { phoneme: "REST", type: "silence", declared: false, eligible: false },
+  ])("scales declared pause identity: $phoneme/$type, context=$declared", (testCase) => {
+    for (const pauseScale of [1, 1.5]) {
+      const utterance = fixture();
+      const firstSegment = utterance.relation("Segment").listItems()[0];
+      const globalAffect = utterance.relation("Affect").listItems()[0];
+      if (!firstSegment || !globalAffect) throw new Error("pause fixture Items missing");
+      firstSegment.set("phoneme", testCase.phoneme, META);
+      firstSegment.set("type", testCase.type, META);
+      const durationScale = 1.25;
+      globalAffect.set(
+        "delta",
+        { ...compileAffect(library, channels, "angry", 1).vq, durationScale, pauseScale },
+        META,
+      );
+      const policy = {
+        ...POLICY,
+        timeline: {
+          ...POLICY.timeline,
+          initial_silence_ms: { value: 10 },
+          final_silence_ms: { value: 20 },
+        },
+      };
+      const lowered = lowerToFrames(utterance, policy, {
+        ...context,
+        ...(testCase.declared
+          ? {
+              silence: {
+                symbol: "REST",
+                initialParams: params(),
+                finalParams: params(),
+                decisionId: globalAffect.latestWrite("delta")!.decisionId,
+              },
+            }
+          : {}),
+      });
+      const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
+      const second = lowered.frames.find((frame) => frame.segmentId === "segment-1");
+      if (!first || !second) throw new Error("pause fixture frames missing");
+      const edgeScale = durationScale * pauseScale;
+      const firstDuration = 100 * durationScale * (testCase.eligible ? pauseScale : 1);
+      const secondDuration = 100 * durationScale;
+      expect(first.time).toBeCloseTo((10 * edgeScale) / 1000, 9);
+      expect(second.time).toBeCloseTo((10 * edgeScale + firstDuration) / 1000, 9);
+      expect(lowered.totalMs).toBeCloseTo(30 * edgeScale + firstDuration + secondDuration, 9);
+      expect(utterance.axis.start.time).toBe(0);
+      expect(utterance.axis.end.time).toBe(200);
+    }
+  });
+
+  it("retains the existing formant clamp without a VQ resource or delta", () => {
+    const utterance = fixture(false);
+    const update = utterance.beginTransaction(META);
+    for (const segment of utterance.relation("Segment").listItems()) {
+      update.set(segment, "F1", 0);
+    }
+    update.commit();
     const lowered = lowerToFrames(utterance, POLICY);
+    expect(lowered.frames.find((frame) => frame.segmentId === "segment-0")?.params.F1).toBe(1);
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_VALUE_CLAMPED",
+        data: expect.objectContaining({ key: "F1", requested: 0, clamped: 1 }),
+      }),
+    );
+  });
+
+  it("composes global and field-wise winning local deltas over graph-linked Words", () => {
+    const angry = compileAffect(library, channels, "angry", 1).vq;
+    const utterance = fixture();
+    const lowered = lowerToFrames(utterance, POLICY, context);
     const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
     const second = lowered.frames.find((frame) => frame.segmentId === "segment-1");
     if (!first || !second) throw new Error("lowered Segment frames missing");
@@ -262,9 +367,9 @@ describe("HRG lowering Affect projection", () => {
   });
 
   it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
-    const angry = compileAffect("angry", 1).vq;
+    const angry = compileAffect(library, channels, "angry", 1).vq;
     const utterance = varianceFixture();
-    const lowered = lowerToFrames(utterance, POLICY);
+    const lowered = lowerToFrames(utterance, POLICY, context);
     const voiced = lowered.frames.filter((frame) => frame.segmentId != null);
     const first = voiced[0];
     const second = voiced[1];
@@ -300,9 +405,13 @@ describe("HRG lowering Affect projection", () => {
     const utterance = varianceFixture();
     const affect = utterance.relation("Affect").listItems()[0];
     if (!affect) throw new Error("variance Affect Item missing");
-    affect.set("delta", { ...compileAffect("angry", 1).vq, f0VarianceScale: -1 }, META);
+    affect.set(
+      "delta",
+      { ...compileAffect(library, channels, "angry", 1).vq, f0VarianceScale: -1 },
+      META,
+    );
 
-    expect(() => lowerToFrames(utterance, POLICY)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
+    expect(() => lowerToFrames(utterance, POLICY, context)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({
         code: "HRG_LOWER_F0_VARIANCE_REJECTED",

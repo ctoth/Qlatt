@@ -1,3 +1,4 @@
+import { ItemViewType } from "../cel-expressions";
 import type { Item } from "./item";
 import type { HrgNode } from "./relation";
 import type {
@@ -8,13 +9,36 @@ import type {
 } from "./types";
 import type { Utterance } from "./utterance";
 
+/** What `ItemViewDerived.get` returns for a name it does not supply. */
+export const NOT_DERIVED: unique symbol = Symbol("not derived");
+
+/**
+ * Names a view answers beside the Item's own features (what the rule engine
+ * adds: structure, anchors). They live in the view's one proxy, not in a
+ * second proxy around it: the expression evaluator reads a view's properties
+ * several times per operator, and each proxy layer multiplies that cost.
+ */
+export interface ItemViewDerived {
+  /** The value of a derived name, or NOT_DERIVED to read the Item's feature. */
+  get(property: string): unknown;
+  /** Whether a derived name exists; when false the Item's features decide. */
+  has(property: string): boolean;
+}
+
 type StagedOperation =
   | { kind: "create_item"; item: Item }
   | { kind: "set_feature"; item: Item; key: string; value: unknown; tag?: string }
   | { kind: "append"; relationName: string; item: Item }
   | { kind: "insert_after"; relationName: string; previous: Item; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
-  | { kind: "add_daughter"; relationName: string; parent: Item; item: Item }
+  | {
+      kind: "add_daughter";
+      relationName: string;
+      parent: Item;
+      item: Item;
+      /** Omitted: last daughter. Null: first. Otherwise: right after it. */
+      after?: Item | null;
+    }
   | { kind: "associate"; name: string; from: Item; to: Item }
   | { kind: "disassociate"; name: string; from: Item; to: Item }
   | {
@@ -44,6 +68,11 @@ function freezeMetadata(metadata: TransactionMetadata): TransactionMetadata {
   }
   return Object.freeze({
     ...metadata,
+    // The existing annotation phase includes prosodic labels as well as structure.
+    ...(metadata.stage === undefined &&
+    (metadata.phase === "prosody" || metadata.phase === "annotation")
+      ? { stage: "prosody" as const }
+      : {}),
     citations: Object.freeze([...metadata.citations]),
   });
 }
@@ -52,6 +81,8 @@ export class HrgTransaction {
   private readonly operations: StagedOperation[] = [];
   private readonly reads = new Set<string>();
   private readonly stagedItems = new Set<Item>();
+  /** The ids of `stagedItems`: one transaction can stage every Segment of a text. */
+  private readonly stagedItemIds = new Set<string>();
   private closed = false;
 
   private currentMetadata: TransactionMetadata;
@@ -85,11 +116,12 @@ export class HrgTransaction {
 
   createItem(type: string, explicitId: string): Item {
     this.assertOpen();
-    if ([...this.stagedItems].some((item) => item.id === explicitId)) {
+    if (this.stagedItemIds.has(explicitId)) {
       throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${explicitId}' is staged twice`);
     }
     const item = this.utterance._createDetachedItem(type, explicitId);
     this.stagedItems.add(item);
+    this.stagedItemIds.add(explicitId);
     this.operations.push({ kind: "create_item", item });
     return item;
   }
@@ -102,19 +134,27 @@ export class HrgTransaction {
     return item.get(key);
   }
 
-  view(item: Item): Readonly<Record<string, unknown>> {
+  view(item: Item, derived?: ItemViewDerived): Readonly<Record<string, unknown>> {
     this.assertAvailableItem(item);
     return new Proxy<Record<string, unknown>>(
       {},
       {
         get: (_target, property) => {
+          // What the expression evaluator types the view by; read most often.
+          if (property === "constructor") return ItemViewType;
+          if (typeof property !== "string") return undefined;
+          if (derived) {
+            const value = derived.get(property);
+            if (value !== NOT_DERIVED) return value;
+          }
           if (property === "id") return item.id;
           if (property === "itemType") return item.type;
-          return typeof property === "string" ? this.read(item, property) : undefined;
+          return this.read(item, property);
         },
         has: (_target, property) => {
-          if (property === "id" || property === "itemType") return true;
           if (typeof property !== "string") return false;
+          if (derived?.has(property)) return true;
+          if (property === "id" || property === "itemType") return true;
           if (item.has(property)) this.read(item, property);
           return item.has(property);
         },
@@ -154,9 +194,19 @@ export class HrgTransaction {
     return this;
   }
 
-  addDaughter(relationName: string, parent: Item, item: Item): this {
+  /**
+   * Stage `item` as a daughter of `parent`: last when `after` is omitted,
+   * first when it is null, otherwise immediately after that daughter.
+   */
+  addDaughter(relationName: string, parent: Item, item: Item, after?: Item | null): this {
     this.assertOpen();
-    this.operations.push({ kind: "add_daughter", relationName, parent, item });
+    this.operations.push({
+      kind: "add_daughter",
+      relationName,
+      parent,
+      item,
+      ...(after === undefined ? {} : { after }),
+    });
     return this;
   }
 
@@ -455,18 +505,34 @@ export class HrgTransaction {
           `E_HRG_PARENT_RELATION: parent item '${operation.parent.id}' is not in relation '${operation.relationName}'`,
         );
       }
+      const after = operation.after;
+      if (after) {
+        this.assertAvailableItem(after);
+        const afterKey = `${operation.relationName}\u0000${after.id}`;
+        if (!relation.node(after) && !plannedMembership.has(afterKey)) {
+          throw new Error(
+            `E_HRG_PREVIOUS_RELATION: previous item '${after.id}' is not in relation '${operation.relationName}'`,
+          );
+        }
+      }
       prepared.push({
         journal: Object.freeze({
           kind: "add_daughter",
           relationName: operation.relationName,
           parentItemId: operation.parent.id,
           itemId: operation.item.id,
+          ...(after === undefined ? {} : { previousItemId: after?.id ?? null }),
         }),
         commit: () => {
           const parentNode: HrgNode | undefined = relation.node(operation.parent);
           if (!parentNode)
             throw new Error("E_HRG_PARENT_RELATION: staged parent was not committed first");
-          return [relation.addDaughter(parentNode, operation.item, input).write.decisionId];
+          const afterNode = after ? relation.node(after) : after;
+          if (after && !afterNode)
+            throw new Error("E_HRG_PREVIOUS_RELATION: staged previous was not committed first");
+          return [
+            relation.addDaughter(parentNode, operation.item, input, afterNode).write.decisionId,
+          ];
         },
       });
     }

@@ -276,7 +276,7 @@ rules:
           - when:
               predicate: is_coda
             value: params.policy.formant.dark_l_f2
-          - default: "has(current.F2) ? current.F2 : params.policy.formant.light_l_f2"
+          - default: "get(current, 'F2', params.policy.formant.light_l_f2)"
         tag: lateral_allophony
       - field: F3
         op: set
@@ -284,7 +284,7 @@ rules:
           - when:
               predicate: is_coda
             value: params.policy.formant.dark_l_f3
-          - default: "has(current.F3) ? current.F3 : params.policy.formant.light_l_f3"
+          - default: "get(current, 'F3', params.policy.formant.light_l_f3)"
         tag: lateral_allophony
     citations:
       - Recasens 2012 (lateral allophones)
@@ -315,14 +315,11 @@ rules:
       - field: F1
         op: set
         dispatch:
-          - when:
-              predicate: is_bilabial
+          - when: bilabial(current)
             value: params.policy.formant.f1_release_labial
-          - when:
-              predicate: is_alveolar
+          - when: alveolar(current)
             value: params.policy.formant.f1_release_alveolar
-          - when:
-              predicate: is_velar
+          - when: velar(current)
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
         tag: stop_release_formant
@@ -342,16 +339,13 @@ rules:
         field: "{field}"
         op: set
         dispatch:
-          - when:
-              predicate: is_bilabial
+          - when: bilabial(current)
             value: "params.policy.formant.burst_amplitudes.{field}.bilabial"
-          - when:
-              predicate: is_alveolar
+          - when: alveolar(current)
             value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
-          - when:
-              predicate: is_velar
+          - when: velar(current)
             value: "params.policy.formant.burst_amplitudes.{field}.velar"
-          - default: "has(current.?{field}) ? current.{field} : 0"
+          - default: "get(current, '{field}', 0)"
         tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
@@ -363,7 +357,7 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
+      where: "current.type == 'stop_release' && isTrue(current, 'weak')"
     apply:
       # Chunk 7: one templated effect block expands to 10 concrete `add -18`
       # blocks across A1..A10 at rule-load time.
@@ -380,10 +374,10 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: "current.type == 'stop_closure' && has(current.voiced) && current.voiced == true"
+      where: "current.type == 'stop_closure' && isTrue(current, 'voiced')"
     define:
       n: next
-      before_weak_release: "n != null && n.type == 'stop_release' && has(n.weak) && n.weak == true"
+      before_weak_release: "n != null && n.type == 'stop_release' && isTrue(n, 'weak')"
     constraint: before_weak_release
     apply:
       - field: AV
@@ -409,19 +403,19 @@ rules:
         n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
         ahead(current, 2) : null) : null))
       has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
-      prev_f1: "has(prev.F1) ? prev.F1 : params.policy.formant.default_f1_fallback"
-      next_f1: "has_flanking ? (has(next_vowel.F1) ? next_vowel.F1 : params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
+      prev_f1: "get(prev, 'F1', params.policy.formant.default_f1_fallback)"
+      next_f1: "has_flanking ? get(next_vowel, 'F1', params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
       flanking_avg_f1: "has_flanking ? (prev_f1 + next_f1) / 2 : 0"
-      cur_f1: "has(current.F1) ? current.F1 : params.policy.formant.default_f1_fallback"
-      prev_f2: "has(prev.F2) ? prev.F2 : params.policy.formant.default_f2_fallback"
-      next_f2: "has_flanking ? (has(next_vowel.F2) ? next_vowel.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
+      cur_f1: "get(current, 'F1', params.policy.formant.default_f1_fallback)"
+      prev_f2: "get(prev, 'F2', params.policy.formant.default_f2_fallback)"
+      next_f2: "has_flanking ? get(next_vowel, 'F2', params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
       flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
-      cur_f2: "has(current.F2) ? current.F2 : params.policy.formant.default_f2_fallback"
-      prev_f3: "has(prev.F3) ? prev.F3 : params.policy.formant.default_f3_fallback"
-      next_f3: "has_flanking ? (has(next_vowel.F3) ? next_vowel.F3 : params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
+      cur_f2: "get(current, 'F2', params.policy.formant.default_f2_fallback)"
+      prev_f3: "get(prev, 'F3', params.policy.formant.default_f3_fallback)"
+      next_f3: "has_flanking ? get(next_vowel, 'F3', params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
       flanking_avg_f3: "has_flanking ? (prev_f3 + next_f3) / 2 : 0"
-      cur_f3: "has(current.F3) ? current.F3 : params.policy.formant.default_f3_fallback"
-      dac_value: "has(current.dac) ? current.dac : 1"
+      cur_f3: "get(current, 'F3', params.policy.formant.default_f3_fallback)"
+      dac_value: "get(current, 'dac', 1)"
       resistance: "dac_value / 3.0"
       dac_weight: "params.policy.formant.vcv_coarticulation_rate * (1.0 - resistance)"
     constraint: has_flanking
@@ -488,7 +482,7 @@ rules:
     # asymptotically). The linear rate-to-weight map itself is the engineering
     # estimate in rate.undershoot_coefficient; the saturating form is #68.
     define:
-      weight: min([params.policy.formant.rate_undershoot_factor, 1.0])
+      weight: min(params.policy.formant.rate_undershoot_factor, 1.0)
     apply:
       - field: F1
         op: set
@@ -510,14 +504,12 @@ rules:
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
-    constraint:
-      predicate: one_coronal
+    constraint: coronal(prev) || coronal(next)
     apply:
       - field: F2
         op: set
         dispatch:
-          - when:
-              predicate: both_coronal
+          - when: coronal(prev) && coronal(next)
             value: >-
               current.F2 + (params.policy.formant.schwa_coronal_f2_target - current.F2) *
               params.policy.formant.schwa_coronal_fronting_rate
@@ -532,14 +524,12 @@ rules:
     select:
       relation: Segment
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
-    constraint:
-      predicate: one_coronal
+    constraint: coronal(prev) || coronal(next)
     apply:
       - field: F2
         op: set
         dispatch:
-          - when:
-              predicate: both_coronal
+          - when: coronal(prev) && coronal(next)
             value: >-
               current.F2 + (params.policy.formant.uw_coronal_f2_target - current.F2) *
               params.policy.formant.uw_coronal_fronting_rate

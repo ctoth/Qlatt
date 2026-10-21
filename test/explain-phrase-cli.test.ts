@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { runExplainCli } from "../scripts/explain-phrase";
+import {
+  getRulepackValidationDiagnostics,
+  loadBundledRulepackSpec,
+  rulepackRuleDocumentSpans,
+} from "../src/declarative-frontend/rule-pack";
 import type { DecisionRecord } from "../src/provenance";
+import * as frontend from "../src/tts-frontend";
+import type { YamlDocumentSpan } from "../src/yaml-loader";
 
 interface ExplainPayload {
   rangeApplied?: string;
@@ -10,6 +17,22 @@ interface ExplainPayload {
     uncitedCount: number;
   };
   decisions: DecisionRecord[];
+  tooling: {
+    parameter: {
+      layer: "lowered";
+      name: string;
+      requestedTimeMs: number;
+      frameTimeMs: number | null;
+      value: number | null;
+    } | null;
+    ruleSources: Record<string, YamlDocumentSpan>;
+    vocabularySources: Record<string, YamlDocumentSpan>;
+    ruleExpressions: Record<
+      string,
+      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
+    >;
+    replay: { matches: boolean } | null;
+  };
 }
 
 function parseExplainPayload(json: string): ExplainPayload {
@@ -31,6 +54,290 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
+  it("queries an actual lowered vowel frame in milliseconds and retains its ancestry", async () => {
+    const detailed = frontend.textToKlattTrackDetailed("cat", undefined, undefined, {
+      captureTooling: true,
+    });
+    const index = detailed.track.findIndex(
+      (frame, i) =>
+        frame.phoneme === "AE" && frame.provenance?.F1 && detailed.track[i + 1]?.time > frame.time,
+    );
+    expect(index).toBeGreaterThanOrEqual(0);
+    const frame = detailed.track[index];
+    const atMs = (frame.time + detailed.track[index + 1].time) * 500;
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed");
+    try {
+      const result = await runCli([
+        "cat",
+        "--why-param=F1",
+        `--at=${atMs}`,
+        "--format=json",
+        "--stage=runtime",
+        "--subject=does-not-match",
+        "--range=seq:0-0",
+      ]);
+      expect(result.code).toBe(0);
+      const actual = spy.mock.results[0].value as ReturnType<
+        typeof frontend.textToKlattTrackDetailed
+      >;
+      const selected = actual.track.findLast((entry) => entry.time <= atMs / 1000)!;
+      const payload = parseExplainPayload(result.stdout);
+      expect(payload.tooling.parameter).toEqual({
+        layer: "lowered",
+        name: "F1",
+        requestedTimeMs: atMs,
+        frameTimeMs: selected.time * 1000,
+        value: selected.params.F1,
+      });
+      expect(payload.decisions[0].id).toBe(selected.provenance?.F1);
+      const ids = new Set(payload.decisions.map((decision) => decision.id));
+      expect(payload.decisions.length).toBeGreaterThan(1);
+      expect(
+        payload.decisions.every((decision) => (decision.parents ?? []).every((id) => ids.has(id))),
+      ).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it.each(["text", "dot", "html"])("labels %s parameter queries as lowered", async (format) => {
+    const result = await runCli(["cat", "--why-param=F1", "--at=340", `--format=${format}`]);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("Lowered frame query: F1 at 340 ms; selected frame");
+    expect(result.stdout).toContain("No interpolation or scheduled audio value.");
+  });
+
+  it("retains endpoint selection and reports unknown parameters without invented ancestry", async () => {
+    const detailed = frontend.textToKlattTrackDetailed("cat", undefined, undefined);
+    for (const [at, frame] of [
+      [0, detailed.track[0]],
+      [1e6, detailed.track.at(-1)!],
+    ] as const) {
+      const result = await runCli([
+        "cat",
+        "--why-param=NOT_A_PARAM",
+        `--at=${at}`,
+        "--format=json",
+      ]);
+      expect(result.code).toBe(0);
+      const payload = parseExplainPayload(result.stdout);
+      expect(payload.tooling.parameter?.frameTimeMs).toBe(frame.time * 1000);
+      expect(payload.tooling.parameter?.value).toBeNull();
+      expect(payload.decisions).toEqual([]);
+    }
+  });
+
+  it.each([
+    ["--why-param=F1"],
+    ["--at=340"],
+    ["--why-param=F1", "--at=NaN"],
+    ["--why-param=F1", "--at=-1"],
+    ["--why-param=F1", "--at=0", "--why=d000001"],
+  ])("rejects incomplete or ambiguous parameter query %j", async (...args) => {
+    expect((await runCli(["cat", ...args])).code).toBe(1);
+  });
+
+  it("selects cited prosody decisions and preserves replay", async () => {
+    const result = await runCli([
+      "The quick brown fox jumps over the lazy dog.",
+      "--stage=prosody",
+      "--format=json",
+      "--strict-citations",
+      "--verify-replay",
+    ]);
+    expect(result.code).toBe(0);
+    const payload = parseExplainPayload(result.stdout);
+    expect(payload.decisions.length).toBeGreaterThan(0);
+    expect(payload.decisions.every((decision) => decision.stage === "prosody")).toBe(true);
+    expect(payload.decisions.some((decision) => decision.reason.startsWith("assign_accent "))).toBe(
+      true,
+    );
+    expect(payload.decisions.some((decision) => decision.reason.startsWith("tobi_accent "))).toBe(
+      true,
+    );
+    expect(payload.tooling.replay?.matches).toBe(true);
+  });
+
+  it("prioritizes emitted rule overwrites in compact text", async () => {
+    const json = await runCli(["hello world", "--format=json"]);
+    const compact = await runCli(["hello world"]);
+    expect(json.code).toBe(0);
+    expect(compact.code).toBe(0);
+    const expected = parseExplainPayload(json.stdout).decisions.filter(
+      (decision) => decision.type === "feature_overwrite" && decision.stage === "rules",
+    );
+    expect(expected.length).toBeGreaterThan(0);
+    expect(compact.stdout).toContain(`#${expected[0].seq} [rules] [feature_overwrite]`);
+    expect(compact.stdout).not.toContain("[feature_write]");
+  });
+
+  it.each(["rules", "no-such-stage"])(
+    "exports a self-contained selected HTML DAG: %s",
+    async (stage) => {
+      const args = ["hello world", `--stage=${stage}`];
+      const json = await runCli([...args, "--format=json"]);
+      const html = await runCli([...args, "--format=html"]);
+      expect(json.code).toBe(0);
+      expect(html.code).toBe(0);
+      const { decisions } = parseExplainPayload(json.stdout);
+      const ids = new Set(decisions.map((decision) => decision.id));
+      expect(
+        [...html.stdout.matchAll(/<li id="detail-([^"]+)">/g)].map((match) => match[1]),
+      ).toEqual([...ids]);
+      const expectedEdges: string[] = [];
+      let omitted = 0;
+      for (const decision of decisions) {
+        expect(html.stdout).toContain(
+          `<a href="#detail-${decision.id}" aria-label="Details for ${decision.id}">`,
+        );
+        expect(html.stdout).toContain(`${decision.stage}: ${decision.type}`);
+        for (const parent of decision.parents ?? []) {
+          if (ids.has(parent)) expectedEdges.push(`${parent}->${decision.id}`);
+          else omitted += 1;
+        }
+      }
+      expect(
+        [...html.stdout.matchAll(/data-parent="([^"]+)" data-child="([^"]+)"/g)].map(
+          (match) => `${match[1]}->${match[2]}`,
+        ),
+      ).toEqual(expectedEdges);
+      expect(html.stdout).toContain(`omitted external parent links: ${omitted}`);
+      expect(html.stdout.match(/marker-end="url\(#arrow\)"/g) ?? []).toHaveLength(
+        expectedEdges.length,
+      );
+      expect(html.stdout).toContain('href="#details"');
+      expect(html.stdout).toContain("IDs belong to this run.");
+      expect(html.stdout).not.toMatch(/<script|<link|\ssrc=/i);
+    },
+  );
+
+  it("escapes authored HTML and includes full reasons and citations in ancestry details", async () => {
+    const phrase = 'hello <world> & "again"';
+    const json = await runCli(["--phrase", phrase, "--format=json"]);
+    expect(json.code).toBe(0);
+    const child = parseExplainPayload(json.stdout).decisions.find(
+      (decision) => (decision.parents?.length ?? 0) > 0,
+    )!;
+    const args = ["--phrase", phrase, "--why", child.id];
+    const why = parseExplainPayload((await runCli([...args, "--format=json"])).stdout);
+    const html = await runCli([...args, "--format=html"]);
+    expect(html.code).toBe(0);
+    expect(html.stdout).toContain("hello &lt;world&gt; &amp; &quot;again&quot;");
+    expect(html.stdout).not.toContain("<world>");
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    for (const decision of why.decisions) {
+      expect(html.stdout).toContain(`<p>${escapeHtml(decision.reason)}</p>`);
+      expect(html.stdout).toContain(
+        `Citations: ${escapeHtml(decision.citations.join("; ") || "(none)")}`,
+      );
+    }
+    expect(html.stdout).toContain("omitted external parent links: 0");
+  });
+
+  it.each([
+    { selection: [] },
+    { selection: ["--stage=rules"] },
+    { selection: ["--range=seq:1-3"] },
+  ])("exports exactly the selected nodes and parent edges as DOT: %j", async ({ selection }) => {
+    const args = ["hello world", ...selection];
+    const json = await runCli([...args, "--format=json"]);
+    const dot = await runCli([...args, "--format=dot"]);
+    expect(json.code).toBe(0);
+    expect(dot.code).toBe(0);
+    const { decisions } = parseExplainPayload(json.stdout);
+    const ids = new Set(decisions.map((decision) => decision.id));
+    const expectedEdges: string[] = [];
+    let omitted = 0;
+    for (const decision of decisions) {
+      expect(dot.stdout).toContain(`${decision.stage}: ${decision.type}`);
+      for (const parent of decision.parents ?? []) {
+        if (ids.has(parent)) expectedEdges.push(`  "${parent}" -> "${decision.id}";`);
+        else omitted += 1;
+      }
+    }
+    expect([...dot.stdout.matchAll(/^ {2}"(d\d+)" \[label=/gm)].map((match) => match[1])).toEqual([
+      ...ids,
+    ]);
+    expect(dot.stdout.split("\n").filter((line) => /^ {2}"d\d+" -> "d\d+";$/.test(line))).toEqual(
+      expectedEdges,
+    );
+    expect(dot.stdout).toContain(`omitted external parent links: ${omitted}`);
+  });
+
+  it("exports why ancestry and escapes authored phrase text in DOT labels", async () => {
+    const phrase = 'hello "world" \\N\nagain';
+    const json = await runCli(["--phrase", phrase, "--format=json"]);
+    expect(json.code).toBe(0);
+    const decisions = parseExplainPayload(json.stdout).decisions;
+    const child = decisions.find((decision) => (decision.parents?.length ?? 0) > 0)!;
+    expect(child).toBeDefined();
+    const args = ["--phrase", phrase, "--why", child.id];
+    const why = parseExplainPayload((await runCli([...args, "--format=json"])).stdout);
+    const dot = await runCli([...args, "--format=dot"]);
+    expect(dot.code).toBe(0);
+    expect(dot.stdout).toContain('hello \\"world\\" \\\\N\\nagain');
+    expect([...dot.stdout.matchAll(/^ {2}"(d\d+)" \[label=/gm)].map((match) => match[1])).toEqual(
+      why.decisions.map((decision) => decision.id),
+    );
+    expect(dot.stdout).toContain("omitted external parent links: 0");
+  });
+
+  it.each([
+    "--verbose",
+    "--strict-citations",
+    "--phase-views",
+    "--verify-replay",
+    "--tooling-only",
+  ])("keeps positional phrase words after %s", async (flag) => {
+    const before = await runCli([flag, "hello", "world", "--format=json"]);
+    const after = await runCli(["hello", "world", flag, "--format=json"]);
+    expect(before.code).toBe(0);
+    expect(after.code).toBe(0);
+    expect(before.stdout).toBe(after.stdout);
+  });
+
+  it("keeps a phrase after strict and accepts explicit boolean values", async () => {
+    const strict = await runCli(["--strict", "hello", "--format=json"]);
+    expect(strict.code).toBe(2);
+    expect(strict.stderr).toContain("strict failed: rulepack validation emitted");
+    const disabled = await runCli(["--strict=false", "hello", "--format=json"]);
+    expect(disabled.code).toBe(0);
+    const enabled = await runCli(["--strict=true", "hello", "--format=json"]);
+    expect(enabled.code).toBe(2);
+    expect(enabled.stderr).toBe(strict.stderr);
+  });
+
+  it("preserves equals inside values and explicit phrase precedence", async () => {
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed");
+    try {
+      const equals = await runCli([
+        "ignored",
+        "--phrase=hello=world",
+        "--format=json",
+        "--stage=transcribe",
+      ]);
+      expect(equals.code).toBe(0);
+      expect(spy.mock.calls[0][0]).toBe("hello=world");
+      const spaced = await runCli([
+        "--phrase",
+        "hello=world",
+        "--format",
+        "json",
+        "--stage",
+        "transcribe",
+      ]);
+      expect(spaced.code).toBe(0);
+      expect(equals.stdout).toBe(spaced.stdout);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("supports stage + range filtering in json output", async () => {
     const result = await runCli([
       "--phrase",
@@ -81,40 +388,158 @@ describe("explain phrase cli", () => {
   });
 
   it("supports why ancestry chain output", async () => {
+    const explain = await runCli(["--phrase", "hello world", "--format", "json"]);
+    expect(explain.code).toBe(0);
+    const inventory = parseExplainPayload(explain.stdout).decisions.find(
+      (decision) => decision.stage === "frontend" && decision.type === "inventory_selected",
+    );
+    expect(inventory).toBeTruthy();
+    if (!inventory) throw new Error("expected inventory selection decision");
+    expect(inventory.parents ?? []).toEqual([]);
     const result = await runCli([
       "--phrase",
       "hello world",
       "--format",
       "json",
       "--why",
-      "d000003",
+      inventory.id,
     ]);
 
     expect(result.code).toBe(0);
     const payload = parseExplainPayload(result.stdout);
-    expect(payload.whyDecisionId).toBe("d000003");
-    expect(payload.decisions.map((decision) => decision.id)).toEqual(["d000003"]);
+    expect(payload.whyDecisionId).toBe(inventory.id);
+    expect(payload.decisions).toEqual([inventory]);
+    expect(payload.tooling.ruleSources).toEqual({});
+    expect(payload.tooling.ruleExpressions).toEqual({});
   });
 
-  it("links rule decisions to transcribe ancestry in why output", async () => {
-    const explain = await runCli(["--phrase", "hello world", "--format", "json"]);
+  it.each([
+    ["hello world", "duration_floor_from_inventory"],
+    ["Did you see the red car?", "palatalization_dy"],
+  ])("explains %s through compiled %s", async (phrase, expectedRule) => {
+    const explain = await runCli(["--phrase", phrase, "--format", "json"]);
     expect(explain.code).toBe(0);
     const explainPayload = parseExplainPayload(explain.stdout);
+    expect(explainPayload.tooling.ruleExpressions).toEqual({});
     const rewrite = explainPayload.decisions.find(
-      (decision) =>
-        decision.stage === "rules" &&
-        decision.type === "feature_overwrite" &&
-        typeof decision.subject === "string" &&
-        decision.subject.startsWith("item:segment_"),
+      (decision) => explainPayload.tooling.ruleSources[decision.id]?.path[1] === expectedRule,
     );
     expect(rewrite).toBeTruthy();
-    if (!rewrite) throw new Error("expected feature overwrite decision");
+    if (!rewrite) throw new Error(`expected committed decision for ${expectedRule}`);
 
-    const why = await runCli(["--phrase", "hello world", "--format", "json", "--why", rewrite.id]);
+    const why = await runCli([
+      "--phrase",
+      phrase,
+      "--format",
+      "json",
+      "--why",
+      rewrite.id,
+      "--verify-replay",
+    ]);
     expect(why.code).toBe(0);
     const whyPayload = parseExplainPayload(why.stdout);
     expect(whyPayload.decisions.length).toBeGreaterThan(1);
     expect(whyPayload.decisions.some((decision) => decision.stage === "transcribe")).toBe(true);
+    expect(whyPayload.decisions.find((decision) => decision.id === rewrite.id)).toEqual(rewrite);
+    expect(whyPayload.tooling.replay?.matches).toBe(true);
+    const span = whyPayload.tooling.ruleSources[rewrite.id];
+    expect(span).toBeDefined();
+    expect(span.path[0]).toBe("rules");
+    expect(span.path).toHaveLength(2);
+    const ruleId = String(span.path[1]);
+    const rulepack = loadBundledRulepackSpec();
+    const compiledRule = rulepack.rules[ruleId];
+    expect(compiledRule).toBeDefined();
+    const expressions = {
+      ruleId,
+      rule: compiledRule,
+      pattern:
+        typeof compiledRule.match === "string" ? rulepack.patterns[compiledRule.match] : null,
+    };
+    expect(whyPayload.tooling.ruleExpressions[rewrite.id]).toEqual(expressions);
+    expect(expressions.rule.define).not.toEqual({});
+    if (expectedRule === "palatalization_dy") {
+      expect(expressions.rule.splice).not.toBeNull();
+      expect(expressions.pattern).toBeDefined();
+      expect(expressions.pattern).not.toBeNull();
+    }
+    const declaration = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
+      (entry) => entry.value.path.length === 2 && entry.value.path[1] === span.path[1],
+    );
+    expect(span).toEqual(declaration?.key);
+    expect(whyPayload.tooling.ruleSources[rewrite.id]).toEqual(
+      explainPayload.tooling.ruleSources[rewrite.id],
+    );
+    const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
+    expect(Object.keys(whyPayload.tooling.ruleExpressions).every((id) => selectedIds.has(id))).toBe(
+      true,
+    );
+    for (const [id, entry] of Object.entries(whyPayload.tooling.ruleExpressions)) {
+      expect(whyPayload.tooling.ruleSources[id].path[1]).toBe(entry.ruleId);
+    }
+    expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(
+      true,
+    );
+    const text = await runCli(["--phrase", phrase, "--why", rewrite.id, "--verbose"]);
+    expect(text.code).toBe(0);
+    expect(text.stdout.split("\n").find((line) => line.startsWith(`#${rewrite.seq} `))).toContain(
+      ` | rule: ${span.resource}:${span.line}:${span.column}`,
+    );
+    expect(text.stdout).toContain(
+      `compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
+    );
+  });
+
+  it("locates actual vocabulary values with dotted keys in text, JSON, and why output", async () => {
+    const result = await runCli(["--phrase", "Dr. Smith", "--format", "json"]);
+    expect(result.code).toBe(0);
+    const payload = parseExplainPayload(result.stdout);
+    const lookup = payload.decisions.find(
+      (decision) => decision.vocabularyLookup?.table === "tn_abbreviations",
+    )!;
+    expect(lookup.vocabularyLookup).toMatchObject({ key: "dr.", value: "doctor" });
+    expect(lookup.citations.length).toBeGreaterThan(0);
+    const span = payload.tooling.vocabularySources[lookup.id];
+    expect(span).toMatchObject({
+      resource: lookup.vocabularyLookup!.resource,
+      path: ["maps", "tn_abbreviations", "dr."],
+      line: 7,
+      column: 10,
+    });
+    expect(span.resource).toMatch(/normalization\/lexical.yaml$/);
+    const why = await runCli([
+      "--phrase",
+      "Dr. Smith",
+      "--format",
+      "json",
+      "--why",
+      lookup.id,
+      "--verify-replay",
+    ]);
+    expect(why.code).toBe(0);
+    const whyPayload = parseExplainPayload(why.stdout);
+    expect(whyPayload.decisions.find((decision) => decision.id === lookup.id)).toEqual(lookup);
+    expect(whyPayload.tooling.vocabularySources[lookup.id]).toEqual(span);
+    expect(whyPayload.tooling.replay?.matches).toBe(true);
+    const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
+    expect(
+      Object.keys(whyPayload.tooling.vocabularySources).every((id) => selectedIds.has(id)),
+    ).toBe(true);
+    const text = await runCli(["--phrase", "Dr. Smith", "--why", lookup.id, "--verbose"]);
+    expect(text.code).toBe(0);
+    expect(text.stdout.split("\n").find((line) => line.startsWith(`#${lookup.seq} `))).toContain(
+      ` | vocabulary: ${span.resource}:${span.line}:${span.column}`,
+    );
+    const filtered = await runCli([
+      "--phrase",
+      "Dr. Smith",
+      "--format",
+      "json",
+      "--stage",
+      "transcribe",
+    ]);
+    expect(filtered.code).toBe(0);
+    expect(parseExplainPayload(filtered.stdout).tooling.vocabularySources).toEqual({});
   });
 
   it("uses diagnostic symbol pronunciation for explicit segment lists", async () => {
@@ -137,7 +562,7 @@ describe("explain phrase cli", () => {
     ).toBe(false);
   });
 
-  it("passes strict-citations for current transcribe/rules provenance", async () => {
+  it("passes strict-citations for a cited run while retaining the selected summary", async () => {
     const result = await runCli([
       "--phrase",
       "hello world",
@@ -152,10 +577,53 @@ describe("explain phrase cli", () => {
     expect(payload.summary.uncitedCount).toBe(0);
   });
 
+  it.each([
+    { label: "stage", filters: ["--stage", "transcribe"] },
+    { label: "range", filters: ["--range", "seq:1-1"] },
+    { label: "empty window", filters: ["--subject", "fixture:no-such-subject"] },
+    { label: "ancestry", filters: ["--why", "d000003"] },
+  ])("checks hidden uncited decisions with $label selection", async ({ label, filters }) => {
+    const original = frontend.textToKlattTrackDetailed;
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed").mockImplementation((...args) => {
+      const detailed = original(...args);
+      args[3]?.provenance?.add({
+        stage: "runtime",
+        type: "fixture_uncited",
+        subject: "fixture:hidden",
+        reason: "Uncited fixture decision outside the selected output",
+        citations: [],
+      });
+      return detailed;
+    });
+    try {
+      const args = ["--phrase", "hello world", "--format", "json", ...filters];
+      const ordinary = await runCli(args);
+      const strict = await runCli([...args, "--strict-citations"]);
+      expect(ordinary.code).toBe(0);
+      expect(strict.code).toBe(2);
+      const payload = parseExplainPayload(strict.stdout);
+      expect(payload.summary.uncitedCount).toBe(0);
+      expect(payload.decisions.some((decision) => decision.type === "fixture_uncited")).toBe(false);
+      expect(payload.decisions).toEqual(parseExplainPayload(ordinary.stdout).decisions);
+      if (label === "empty window") expect(payload.decisions).toEqual([]);
+      expect(strict.stderr).toContain("1 uncited decisions in full run");
+      expect(strict.stderr).toContain("runtime=1");
+      expect(strict.stderr).toContain("fixture_uncited=1");
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("prints rulepack warnings and fails them under --strict", async () => {
     const normal = await runCli(["--phrase", "hello", "--format", "json"]);
     expect(normal.code).toBe(0);
     expect(normal.stderr).toContain("rulepack warning W_");
+    const warning = getRulepackValidationDiagnostics(loadBundledRulepackSpec()).find(
+      (entry) => entry.path === "parameters.policy.rate.default",
+    );
+    expect(warning?.documentSpan).toBeDefined();
+    const span = warning!.documentSpan!;
+    expect(normal.stderr).toContain(` [${span.resource}:${span.line}:${span.column}]\n`);
 
     const strict = await runCli(["--phrase", "hello", "--format", "json", "--strict"]);
     expect(strict.code).toBe(2);

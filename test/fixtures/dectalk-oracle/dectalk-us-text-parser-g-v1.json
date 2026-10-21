@@ -1,0 +1,507 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-messy-sweep-2-v1.json"
+ ],
+ "entries": {
+  "Send it to me @ home.": [
+   "Send it to me @ home. "
+  ],
+  "Press # to continue.": [
+   "Press # to continue. "
+  ],
+  "Salt & pepper are on the table.": [
+   "Salt & pepper are on the table. "
+  ],
+  "Fields marked * are required.": [
+   "Fields marked * are required. "
+  ],
+  "Two + two = four.": [
+   "Two + two = four. "
+  ],
+  "The value is < ten but > five.": [
+   "The value is ten but > five. "
+  ],
+  "Type ^ and then ~ to finish.": [
+   "Type ^ and then ~ to finish. "
+  ],
+  "We sell books&toys here.": [
+   "We sell books & toys here. "
+  ],
+  "Item #5 is missing.": [
+   "Item # 5 is missing. "
+  ],
+  "It is 72 degrees outside.": [
+   "It is 72 degrees outside. "
+  ],
+  "Bake it at 350 F for an hour.": [
+   "Bake it at 350 F for an hour. "
+  ],
+  "Water boils at 100 C.": [
+   "Water boils at 100 C. "
+  ],
+  "The low was -5 degrees last night.": [
+   "The low was -5 degrees last night. "
+  ],
+  "Turn the dial 90 degrees to the left.": [
+   "Turn the dial 90 degrees to the left. "
+  ],
+  "It reached 98.6 degrees by noon.": [
+   "It reached 98.6 degrees by noon. "
+  ],
+  "The oven is set to 425F.": [
+   "The oven is set to 425 F. "
+  ],
+  "A fever of 101 is not high.": [
+   "A fever of 101 is not high. "
+  ],
+  "The ticket costs 20 euros.": [
+   "The ticket costs 20 euros. "
+  ],
+  "He paid 15 pounds for the book.": [
+   "He paid 15 pounds for the book. "
+  ],
+  "It sold for 500 yen.": [
+   "It sold for 500 yen. "
+  ],
+  "The fee is USD 40.": [
+   "The fee is USD 40. "
+  ],
+  "She owes me 5 bucks.": [
+   "She owes me 5 bucks. "
+  ],
+  "A cup costs 75 cents.": [
+   "A cup costs 75 cents. "
+  ],
+  "The total came to $0.99.": [
+   "The total came to $0.99. "
+  ],
+  "He won $1,000,000 in the lottery.": [
+   "He won $1,000,000 in the lottery. "
+  ],
+  "The answer is -7.": [
+   "The answer is -7. "
+  ],
+  "Add +3 to the score.": [
+   "Add +3 to the score. "
+  ],
+  "It fell from 10 to -10.": [
+   "It fell from 10 to -10. "
+  ],
+  "The change was +2.5 points.": [
+   "The change was +2.5 points. "
+  ],
+  "Subtract 4 - 9 and you get -5.": [
+   "Subtract 4 - ",
+   "9 and you get -5. "
+  ],
+  "The balance is -$20.": [
+   "The balance is -$20. "
+  ],
+  "Plus or minus 3 is fine.": [
+   "Plus or minus 3 is fine. "
+  ],
+  "His score was 5 +/- 1.": [
+   "His score was 5 + /- ",
+   "1. "
+  ],
+  "The odds are .5 at best.": [
+   "The odds are .5 at best. "
+  ],
+  "It weighs .25 of a pound.": [
+   "It weighs .25 of a pound. "
+  ],
+  "Use a .22 for practice.": [
+   "Use a .22 for practice. "
+  ],
+  "The gap is 0.5 of an inch.": [
+   "The gap is 0.5 of an inch. "
+  ],
+  "Pi is about 3.14159.": [
+   "Pi is about 3.14159. "
+  ],
+  "He ran it in 9.58 seconds.": [
+   "He ran it in 9.58 seconds. "
+  ],
+  "The rate is 0.05 per mile.": [
+   "The rate is 0.05 per mile. "
+  ],
+  "Version 2.0 is out now.": [
+   "Version 2.0 is out now. "
+  ],
+  "My number is 12345678.": [
+   "My number is 12345678. "
+  ],
+  "The code is 0042.": [
+   "The code is 0042. "
+  ],
+  "Dial 18005551234 now.": [
+   "Dial 1, 8 0 0, 5 5 5, 1 2 3 4\\x81,\\x82 now. "
+  ],
+  "The serial is 9876543210123.": [
+   "The serial is 9876543210123. "
+  ],
+  "Enter 1234 5678 9012 3456.": [
+   "Enter 1234 5678 9012 3456. "
+  ],
+  "The zip code is 02139.": [
+   "The zip code is 02139. "
+  ],
+  "There are 1000000 of them.": [
+   "There are 1000000 of them. "
+  ],
+  "Flight 370 left at gate 12.": [
+   "Flight 370 left at gate 12. "
+  ],
+  "The part is AB123.": [
+   "The part is AB 123. "
+  ],
+  "Order X7Y9 has shipped.": [
+   "Order X 7 Y 9 has shipped. "
+  ],
+  "Use the USB2 port.": [
+   "Use the USB 2 port. "
+  ],
+  "Take the I95 north.": [
+   "Take the I 95 north. "
+  ],
+  "Room 12B is upstairs.": [
+   "Room 12 B is upstairs. "
+  ],
+  "The model is XJ-900.": [
+   "The model is XJ-900. "
+  ],
+  "My plate is 4ABC123.": [
+   "My plate is 4 ABC 123. "
+  ],
+  "Seat 23A is by the window.": [
+   "Seat 23 A is by the window. "
+  ],
+  "He drives an F150.": [
+   "He drives an F 150. "
+  ],
+  "Open the file notes.txt first.": [
+   "Open the file notes \\x81d'at\\x82 txt first. "
+  ],
+  "It is in C:\\Users\\Paul\\notes.": [
+   "It is in C: \\x5c Users \\x5c Paul \\x5c notes. "
+  ],
+  "Look in /usr/local/bin for it.": [
+   "Look in /usr/local/bin for it. "
+  ],
+  "We run version 4.63 here.": [
+   "We run version 4.63 here. "
+  ],
+  "Update to v2.1.3 today.": [
+   "Update to v 2.1 .3 today. "
+  ],
+  "Save it as report_final.doc.": [
+   "Save it as report _ final. doc. "
+  ],
+  "The script is run.sh.": [
+   "The script is run \\x81d'at\\x82 s h. "
+  ],
+  "Python 3.11 is required.": [
+   "Python 3.11 is required. "
+  ],
+  "She works for NASA now.": [
+   "She works for NASA now. "
+  ],
+  "The FBI and the CIA were there.": [
+   "The FBI and the CIA were there. "
+  ],
+  "He has a PhD from MIT.": [
+   "He has a PhD from MIT. "
+  ],
+  "The CEO spoke to the UN.": [
+   "The CEO spoke to the UN. "
+  ],
+  "Send me the PDF by email.": [
+   "Send me the PDF by email. "
+  ],
+  "We watched it on DVD.": [
+   "We watched it on DVD. "
+  ],
+  "NATO met in the USA.": [
+   "NATO met in the USA. "
+  ],
+  "Her GPA is high.": [
+   "Her GPA is high. "
+  ],
+  "The ATM is out of order.": [
+   "The ATM is out of order. "
+  ],
+  "J. R. Smith wrote the book.": [
+   "J. ",
+   "R. ",
+   "Smith wrote the book. "
+  ],
+  "Ask Mary K. Jones about it.": [
+   "Ask Mary K. ",
+   "Jones about it. "
+  ],
+  "John Brown III was there.": [
+   "John Brown the 3rd was there. "
+  ],
+  "Dr. A. B. White, Ph.D., spoke.": [
+   "Doctor A ",
+   "B. ",
+   "White, ",
+   "Ph . D., ",
+   "spoke. "
+  ],
+  "Mr. and Mrs. O'Brien left early.": [
+   "Mr. and Mrs. O'Brien left early. "
+  ],
+  "It was signed by T.S. Eliot.": [
+   "It was signed by T.S. ",
+   "Eliot. "
+  ],
+  "Henry VIII had six wives.": [
+   "Henry the 8th had six wives. "
+  ],
+  "Sam Lee Jr. and Sam Lee Sr. agree.": [
+   "Sam Lee Jr. and Sam Lee Sr. agree. "
+  ],
+  "He lives at 221B Baker Street.": [
+   "He lives at 221 B Baker Street. "
+  ],
+  "Send it to 1600 Pennsylvania Ave.": [
+   "Send it to 1600 Pennsylvania Ave. "
+  ],
+  "The office is at 42 Elm St., Apt. 3.": [
+   "The office is at 42 Elm St., ",
+   "apartment ",
+   "3. "
+  ],
+  "Turn onto N. Main St. at the light.": [
+   "Turn onto N. ",
+   "Main St. at the light. "
+  ],
+  "Write to P.O. Box 123.": [
+   "Write to P.O. ",
+   "Box 123. "
+  ],
+  "It is on Rte. 9 near Blvd. East.": [
+   "It is on Rte. 9 near Blvd. East. "
+  ],
+  "She moved to Boston, MA 02134.": [
+   "She moved to Boston, ",
+   "Massachusetts 0 2 1 3 4 \\x81,\\x82. "
+  ],
+  "Meet me at 5th Ave. and 42nd St.": [
+   "Meet me at 5th Ave. and 42nd St. "
+  ],
+  "Bring fruit, e.g. apples.": [
+   "Bring fruit, ",
+   "for example apples. "
+  ],
+  "He left early, i.e. before noon.": [
+   "He left early, ",
+   "this is before noon. "
+  ],
+  "Bring pens, paper, etc. with you.": [
+   "Bring pens, ",
+   "paper, ",
+   "etc. with you. "
+  ],
+  "It was Smith et al. who found it.": [
+   "It was Smith et al. ",
+   "who found it. "
+  ],
+  "See the note, cf. page ten.": [
+   "See the note, ",
+   "cf. ",
+   "page ten. "
+  ],
+  "The game is Reds vs. Blues.": [
+   "The game is Reds vs. Blues. "
+  ],
+  "N.B. the door sticks.": [
+   "N.B. ",
+   "the door sticks. "
+  ],
+  "He paid, viz. in cash.": [
+   "He paid, ",
+   "viz. ",
+   "in cash. "
+  ],
+  "Y'all should've seen it.": [
+   "Y'all should've seen it. "
+  ],
+  "I'd've gone if I could.": [
+   "I'd've gone if I could. "
+  ],
+  "She's gonna say it ain't so.": [
+   "She's gonna say it ain't so. "
+  ],
+  "Who'd've thought it?": [
+   "Who'd've thought it? "
+  ],
+  "It's five o'clock already.": [
+   "It's five o'clock already. "
+  ],
+  "They're goin' fishin' today.": [
+   "They're goin' ",
+   "fishin' ",
+   "today. "
+  ],
+  "That'll do, won't it?": [
+   "That'll do, ",
+   "won't it? "
+  ],
+  "We mustn't and we needn't.": [
+   "We mustn't and we needn't. "
+  ],
+  "That is Chris's bike.": [
+   "That is Chris's bike. "
+  ],
+  "We met at the Joneses' house.": [
+   "We met at the Joneses' ",
+   "house. "
+  ],
+  "Mr. Hughes's car is red.": [
+   "Mr. Hughes's car is red. "
+  ],
+  "Texas' weather is hot.": [
+   "Texas' ",
+   "weather is hot. "
+  ],
+  "It is Ross's turn now.": [
+   "It is Ross's turn now. "
+  ],
+  "Charles' book is on the desk.": [
+   "Charles' ",
+   "book is on the desk. "
+  ],
+  "The Williams's dog barked.": [
+   "The Williams's dog barked. "
+  ],
+  "Is this Thomas's or Lucas's?": [
+   "Is this Thomas's or Lucas's? "
+  ],
+  "Oh, I see.": [
+   "Oh, ",
+   "I see. "
+  ],
+  "Wow! That is huge.": [
+   "Wow! ",
+   "That is huge. "
+  ],
+  "Hmm, let me think.": [
+   "Hmm, ",
+   "let me think. "
+  ],
+  "Ouch! That hurt.": [
+   "Ouch! ",
+   "That hurt. "
+  ],
+  "Uh, no thanks.": [
+   "Uh, ",
+   "no thanks. "
+  ],
+  "Oops, I dropped it.": [
+   "Oops, ",
+   "I dropped it. "
+  ],
+  "Shh! The baby is asleep.": [
+   "Shh! ",
+   "The baby is asleep. "
+  ],
+  "Aha, there it is.": [
+   "Aha, ",
+   "there it is. "
+  ],
+  "Ugh, not again.": [
+   "Ugh, ",
+   "not again. "
+  ],
+  "I am sooo tired.": [
+   "I am sooo tired. "
+  ],
+  "W-w-wait a minute.": [
+   "W-w-wait a minute. "
+  ],
+  "Nooo, do not go.": [
+   "Nooo, ",
+   "do not go. "
+  ],
+  "It was a looong day.": [
+   "It was a looong day. "
+  ],
+  "I, I, I do not know.": [
+   "I, ",
+   "I, ",
+   "I do not know. "
+  ],
+  "B-but why?": [
+   "B dash but why? "
+  ],
+  "Yesss, we won.": [
+   "Yesss, ",
+   "we won. "
+  ],
+  "He said hellooo to everyone.": [
+   "He said hellooo to everyone. "
+  ],
+  "hey are you coming to the party tonight": [
+   "hey are you coming to the party tonight "
+  ],
+  "i think so but i have to work late": [
+   "i think so but i have to work late "
+  ],
+  "ok see you there around nine then": [
+   "ok see you there around nine then "
+  ],
+  "thanks for the help yesterday it was great": [
+   "thanks for the help yesterday it was great "
+  ],
+  "dont forget the keys and the tickets": [
+   "dont forget the keys and the tickets "
+  ],
+  "what time does the train leave tomorrow": [
+   "what time does the train leave tomorrow "
+  ],
+  "i saw john and mary at the store on main street": [
+   "i saw john and mary at the store on main street "
+  ],
+  "call me when you get home ok": [
+   "call me when you get home ok "
+  ],
+  "She asked, \"Are you coming?\" and left.": [
+   "She asked, ",
+   "Are you coming? and left. "
+  ],
+  "\"Where is it?\" he said.": [
+   "Where is it? he said. "
+  ],
+  "He shouted \"Stop!\" twice.": [
+   "He shouted Stop! twice. "
+  ],
+  "\"Is it late?\" \"No.\" \"Then stay.\"": [
+   "Is it late? No. Then stay. "
+  ],
+  "I wondered, \"Why me?\" for a while.": [
+   "I wondered, ",
+   "Why me? for a while. "
+  ],
+  "Did she say \"yes\" or \"no\"?": [
+   "Did she say yes or no? "
+  ],
+  "\"Can you hear me?\" she asked. \"Yes,\" I said.": [
+   "Can you hear me? she asked. ",
+   "Yes, I said. "
+  ],
+  "The sign read \"Open?\" which was odd.": [
+   "The sign read Open? which was odd. "
+  ],
+  "\"What?\" \"Nothing.\" \"Are you sure?\"": [
+   "What? Nothing. Are you sure? "
+  ],
+  "He asked \"Who?\" and she said \"Me.\"": [
+   "He asked Who? and she said Me. "
+  ]
+ }
+}

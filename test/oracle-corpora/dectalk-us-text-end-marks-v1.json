@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-text-end-marks-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "te-quote-after-period", "text": "'Come in,' said the old man, 'and shut the door.'", "group": "text-end-after-mark", "tags": ["single-quote", "period"], "expectedFocus": ["trace"] },
+    { "id": "te-quote-short", "text": "He said 'shut the door.'", "group": "text-end-after-mark", "tags": ["single-quote", "period"], "expectedFocus": ["trace"] },
+    { "id": "te-quote-unpaired", "text": "It is at the door.'", "group": "text-end-after-mark", "tags": ["single-quote", "period", "unpaired"], "expectedFocus": ["trace"] },
+    { "id": "te-period-word-clause-end", "text": "See ftp://files.example.com/pub/.", "group": "text-end-after-mark", "tags": ["period-word", "parser-clause-end"], "expectedFocus": ["trace"] },
+    { "id": "te-quote-mid-control", "text": "He said 'shut the door.' Then left.", "group": "text-end-after-mark", "tags": ["control", "sentence-after"], "expectedFocus": ["trace"] },
+    { "id": "te-exclaim-control", "text": "He said 'stop!'", "group": "text-end-after-mark", "tags": ["control", "exclamation"], "expectedFocus": ["trace"] },
+    { "id": "te-path-control", "text": "Look in example.com/pub/.", "group": "text-end-after-mark", "tags": ["control", "no-scheme"], "expectedFocus": ["trace"] }
+  ]
+}

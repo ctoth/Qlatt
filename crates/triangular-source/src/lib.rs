@@ -1,3 +1,7 @@
+//! Normalized asymmetric triangular glottal source evaluated at the base sample rate.
+//! Reference: klsyn88 `c/parwv.c`, `triangular_source` and `pitch_synch_par_reset`.
+//! The reference slopes and clamps are adapted to base-rate phase lengths.
+
 use klatt_wasm_common::export_alloc_fns;
 
 export_alloc_fns!();

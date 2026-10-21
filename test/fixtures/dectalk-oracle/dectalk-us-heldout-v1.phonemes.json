@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-heldout-v1",
+  "engine": "DECtalk 4.63 say.exe -lp",
+  "entries": {
+    "held-take": {
+      "text": "take.",
+      "phonemeLog": "t ' eyk ."
+    },
+    "held-bake": {
+      "text": "bake.",
+      "phonemeLog": ") b ' eyk ."
+    },
+    "held-lake": {
+      "text": "lake.",
+      "phonemeLog": "ll' eyk ."
+    },
+    "held-cape": {
+      "text": "cape.",
+      "phonemeLog": "k ' eyp ."
+    },
+    "held-kate": {
+      "text": "kate.",
+      "phonemeLog": "k ' eyt ."
+    },
+    "held-coke": {
+      "text": "coke.",
+      "phonemeLog": "k ' owk ."
+    },
+    "held-kick": {
+      "text": "kick.",
+      "phonemeLog": "k ' ihk ."
+    },
+    "held-a": {
+      "text": "a.",
+      "phonemeLog": "' ey."
+    },
+    "held-they": {
+      "text": "they.",
+      "phonemeLog": "dhey."
+    },
+    "held-cake-phrase": {
+      "text": "The cake is good.",
+      "phonemeLog": "dhax  k ' eyk   ihz   g ' uhd ."
+    }
+  }
+}

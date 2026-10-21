@@ -105,7 +105,7 @@ it("declares percent CV controls from semantics through worklet", () => {
 
 it("keeps bundled nonzero jitter presets within the percent range", () => {
   for (const file of [
-    "policy/source-contour.yaml",
+    "frontends/qlatt-english/policy/source-contour.yaml",
     "frontends/dectalk-english/source-contour.yaml",
   ]) {
     const policy = load(readFileSync(`public/rules/${file}`, "utf8")) as {

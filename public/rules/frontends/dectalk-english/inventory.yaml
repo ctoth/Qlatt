@@ -1,4 +1,86 @@
 version: v1
+target_feature_exclusions: [dur, SW, type]
+target_features:
+  derived_from: {kind: string}
+  area_function:
+    kind: object
+    optional: [source_sha256, model_settings, tract_length_cm, pharynx_fraction]
+    fields:
+      source: {kind: string}
+      source_sha256: {kind: string}
+      model: {kind: string}
+      speaker:
+        kind: object
+        fields:
+          tract_length_scale: {kind: number}
+          pharynx_scale: {kind: number}
+          mouth_scale: {kind: number}
+      model_settings:
+        kind: object
+        fields:
+          sound_speed_cm_s: {kind: number}
+          attenuation_neper: {kind: number}
+          lip_end_correction: {kind: number}
+          citations: {kind: array, items: {kind: string}}
+      tract_length_cm: {kind: number}
+      pharynx_fraction: {kind: number}
+      citations: {kind: array, items: {kind: string}}
+  dur: {kind: number}
+  type: {kind: string}
+  fricative_min_ms: {kind: number}
+  burstDuration: {kind: number}
+  minimumDuration: {kind: number}
+  nasal_place_index: {kind: number}
+  diph: {kind: array, items: {kind: string}}
+  alveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  back: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  bilabial: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  dental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  front: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  glottal: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  hi: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_back_rounded: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_obstruent: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_stop_base: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  labiodental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  low: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  mid: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  postalveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  rhotic: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  velar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiced: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiceless: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  trajectory:
+    kind: object
+    optional: [B1, B2, B3]
+    fields:
+      F1: &trajectory_track
+        kind: array
+        items:
+          kind: object
+          fields:
+            value: {kind: number}
+            time: {kind: union, variants: [{kind: number}, {kind: "null"}]}
+      F2: *trajectory_track
+      F3: *trajectory_track
+      B1: *trajectory_track
+      B2: *trajectory_track
+      B3: *trajectory_track
+  stopReleaseProfiles:
+    kind: object
+    fields:
+      front_vowel: &release_profile
+        kind: object
+        fields:
+          A2: {kind: number}
+          A3: {kind: number}
+          A4: {kind: number}
+          A5: {kind: number}
+          A6: {kind: number}
+          AB: {kind: number}
+      back_unrounded_vowel: *release_profile
+      back_rounded_vowel: *release_profile
+      obstruent: *release_profile
 # Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
 silence_symbol: SIL
 nucleus_types: [vowel]
@@ -143,7 +225,9 @@ phoneme_targets:
     mid: true
   # DECtalk 4.63 US_IX code 18 from p_us_rom.h
   # us_maltar/us_inhdr/us_mindur; used directly by the final dummy-vowel rule.
-  IX0:
+  # DECtalk has one US_IX target whatever the stress; IX1 names it for a
+  # letter-to-sound IX that carries stress (the "mc" of "McGuigan").
+  IX0: &dectalk_ix
     TL: 3
     F1: 460
     F2: 1680
@@ -158,6 +242,7 @@ phoneme_targets:
     voiced: true
     mid: true
     front: true
+  IX1: *dectalk_ix
   EY1:
     TL: 3
     F1: 520
@@ -847,6 +932,67 @@ phoneme_targets:
     hi: true
     back: true
     is_back_rounded: true
+  # DECtalk's single allophone for "you" (US_YU, code 16): a glide from a high
+  # front start into a high back vowel. Trajectories from p_us_rom.h
+  # us_maltar / us_maldip (scripts/extract-dectalk-diphthong-trajectories.ts
+  # prints them); the static values are each trajectory's first target, B1 and
+  # AV from us_maltar; durations from us_inhdr / us_mindur. DECtalk has one YU
+  # target whatever the stress, so YU0 and YU1 name the same one.
+  # engineering estimate: TL copied from UW; the place flags describe where the
+  # glide ends.
+  YU1: &dectalk_yu
+    TL: 3
+    F1: 270
+    F2: 2000
+    F3: 2600
+    B1: 70
+    B2: 150
+    B3: 250
+    AV: 65
+    dur: 230
+    minimumDuration: 100
+    type: vowel
+    voiced: true
+    hi: true
+    back: true
+    is_back_rounded: true
+    trajectory:
+      F1:
+      - value: 270
+        time: 45
+      - value: 360
+        time: 150
+      - value: 360
+        time: null
+      F2:
+      - value: 2000
+        time: 45
+      - value: 1050
+        time: 150
+      - value: 1000
+        time: null
+      F3:
+      - value: 2600
+        time: 45
+      - value: 2250
+        time: 95
+      - value: 2200
+        time: null
+      B2:
+      - value: 150
+        time: 45
+      - value: 70
+        time: 150
+      - value: 70
+        time: null
+      B3:
+      - value: 250
+        time: 45
+      - value: 130
+        time: 100
+      - value: 130
+        time: null
+  YU0: *dectalk_yu
   ER1:
     TL: 3
     F1: 490
@@ -1051,9 +1197,11 @@ phoneme_targets:
   # of the RR diphthong: F1 450->390, F2/F3 steady 1320/1540) and us_mindur[]
   # (inherent 180 / minimum 90).  RR is the vowel produced by AX+R fusion ("letter",
   # "actor" -> ...RR) and by the A5 R-before-syllabic rewrite; it is a syllabic
-  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).  No stress variant:
-  # AX is the reduced schwa and RR inherits its unstressed quality.
-  RR:
+  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).
+  # DECtalk has one US_RR target whatever the stress; it is also the vowel of
+  # "church" and "world" in the dictionary, where it is stressed. RR0 and RR1
+  # name that same target for a dictionary vowel with a stress digit.
+  RR: &dectalk_rr
     TL: 3
     F1: 390
     F2: 1320
@@ -1067,6 +1215,8 @@ phoneme_targets:
     type: vowel
     voiced: true
     rhotic: true
+  RR0: *dectalk_rr
+  RR1: *dectalk_rr
   L:
     TL: 3
     F1: 400
@@ -1078,6 +1228,37 @@ phoneme_targets:
     AV: 63
     dur: 70
     minimumDuration: 40
+    type: liquid
+    voiced: true
+  # Postvocalic allophones of /l/ and /r/ (US_LX, US_RX), selected by
+  # ph_aloph.c:821-870. Formants, bandwidths and AV from p_us_rom.h us_maltar;
+  # durations from us_inhdr / us_mindur.
+  # engineering estimate: TL copied from L and R; the source of that 3 is not
+  # recorded in this inventory.
+  LX:
+    TL: 3
+    F1: 425
+    F2: 800
+    F3: 2800
+    B1: 140
+    B2: 222
+    B3: 233
+    AV: 63
+    dur: 100
+    minimumDuration: 70
+    type: liquid
+    voiced: true
+  RX:
+    TL: 3
+    F1: 470
+    F2: 1270
+    F3: 1540
+    B1: 80
+    B2: 120
+    B3: 150
+    AV: 64
+    dur: 120
+    minimumDuration: 70
     type: liquid
     voiced: true
   HH:

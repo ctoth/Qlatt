@@ -1,9 +1,11 @@
-import { readFileSync } from "node:fs";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 
-const d = JSON.parse(readFileSync("public/dectalk-dictionary.json", "utf8")) as Record<
-  string,
-  string
->;
+const lexicon = loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).lexicon;
+if (!lexicon) throw new Error("E_FRONTEND_CONFIG: dectalk-english requires resources.lexicon");
+const d = lexicon.dictionary;
 console.log("entries:", Object.keys(d).length);
 for (const w of [
   "judicial",

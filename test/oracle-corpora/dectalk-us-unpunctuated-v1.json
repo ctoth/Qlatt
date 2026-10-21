@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-unpunctuated-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "bare-word", "text": "cat", "group": "no-final-punctuation", "tags": ["word", "final-voiceless-stop"], "expectedFocus": ["trace"] },
+    { "id": "bare-word-vowel", "text": "hello", "group": "no-final-punctuation", "tags": ["word"], "expectedFocus": ["trace"] },
+    { "id": "bare-words", "text": "hello world", "group": "no-final-punctuation", "tags": ["words"], "expectedFocus": ["trace"] },
+    { "id": "bare-sentence", "text": "The cat sat on the mat", "group": "no-final-punctuation", "tags": ["words", "final-voiceless-stop"], "expectedFocus": ["trace"] },
+    { "id": "bare-number", "text": "42", "group": "no-final-punctuation", "tags": ["number"], "expectedFocus": ["trace"] },
+    { "id": "bare-ordinal", "text": "1st", "group": "no-final-punctuation", "tags": ["ordinal", "final-voiceless-stop"], "expectedFocus": ["trace"] },
+    { "id": "bare-money", "text": "$1.01", "group": "no-final-punctuation", "tags": ["money", "final-voiceless-stop"], "expectedFocus": ["trace"] },
+    { "id": "bare-abbreviation", "text": "Mr", "group": "no-final-punctuation", "tags": ["abbreviation", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "bare-letter", "text": "B", "group": "no-final-punctuation", "tags": ["letter"], "expectedFocus": ["trace"] },
+    { "id": "bare-letter-a", "text": "A", "group": "no-final-punctuation", "tags": ["letter"], "expectedFocus": ["trace"] },
+    { "id": "bare-after-sentence", "text": "He left. Then he sat", "group": "no-final-punctuation", "tags": ["words", "final-voiceless-stop"], "expectedFocus": ["trace"] },
+    { "id": "bare-trailing-space", "text": "cat ", "group": "no-final-punctuation", "tags": ["word", "final-voiceless-stop"], "expectedFocus": ["trace"] }
+  ]
+}

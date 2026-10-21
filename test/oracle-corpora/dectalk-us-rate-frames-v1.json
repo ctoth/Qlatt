@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-rate-frames-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "fox-dog-320", "rate": 320, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate", "tags": ["below-350"], "expectedFocus": ["trace"] },
+    { "id": "fox-dog-350", "rate": 350, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate", "tags": ["glottis-fast-rate"], "expectedFocus": ["trace"] },
+    { "id": "fox-dog-450", "rate": 450, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate", "tags": ["glottis-fast-rate"], "expectedFocus": ["trace"] },
+    { "id": "fox-dog-550", "rate": 550, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate", "tags": ["glottis-fast-rate"], "expectedFocus": ["trace"] }
+  ]
+}

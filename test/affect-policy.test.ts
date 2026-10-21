@@ -1,10 +1,15 @@
 import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { resolveAffectPreset } from "../src/input/affect";
 import { affectDegree, parseAffectPresets } from "../src/input/affect-presets";
 
 function document() {
-  return load(readFileSync("public/rules/affect/presets.yaml", "utf8")) as {
+  const source = readFileSync(
+    "public/rules/frontends/qlatt-english/policy/affect-presets.yaml",
+    "utf8",
+  );
+  return load(source) as {
     degree: { points: number[][]; citations: string[] };
     variants: Record<string, Record<string, string>>;
     presets: {
@@ -18,6 +23,21 @@ function document() {
 }
 
 describe("affect policy validation", () => {
+  it("preserves own names that overlap object prototype properties", () => {
+    const data = document();
+    const preset = data.presets[0];
+    data.presets = [
+      { ...preset, name: "__proto__" },
+      { ...preset, name: "toString" },
+    ];
+    data.variants = JSON.parse('{"constructor":{"male":"__proto__","female":"toString"}}');
+    const library = parseAffectPresets(data);
+    expect(Object.getPrototypeOf(library.presets)).toBeNull();
+    expect(Object.getPrototypeOf(library.variants)).toBeNull();
+    expect(resolveAffectPreset(library, "constructor", "male").name).toBe("__proto__");
+    expect(resolveAffectPreset(library, "constructor", "female").name).toBe("toString");
+    expect(() => resolveAffectPreset(library, "hasOwnProperty")).toThrow(/Unknown affect/);
+  });
   it("uses the declared curve, including intermediate knots and endpoint clamping", () => {
     const data = document();
     data.degree.points = [
@@ -36,7 +56,7 @@ describe("affect policy validation", () => {
   it("accepts explicit variant targets that do not follow the old naming convention", () => {
     const data = document();
     data.variants.custom = { male: "happy", female: "sad" };
-    expect(parseAffectPresets(data).variants.get("custom")?.get("male")).toBe("happy");
+    expect(parseAffectPresets(data).variants.custom?.male).toBe("happy");
   });
 
   it("rejects duplicate names", () => {

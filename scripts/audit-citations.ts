@@ -22,8 +22,7 @@ export function auditDocument(file: string, document: unknown): Entry[] {
       let status: Entry["status"];
       if (!["rules", "realize", "realize_each"].includes(category) || !isPlainObject(value)) {
         status = "no-slot";
-      }
-      else if (!("citations" in value)) status = "absent";
+      } else if (!("citations" in value)) status = "absent";
       else {
         const citations = value.citations;
         status =

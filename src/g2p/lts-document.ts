@@ -7,12 +7,20 @@
  * kilobytes, so the three share one parsed document.
  */
 
-import { loadYamlDocumentSync } from "../yaml-loader";
+import { loadYamlDocumentSync, loadYamlSourceSync } from "../yaml-loader";
 
 const documents = new Map<string, unknown>();
 
 /** The parsed letter-to-sound file at `path`: a rule list (YAML) or a compiled table (JSON). */
 export function ltsDocumentAt(path: string): unknown {
-  if (!documents.has(path)) documents.set(path, loadYamlDocumentSync<unknown>(path));
+  if (!documents.has(path)) {
+    const document: unknown = path.endsWith(".json")
+      ? JSON.parse(loadYamlSourceSync(path))
+      : loadYamlDocumentSync<unknown>(path);
+    if (document === null || document === undefined) {
+      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
+    }
+    documents.set(path, document);
+  }
   return documents.get(path);
 }

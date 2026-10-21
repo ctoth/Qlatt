@@ -6,7 +6,9 @@ browser warmup runs the synchronous utterance (#141, partial delivery).
 # State
 
 Isolated from #426 final d8e8cd00; #426 merged as d9f7d4e4. Implementation complete;
-hosted CI and Claude review pending. Production/caller diff: 251 additions /
+all seven hosted checks passed on 925c1093. Claude reviewed the full seven-file
+PR range; supervisor independently verified the report and review gate.
+Review response complete, awaiting final-head CI. Initial production/caller diff: 251 additions /
 63 removals; existing fixtures add 86 lines. No local CI.
 
 # Decisions and why
@@ -31,7 +33,15 @@ closures use unique paths over fake fetch/XHR; assertions cover no blocking
 requests, sync cache identity, nested missing-resource errors, DECtalk's absent
 shared roles and selected open-registry voices without compile rule fields.
 
+Accepted review corrections: the probe had gained an unrequested configError
+exit condition; removed it while retaining the report, network failure and timeout
+behavior. Updated builder/test comments that still described manifest-driven
+browser warmup. The cache's generic host-priming capability remains available.
+Claude found no correctness defects in resource acquisition. Serial acquisition
+differs from the former parallel priming; no latency measurement establishes a
+regression, so this response adds no concurrency machinery.
+
 # Next step
 
-Publish for hosted CI and Claude; respond to findings. Supervisor owns merge;
+Push review response and await final hosted CI. Supervisor owns merge;
 #141 remains open.

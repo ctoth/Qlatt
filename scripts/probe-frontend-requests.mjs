@@ -13,8 +13,8 @@
 //     and any paired experiment configuration error.
 //
 // It shows whether a browser finds every document a frontend's inventory is
-// made of. Exits 1 when a request failed, the paired config failed,
-// or a warm-up did not finish (a "no such file" answer taken
+// made of. Exits 1 when a request failed or a warm-up did not finish
+// (a "no such file" answer taken
 // for the file's content shows up as that).
 //
 // Usage (dev server running, e.g. `npx vite --port 8137`):
@@ -112,7 +112,6 @@ for (const frontendId of frontends) {
   console.log(
     `${frontendId}: unprimed=${JSON.stringify(report.unprimed)} configError=${JSON.stringify(report.configError)}`,
   );
-  if (report.configError) ok = false;
 }
 await browser.close();
 

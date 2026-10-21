@@ -3,8 +3,8 @@
  * and the primed-resource cache the synchronous loaders read
  * (src/sync-resource-cache.ts).
  *
- * A manifest lists what a frontend's synchronous pipeline reads when loaded
- * cold, so a page can fetch it all in parallel before the first Speak. If
+ * A manifest audits what a frontend's synchronous pipeline reads when loaded
+ * cold. Browser warmup uses the asynchronous resource owner instead. If
  * this test fails after a frontend gained or lost a resource (an include, a
  * voice file, a table), regenerate:
  *

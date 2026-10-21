@@ -2459,7 +2459,12 @@ transcription:
     max_span: 0
     joiners: []
     citations:
-      - "DECtalk 4.63 LTS/ls_task.c:2161: search the written word; do not join separately written words"
+      - "Engineering compatibility: preserve disabled multi-token compound recovery; DECtalk 4.63 LTS/ls_task.c:2161 is the lookup-as-written reference, not a nonjoining guarantee"
+  # Existing recorded say.exe observation (not remeasured for this migration):
+  # "Plan n is ready." has EH N, "Plan 'n is ready." EN;
+  # "Plan em is ready." has EH M, "Plan 'em is ready." IX M
+  # (DECtalk 4.63 say.exe symbols into ph_sort). The candidate order therefore
+  # does not prepend an apostrophe to find another dictionary entry.
   dictionary_candidates:
     order: [exact, strip-alternate-suffix]
     citations:
@@ -2477,15 +2482,11 @@ transcription:
   # [:phoneme on]: the mode starts off (CMD/Cmd_init.c:87) and the parser
   # tests it before reading a bracket as phonemes (CMD/cm_pars.c:361).
   diagnostic_symbol_input: false
-  # The dictionary is searched by the written word: "n" does not find "'n",
-  # "em" does not find "'em". Measured on DECtalk 4.63 say.exe (symbols into
-  # ph_sort): "Plan n is ready." has EH N, "Plan 'n is ready." EN;
-  # "Plan em is ready." has EH M, "Plan 'em is ready." IX M.
-  elided_apostrophe_lookup: false
   # A word that misses as written is looked up again without the apostrophes
   # at its ends (LTS/ls_task.c:2161 as written, 2244-2325 strip, 2477-2478
   # again).
-  #
+  elided_apostrophe_lookup: false
+
   # What this frontend's lexicon is, for the decision record of each word.
   sources:
     number:

@@ -207,6 +207,78 @@ function buildAspirationFixture(): {
 }
 
 describe("HRG lowering control windows", () => {
+  it.each([
+    { bounds: { prefix_ms: 200 }, requested: { startMs: 0, endMs: 200 } },
+    { bounds: { suffix_ms: 200 }, requested: { startMs: -46, endMs: 154 } },
+    { bounds: { start_ms: -10, end_ms: 200 }, requested: { startMs: -10, endMs: 200 } },
+    { bounds: { start_ratio: -0.5, end_ratio: 2 }, requested: { startMs: -77, endMs: 308 } },
+  ])("reports one shortened authored window: $bounds", ({ bounds, requested }) => {
+    const render = (windowBounds: Partial<Record<string, number>>) => {
+      const { utterance, release, vowel } = buildAspirationFixture();
+      const write = release.set(
+        "control_windows",
+        [{ ...windowBounds, target: "next", fields: { AH: 48 }, tag: "onset" }],
+        META,
+      );
+      const lowered = lowerToFrames(utterance, POLICY);
+      const warnings = utterance.diagnostics
+        .getEntries()
+        .filter((entry) => entry.code === "HRG_LOWER_CONTROL_WINDOW_LIMITED");
+      return { lowered, warnings, write, release, vowel };
+    };
+    const clipped = render(bounds);
+    const intact = render({ start_ms: 0, end_ms: 154 });
+    expect(clipped.warnings).toHaveLength(1);
+    expect(clipped.warnings[0]).toMatchObject({
+      level: "warn",
+      data: {
+        sourceItemId: clipped.release.id,
+        targetItemId: clipped.vowel.id,
+        windowIndex: 0,
+        tag: "onset",
+        requested,
+        applied: { startMs: 0, endMs: 154 },
+        reason: "target_interval_bounds",
+        fields: ["AH"],
+        parents: [clipped.write.decisionId],
+        citations: META.citations,
+      },
+    });
+    expect(intact.warnings).toHaveLength(0);
+    expect(clipped.lowered.frames).toEqual(intact.lowered.frames);
+    const onset = clipped.lowered.frames.find((frame) => frame.segmentId === clipped.vowel.id);
+    expect(onset?.time).toBeCloseTo((19.2 + 83 + 7) / 1000, 9);
+    expect(onset?.params.AH).toBe(48);
+    expect(onset?.provenance?.AH).toBe(clipped.write.decisionId);
+  });
+
+  it("keeps initial-silence access and empty-window reporting", () => {
+    const { utterance, closure, release } = buildAspirationFixture();
+    release.set("control_windows", [], META);
+    closure.set(
+      "control_windows",
+      [
+        { start_ms: -19.2, end_ms: 10, fields: { AH: 12 } },
+        { prefix_ms: 0, fields: { AH: 99 } },
+      ],
+      META,
+    );
+    const lowered = lowerToFrames(utterance, POLICY);
+    expect(
+      utterance.diagnostics
+        .getEntries()
+        .filter((entry) => entry.code === "HRG_LOWER_CONTROL_WINDOW_LIMITED"),
+    ).toHaveLength(0);
+    expect(
+      utterance.diagnostics
+        .getEntries()
+        .filter((entry) => entry.code === "HRG_LOWER_CONTROL_WINDOW_EMPTY"),
+    ).toHaveLength(1);
+    const onset = lowered.frames.find((frame) => Math.abs(frame.time - 0.0192) <= 1e-9);
+    expect(onset?.time).toBeCloseTo(0.0192, 9);
+    expect(onset?.params.AH).toBe(12);
+  });
+
   it("matches the captured DECtalk next-target aspiration window events", () => {
     const { utterance, vowel, windowDecisionId } = buildAspirationFixture();
 

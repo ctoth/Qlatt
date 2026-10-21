@@ -5,8 +5,9 @@ Make the dictionary verification harness use the selected frontend's declared le
 # State
 
 Fresh isolated branch from fcbb001d. Full script, dictionary loader and path
-helper read; implementation and owned diff inspected. Publishing for hosted CI
-and Claude review. No local CI ran.
+helper read; implementation and owned diff inspected. PR #406 published; Claude
+completed its full review with no actionable defects. Accepted without code
+changes. No local CI ran.
 
 # Decisions and why
 
@@ -23,4 +24,5 @@ that reporting behavior and do not replace the raw read with the parsed cache.
 
 # Next step
 
-Publish for hosted CI and Claude review; supervisor owns merge. #141 stays open.
+Await final-head hosted CI and supervisor verification; supervisor owns merge.
+#141 stays open.

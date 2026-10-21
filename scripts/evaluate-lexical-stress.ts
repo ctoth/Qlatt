@@ -9,8 +9,6 @@ import { pronounce } from "../src/g2p";
 import { applyLtsRules } from "../src/g2p/lts-engine";
 import { getStressHintForWord } from "../src/g2p/morphology";
 import { type StressHint, stressPronunciation } from "../src/g2p/stress";
-import { loadStressPolicy } from "../src/g2p/stress-policy";
-import { loadPhonotacticsSync } from "../src/g2p/syllabify";
 
 // Chosen before the first evaluation run; no accuracy-based selection or removal.
 // Families describe the spelling/input challenge, not an inferred lexical category.
@@ -31,9 +29,8 @@ export const evaluationWords = {
 } as const;
 
 const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
-const policyPath = resources.stressPolicyPath;
 const ltsPath = resources.ltsPath;
-const vowels = new Set(loadPhonotacticsSync(loadStressPolicy(policyPath).phonotacticsPath).vowels);
+const vowels = new Set(resources.stress.phonotactics.vowels);
 const stressPattern = (phones: string[]) =>
   phones
     .filter((phone) => /[012]$/.test(phone))
@@ -71,8 +68,8 @@ export function evaluateLexicalStress() {
         .map((key) => dictionary[key].split(/\s+/));
       if (!variants.length) throw new Error(`Missing frozen evaluation reference: ${word}`);
       const phones = variants[0].map((phone) => phone.replace(/[012]$/, ""));
-      const hint = getStressHintForWord(word, resources.morphologyPath);
-      const reference = stressPronunciation(phones, { policyPath, wordId: word, hint });
+      const hint = getStressHintForWord(word, resources.morphology.path);
+      const reference = stressPronunciation(phones, { stress: resources.stress, wordId: word, hint });
       // No whole-word OR root dictionary access: both old and new use the same bare LTS phones.
       const generated = pronounce(word, () => null, resources);
       if (generated.source !== "lts-rules")

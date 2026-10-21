@@ -1065,8 +1065,8 @@ function buildTextToKlattTrackDetailed(
     compiledSpec: spec,
     transcriptionConfig,
     ltsPath: resources.ltsPath,
-    morphologyPath: resources.morphologyPath,
-    stressPolicyPath: resources.stressPolicyPath,
+    morphology: resources.morphology,
+    stress: resources.stress,
     diagnostics: options.diagnostics,
     dictionaryMap: dictionary,
   });

@@ -1,5 +1,7 @@
 import type { Utterance } from "./declarative-frontend/hrg";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
+import type { MorphologyContext } from "./g2p/morphology";
+import type { StressContext } from "./g2p/stress-policy";
 import type { ProvenanceCollector } from "./provenance";
 
 /** One phoneme selected by transcription before inventory materialization. */
@@ -161,8 +163,9 @@ export type TranscriptionOptions = {
   provenance?: ProvenanceCollector | null;
   transcriptionConfig?: TranscriptionConfig;
   ltsPath?: string;
-  morphologyPath?: string;
-  stressPolicyPath?: string;
+  /** Explicit parsed resource overrides; paths alone cannot select dependencies. */
+  morphology?: MorphologyContext;
+  stress?: StressContext;
   dictLookup?: (word: string) => string[] | null;
   dictionaryMap?: Record<string, string | undefined>;
   utterance?: Utterance;

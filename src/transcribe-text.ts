@@ -672,8 +672,8 @@ export function transcribeText(
   const compiledSpec = options.compiledSpec;
   const resources = loadFrontendResources(compiledSpec);
   const ltsPath = options.ltsPath ?? resources.ltsPath;
-  const morphologyPath = options.morphologyPath ?? resources.morphologyPath;
-  const stressPolicyPath = options.stressPolicyPath ?? resources.stressPolicyPath;
+  const morphology = options.morphology ?? resources.morphology;
+  const stress = options.stress ?? resources.stress;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
   const effectiveDictLookup =
@@ -772,8 +772,8 @@ export function transcribeText(
         effectiveDictLookup,
         {
           ltsPath,
-          morphologyPath,
-          stressPolicyPath,
+          morphology,
+          stress,
           atWrittenPunctuation,
           ...(endMark === undefined ? {} : { endMark }),
           ...(endMarkSent ? { endMarkSent } : {}),
@@ -882,8 +882,8 @@ export function transcribeText(
             ? ((consumedWords === 1 ? inClause.get(index) : undefined) ??
               pronounce(sourceWord, effectiveDictLookup, {
                 ltsPath,
-                morphologyPath,
-                stressPolicyPath,
+                morphology,
+                stress,
               }))
             : {
                 phonemes: symbolPronunciation,

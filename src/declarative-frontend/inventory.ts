@@ -1,7 +1,9 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
-import { loadStressPolicy } from "../g2p/stress-policy";
+import type { MorphologyContext } from "../g2p/morphology";
+import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
+import type { PhonotacticsData } from "../g2p/syllabify";
 import {
   type AffectLibrary,
   parseAffectPresets,
@@ -71,8 +73,8 @@ export type FrontendResources = {
    */
   inventoryDocuments: readonly string[];
   ltsPath: string;
-  morphologyPath: string;
-  stressPolicyPath: string;
+  morphology: MorphologyContext;
+  stress: StressContext;
   /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
   lexicon?: { path: string; dictionary: CmuDictionary };
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
@@ -816,6 +818,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
         FRONTEND_ASSET_CACHE.set(value, load(value));
       }
     } catch (cause) {
+      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
       throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
     }
     return value;
@@ -824,17 +827,23 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const ltsPath = requireAsset(spec.lts_path, "lts_path", ltsDocumentAt);
   const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
   const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
-  requireAsset(
+  const morphologyPhonotacticsPath = requireAsset(
     isPlainObject(morphology) ? morphology.phonotactics_path : undefined,
     "morphology.phonotactics_path",
   );
-  const stressPolicyPath = requireAsset(spec.stress_policy_path, "stress_policy_path");
-  const stress = FRONTEND_ASSET_CACHE.get(stressPolicyPath);
-  requireAsset(
-    isPlainObject(stress) ? stress.phonotactics_path : undefined,
-    "stress_policy.phonotactics_path",
-  );
-  loadStressPolicy(stressPolicyPath);
+  const stressPolicyPath = requireAsset(spec.stress_policy_path, "stress_policy_path", (path) => {
+    const raw = loadYamlDocumentSync(path);
+    const phonotacticsPath = requireAsset(
+      isPlainObject(raw) ? raw.phonotactics_path : undefined,
+      "stress_policy.phonotactics_path",
+    );
+    const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
+    try {
+      return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+    } catch (cause) {
+      throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
+    }
+  });
   const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
   if (!Array.isArray(normalization.phases) || !normalization.phases.length)
     throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
@@ -913,8 +922,11 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     inventoryDocuments:
       phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
     ltsPath,
-    morphologyPath,
-    stressPolicyPath,
+    morphology: {
+      path: morphologyPath,
+      phonotactics: FRONTEND_ASSET_CACHE.get(morphologyPhonotacticsPath) as PhonotacticsData,
+    },
+    stress: FRONTEND_ASSET_CACHE.get(stressPolicyPath) as StressContext,
     ...(lexiconPath === undefined
       ? {}
       : {

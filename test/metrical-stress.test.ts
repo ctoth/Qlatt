@@ -1,9 +1,9 @@
 import { expect, it } from "vitest";
 import type { StressSyllable } from "../src/g2p/lexical-stress-types";
 import { assignMetricalStress } from "../src/g2p/metrical-stress";
-import { loadStressPolicy } from "../src/g2p/stress-policy";
+import { resources } from "./g2p-fixture";
 
-const policy = loadStressPolicy("/rules/frontends/qlatt-english/stress-policy.yaml");
+const policy = resources.stress.policy;
 const parental: StressSyllable[] = [
   { id: "parental:s0", nucleus: "AH", long: false, coda: [], inherited: null },
   { id: "parental:s1", nucleus: "EH", long: false, coda: ["N"], inherited: null },

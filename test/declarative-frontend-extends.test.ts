@@ -650,9 +650,11 @@ describe("foreach parser error locations", () => {
       });
       const resource = join(dir, "pipeline.yaml").replace(/\\/g, "/");
       const authoredPath = ["rules", "fixture_foreach", "apply", 0, "dispatch", 1, ...tail];
-      const span = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource)).find(
-        (entry) => JSON.stringify(entry.value.path) === JSON.stringify(authoredPath),
-      )?.[position];
+      const span = yamlDocumentSpans(
+        parseYamlString(readFileSync(resource, "utf8"), resource),
+      ).find((entry) => JSON.stringify(entry.value.path) === JSON.stringify(authoredPath))?.[
+        position
+      ];
       for (const load of [loadRulepackSpecFromPath, preloadRulepackSpecFromPath]) {
         let caught: unknown;
         try {

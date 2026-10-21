@@ -12,6 +12,8 @@ Only foreach's five existing throws carry paths. The expansion already knows aut
 
 # Surprises
 
+Hosted quality job119194476274 requested one fixture lookup wrapping correction; applied exactly. No local CI or unrelated existing-data warning change.
+
 Other agents own normalization moves and resources; preserve their work.
 
 # Next step

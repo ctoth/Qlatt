@@ -26,6 +26,11 @@ Applied hosted job119236825300's exact chained-spy formatter layout.
 Shard2 then exposed the same cloned-spec assumption in two valid DECtalk rate
 fixtures. Both now compile their configured clone before resolver delivery;
 their policies, real inventory and downstream output assertions stay unchanged.
+The compiler consumes authored inputs: the initial fixture correction retained
+generated policy.voice and shared mutable policy objects. Replacement CI exposed
+reserved-voice and readonly-policy failures. Each configured request now compiles
+a fresh clone with only generated policy.voice removed, letting the existing
+voice compiler regenerate it while later fixture mutations remain observable.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads

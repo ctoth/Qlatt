@@ -47,7 +47,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
+import { parseYamlString } from "../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const frontendDir = path.join(repoRoot, "public", "rules", "frontends", "dectalk-english");
@@ -488,7 +488,7 @@ const pending: { file: string; edited: string }[] = [];
 for (const file of yamlFiles(frontendDir)) {
   const relative = path.relative(repoRoot, file).replace(/\\/g, "/");
   const source = fs.readFileSync(file, "utf8");
-  const document = yaml.load(source);
+  const document = parseYamlString(source, file);
   const before: Leaf[] = [];
   leaves(document, "", before);
 
@@ -589,7 +589,7 @@ for (const file of yamlFiles(frontendDir)) {
   // Nothing but the rewritten expressions may differ, and each must be what
   // the rewrite of the old value is (line breaks apart).
   const after: Leaf[] = [];
-  const reloaded = yaml.load(edited);
+  const reloaded = parseYamlString(edited, file);
   leaves(reloaded, "", after);
   const problems: string[] = [];
   if (JSON.stringify(skeleton(reloaded)) !== JSON.stringify(skeleton(document))) {

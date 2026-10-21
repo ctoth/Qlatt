@@ -32,7 +32,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { load as loadYaml } from "js-yaml";
+import { parseYamlString } from "../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const frontendsDir = path.join(repoRoot, "public", "rules", "frontends");
@@ -71,8 +71,10 @@ export function frontendIds(): string[] {
  * is not recorded as the frontend's.
  */
 function registeredVoices(frontendId: string): (string | undefined)[] {
-  const spec = loadYaml(
-    fs.readFileSync(path.join(frontendsDir, frontendId, "frontend.yaml"), "utf8"),
+  const frontendPath = path.join(frontendsDir, frontendId, "frontend.yaml");
+  const spec = parseYamlString(
+    fs.readFileSync(frontendPath, "utf8"),
+    frontendPath,
   ) as { speakers?: { default?: unknown; voices?: unknown } } | null;
   const voices = [spec?.speakers?.default, ...[spec?.speakers?.voices ?? []].flat()].filter(
     (voice): voice is string => typeof voice === "string",

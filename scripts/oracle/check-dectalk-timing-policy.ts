@@ -94,10 +94,9 @@ const frontendPath = path.join(
   "dectalk-english",
   "frontend.yaml",
 );
-const frontend = parseYamlString(
-  fs.readFileSync(frontendPath, "utf8"),
-  frontendPath,
-) as { parameters: { policy: { timing: Record<string, unknown> } } };
+const frontend = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
+  parameters: { policy: { timing: Record<string, unknown> } };
+};
 const timing = frontend.parameters.policy.timing;
 
 const differences: string[] = [];

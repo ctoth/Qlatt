@@ -72,10 +72,9 @@ export function frontendIds(): string[] {
  */
 function registeredVoices(frontendId: string): (string | undefined)[] {
   const frontendPath = path.join(frontendsDir, frontendId, "frontend.yaml");
-  const spec = parseYamlString(
-    fs.readFileSync(frontendPath, "utf8"),
-    frontendPath,
-  ) as { speakers?: { default?: unknown; voices?: unknown } } | null;
+  const spec = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
+    speakers?: { default?: unknown; voices?: unknown };
+  } | null;
   const voices = [spec?.speakers?.default, ...[spec?.speakers?.voices ?? []].flat()].filter(
     (voice): voice is string => typeof voice === "string",
   );

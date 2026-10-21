@@ -87,10 +87,10 @@ const inventoryPath = path.join(
   "dectalk-english",
   "inventory.yaml",
 );
-const inventoryDoc = parseYamlString(fs.readFileSync(inventoryPath, "utf8"), inventoryPath) as Record<
-  string,
-  unknown
->;
+const inventoryDoc = parseYamlString(
+  fs.readFileSync(inventoryPath, "utf8"),
+  inventoryPath,
+) as Record<string, unknown>;
 // The inventory's target table is the top-level map that holds phoneme entries.
 const targets = (Object.values(inventoryDoc).find(
   (value) => value != null && typeof value === "object" && "EY1" in (value as object),

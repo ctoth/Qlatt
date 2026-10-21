@@ -18,8 +18,11 @@ import { parseInventorySymbol } from "./declarative-frontend/inventory";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce, pronounceClause } from "./g2p";
+import { isLtsTableDocument } from "./g2p/table-lts-pronounce";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
 import {
+  DICTIONARY_CANDIDATE_OPERATIONS,
+  type DictionaryCandidateOperation,
   LEXICON_SOURCE_KEYS,
   type LexiconSource,
   type LexiconSourceKey,
@@ -27,19 +30,6 @@ import {
   type TranscriptionOptions,
   type TranscriptionToken,
 } from "./tts-frontend-types";
-
-// ---------------------------------------------------------------------------
-// Citation constants for provenance tracking
-// ---------------------------------------------------------------------------
-
-const SYMBOL_PRONUNCIATION_CITATION =
-  "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
-const LETTER_NAME_PRONUNCIATION_CITATION =
-  "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
-const NUMBER_PRONUNCIATION_CITATION =
-  "DECtalk 4.63 LTS/l_us_pr1.c (ls_proc_do_number, ls_proc_do_4_digits) with the phone lists of LTS/l_us_con.c";
-const PHONEMIC_PRONUNCIATION_CITATION =
-  "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on as phonemes) with the character table usa_ascky_rev of INCLUDE/usa_phon.tab:70";
 
 const TOKEN_SCHEMA = {
   itemTypes: {
@@ -107,6 +97,10 @@ type OrthographyInputToken = {
 };
 
 type RequiredTranscriptionTables = {
+  compoundRecovery: NonNullable<TranscriptionConfig["compound_recovery"]>;
+  dictionaryCandidates: DictionaryCandidateOperation[];
+  emptyPronunciation: NonNullable<TranscriptionConfig["empty_pronunciation"]>;
+  diagnosticDelimiters: string;
   diagnosticSymbols: Record<string, string[]>;
   /** False when the frontend turns phoneme-symbol input off. */
   symbolInput: boolean;
@@ -127,43 +121,40 @@ type RequiredTranscriptionTables = {
 /**
  * Build a dictionary lookup adapter over a flat word -> "ARPABET ..." map.
  *
- * Generic: the same elision/apostrophe/trailing-`.`/alternate-pronunciation
- * candidate logic applies to ANY supplied dictionary map. No per-frontend
- * branches — only the backing map differs.
- *
- * Also handles alternate pronunciation entries like "read(1)".
+ * The selected transcription resource owns which candidate conventions apply
+ * and their order. CMU conventions are not assumed for every dictionary.
  */
 function makeDictLookup(
   map: Record<string, string | undefined>,
-  elidedApostrophe = true,
+  order: readonly DictionaryCandidateOperation[],
 ): DictLookup {
   return (word: string): string[] | null => {
     const lowerWord = word.toLowerCase();
-    const candidates: string[] = [lowerWord];
-
-    // Handle elided spellings where the dictionary key keeps leading apostrophe
-    // (e.g., "'cuse") but normalized input token may not ("cuse"). A frontend
-    // turns this off with `transcription.elided_apostrophe_lookup: false`.
-    if (elidedApostrophe && !lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
-    // Handle converse elision: input may omit or include trailing apostrophe.
-    if (elidedApostrophe) {
-      if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
-      if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
-    }
-    // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
-    // Not for a frontend that looks words up as written: its text rules keep
-    // the period on an abbreviation, and "sat" must not find "sat.".
-    if (elidedApostrophe && !lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
-
-    for (const candidate of candidates) {
-      const entry = map[candidate];
+    for (const operation of order) {
+      let candidate: string | undefined;
+      switch (operation) {
+        case "exact":
+          candidate = lowerWord;
+          break;
+        case "prepend-apostrophe":
+          if (!lowerWord.startsWith("'")) candidate = `'${lowerWord}`;
+          break;
+        case "append-apostrophe":
+          if (!lowerWord.endsWith("'")) candidate = `${lowerWord}'`;
+          break;
+        case "strip-trailing-apostrophe":
+          if (lowerWord.endsWith("'") && lowerWord.length > 1) candidate = lowerWord.slice(0, -1);
+          break;
+        case "append-period":
+          if (!lowerWord.endsWith(".")) candidate = `${lowerWord}.`;
+          break;
+        case "strip-alternate-suffix":
+          // Preserve the existing adapter's original-case alternate fallback.
+          if (word.includes("(")) candidate = word.replace(/\(\d+\)$/, "");
+          break;
+      }
+      const entry = candidate === undefined ? undefined : map[candidate];
       if (entry) return entry.split(" ");
-    }
-
-    // Handle alternate pronunciations like "read(1)" -> "read"
-    if (word.includes("(")) {
-      const base = map[word.replace(/\(\d+\)$/, "")];
-      if (base) return base.split(" ");
     }
     return null;
   };
@@ -259,9 +250,9 @@ function requireLexiconSources(
     const citation = (value as LexiconSource | undefined)?.citation;
     if (
       typeof name !== "string" ||
-      name.length === 0 ||
+      name.trim().length === 0 ||
       typeof citation !== "string" ||
-      citation.length === 0
+      citation.trim().length === 0
     ) {
       throw new Error(
         `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources.${key} needs a name and a citation`,
@@ -277,6 +268,60 @@ function requireTranscriptionTables(
 ): RequiredTranscriptionTables {
   if (!config || typeof config !== "object") {
     throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription config is required");
+  }
+  for (const key of [
+    "compound_recovery",
+    "dictionary_candidates",
+    "empty_pronunciation",
+    "diagnostic_symbol_delimiters",
+  ] as const) {
+    const entry = config[key];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${key} is required`);
+    }
+    const citations = requireStringArray(entry.citations, `${key}.citations`);
+    if (citations.some((citation) => !citation.trim())) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${key}.citations must not be blank`,
+      );
+    }
+  }
+  const compound = config.compound_recovery!;
+  if (
+    !Number.isInteger(compound.max_span) ||
+    compound.max_span < 0 ||
+    !Array.isArray(compound.joiners) ||
+    compound.joiners.some((joiner) => typeof joiner !== "string" || !joiner.length) ||
+    (compound.max_span >= 2 && compound.joiners.length === 0)
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.compound_recovery needs a nonnegative integer max_span and nonempty joiners when enabled",
+    );
+  }
+  const candidates = requireStringArray(
+    config.dictionary_candidates!.order,
+    "dictionary_candidates.order",
+  );
+  if (
+    candidates.some(
+      (operation) => !(DICTIONARY_CANDIDATE_OPERATIONS as readonly string[]).includes(operation),
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.dictionary_candidates.order has an unknown operation",
+    );
+  }
+  const empty = config.empty_pronunciation!;
+  if (!Number.isFinite(empty.duration_ms) || empty.duration_ms <= 0) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.empty_pronunciation.duration_ms must be finite and positive",
+    );
+  }
+  const delimiters = config.diagnostic_symbol_delimiters!.characters;
+  if (typeof delimiters !== "string" || delimiters.length === 0) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.diagnostic_symbol_delimiters.characters must be nonempty",
+    );
   }
   const symbolInput = config.diagnostic_symbol_input;
   if (symbolInput !== undefined && typeof symbolInput !== "boolean") {
@@ -333,6 +378,10 @@ function requireTranscriptionTables(
     );
   }
   return {
+    compoundRecovery: compound,
+    dictionaryCandidates: candidates as DictionaryCandidateOperation[],
+    emptyPronunciation: empty,
+    diagnosticDelimiters: delimiters,
     wordStretchEndCharacters: stretchEnd ?? "",
     ...(stretchLimits
       ? { wordStretchLimits: [stretchLimits[0] as number, stretchLimits[1] as number] as const }
@@ -433,7 +482,11 @@ function getDiagnosticSymbolPronunciationWithTables(
   word: string,
   tables: RequiredTranscriptionTables,
 ): string[] | null {
-  const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
+  let normalized = word.toLowerCase();
+  while (normalized && tables.diagnosticDelimiters.includes(normalized[0]!))
+    normalized = normalized.slice(1);
+  while (normalized && tables.diagnosticDelimiters.includes(normalized.at(-1)!))
+    normalized = normalized.slice(0, -1);
   const phones = tables.diagnosticSymbols[normalized];
   return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
 }
@@ -678,7 +731,7 @@ export function transcribeText(
   const transcriptionTables = requireTranscriptionTables(cfg);
   const effectiveDictLookup =
     options.dictLookup ??
-    makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup);
+    makeDictLookup(effectiveDictMap, transcriptionTables.dictionaryCandidates);
   if (options.dictionaryMap === undefined && options.dictLookup === undefined) {
     const frontendId = options.frontendId ?? "unspecified";
     options.diagnostics?.info(
@@ -690,10 +743,20 @@ export function transcribeText(
 
   // Each selected resource declares its source; another frontend's names
   // cannot supply provenance for it. LTS and morphology are required resources.
+  const table =
+    lts.path.endsWith(".json") && isLtsTableDocument(lts.document) ? lts.document : undefined;
   const undeclared = [
     ...(resources.lexicon ? ["dictionary"] : []),
     "lts-rules",
     "morphology",
+    "spelling",
+    ...(transcriptionTables.symbolInput ? ["diagnostic-symbol"] : []),
+    ...(table?.numberPhones ? ["number"] : []),
+    ...(table?.phonemeCharacters &&
+    table.phonemicMarks?.[0] !== undefined &&
+    table.phonemicMarks?.[1] !== undefined
+      ? ["phonemic"]
+      : []),
   ].filter((key) => transcriptionTables.sources[key as LexiconSourceKey] === undefined);
   if (undeclared.length > 0) {
     throw new Error(
@@ -831,14 +894,8 @@ export function transcribeText(
       let consumedWords = 1;
       const parentDecisionId = inputToken.parentDecisionId;
 
-      // Recover CMUdict compounds after normalization splits tokens.
-      // Citation anchor: CMUdict orthography includes hyphenated and apostrophe-linked compounds.
-      // Not for a frontend that looks a word up as it is written
-      // (elided_apostrophe_lookup: false): its text rules keep a written
-      // hyphen on the word, and two words written apart are two words
-      // (DECtalk 4.63 speaks "zip code" as two words and "zipcode" as its
-      // dictionary's one).
-      const maxCompoundSpan = transcriptionTables.elidedApostropheLookup ? 4 : 0;
+      // Recover only the compounds declared by the selected transcription policy.
+      const maxCompoundSpan = transcriptionTables.compoundRecovery.max_span;
       for (
         let span = Math.min(maxCompoundSpan, orthographyWords.length - index);
         span >= 2;
@@ -854,7 +911,9 @@ export function transcribeText(
         }
         const partWords = parts.map((part) => part.word);
         if (partWords.every((part) => hasDirectDictionaryEntry(part))) continue;
-        const candidates = [partWords.join("-"), partWords.join("'")];
+        const candidates = transcriptionTables.compoundRecovery.joiners.map((joiner) =>
+          partWords.join(joiner),
+        );
         const match = candidates.find((candidate) => hasDirectDictionaryEntry(candidate));
         if (match) {
           sourceWord = match;
@@ -899,25 +958,21 @@ export function transcribeText(
       let citations: string[];
       if (letterPronunciation != null) {
         decisionType = "letter_name_pronunciation_selected";
-        // A frontend that declares its spelling source names the letters from
-        // it; the shared letter names are the default.
-        const declared = cfg?.sources?.spelling;
-        reason = declared
-          ? `Used ${declared.name} for '${sourceWord}' via ${inputToken.pronunciationKey ?? ""}`
-          : `Used letter-name pronunciation for '${sourceWord}' via ${inputToken.pronunciationKey}`;
-        citations = [declared ? declared.citation : LETTER_NAME_PRONUNCIATION_CITATION];
+        const declared = lexiconSource("spelling");
+        reason = `Used ${declared.name} for '${sourceWord}' via ${inputToken.pronunciationKey ?? ""}`;
+        citations = [declared.citation];
       } else if (symbolPronunciation != null) {
         decisionType = "symbol_pronunciation_selected";
         reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;
-        citations = [SYMBOL_PRONUNCIATION_CITATION];
+        citations = [lexiconSource("diagnostic-symbol").citation];
       } else if (pronResult.source === "number") {
         decisionType = "number_pronunciation_selected";
         reason = `Spoke the digits '${sourceWord}' as ${(pronResult.parts ?? []).length.toString()} words from the frontend's number phone lists`;
-        citations = [NUMBER_PRONUNCIATION_CITATION];
+        citations = [lexiconSource("number").citation];
       } else if (pronResult.source === "phonemic") {
         decisionType = "phonemic_pronunciation_selected";
         reason = `Spoke the phonemic text '${sourceWord.slice(1, -1)}' as the phones its characters name: ${pronResult.phonemes.join(" ")}`;
-        citations = [PHONEMIC_PRONUNCIATION_CITATION];
+        citations = [lexiconSource("phonemic").citation];
       } else if (pronResult.source === "dictionary") {
         const used = lexiconSource("dictionary");
         decisionType = "dictionary_pronunciation_selected";
@@ -970,7 +1025,10 @@ export function transcribeText(
         type: decisionType,
         subject: `word:${sourceWord}`,
         reason,
-        citations,
+        citations:
+          consumedWords > 1
+            ? [...citations, ...transcriptionTables.compoundRecovery.citations]
+            : citations,
         parents:
           typeof parentDecisionId === "string" && parentDecisionId.length > 0
             ? [parentDecisionId]
@@ -1183,13 +1241,13 @@ export function transcribeText(
           word: sourceWord,
           token: inputToken.tokenId,
           applied: resources.inventory.silence_symbol,
-          duration: 50,
+          duration: transcriptionTables.emptyPronunciation.duration_ms,
         });
         flatPhonemeList.push({
           phoneme: resources.inventory.silence_symbol,
           stress: null,
           sourceTokenId: inputToken.tokenId,
-          duration: 50,
+          duration: transcriptionTables.emptyPronunciation.duration_ms,
           word: sourceWord,
           _pronDecisionId: pronunciationDecision?.id,
         });
@@ -1206,7 +1264,11 @@ export function transcribeText(
   if (emptyPronunciations.length)
     options.diagnostics?.warn(
       "Empty pronunciations represented as silence",
-      { count: emptyPronunciations.length, affected: emptyPronunciations },
+      {
+        count: emptyPronunciations.length,
+        affected: emptyPronunciations,
+        citations: transcriptionTables.emptyPronunciation.citations,
+      },
       "EMPTY_PRONUNCIATION_SILENCE",
     );
   joinPhonemicText(flatPhonemeList, provenance);

@@ -1086,7 +1086,7 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     maps: {
       // Overrides a base map whole: the base's other five entries are gone.
       phoneme_release_map: { P_CL: "P_REL" },
-      fixture_map: { P_CL: "p" },
+      fixture_map: { P_CL: "p", "Dr.": "doctor" },
     },
     tags: {
       stress: "fixture description of the stress tag",
@@ -1119,6 +1119,21 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     const spans = rulepackRuleDocumentSpans(spec);
     const resource = `${dir.replace(/\\/g, "/")}/pipeline.yaml`;
     const authored = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource));
+    const mapOrigins = rulepackMapOrigins(spec);
+    expect(mapOrigins.fixture_map["Dr."]).toBe(resource);
+    expect(mapOrigins.fixture_map.Dr).toBeUndefined();
+    expect(Object.isFrozen(mapOrigins)).toBe(true);
+    expect(Object.isFrozen(mapOrigins.fixture_map)).toBe(true);
+    for (const [table, entries] of Object.entries(mapOrigins)) {
+      for (const [key, origin] of Object.entries(entries)) {
+        const matches = spans.filter((entry) => {
+          const path = entry.compiledPath ?? entry.value.path;
+          return path.length === 3 && path[0] === "maps" && path[1] === table && path[2] === key;
+        });
+        expect(matches).toHaveLength(1);
+        expect(matches[0].value.resource).toBe(origin);
+      }
+    }
     for (const path of [
       "predicates.is_sonorant",
       "predicates.is_fixture_nasal",
@@ -1307,6 +1322,15 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     const rules = (child as RulepackFixture).rules;
     const origins = rulepackRuleOrigins(child);
     const spans = rulepackRuleDocumentSpans(child);
+    expect(Object.isFrozen(origins)).toBe(true);
+    for (const [name, resource] of Object.entries(origins)) {
+      const matches = spans.filter((entry) => {
+        const path = entry.compiledPath ?? entry.value.path;
+        return path.length === 2 && path[0] === "rules" && path[1] === name;
+      });
+      expect(matches).toHaveLength(1);
+      expect(matches[0].value.resource).toBe(resource);
+    }
     // Undefined by the child and named by one of its phases: inherited, and
     // attributed to the base file the body was read from.
     for (const name of ["tobi_accent", "f0_continuation_rise", "accent_index_in_phrase"]) {

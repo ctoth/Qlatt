@@ -70,11 +70,8 @@ import {
 
 type PlainObject = Record<string, unknown>;
 
-type MapOrigins = Record<string, Record<string, string>>;
-const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
 /** Rule name -> resource path of the file whose `rules:` block declares it (#219). */
 type RuleOrigins = Readonly<Record<string, string>>;
-const RULE_ORIGINS = new WeakMap<object, RuleOrigins>();
 const PARAMETER_ORIGINS = new WeakMap<object, readonly YamlNodeSpans[]>();
 const RULE_DOCUMENT_SPANS = new WeakMap<object, readonly DiagnosticDocumentSpans[]>();
 const FUNCTION_BODY_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
@@ -127,14 +124,38 @@ function mergeParameterOrigins(
 
 /** Loader-derived rule origins: which rulepack file declared each rule. */
 export function rulepackRuleOrigins(spec: CompiledRulepack): RuleOrigins {
-  return RULE_ORIGINS.get(spec) ?? {};
+  return Object.freeze(
+    Object.fromEntries(
+      rulepackRuleDocumentSpans(spec).flatMap((entry) => {
+        const path = sourceLookupPath(entry);
+        return path.length === 2 && path[0] === "rules" && typeof path[1] === "string"
+          ? [[path[1], entry.value.resource]]
+          : [];
+      }),
+    ),
+  );
 }
 
 /** Loader-derived resource identity, never authored vocabulary evidence. */
 export function rulepackMapOrigins(
   spec: CompiledRulepack,
 ): Readonly<Record<string, Readonly<Record<string, string>>>> {
-  return MAP_ORIGINS.get(spec) ?? {};
+  const tables = new Map<string, Map<string, string>>();
+  for (const entry of rulepackRuleDocumentSpans(spec)) {
+    const path = sourceLookupPath(entry);
+    if (path[0] !== "maps" || typeof path[1] !== "string") continue;
+    if (path.length !== 2 && path.length !== 3) continue;
+    const table = tables.get(path[1]) ?? new Map<string, string>();
+    tables.set(path[1], table);
+    if (path.length === 3 && typeof path[2] === "string") {
+      table.set(path[2], entry.value.resource);
+    }
+  }
+  return Object.freeze(
+    Object.fromEntries(
+      [...tables].map(([name, entries]) => [name, Object.freeze(Object.fromEntries(entries))]),
+    ),
+  );
 }
 
 /** Parse authored YAML and normalize resource aliases before document composition. */
@@ -210,30 +231,6 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
       yamlDocumentSpans(authored).filter(
         ({ value: { path } }) => path.length === 3 && path[0] === "functions" && path[2] === "body",
       ),
-    ),
-  );
-  MAP_ORIGINS.set(
-    document,
-    Object.fromEntries(
-      Object.entries(isPlainObject(document.maps) ? document.maps : {}).map(([name, entries]) => [
-        name,
-        Object.fromEntries(
-          Object.keys(isPlainObject(entries) ? entries : {}).map((key) => [
-            key,
-            label.replace(/^(included|base) rulepack /, ""),
-          ]),
-        ),
-      ]),
-    ),
-  );
-  const origin = label.replace(/^(included|base) rulepack /, "");
-  RULE_ORIGINS.set(
-    document,
-    Object.fromEntries(
-      Object.keys(isPlainObject(document.rules) ? document.rules : {}).map((name) => [
-        name,
-        origin,
-      ]),
     ),
   );
   return document;
@@ -320,8 +317,6 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
       ...(RULE_DOCUMENT_SPANS.get(child) ?? []).filter((entry) => entry.value.path[0] !== "phases"),
     ]),
   );
-  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
-  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
   INHERITABLE_SHADOWED_RULES.set(merged, {
     ...INHERITABLE_SHADOWED_RULES.get(root),
     ...INHERITABLE_SHADOWED_RULES.get(child),
@@ -476,7 +471,7 @@ function dirOfPath(path: string): string {
 const INHERITED_SHADOWED_FILE_KEYS = ["predicates", "maps", "tags", "relations"] as const;
 
 /** A base file's rule that a shadowing child file left undefined. */
-type InheritableRule = Readonly<{ rule: unknown; origin: string; spans: readonly YamlNodeSpans[] }>;
+type InheritableRule = Readonly<{ rule: unknown; spans: readonly YamlNodeSpans[] }>;
 /** Rule name -> the shadowed base file's rule, until the phases settle it. */
 const INHERITABLE_SHADOWED_RULES = new WeakMap<object, Readonly<Record<string, InheritableRule>>>();
 
@@ -508,10 +503,6 @@ function inheritPhasedShadowedRules(resolved: PlainObject): void {
     ...defined,
     ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.rule])),
   };
-  RULE_ORIGINS.set(resolved, {
-    ...RULE_ORIGINS.get(resolved),
-    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.origin])),
-  });
 }
 
 /**
@@ -531,8 +522,6 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
       ...(isPlainObject(childDict) ? childDict : {}),
     };
   }
-  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
-  RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
   RULE_DOCUMENT_SPANS.set(
     merged,
     Object.freeze([
@@ -552,7 +541,6 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
     ]),
   );
   FUNCTION_BODY_SPANS.set(merged, FUNCTION_BODY_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
-  const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
   INHERITABLE_SHADOWED_RULES.set(
     merged,
     Object.fromEntries(
@@ -560,7 +548,6 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
         name,
         {
           rule: cloneValue(rule),
-          origin: baseOrigins[name] as string,
           spans: (RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
             (entry) =>
               sourceLookupPath(entry)[0] === "rules" && sourceLookupPath(entry)[1] === name,
@@ -715,14 +702,6 @@ function resolveExtendsSync(
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
   FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
-  MAP_ORIGINS.set(
-    merged,
-    deepMergeChildWins(
-      MAP_ORIGINS.get(baseDoc) ?? {},
-      MAP_ORIGINS.get(rootDoc) ?? {},
-    ) as MapOrigins,
-  );
-  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(baseDoc), ...RULE_ORIGINS.get(rootDoc) });
   delete merged.extends;
   return {
     doc: merged,
@@ -750,14 +729,6 @@ async function resolveExtendsAsync(
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
   FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
-  MAP_ORIGINS.set(
-    merged,
-    deepMergeChildWins(
-      MAP_ORIGINS.get(baseDoc) ?? {},
-      MAP_ORIGINS.get(rootDoc) ?? {},
-    ) as MapOrigins,
-  );
-  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(baseDoc), ...RULE_ORIGINS.get(rootDoc) });
   delete merged.extends;
   return {
     doc: merged,
@@ -1062,9 +1033,6 @@ export function loadRulepackSpecFromPath(specPath: string): CompiledRulepack {
   }
   const spec = parseComposedRulepack(merged, loadVoiceRuleDocuments(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
-  freezeRecursively(MAP_ORIGINS.get(spec));
-  RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
     typeof spec.resources.inventory === "string"
       ? loadInventorySpecFromPath(spec.resources.inventory)
@@ -1151,9 +1119,6 @@ export async function preloadRulepackSpecFromPath(specPath: string): Promise<Com
   }
   const spec = parseComposedRulepack(merged, await preloadVoiceRuleDocuments(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
-  freezeRecursively(MAP_ORIGINS.get(spec));
-  RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
     typeof spec.resources.inventory === "string"
       ? await preloadInventorySpecFromPath(spec.resources.inventory)

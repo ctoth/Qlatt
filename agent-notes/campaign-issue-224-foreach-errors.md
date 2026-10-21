@@ -4,7 +4,7 @@ Attach authored locations to the existing E_FOREACH_INVALID parser errors. Estim
 
 # State
 
-Started from PR427 e7eff270; prerequisite remains open and its d230a5f0 fixture-role correction is carried here too. Implemented typed foreach error paths, rule-name prefixing, and exact loader location suffixes. Existing sync/async fixtures cover all five throws and missing-template absence, with a preceding directive that expands twice to distinguish authored and expanded positions. No local CI; hosted validation pending.
+Started from PR427 e7eff270; prerequisite merged as 7fe84a77 and this PR now targets master. Implemented typed foreach error paths, rule-name prefixing, and exact loader location suffixes. Existing sync/async fixtures cover all five throws and missing-template absence, with a preceding directive that expands twice to distinguish authored and expanded positions. Private Claude review returned for the full four-file range at 4589a51e in conversation d492cef6-9384-4c11-b21f-9c9f936e6d45. Implementer response: dependency status verified against GitHub and corrected here; no production changes. Supervisor owns the review ledger/gate. No local CI; final-head hosted validation pending.
 
 # Decisions and why
 
@@ -18,4 +18,4 @@ Other agents own normalization moves and resources; preserve their work.
 
 # Next step
 
-Await hosted CI and Claude review after prerequisite #427 merges, respond, then supervisor merges. Keep #224 open.
+Review response is complete. Await supervisor review gate, final-head hosted CI, and supervisor merge. Keep #224 open.

@@ -77,7 +77,9 @@ describe("explain phrase cli", () => {
         "--range=seq:0-0",
       ]);
       expect(result.code).toBe(0);
-      const actual = spy.mock.results[0].value as ReturnType<typeof frontend.textToKlattTrackDetailed>;
+      const actual = spy.mock.results[0].value as ReturnType<
+        typeof frontend.textToKlattTrackDetailed
+      >;
       const selected = actual.track.findLast((entry) => entry.time <= atMs / 1000)!;
       const payload = parseExplainPayload(result.stdout);
       expect(payload.tooling.parameter).toEqual({

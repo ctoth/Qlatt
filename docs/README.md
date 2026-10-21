@@ -25,6 +25,8 @@ For PowerShell argument forwarding and the complete explain flag reference, see 
 
 Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`; literal origins and macro-body ancestry are not included.
 
+Use `--format dot --out decisions.dot` to export the selected provenance DAG for Graphviz.
+DOT uses current-run IDs and stage colors, and reports parent links omitted by selection.
 With `--why`, text also prints the full compiled rule and its referenced pattern;
 JSON exposes them by decision ID in `tooling.ruleExpressions`. These normalized,
 expanded definitions are distinct from authored YAML and do not identify which

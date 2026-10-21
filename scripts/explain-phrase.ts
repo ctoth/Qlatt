@@ -26,7 +26,7 @@ import {
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { YamlDocumentSpan } from "../src/yaml-loader";
 
-type ExplainFormat = "text" | "json";
+type ExplainFormat = "text" | "json" | "dot";
 
 type ParsedArgs = {
   phrase: string;
@@ -155,8 +155,8 @@ function parseArgv(argv: string[]): ParsedArgs {
   }
 
   const format = (flags.get("format") ?? "text").toLowerCase();
-  if (format !== "text" && format !== "json") {
-    throw new Error(`Unsupported format '${format}'. Use text or json.`);
+  if (format !== "text" && format !== "json" && format !== "dot") {
+    throw new Error(`Unsupported format '${format}'. Use text, json or dot.`);
   }
 
   // Absent: no base pitch is requested, and the frontend's voice keeps its own.
@@ -294,6 +294,48 @@ function selectCompactDecisions(decisions: DecisionRecord[]): {
     displayed,
     truncated: Math.max(0, base.length - displayed.length),
   };
+}
+
+function renderDot(payload: ExplainPayload): string {
+  // Presentation colors only; stages and IDs remain explicit in every node label.
+  const colors: Record<ProvenanceStage, string> = {
+    transcribe: "#d9edf7",
+    rules: "#dff0d8",
+    prosody: "#fcf8e3",
+    semantics: "#eadcf4",
+    interpreter: "#fce5cd",
+    runtime: "#f2dede",
+    frontend: "#eeeeee",
+  };
+  // DOT quoted labels use escString, not JSON escape sequences.
+  const quote = (value: string) =>
+    `"${value
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\r\n|\r|\n/g, "\\n")}"`;
+  const selected = new Set(payload.decisions.map((decision) => decision.id));
+  const edges: string[] = [];
+  let omitted = 0;
+  for (const decision of payload.decisions) {
+    for (const parent of decision.parents ?? []) {
+      if (selected.has(parent)) edges.push(`  ${quote(parent)} -> ${quote(decision.id)};`);
+      else omitted += 1;
+    }
+  }
+  const label = `Selected decision subset: ${selected.size}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}\n${payload.phrase}`;
+  const lines = [
+    "digraph provenance {",
+    `  graph [label=${quote(label)}];`,
+    '  node [shape="box", style="filled"];',
+  ];
+  for (const decision of payload.decisions) {
+    const nodeLabel = `${decision.id}\n${decision.stage}: ${decision.type}\n${decision.subject}`;
+    const tooltip = `${decision.reason} | citations: ${decision.citations.join("; ")}`;
+    lines.push(
+      `  ${quote(decision.id)} [label=${quote(nodeLabel)}, tooltip=${quote(tooltip)}, fillcolor="${colors[decision.stage]}"];`,
+    );
+  }
+  return [...lines, ...edges, "}"].join("\n");
 }
 
 function renderText(payload: ExplainPayload, verbose: boolean): string {
@@ -510,7 +552,9 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     const rendered =
       args.format === "json"
         ? JSON.stringify(args.toolingOnly ? payload.tooling : payload, null, 2)
-        : renderText(payload, args.verbose);
+        : args.format === "dot"
+          ? renderDot(payload)
+          : renderText(payload, args.verbose);
 
     if (args.outPath) {
       fs.mkdirSync(path.dirname(args.outPath), { recursive: true });

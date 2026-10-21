@@ -47,6 +47,52 @@ async function runCli(args: string[]) {
 
 describe("explain phrase cli", () => {
   it.each([
+    { selection: [] },
+    { selection: ["--stage=rules"] },
+    { selection: ["--range=seq:1-3"] },
+  ])("exports exactly the selected nodes and parent edges as DOT: %j", async ({ selection }) => {
+    const args = ["hello world", ...selection];
+    const json = await runCli([...args, "--format=json"]);
+    const dot = await runCli([...args, "--format=dot"]);
+    expect(json.code).toBe(0);
+    expect(dot.code).toBe(0);
+    const { decisions } = parseExplainPayload(json.stdout);
+    const ids = new Set(decisions.map((decision) => decision.id));
+    const expectedEdges: string[] = [];
+    let omitted = 0;
+    for (const decision of decisions) {
+      expect(dot.stdout).toContain(`${decision.stage}: ${decision.type}`);
+      for (const parent of decision.parents ?? []) {
+        if (ids.has(parent)) expectedEdges.push(`  "${parent}" -> "${decision.id}";`);
+        else omitted += 1;
+      }
+    }
+    expect([...dot.stdout.matchAll(/^ {2}"(d\d+)" \[label=/gm)].map((match) => match[1])).toEqual([
+      ...ids,
+    ]);
+    expect(dot.stdout.split("\n").filter((line) => line.includes(" -> "))).toEqual(expectedEdges);
+    expect(dot.stdout).toContain(`omitted external parent links: ${omitted}`);
+  });
+
+  it("exports why ancestry and escapes authored phrase text in DOT labels", async () => {
+    const phrase = 'hello "world" \\N\nagain';
+    const json = await runCli(["--phrase", phrase, "--format=json"]);
+    expect(json.code).toBe(0);
+    const decisions = parseExplainPayload(json.stdout).decisions;
+    const child = decisions.find((decision) => (decision.parents?.length ?? 0) > 0)!;
+    expect(child).toBeDefined();
+    const args = ["--phrase", phrase, "--why", child.id];
+    const why = parseExplainPayload((await runCli([...args, "--format=json"])).stdout);
+    const dot = await runCli([...args, "--format=dot"]);
+    expect(dot.code).toBe(0);
+    expect(dot.stdout).toContain('hello \\"world\\" \\\\N\\nagain');
+    expect([...dot.stdout.matchAll(/^ {2}"(d\d+)" \[label=/gm)].map((match) => match[1])).toEqual(
+      why.decisions.map((decision) => decision.id),
+    );
+    expect(dot.stdout).toContain("omitted external parent links: 0");
+  });
+
+  it.each([
     "--verbose",
     "--strict-citations",
     "--phase-views",

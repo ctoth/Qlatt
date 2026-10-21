@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 import {
   explainFeature,
   type FieldExplanation,
+  frameIndexAt,
   type PhaseCheckpoint,
   replayJournal,
   replayPhaseView,
   type WhyNotRuleResult,
   whyNotRule,
+  whyParamAt,
 } from "../src/declarative-frontend/hrg";
 import {
   getRulepackValidationDiagnostics,
@@ -41,6 +43,8 @@ type ParsedArgs = {
   transitionMs?: number;
   verbose: boolean;
   whyDecisionId: string | null;
+  whyParam: string | null;
+  atMs: number | null;
   frontendId: string;
   speaker: string | null;
   itemId: string | null;
@@ -79,6 +83,13 @@ type ExplainPayload = {
   decisions: DecisionRecord[];
   summary: ExplainSummary;
   tooling: {
+    parameter: {
+      layer: "lowered";
+      name: string;
+      requestedTimeMs: number;
+      frameTimeMs: number | null;
+      value: number | null;
+    } | null;
     ruleSources: Record<string, YamlDocumentSpan>;
     vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
@@ -184,6 +195,17 @@ function parseArgv(argv: string[]): ParsedArgs {
   if ((field || whyNotRule) && !itemId) {
     throw new Error("--item is required with --field or --why-not");
   }
+  const whyParam = flags.get("why-param") ?? null;
+  const atMs = flags.has("at") ? Number(flags.get("at")) : null;
+  if ((whyParam === null) !== (atMs === null)) {
+    throw new Error("--why-param and --at must be supplied together");
+  }
+  if (atMs !== null && (!Number.isFinite(atMs) || atMs < 0)) {
+    throw new Error("--at must be finite nonnegative milliseconds");
+  }
+  if (whyParam !== null && flags.has("why")) {
+    throw new Error("Use --why-param or --why, not both");
+  }
 
   return {
     phrase,
@@ -198,6 +220,8 @@ function parseArgv(argv: string[]): ParsedArgs {
     transitionMs,
     verbose: flags.get("verbose") === "true",
     whyDecisionId: flags.get("why") ?? null,
+    whyParam,
+    atMs,
     // Which frontend to run (e.g. "dectalk-english"). Defaults to the
     // bundled default frontend so existing invocations are unchanged.
     frontendId: flags.get("frontend") ?? "qlatt-english",
@@ -305,6 +329,13 @@ const STAGE_COLORS: Record<ProvenanceStage, string> = {
   frontend: "#eeeeee",
 };
 
+function parameterLabel(payload: ExplainPayload): string {
+  const query = payload.tooling.parameter;
+  return query
+    ? `Lowered frame query: ${query.name} at ${query.requestedTimeMs} ms; selected frame ${query.frameTimeMs ?? "none"} ms; value ${query.value ?? "unavailable"}. No interpolation or scheduled audio value.`
+    : "";
+}
+
 function renderDot(payload: ExplainPayload): string {
   // DOT quoted labels use escString, not JSON escape sequences.
   const quote = (value: string) =>
@@ -321,7 +352,7 @@ function renderDot(payload: ExplainPayload): string {
       else omitted += 1;
     }
   }
-  const label = `Selected decision subset: ${selected.size}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}\n${payload.phrase}`;
+  const label = `Selected decision subset: ${selected.size}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}\n${payload.phrase}${payload.tooling.parameter ? `\n${parameterLabel(payload)}` : ""}`;
   const lines = [
     "digraph provenance {",
     `  graph [label=${quote(label)}];`,
@@ -401,6 +432,7 @@ svg text { font: 13px monospace; fill: #222; }
 a:focus { outline: 3px solid #005fcc; } li:target { outline: 3px solid #005fcc; }
 li { padding: .5rem; overflow-wrap: anywhere; } p { white-space: pre-wrap; }
 </style></head><body><h1>Provenance decisions</h1><p>${escapeHtml(payload.phrase)}</p>
+${payload.tooling.parameter ? `<p>${escapeHtml(parameterLabel(payload))}</p>` : ""}
 <p>Selected decision subset: ${decisions.length}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}.
 IDs belong to this run. Columns show stages; rows follow decision sequence, not elapsed time. Arrows point from parent to child.</p>
 <p><a href="#details">Skip graph to decision details</a></p><div class="graph" tabindex="0" role="region" aria-label="Scrollable decision graph">
@@ -414,6 +446,7 @@ ${nodes.join("\n")}
 
 function renderText(payload: ExplainPayload, verbose: boolean): string {
   const lines: string[] = [];
+  if (payload.tooling.parameter) lines.push(parameterLabel(payload));
   const compact = verbose
     ? { displayed: payload.decisions, truncated: 0 }
     : selectCompactDecisions(payload.decisions);
@@ -550,8 +583,21 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     let decisions = allDecisions;
     let appliedRange: string | null = null;
     let subjectApplied: string | null = null;
+    let parameter: ExplainPayload["tooling"]["parameter"] = null;
 
-    if (args.whyDecisionId) {
+    if (args.whyParam !== null && args.atMs !== null) {
+      const track = { frames: detailed.track, utterance: detailed.utterance };
+      const timeSec = args.atMs / 1000;
+      const frame = track.frames[frameIndexAt(track, timeSec)];
+      decisions = whyParamAt(track, args.whyParam, timeSec);
+      parameter = {
+        layer: "lowered",
+        name: args.whyParam,
+        requestedTimeMs: args.atMs,
+        frameTimeMs: frame ? frame.time * 1000 : null,
+        value: frame?.params[args.whyParam] ?? null,
+      };
+    } else if (args.whyDecisionId) {
       decisions = buildWhyChain(allDecisions, args.whyDecisionId);
     } else {
       if (args.stages && args.stages.size > 0) {
@@ -609,7 +655,7 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
         ruleSources[id] = span;
         const ruleId = transaction.metadata.ruleId;
         const rule = rulepack.rules[ruleId];
-        if (args.whyDecisionId && rule) {
+        if ((args.whyDecisionId || args.whyParam) && rule) {
           ruleExpressions[id] = {
             ruleId,
             rule,
@@ -628,6 +674,7 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       allDecisions.length,
       args.whyDecisionId,
       {
+        parameter,
         ruleSources,
         vocabularySources,
         ruleExpressions,

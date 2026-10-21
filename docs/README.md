@@ -23,6 +23,8 @@ Use these documents as the main entry points into the codebase:
 
 For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.
 
+Use `--why-param F1 --at 340` to inspect the selected lowered frame value and ancestry at a requested time in milliseconds. Text, DOT and HTML label the lowered layer; JSON exposes `tooling.parameter`. Endpoint frames remain selected outside their times. This query does not interpolate or explain realized/scheduled audio values.
+
 Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`.
 Executed vocabulary reads also show exact authored map-value locations in text and `tooling.vocabularySources`, including dotted map keys. Other literal origins and macro-body ancestry are not included.
 

@@ -111,10 +111,15 @@ class QlattServer:
             if event.get("event") in ("done", "error", "hello"):
                 return events
 
-    def speak(self, text, frontend, rate, pitch_scale, lead_time=0.02, tail_time=0.05):
+    def speak(self, text, frontend, rate, pitch_scale, lead_time=None, tail_time=None):
+        padding = {}
+        if lead_time is not None:
+            padding["leadTime"] = lead_time
+        if tail_time is not None:
+            padding["tailTime"] = tail_time
         events = self.request(
             "speak", text=text, frontendId=frontend, rate=rate, pitchScale=pitch_scale,
-            leadTime=lead_time, tailTime=tail_time,
+            **padding,
         )
         for event in events:
             if event.get("event") == "error":
@@ -266,8 +271,8 @@ class SynthDriver(SynthDriver):
                     try:
                         pcm, markers, sample_rate = self._server.speak(
                             text, self._voice, self._rate_scale(rate_setting), self._pitch_scale(pitch_setting),
-                            0.02 if position == spoken_chunks[0] else 0,
-                            0.05 if position == spoken_chunks[-1] else 0,
+                            None if position == spoken_chunks[0] else 0,
+                            None if position == spoken_chunks[-1] else 0,
                         )
                     except Exception:
                         log.exception("qlatt render failed for %r", text)

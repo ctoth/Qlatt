@@ -75,9 +75,9 @@ class CancellationTests(unittest.TestCase):
         ])
         self.workers[0]()
         self.assertEqual(self.driver._server.speak.call_args_list, [
-            unittest.mock.call("one", "qlatt-english", 1.0, 1.0, 0.02, 0),
+            unittest.mock.call("one", "qlatt-english", 1.0, 1.0, None, 0),
             unittest.mock.call("two", "qlatt-english", 1.0, 1.0, 0, 0),
-            unittest.mock.call("three", "qlatt-english", 1.0, 1.0, 0, 0.05),
+            unittest.mock.call("three", "qlatt-english", 1.0, 1.0, 0, None),
         ])
         self.assertEqual(
             [call.kwargs["index"] for call in notifications.synthIndexReached.notify.call_args_list],
@@ -87,7 +87,7 @@ class CancellationTests(unittest.TestCase):
     def test_single_spoken_chunk_keeps_both_padding_values(self):
         self.speak("only", 1)
         self.workers[0]()
-        self.driver._server.speak.assert_called_once_with("only", "qlatt-english", 1.0, 1.0, 0.02, 0.05)
+        self.driver._server.speak.assert_called_once_with("only", "qlatt-english", 1.0, 1.0, None, None)
 
     def test_index_only_sequence_does_not_render(self):
         self.driver.speak([commands.IndexCommand(1), commands.IndexCommand(2)])
@@ -101,10 +101,15 @@ class CancellationTests(unittest.TestCase):
     def test_server_adapter_forwards_padding(self):
         server = driver_module.QlattServer.__new__(driver_module.QlattServer)
         server.request = Mock(return_value=[{"event": "audio", "pcm": "", "sampleRate": 22050}])
-        server.speak("text", "qlatt-english", 1, 1, 0, 0.05)
+        server.speak("text", "qlatt-english", 1, 1, 0, None)
         server.request.assert_called_once_with(
             "speak", text="text", frontendId="qlatt-english", rate=1, pitchScale=1,
-            leadTime=0, tailTime=0.05,
+            leadTime=0,
+        )
+        server.request.reset_mock()
+        server.speak("text", "qlatt-english", 1, 1)
+        server.request.assert_called_once_with(
+            "speak", text="text", frontendId="qlatt-english", rate=1, pitchScale=1,
         )
 
     def test_replacement_while_rendering_discards_old_pcm_and_notifications(self):

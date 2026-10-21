@@ -192,6 +192,31 @@ describe("a rule pack or inventory path", () => {
 describe("a dictionary path", () => {
   const DICTIONARY = "/no-such-dictionary.json";
 
+  it.each(["http", "https"])("preserves %s dictionary URLs and failures", async (scheme) => {
+    for (const asynchronous of [false, true]) {
+      const remote = `${scheme}://assets.example.test/a%20b.json?mode=${asynchronous}&x=%2F`;
+      const missing = `${remote}&missing=1`;
+      const failed = `${remote}&failed=1`;
+      const { requested } = devServer({
+        [remote]: {
+          status: 200,
+          contentType: "application/json",
+          body: '{"hello":"HH AH0 L OW1"}',
+        },
+        [missing]: { status: 404, contentType: "text/plain", body: "missing" },
+        [failed]: new Error("transport failed"),
+      });
+      const dictionary = await import("../src/cmu-dictionary-loader");
+      const load = asynchronous
+        ? dictionary.preloadCmuDictionaryFromPath
+        : dictionary.loadCmuDictionaryFromPathSync;
+      expect(await load(remote)).toEqual({ hello: "HH AH0 L OW1" });
+      expect((await failure(() => load(missing))).message).toContain("E_CMU_DICT_PATH_UNKNOWN:");
+      expect((await failure(() => load(failed))).message).toContain("E_CMU_DICT_FETCH:");
+      expect(requested).toEqual([remote, missing, failed]);
+    }
+  });
+
   async function loaders(overrides: Record<string, Answer> = {}) {
     devServer(overrides);
     const { loadCmuDictionaryFromPathSync, preloadCmuDictionaryFromPath } = await import(

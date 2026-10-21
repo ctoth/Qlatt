@@ -21,4 +21,4 @@ Use these documents as the main entry points into the codebase:
 - `scripts/render-phrase.ts` — offline WAV rendering via node-web-audio-api or Playwright.
 - `scripts/oracle/` — DECtalk oracle pipeline: build reference binary, render corpora, compare audio.
 
-For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` currently checks the selected output window, not excluded decisions.
+For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.

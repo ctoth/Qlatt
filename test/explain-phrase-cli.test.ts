@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { runExplainCli } from "../scripts/explain-phrase";
 import type { DecisionRecord } from "../src/provenance";
+import * as frontend from "../src/tts-frontend";
 
 interface ExplainPayload {
   rangeApplied?: string;
@@ -137,7 +138,7 @@ describe("explain phrase cli", () => {
     ).toBe(false);
   });
 
-  it("passes strict-citations for current transcribe/rules provenance", async () => {
+  it("passes strict-citations for a cited run while retaining the selected summary", async () => {
     const result = await runCli([
       "--phrase",
       "hello world",
@@ -150,6 +151,43 @@ describe("explain phrase cli", () => {
     expect(result.code).toBe(0);
     const payload = parseExplainPayload(result.stdout);
     expect(payload.summary.uncitedCount).toBe(0);
+  });
+
+  it.each([
+    { label: "stage", filters: ["--stage", "transcribe"] },
+    { label: "range", filters: ["--range", "seq:1-1"] },
+    { label: "empty window", filters: ["--subject", "fixture:no-such-subject"] },
+    { label: "ancestry", filters: ["--why", "d000003"] },
+  ])("checks hidden uncited decisions with $label selection", async ({ label, filters }) => {
+    const original = frontend.textToKlattTrackDetailed;
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed").mockImplementation((...args) => {
+      const detailed = original(...args);
+      args[3]?.provenance?.add({
+        stage: "runtime",
+        type: "fixture_uncited",
+        subject: "fixture:hidden",
+        reason: "Uncited fixture decision outside the selected output",
+        citations: [],
+      });
+      return detailed;
+    });
+    try {
+      const args = ["--phrase", "hello world", "--format", "json", ...filters];
+      const ordinary = await runCli(args);
+      const strict = await runCli([...args, "--strict-citations"]);
+      expect(ordinary.code).toBe(0);
+      expect(strict.code).toBe(2);
+      const payload = parseExplainPayload(strict.stdout);
+      expect(payload.summary.uncitedCount).toBe(0);
+      expect(payload.decisions.some((decision) => decision.type === "fixture_uncited")).toBe(false);
+      expect(payload.decisions).toEqual(parseExplainPayload(ordinary.stdout).decisions);
+      if (label === "empty window") expect(payload.decisions).toEqual([]);
+      expect(strict.stderr).toContain("1 uncited decisions in full run");
+      expect(strict.stderr).toContain("runtime=1");
+      expect(strict.stderr).toContain("fixture_uncited=1");
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("prints rulepack warnings and fails them under --strict", async () => {

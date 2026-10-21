@@ -449,11 +449,12 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       io.stdout(`${rendered}\n`);
     }
 
-    if (args.strictCitations && payload.summary.uncitedCount > 0) {
+    const citationSummary = args.strictCitations ? buildSummary(allDecisions) : null;
+    if (citationSummary && citationSummary.uncitedCount > 0) {
       io.stderr(
-        `strict-citations failed: ${payload.summary.uncitedCount} uncited decisions in output window` +
-          ` | by-stage: ${formatBreakdown(payload.summary.uncitedByStage)}` +
-          ` | by-type: ${formatBreakdown(payload.summary.uncitedByType)}\n`,
+        `strict-citations failed: ${citationSummary.uncitedCount} uncited decisions in full run` +
+          ` | by-stage: ${formatBreakdown(citationSummary.uncitedByStage)}` +
+          ` | by-type: ${formatBreakdown(citationSummary.uncitedByType)}\n`,
       );
       return 2;
     }

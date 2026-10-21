@@ -10,7 +10,7 @@
  *   npx tsx scripts/probe-f0-contour.ts "<phrase>" [baseF0] [--frontend <id>] [--pitch-scale R] [--tail N] [--full]
  *
  * --pitch-scale R : a requested pitch as a ratio of the base pitch
- *            (/rules/policy/speaker-profile.yaml pitch_composition).
+ *            (the selected frontend's speaker-profile pitch_composition).
  * baseF0   : a requested base pitch in Hz. Absent: none is requested, and the
  *            frontend's voice keeps its own.
  * --tail N : print the last N frames in full (default 24).

@@ -5,9 +5,9 @@
     "/rules/frontends/qlatt-english/lts-rules.yaml",
     "/rules/frontends/qlatt-english/morphology.yaml",
     "/rules/frontends/qlatt-english/phonotactics.yaml",
+    "/rules/frontends/qlatt-english/policy/source-contour.yaml",
+    "/rules/frontends/qlatt-english/policy/speaker-profile.yaml",
     "/rules/frontends/qlatt-english/stress-policy.yaml",
-    "/rules/policy/source-contour.yaml",
-    "/rules/policy/speaker-profile.yaml",
     "/rules/policy/vq-channels.yaml"
   ]
 }

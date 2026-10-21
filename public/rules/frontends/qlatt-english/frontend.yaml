@@ -6,8 +6,8 @@ morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
-speaker_profile_path: /rules/policy/speaker-profile.yaml
-source_contour_path: /rules/policy/source-contour.yaml
+speaker_profile_path: /rules/frontends/qlatt-english/policy/speaker-profile.yaml
+source_contour_path: /rules/frontends/qlatt-english/policy/source-contour.yaml
 functions:
   has_voiced_formants:
     params: [item]
@@ -482,7 +482,7 @@ parameters:
       # base_hz and range_hz are the speaker's: src/tts-frontend.ts gives the
       # prosody phase the resolved speaker profile's base_f0_hz (times the
       # source preset's f0_scale) and f0_range_hz in their place
-      # (/rules/policy/speaker-profile.yaml; a voice of the frontend's
+      # (policy/speaker-profile.yaml; a voice of the frontend's
       # `speakers:` registry or a request sets them). The leaves here declare
       # the paths to load-time validation and repeat the profile's defaults.
       base_hz:
@@ -1058,7 +1058,7 @@ parameters:
           - Klatt & Klatt 1990
       # NOTE: voice-quality presets (modal/breathy/pressed/creaky/whispery/falsetto)
       # are NOT declared here. The live source of truth is the source-contour policy
-      # at source_contour_path (/rules/policy/source-contour.yaml), loaded by
+      # at source_contour_path (policy/source-contour.yaml), loaded by
       # src/declarative-frontend/inventory.ts and parsed by src/source-contour.ts.
       # A duplicate table formerly lived here but was dead
       # (nothing reads params.policy.speaker.voice_quality_presets); removed in

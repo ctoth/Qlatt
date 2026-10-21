@@ -64,7 +64,7 @@ describe("the frontend's own base F0, which the empty box leaves in force", () =
     });
 
   // The 110 the box used to hold is this frontend's own default
-  // (public/rules/policy/speaker-profile.yaml base_f0_hz; qlatt-english has no
+  // (qlatt-english/policy/speaker-profile.yaml base_f0_hz; qlatt-english has no
   // voice registry), so its track does not change.
   it("qlatt-english: none is 110", () => {
     const none = speak("qlatt-english", undefined);

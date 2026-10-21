@@ -10,7 +10,7 @@ import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const profileSpec = parseSpeakerProfileDocument(
-  loadYamlDocumentSync("/rules/policy/speaker-profile.yaml"),
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/speaker-profile.yaml"),
 );
 
 const sourcePath = "data/area-functions/story-1996.yaml";

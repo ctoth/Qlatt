@@ -13,7 +13,7 @@ projection:
   - {field: jitter, target_param: jitter, op: override_if_set, order: 8}
 
 # DECtalk-specific source contour. Unlike the shared qlatt-english contour
-# (/rules/policy/source-contour.yaml, source_mode: 1 = LF glottal source), this
+# (qlatt-english/policy/source-contour.yaml, source_mode: 1 = LF glottal source), this
 # frontend keeps the browser-audible impulse fallback as the default while the
 # KLGLOTT88 runtime worklet is blocked.
 #

@@ -51,7 +51,7 @@ include:
   - phases/prosody.yaml
 # The voices of this frontend: each entry of `voices` is a file of `dir` whose
 # numeric fields that are speaker-profile fields
-# (/rules/policy/speaker-profile.yaml) set the speaker profile; a request's
+# (qlatt-english/policy/speaker-profile.yaml) set the speaker profile; a request's
 # own values come before the voice's.
 speakers:
   dir: /rules/frontends/qlatt-beauty/speakers

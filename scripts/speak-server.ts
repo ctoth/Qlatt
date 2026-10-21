@@ -18,7 +18,7 @@
  * interval on every voice of every frontend. "baseF0" is a base pitch in Hz
  * that replaces the voice's own; when both are given, the base is
  * baseF0 * pitchScale. With neither, the voice keeps its own pitch. The pitch
- * span follows the level (/rules/policy/speaker-profile.yaml
+ * span follows the level (the selected frontend's speaker-profile
  * pitch_composition).
  *
  * Responses for a speak request, in order:

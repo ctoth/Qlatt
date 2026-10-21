@@ -1,6 +1,6 @@
 # The default voice of the qlatt-beauty frontend: an entry of its `speakers:`
 # registry (frontend.yaml). Its fields that are speaker-profile fields
-# (/rules/policy/speaker-profile.yaml) set the speaker profile.
+# (qlatt-english/policy/speaker-profile.yaml) set the speaker profile.
 #
 # base_f0_hz: the floor Fr of the speaker's range, the anchor the prosody rules
 # read as params.policy.f0.base_hz. The span (f0_range_hz, read as

@@ -1,6 +1,6 @@
 /**
  * A requested pitch as a ratio, and the span that follows the level
- * (public/rules/policy/speaker-profile.yaml pitch_composition): pitch_scale
+ * (the selected frontend's speaker-profile pitch_composition): pitch_scale
  * multiplies the base pitch of whichever voice is selected, and the span is
  * multiplied by the ratio of that base to the reference base (the voice's own,
  * or the profile default), unless the request gives the span itself.
@@ -18,7 +18,7 @@ import { type TextToKlattTrackOptions, textToKlattTrackDetailed } from "../src/t
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const englishProfile = parseSpeakerProfileDocument(
-  loadYamlDocumentSync("/rules/policy/speaker-profile.yaml"),
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/speaker-profile.yaml"),
 );
 
 const STATEMENT = "The cat sat on the mat.";

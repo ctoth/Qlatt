@@ -69,7 +69,7 @@ export type TextToKlattTrackOptions = {
   speaker?: string | SpeakerProfileOverride;
   /**
    * A requested pitch as a ratio of the selected voice's base pitch
-   * (/rules/policy/speaker-profile.yaml pitch_composition.pitch_scale). For a
+   * (the selected frontend's speaker-profile pitch_composition.pitch_scale). For a
    * caller that names its voice; a speaker override gives it as `pitch_scale`.
    */
   pitchScale?: number;

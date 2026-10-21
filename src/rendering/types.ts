@@ -54,7 +54,7 @@ export interface RenderRequest
   baseF0?: number;
   /**
    * A requested pitch as a ratio of the base pitch
-   * (/rules/policy/speaker-profile.yaml pitch_composition). Absent: 1.
+   * (the selected frontend's speaker-profile pitch_composition). Absent: 1.
    */
   pitchScale?: number;
   frontendId: string;

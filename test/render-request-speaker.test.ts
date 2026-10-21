@@ -7,7 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readWavInt16 } from "../scripts/oracle/dectalk-vtm-fixture";
 import {
   browserRenderOptions,
@@ -143,6 +143,8 @@ const performanceRequest: RenderRequest = {
 };
 
 describe("render request frontend options", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   it("matches direct frames and resolved profiles through warm Node and track-only A/B/A", async () => {
     const warm = createNodeRuntimeBackend({ keepWarm: true });
     const plain = {
@@ -232,6 +234,8 @@ describe("render request frontend options", () => {
   it.skipIf(!chromePath)(
     "serializes directions and profile overrides through the actual browser page",
     async () => {
+      // Exercise the /Qlatt/ base used by the hosted workflow as well as serialization.
+      vi.stubEnv("GITHUB_ACTIONS", "true");
       const session = await openBrowserSession({
         repoRoot: process.cwd(),
         engine: "runtime",

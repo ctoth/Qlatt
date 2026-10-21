@@ -106,7 +106,7 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-type Served = { port: number; close(): Promise<void> };
+type Served = { port: number; base: string; close(): Promise<void> };
 
 function portOf(address: unknown): number | null {
   return address && typeof address === "object" && "port" in address
@@ -136,7 +136,7 @@ async function serveDev(root: string, port: number | undefined): Promise<Served>
     await server.close();
     throw new Error("Failed to start Vite server for offline render.");
   }
-  return { port: listening, close: () => server.close() };
+  return { port: listening, base: server.config.base, close: () => server.close() };
 }
 
 async function serveBuild(
@@ -171,6 +171,7 @@ async function serveBuild(
     }
     return {
       port: listening,
+      base: server.config.base,
       close: async () => {
         await server.close();
         removeBuild();
@@ -275,7 +276,7 @@ export async function openBrowserSession(options: BrowserSessionOptions): Promis
     });
     log("[browser:driver] browser launched");
     const launched = browser;
-    const url = `http://127.0.0.1:${served.port.toString()}/${OFFLINE_PAGES[options.engine]}`;
+    const url = `http://127.0.0.1:${served.port.toString()}${served.base}${OFFLINE_PAGES[options.engine]}`;
     const openPage = async () => {
       const opened = await launched.newPage();
       opened.setDefaultTimeout(120000);

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as hrg from "../src/declarative-frontend/hrg";
+import * as engine from "../src/declarative-frontend/hrg/rule-engine";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
+import { createDiagnostics } from "../src/diagnostics";
 import { browserRenderOptions } from "../src/rendering/backends/browser-runtime";
 import { trackOnlyBackend } from "../src/rendering/backends/track-only";
 import type { RenderRequest } from "../src/rendering/types";
@@ -37,6 +40,125 @@ function ratePolicy(spec: rulepack.CompiledRulepack) {
 function durationPolicy(spec: rulepack.CompiledRulepack) {
   return (spec.parameters.policy as { duration: Record<string, unknown> }).duration;
 }
+
+describe("continuation and undershoot rate policy", () => {
+  const keys = ["continuation_rise_hz", "continuation_minor_rise_hz"];
+  const f0Policy = (spec: rulepack.CompiledRulepack) =>
+    (spec.parameters.policy as { f0: Record<string, unknown> }).f0;
+  const passedPolicy = (options: engine.GraphRuleEngineOptions | undefined) =>
+    options?.parameters?.policy as Record<string, Record<string, unknown>>;
+
+  it.each(["qlatt-english", "qlatt-beauty"])(
+    "%s requires referenced continuation values and preserves their scaling metadata",
+    (frontendId) => {
+      const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
+      vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+      const speak = () =>
+        textToKlattTrackDetailed("hello, world; hello: world", undefined, undefined, {
+          frontendId,
+          rate: 4,
+        });
+      const original = f0Policy(spec).continuation_rise_hz as {
+        value: number;
+        citations: string[];
+      };
+      const shipped = speak();
+      f0Policy(spec).continuation_rise_hz = { ...original, value: 24 };
+      expect(frameValues(speak().track)).toEqual(frameValues(shipped.track));
+      f0Policy(spec).continuation_rise_hz = original;
+      // The fallback continuation rule only applies without an assigned boundary tone.
+      const annotation = spec.phases.find((phase) => phase.name === "annotation");
+      if (!annotation) throw new Error("expected annotation phase");
+      annotation.rules = annotation.rules.filter((name) => name !== "assign_phrase_edge_tones");
+      for (const key of keys) {
+        const missing = structuredClone(spec);
+        delete f0Policy(missing)[key];
+        expect(validateDslSpec(missing)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              code: "E_POLICY_PARAM_UNKNOWN",
+              message: expect.stringContaining(`params.policy.f0.${key}`),
+            }),
+          ]),
+        );
+      }
+      const run = vi.spyOn(engine, "runGraphRuleEngine");
+      const control = speak();
+      const controlPolicy = passedPolicy(
+        run.mock.calls.find((call) => call[2]?.phases?.includes("prosody"))?.[2],
+      );
+      expect(controlPolicy.f0.continuation_rise_hz).toEqual({ ...original, value: 4 });
+      f0Policy(spec).continuation_rise_hz = { ...original, value: 24, fixture: "retained" };
+      run.mockClear();
+      const changed = speak();
+      const applied = passedPolicy(
+        run.mock.calls.find((call) => call[2]?.phases?.includes("prosody"))?.[2],
+      ).f0;
+      expect(applied.continuation_rise_hz).toEqual({ ...original, value: 12, fixture: "retained" });
+      expect(applied.continuation_minor_rise_hz).toMatchObject({ value: 2.5 });
+      expect(changed.utterance.provenance.getDecisions()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "continuation_policy_scaled",
+            citations: expect.arrayContaining(original.citations),
+          }),
+        ]),
+      );
+      const points = (result: typeof control) =>
+        result.utterance
+          .relation("F0Point")
+          .listItems()
+          .filter((item) => item.id.includes(":f0_continuation_rise:point:"))
+          .map((item) => Number(item.get("value")));
+      expect(points(control)).toHaveLength(3);
+      expect(points(changed)[0] - points(control)[0]).toBeCloseTo(8);
+      for (const key of keys) {
+        for (const value of [undefined, null, Number.NaN, Number.POSITIVE_INFINITY, "bad"]) {
+          const saved = f0Policy(spec)[key];
+          f0Policy(spec)[key] = { value, citations: original.citations };
+          expect(() => textToKlattTrack("hello", undefined, undefined, { frontendId })).toThrow(
+            "E_POLICY_REQUIRED",
+          );
+          f0Policy(spec)[key] = saved;
+        }
+      }
+    },
+  );
+
+  it("leaves unused DECtalk continuation fields absent", () => {
+    const run = vi.spyOn(engine, "runGraphRuleEngine");
+    textToKlattTrack("hello", undefined, undefined, { frontendId: "dectalk-english" });
+    const applied = passedPolicy(
+      run.mock.calls.find((call) => call[2]?.phases?.includes("prosody"))?.[2],
+    ).f0;
+    for (const key of keys) expect(applied).not.toHaveProperty(key);
+  });
+
+  it.each([
+    [0.5, 0],
+    [2, 0.3],
+    [8, 2.1],
+  ])("traces rate %s factor %s without degradation warnings", (rate, factor) => {
+    const diagnostics = createDiagnostics();
+    const run = vi.spyOn(engine, "runGraphRuleEngine");
+    const result = textToKlattTrackDetailed(PHRASE, undefined, undefined, { rate, diagnostics });
+    const applied = passedPolicy(
+      run.mock.calls.find((call) => call[2]?.phases?.includes("formant"))?.[2],
+    );
+    expect(applied.formant.rate_undershoot_factor).toBeCloseTo(factor);
+    const records = result.utterance.provenance
+      .getDecisions()
+      .filter((d) => d.type === "rate_undershoot_policy");
+    expect(records).toHaveLength(1);
+    expect(records[0].reason).toContain(`rate_undershoot_factor=${factor}`);
+    expect(records[0].citations.length).toBeGreaterThan(0);
+    expect(
+      diagnostics
+        .getEntries()
+        .filter((entry) => entry.level === "warn" && entry.code?.includes("UNDERSHOOT")),
+    ).toEqual([]);
+  });
+});
 
 describe("reference rate normalization", () => {
   const citations = ["Engineering fixture: reference multiplier"];

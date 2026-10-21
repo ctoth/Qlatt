@@ -18,4 +18,6 @@ The Lisker 1964 author/year collision appears as ambiguous evidence, including `
 
 # Next step
 
-Publish for independent Claude review and hosted CI, then respond to review. No local CI run. Supervisor owns merge and issue bookkeeping.
+PR #369 review found that literal folder-author matching missed actual `van Santen 1994` and `O'Shaughnessy 1976` citations. Corrected author patterns to permit optional spaces/apostrophes between letters and normalized the grouping key the same way, preserving token boundaries and collision ambiguity. Exact folder matching is unchanged. Accepted the finding; no bibliography resolver or additional gate was added.
+
+Hosted quality run 39556188815 reported `scripts/paper-coverage.ts format` and exited 1. Applied its three requested reflows; left the unrelated numeric-constant warning unchanged. The corrected report scans 530 tracked source files: 108 referenced candidates, six ambiguous-only, 293 no detected reference. Actual corrected evidence includes `frontend.yaml:438,443` for van Santen and DECtalk `policy/speaker-profile.yaml:5,10` for O'Shaughnessy. No local CI run. Push and await final hosted CI and review response verification. Supervisor owns merge and issue bookkeeping.

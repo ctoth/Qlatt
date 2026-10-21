@@ -21,11 +21,13 @@ const papers: Paper[] = tracked.flatMap((file) => {
   return match ? [{ folder: match[1], references: [], ambiguous: [] }] : [];
 });
 const sources = tracked.filter(
-  (file) => scopes.some((scope) => file.startsWith(scope)) && extensions.includes(path.extname(file)),
+  (file) =>
+    scopes.some((scope) => file.startsWith(scope)) && extensions.includes(path.extname(file)),
 );
-function bounded(value: string, flags = ""): RegExp {
+function bounded(value: string, flags = "", author = false): RegExp {
   const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, `${flags}u`);
+  const pattern = author ? escaped.replace(/(?<=\p{L})(?=\p{L})/gu, "[\\s'’]*") : escaped;
+  return new RegExp(`(?<![\\p{L}\\p{N}_])${pattern}(?![\\p{L}\\p{N}_])`, `${flags}u`);
 }
 const exactPatterns = papers.map((paper) => ({ paper, pattern: bounded(paper.folder) }));
 const groups = new Map<string, { author: RegExp; year: RegExp; papers: Paper[] }>();
@@ -33,10 +35,11 @@ for (const paper of papers) {
   const parts = paper.folder.split("_");
   const year = parts.slice(1).find((part) => /^\d{4}$/.test(part));
   if (!year) continue;
-  const key = `${parts[0].toLowerCase()} ${year}`;
+  const author = parts[0].replace(/[\s'’]/g, "").toLowerCase();
+  const key = `${author} ${year}`;
   let group = groups.get(key);
   if (!group) {
-    group = { author: bounded(parts[0], "i"), year: bounded(year), papers: [] };
+    group = { author: bounded(author, "i", true), year: bounded(year), papers: [] };
     groups.set(key, group);
   }
   group.papers.push(paper);
@@ -61,7 +64,9 @@ for (const file of sources) {
   }
 }
 const referenced = papers.filter((paper) => paper.references.length > 0);
-const ambiguous = papers.filter((paper) => paper.references.length === 0 && paper.ambiguous.length > 0);
+const ambiguous = papers.filter(
+  (paper) => paper.references.length === 0 && paper.ambiguous.length > 0,
+);
 const noDetectedReference = papers
   .filter((paper) => paper.references.length === 0 && paper.ambiguous.length === 0)
   .map((paper) => paper.folder);
@@ -73,10 +78,15 @@ const report = {
     ambiguousOnly: ambiguous.length,
     noDetectedReference: noDetectedReference.length,
   },
-  scope: { inventory: "tracked papers/*/notes.md filenames", sourceDirectories: scopes, extensions },
+  scope: {
+    inventory: "tracked papers/*/notes.md filenames",
+    sourceDirectories: scopes,
+    extensions,
+  },
   limits: [
     "Source text includes comments and strings; matches do not establish runtime use or scientific fidelity.",
     "Exact folder names are case-sensitive; author/year matches are case-insensitive author and four-digit year tokens on the same line.",
+    "Author matching permits optional spaces and straight or curly apostrophes between letters; author groups normalize those separators.",
     "Author/year co-occurrence is heuristic, not bibliographic resolution; split-line references, aliases, and alternate spellings may be missed.",
     "Same-author/year candidates remain ambiguous unless that line names an exact folder; yearless folders use exact matching only.",
     "No detected reference means no lexical match in this scope, not evidence that a paper is unused.",

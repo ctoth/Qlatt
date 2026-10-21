@@ -1,3 +1,7 @@
+//! One-pole spectral-tilt filter with the klsyn88 linearized tilt lookup table.
+//! Reference: klsyn88 `c/parwv.c`, `lineartilt`, its selection in
+//! `pitch_synch_par_reset`, and the voicing-source tilt recurrence.
+
 use klatt_wasm_common::export_alloc_fns;
 
 export_alloc_fns!();

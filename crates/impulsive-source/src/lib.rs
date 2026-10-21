@@ -1,3 +1,7 @@
+//! Normalized doublet excitation filtered by a glottal resonator at the base sample rate.
+//! Reference: klsyn88 `c/parwv.c`, `impulsive_source`, `setabc`, and
+//! `pitch_synch_par_reset`; open-phase timing is approximated at the base rate.
+
 use klatt_wasm_common::export_alloc_fns;
 
 export_alloc_fns!();

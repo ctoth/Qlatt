@@ -495,22 +495,6 @@ parameters:
         value: 1.2
         citations:
           - White 2014
-      fricative_min_sibilant_ms:
-        value: 30
-        citations:
-          - Jongman 1989
-      fricative_min_labiodental_ms:
-        value: 50
-        citations:
-          - Jongman 1989
-      fricative_min_dental_ms:
-        value: 60
-        citations:
-          - Jongman 1989
-      fricative_min_glottal_ms:
-        value: 40
-        citations:
-          - Engineering estimate (Jongman 1989 does not test glottal /hh/)
       affricate_frication_min_ms:
         value: 20
         citations:

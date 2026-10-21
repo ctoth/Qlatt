@@ -24,13 +24,18 @@ const PHRASE = "The quick brown fox jumps over the lazy dog.";
 
 afterEach(() => vi.restoreAllMocks());
 
-// Each request sees the latest fixture policy, with compiler-owned schema metadata.
+// Compile each configured request without freezing the mutable fixture source.
 function configuredFrontend(spec: rulepack.CompiledRulepack) {
-  return vi.spyOn(rulepack, "resolveFrontend").mockImplementation(() => ({
-    spec: rulepack.compileRuleEngineSpec(spec),
-    resources: rulepack.loadFrontendResources(spec),
-    voices: {},
-  }));
+  return vi.spyOn(rulepack, "resolveFrontend").mockImplementation(() => {
+    const source = structuredClone(spec);
+    // This loaded value is regenerated from the declared voice documents.
+    delete (source.parameters.policy as Record<string, unknown>).voice;
+    return {
+      spec: rulepack.compileRuleEngineSpec(source),
+      resources: rulepack.loadFrontendResources(source),
+      voices: {},
+    };
+  });
 }
 
 // Default selection adds provenance, so unrelated downstream decision IDs shift.

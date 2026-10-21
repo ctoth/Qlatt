@@ -13,6 +13,9 @@ Also integrated439's configured DECtalk rate correction7e525a1c. Existing resolv
 fixtures in rate, speaker profile, source contour and voice rule tests now compile
 their configured declarations. Mutable rate fixtures compile at request time so
 their subsequent policy edits still reach the intended runtime diagnostics.
+Integrated439's correction9aadbc82: each request compiles a fresh cloned source,
+removing compiler-generated voice policy before regeneration. This fixes the
+actual readonly-policy and reserved-voice fixture failures without runtime edits.
 
 ## Decisions and why
 - Reuse existing HrgSchema/FeatureSchema compilation with authored input checks.

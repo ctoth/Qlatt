@@ -5,10 +5,11 @@ as a bounded part of #141.
 
 # State
 
-Isolated from #418 final head 6d9278c9; depends on that PR until merged.
+Isolated from #418 final head 6d9278c9; #418 merged as 3e6548e7.
 Implementation complete: Git confirms eight 100-percent identical renames, with
 41 additions / 41 removals in references and comments outside this note. Hosted
-CI and Claude review pending. No local CI.
+CI passed at 86797e4f. Claude completed the full review with no defects; accepted.
+Supervisor independently verified the diff and source. No local CI.
 
 # Decisions and why
 
@@ -29,5 +30,4 @@ the path move. Historical frontend-document-model snapshot retains its old path.
 
 # Next step
 
-Publish for hosted CI and Claude review; respond to findings. Supervisor owns
-merge; #141 remains open.
+Await final response-commit CI and supervisor merge; #141 remains open.

@@ -997,22 +997,6 @@ parameters:
         value: 2.5
         citations:
           - Maeda 1993 (velopharyngeal port sweep 0 to 2.5 cm2)
-      pole_base_hz:
-        value: 250
-        citations:
-          - Klatt 1980 Table I
-      pole_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
-      zero_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
-      place_bw_hz:
-        value: 100
-        citations:
-          - Klatt 1980 Table I
       vowel_onset_delay_ms:
         value: 40
         citations:
@@ -1026,18 +1010,6 @@ parameters:
         citations:
           - Hawkins & Stevens 1985
           - "Engineering estimate: decay is slightly shorter than the anticipatory rise for cleaner oral release"
-      murmur_fnz_m_hz:
-        value: 1000
-        citations:
-          - Fujimura 1962
-      murmur_fnz_n_hz:
-        value: 1700
-        citations:
-          - Fujimura 1962
-      murmur_fnz_ng_hz:
-        value: 3000
-        citations:
-          - Fujimura 1962
       murmur_strength:
         value: 1.0
         citations:
@@ -1073,31 +1045,6 @@ parameters:
         citations:
           - Hawkins & Stevens 1985
           - "Engineering estimate: second carryover subwindow halves the residual nasal coupling"
-      b1_stage_1_fraction:
-        value: 0.33
-        citations:
-          - Chen 1997
-          - "Engineering estimate: early anticipatory B1 cue scales with the first coupling stage"
-      b1_stage_2_fraction:
-        value: 0.66
-        citations:
-          - Chen 1997
-          - "Engineering estimate: later anticipatory B1 cue scales with the second coupling stage"
-      b1_carryover_fraction:
-        value: 0.5
-        citations:
-          - Chen 1997
-          - "Engineering estimate: early carryover B1 cue is half-strength"
-      b1_carryover_tail_fraction:
-        value: 0.25
-        citations:
-          - Chen 1997
-          - "Engineering estimate: final carryover B1 cue decays to one quarter strength"
-      b1_addition_hz:
-        value: 107
-        citations:
-          - Chen 1997
-          - Hawkins & Stevens 1985
     speaker:
       base_f0_hz:
         value: 110

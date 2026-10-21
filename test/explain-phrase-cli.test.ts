@@ -133,19 +133,27 @@ describe("explain phrase cli", () => {
   });
 
   it("supports why ancestry chain output", async () => {
+    const explain = await runCli(["--phrase", "hello world", "--format", "json"]);
+    expect(explain.code).toBe(0);
+    const inventory = parseExplainPayload(explain.stdout).decisions.find(
+      (decision) => decision.stage === "frontend" && decision.type === "inventory_selected",
+    );
+    expect(inventory).toBeTruthy();
+    if (!inventory) throw new Error("expected inventory selection decision");
+    expect(inventory.parents ?? []).toEqual([]);
     const result = await runCli([
       "--phrase",
       "hello world",
       "--format",
       "json",
       "--why",
-      "d000003",
+      inventory.id,
     ]);
 
     expect(result.code).toBe(0);
     const payload = parseExplainPayload(result.stdout);
-    expect(payload.whyDecisionId).toBe("d000003");
-    expect(payload.decisions.map((decision) => decision.id)).toEqual(["d000003"]);
+    expect(payload.whyDecisionId).toBe(inventory.id);
+    expect(payload.decisions).toEqual([inventory]);
   });
 
   it("links rule decisions to transcribe ancestry in why output", async () => {

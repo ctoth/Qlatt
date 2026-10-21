@@ -4,7 +4,7 @@ Carry predicate-definition locations through the existing diagnostic side metada
 
 # State
 
-Started from PR403 final fdf1873d while its hosted checks finish. Implemented predicate side metadata and classification, with numeric/macro error coordinates and child/base inheritance assertions in the existing fixture. Supervisor will merge the prerequisite before this review. No local CI; hosted validation pending.
+Started from PR403 final fdf1873d; that prerequisite has merged. Implemented predicate side metadata and classification, with numeric/macro error coordinates and child/base inheritance assertions in the existing fixture. PR407 quality job119152623488 requested one predicate wrapping correction in the existing test; applied the exact formatting change. No local CI; replacement hosted validation pending.
 
 # Decisions and why
 

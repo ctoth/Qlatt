@@ -315,7 +315,8 @@ describe("direct rule errors through composition", () => {
             ["all[1].expr", "all.1.expr"],
           ]) {
             const source = entries.find(
-              (entry) => entry.value.path.join(".") === `predicates.fixture_invalid.${authoredPath}`,
+              (entry) =>
+                entry.value.path.join(".") === `predicates.fixture_invalid.${authoredPath}`,
             )?.value;
             expect(source).toBeDefined();
             expect(

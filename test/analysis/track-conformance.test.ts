@@ -6,11 +6,50 @@ import {
   analyzeStopReleases,
   analyzeTrackGains,
   findVoicingIssues,
+  summarizeBranchSwitch,
   summarizeSourceControl,
 } from "../../src/track-analysis";
 import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 describe("track conformance authority", () => {
+  it("counts configured switch values without inferring parallel activity", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
+    const policy = semantics.analysis!.branch_switch!;
+    const track = [
+      { time: 0, params: { route: 2, SW: 0, AF: 60 } },
+      { time: 1, params: { route: 0, SW: 1 } },
+      { time: 3, params: { route: 7 } },
+      { time: 4, params: { route: NaN } },
+      { time: 5, params: { route: Infinity } },
+      { time: 6 },
+    ];
+    expect(summarizeBranchSwitch(track, { ...policy, param: "route", value: 2 })).toEqual({
+      selectedEvents: 1,
+      otherEvents: 2,
+      selectedSeconds: 1,
+      selectedShare: 25,
+    });
+    const control = summarizeBranchSwitch(track, policy);
+    expect(control.selectedEvents).toBe(1);
+    expect(control.otherEvents).toBe(1);
+    expect(control.selectedSeconds).toBe(2);
+    expect(control.selectedShare).toBeCloseTo(200 / 3);
+    expect(control).not.toHaveProperty("parallelEvents");
+    expect(summarizeBranchSwitch([], policy)).toEqual({
+      selectedEvents: 0,
+      otherEvents: 0,
+      selectedSeconds: 0,
+      selectedShare: 0,
+    });
+    for (const id of ["qlatt-beauty", "dectalk-english"]) {
+      const selected = (await loadExperimentConfig(id)).semantics.analysis!.branch_switch!;
+      expect(selected).toEqual(policy);
+    }
+    for (const id of ["klsyn88", "dectalk-vtm"]) {
+      expect((await loadExperimentConfig(id)).semantics.analysis?.branch_switch).toBeUndefined();
+    }
+  });
+
   it("counts a selected source control with held values and duration weighting", () => {
     const track = [
       { time: 0, params: { lfMode: 4 } },

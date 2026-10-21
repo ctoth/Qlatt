@@ -5,7 +5,7 @@ import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts"
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
-import { summarizeParallel, summarizeTrack } from "../../src/track-analysis.ts";
+import { summarizeBranchSwitch, summarizeTrack } from "../../src/track-analysis.ts";
 import { contextGate, endPlayback, playTrack, untilAdvanced } from "../../src/track-playback.ts";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../../src/tts-frontend";
 import { updateDiagnostics } from "./diagnostics.js";
@@ -271,11 +271,13 @@ export async function speakWithNewRuntime(track, baseF0) {
     "[QLATT] Track summary",
     metricsPolicy ? summarizeTrack(track, metricsPolicy) : "(no experiment metrics policy)",
   );
-  const parallelSummary = summarizeParallel(track);
-  console.log("[QLATT] Parallel summary", parallelSummary);
-  if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {
-    console.warn("[QLATT] Parallel params present, but SW=0 (cascade-only path).");
-  }
+  const branchPolicy = state.newRuntimeSemantics?.analysis?.branch_switch;
+  console.log(
+    "[QLATT] Branch switch summary",
+    branchPolicy
+      ? summarizeBranchSwitch(track, branchPolicy)
+      : "(no experiment branch-switch policy)",
+  );
   console.log("[QLATT] First events", track.slice(0, 6));
 
   // Start spectrogram visualization (matching speak())

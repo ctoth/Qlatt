@@ -5,6 +5,11 @@ bacon: "0.1"
 name: klatt80
 
 analysis:
+  branch_switch:
+    param: SW
+    value: 1
+    citations:
+      - "engineering convention: count the SW=1 track control used by cascadeGain and parallelVoiceGain; parallel frication remains independent"
   source_modes:
     params: [sourceMode, lfMode]
     citations:

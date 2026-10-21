@@ -357,9 +357,19 @@ describe("display-formatter", () => {
     const section: DisplaySection = { id: "signal", source: "signal_flow" };
     const text = formatSection(section, makeState({ run, semantics })).join("\n");
     expect(text).toContain("SW=1: 1 frames, 0.100s");
+    expect(text).toContain("SW other finite values: 2 frames");
+    expect(text).not.toContain("Parallel-marked events");
     expect(text).toContain("Track source controls: lfMode=1: 0.200s");
     expect(text).toContain("Track source controls: sourceMode=1: 0.200s");
     expect(text).not.toContain("No branch timing mismatches detected");
+    semantics.analysis!.branch_switch = {
+      ...semantics.analysis!.branch_switch!,
+      param: "lfMode",
+      value: 1,
+    };
+    expect(formatSection(section, makeState({ run, semantics })).join("\n")).toContain(
+      "lfMode=1: 3 frames, 0.200s",
+    );
   });
 
   it.each([
@@ -379,6 +389,10 @@ describe("display-formatter", () => {
     const section: DisplaySection = { id: "signal", source: "signal_flow" };
     const state = makeState({ run, semantics });
     expect(formatSection(section, state).join("\n")).toContain(expected);
+    if (id === "klsyn88" || id === "dectalk-vtm") {
+      expect(formatSection(section, state)).toContain("(no experiment branch-switch policy)");
+      expect(formatSection(section, state).join("\n")).not.toContain("SW=1:");
+    }
     if (id === "klsyn88") {
       expect(formatSection(section, state).join("\n")).not.toContain("lfMode");
       expect(semantics.analysis!.source_modes!.citations[0]).toContain("engineering convention");

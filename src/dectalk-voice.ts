@@ -46,6 +46,11 @@ export type VoiceRuleFieldSpec =
 
 export type VoiceRuleFields = Record<string, number | string | null>;
 
+export interface SpeakerDefinitionContext {
+  path: string;
+  data: unknown;
+}
+
 export interface VoiceRegistry {
   dir: string;
   default: string;
@@ -60,12 +65,6 @@ export interface VoiceRegistry {
    *  param). Applied as Paul-relative additive offsets by generic infra with no
    *  per-voice or per-gain branches. Empty when not declared. */
   speakerGainOffsets: SpeakerGainOffset[];
-  /**
-   * Where the names and limits of a speaker definition's entries are
-   * (`speakers.definition_path`), for a frontend whose voice files carry
-   * their definition and whose texts may change it. Absent otherwise.
-   */
-  definitionPath?: string;
   /**
    * The rule fields that are sent with a speaker definition
    * (`speakers.definition_frame_params`): in a text whose voice changes
@@ -255,9 +254,6 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
     definitionFrameParams: Array.isArray(speakers.definition_frame_params)
       ? speakers.definition_frame_params.filter((v): v is string => typeof v === "string")
       : [],
-    ...(typeof speakers.definition_path === "string"
-      ? { definitionPath: speakers.definition_path }
-      : {}),
   };
 }
 
@@ -267,20 +263,20 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
  * setspdef() does after setparam() (src/dectalk-speaker-definition.ts).
  */
 function withDefinitionChanges(
-  registry: VoiceRegistry,
+  context: SpeakerDefinitionContext | undefined,
   docPath: string,
   doc: Record<string, unknown>,
   changes: readonly DefinitionChange[],
 ): Record<string, unknown> {
-  if (registry.definitionPath === undefined) {
+  if (context === undefined) {
     throw new Error(
-      "E_VOICE_DEFINITION: the frontend declares no speakers.definition_path, so a voice's definition cannot be changed",
+      "E_VOICE_DEFINITION: selected speaker-definition context was not supplied, so a voice's definition cannot be changed",
     );
   }
-  const data = loadYamlDocumentSync<unknown>(registry.definitionPath);
+  const data = context.data;
   if (!isSpeakerDefinitionData(data)) {
     throw new Error(
-      `E_VOICE_DEFINITION: '${registry.definitionPath}' does not hold the names and limits of a speaker definition`,
+      `E_VOICE_DEFINITION: '${context.path}' does not hold the names and limits of a speaker definition`,
     );
   }
   if (!isSpeakerDefinition(doc.definition)) {
@@ -320,6 +316,7 @@ export function resolveVoice(
   profileSpec: SpeakerProfileSpec,
   /** Changes to the voice's speaker definition, in the order they were asked. */
   definitionChanges: readonly DefinitionChange[] = [],
+  definitionContext?: SpeakerDefinitionContext,
 ): ResolvedVoice {
   const name = voiceName.trim().toLowerCase();
   if (registry.voices.length > 0 && !registry.voices.includes(name)) {
@@ -332,7 +329,7 @@ export function resolveVoice(
   const [docPath, loaded] = loadVoiceDocument(registry, name);
   const doc =
     definitionChanges.length > 0
-      ? withDefinitionChanges(registry, docPath, loaded, definitionChanges)
+      ? withDefinitionChanges(definitionContext, docPath, loaded, definitionChanges)
       : loaded;
 
   const params = toNumberRecord(doc);

@@ -82,7 +82,7 @@ describe("frontend/experiment pairing", () => {
       "klatt80-baseline",
     );
     expect(() => defaultExperimentFor("dectalk-english", null, experimentIds)).toThrow(
-      /E_FRONTEND_DEFAULT_EXPERIMENT/,
+      /E_FRONTEND_DEFAULT_EXPERIMENT.*not in the frontend catalogue/,
     );
     expect(() =>
       defaultExperimentFor(
@@ -90,7 +90,7 @@ describe("frontend/experiment pairing", () => {
         { frontends: [{ id: "dectalk-english" }] },
         experimentIds,
       ),
-    ).toThrow(/E_FRONTEND_DEFAULT_EXPERIMENT/);
+    ).toThrow(/E_FRONTEND_DEFAULT_EXPERIMENT.*declares no default experiment/);
     expect(() =>
       defaultExperimentFor(
         "x",

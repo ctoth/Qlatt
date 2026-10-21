@@ -65,14 +65,13 @@ Promise.all([loadExperimentManifest(), loadFrontendManifest()]).then(() => {
   if (experimentSelect) {
     experimentSelect.addEventListener("change", onExperimentChange);
   }
+  // Apply defaults only after both manifests are available.
+  document.getElementById("frontendSelect")?.addEventListener("change", () => {
+    applyFrontendDefault();
+    refreshSpeakerOptions().then(warmSelectedFrontend);
+  });
   // Auto-pair frontend -> experiment on load and populate the voice dropdown,
   // then prepare the frontend with the voice the dropdown shows.
-  applyFrontendDefault();
-  refreshSpeakerOptions().then(warmSelectedFrontend);
-});
-
-// Frontend change: re-pair the experiment graph and repopulate the voices.
-document.getElementById("frontendSelect")?.addEventListener("change", () => {
   applyFrontendDefault();
   refreshSpeakerOptions().then(warmSelectedFrontend);
 });

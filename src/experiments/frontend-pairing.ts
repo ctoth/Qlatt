@@ -34,9 +34,13 @@ export function defaultExperimentFor(
   const entry = manifest?.frontends?.find((candidate) => candidate.id === frontendId);
   const declared = entry?.defaultExperiment;
   if (typeof declared !== "string" || !declared.trim() || !experimentIds.includes(declared)) {
+    const reason = !entry
+      ? "is not in the frontend catalogue"
+      : declared === undefined
+        ? "declares no default experiment"
+        : `names invalid or unavailable default experiment '${String(declared)}'`;
     throw new Error(
-      `E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' names default experiment ` +
-        `'${String(declared)}', which is not in the experiment manifest`,
+      `E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' ${reason}`,
     );
   }
   return declared;

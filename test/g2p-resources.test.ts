@@ -1,7 +1,12 @@
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, expect, it } from "vitest";
+import { pathToFileURL } from "node:url";
+import { afterEach, expect, it, vi } from "vitest";
+import {
+  loadCmuDictionaryFromPathSync,
+  preloadCmuDictionaryFromPath,
+} from "../src/cmu-dictionary-loader";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import {
   compileRuleEngineSpec,
@@ -24,6 +29,27 @@ import { loadYamlDocumentSync } from "../src/yaml-loader";
 const temporaryDirectories: string[] = [];
 afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) rmSync(directory, { recursive: true });
+});
+
+it("acquires file URL dictionaries on both paths without fetching missing files", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "qlatt dictionary url "));
+  temporaryDirectories.push(dir);
+  const fetch = vi.spyOn(globalThis, "fetch");
+  try {
+    const loaders = [loadCmuDictionaryFromPathSync, preloadCmuDictionaryFromPath];
+    for (const [index, load] of loaders.entries()) {
+      const file = join(dir, `dictionary #${index}.json`);
+      writeFileSync(file, '{"hello":"HH AH0 L OW1"}');
+      expect(await load(pathToFileURL(file).href)).toEqual({ hello: "HH AH0 L OW1" });
+      const absent = pathToFileURL(join(dir, `absent-${index}.json`)).href;
+      await expect(Promise.resolve().then(() => load(absent))).rejects.toThrow(
+        "E_CMU_DICT_PATH_UNKNOWN:",
+      );
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  } finally {
+    fetch.mockRestore();
+  }
 });
 
 it("decodes and reuses the selected generated JSON LTS document", () => {

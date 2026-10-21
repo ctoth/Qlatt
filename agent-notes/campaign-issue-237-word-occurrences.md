@@ -5,7 +5,8 @@ occurrences. Partial #237; no index-offset, scoped-command or live-NVDA claim.
 
 # State
 
-Implementing in an isolated worktree from current master after #448.
+PR #450 from master 4cba779c. Claude reviewed all five files at d037de93 and
+reported no correctness defects; implementer accepts the review.
 
 # Decisions and why
 
@@ -23,5 +24,10 @@ Raw UTF-16 offsets and parser transformations remain a separate larger task.
 
 # Next step
 
-Publish for hosted CI and full Claude review, respond, then supervisor gate/merge.
-Other agents share the repository; preserve their changes.
+Review session f6b0f60f-2c7e-499a-ba1d-857d00185cab confirmed the actual GitHub
+range. Coverage limits: projection is exercised through the real server; no
+claim that the repeated-word integration fixture was run against the old code.
+No extra API or speculative machinery added for those nonfinding observations.
+Initial quality/native/Node checks passed; final hosted CI remains pending.
+Supervisor owns independent verification, gate and merge. Other agents share
+the repository; preserve their changes.

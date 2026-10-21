@@ -831,7 +831,9 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     expect(loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty")).inlineMarkers).toEqual(
       policy,
     );
-    const { inline_markers: _markers, ...without } = spec;
+    const without = Object.fromEntries(
+      Object.entries(spec).filter(([key]) => key !== "inline_markers"),
+    );
     expect(loadFrontendResources(without).inlineMarkers).toBeUndefined();
   });
 

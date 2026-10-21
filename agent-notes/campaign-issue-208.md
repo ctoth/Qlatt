@@ -4,6 +4,8 @@ Declare #208's inline convenience syntax in the selected frontend while keeping 
 # State
 PR #401 implementation on isolated base 5c18e8d1 is complete. Hosted quality job 119144725950 reported one formatter error with two test reflows; applied the exact emitted formatting without behavior changes. Claude review and replacement CI pending. No local CI runs. Other agents own unrelated inventory resource changes; preserve their work.
 
+Replacement quality job 119145878525 reached typecheck and reported TS2339 at input.test.ts834: the compiled spec type does not declare additional root fields. The absent-policy fixture now filters Object.entries rather than destructuring that undeclared property. This retains the actual loaded spec and removes only inline_markers; no production change or validation weakening.
+
 # Decisions and why
 Smallest plan: about 170–220 production/data lines and 90–120 lines in existing input tests. Add optional inline_markers to the existing frontend document, validate it at resource acquisition, and require an explicit policy argument to parseInline. The DSL parser already preserves additional root fields. No new resource service, registry, automatic inline interpretation or authoring model.
 

@@ -1328,18 +1328,52 @@ export function lowerToFrames(
     edge: "leading" | "trailing",
     spanMs: number,
     build: (window: { startMs: number; endMs: number }) => ResolvedSegmentTransition | null,
-  ): void => {
-    if (edge === "leading") {
-      const endMs = Math.min(spanMs, durationMs - minTransitionEdgeMs);
-      if (endMs <= 0) return;
-      const transition = build({ startMs: 0, endMs });
-      if (transition) appendTransition(item, transition);
-      return;
+    kind = "blend",
+  ): boolean => {
+    const requested =
+      edge === "leading"
+        ? { startMs: 0, endMs: spanMs }
+        : { startMs: durationMs - spanMs, endMs: durationMs };
+    const applied =
+      edge === "leading"
+        ? { startMs: 0, endMs: Math.min(spanMs, durationMs - minTransitionEdgeMs) }
+        : { startMs: Math.max(minTransitionEdgeMs, durationMs - spanMs), endMs: durationMs };
+    const dropped = applied.endMs <= applied.startMs;
+    // Builders only select fields. A dropped candidate uses its requested
+    // window to establish whether any transition was actually requested.
+    const transition = build(dropped ? requested : applied);
+    if (!transition) return false;
+    const fields = [...Object.keys(transition.fields), ...Object.keys(transition.linearFields ?? {})];
+    if (spanMs > 0 && fields.length > 0 && (dropped || applied.endMs - applied.startMs < spanMs)) {
+      utterance.diagnostics.warn(
+        dropped
+          ? "Requested transition window was dropped"
+          : "Requested transition window was shortened",
+        {
+          itemId: item.id,
+          kind,
+          edge,
+          requested,
+          applied: dropped ? null : applied,
+          durationMs,
+          minTransitionEdgeMs,
+          reason: "minimum_transition_edge",
+          fields,
+          citations: options.transitions.min_transition_edge_ms.citations ?? [],
+          parents: [
+            ...new Set(
+              ["duration", "transition_ms", ...fields]
+                .map((field) => item.latestWrite(field)?.decisionId)
+                .filter((id): id is string => typeof id === "string"),
+            ),
+          ],
+        },
+        "HRG_LOWER_TRANSITION_WINDOW_LIMITED",
+      );
     }
-    const startMs = Math.max(minTransitionEdgeMs, durationMs - spanMs);
-    if (startMs >= durationMs) return;
-    const transition = build({ startMs, endMs: durationMs });
-    if (transition) appendTransition(item, transition);
+    if (dropped) return false;
+    appendTransition(item, transition);
+    return true;
   };
   timings.forEach((timing, index) => {
     const nextTiming = timings[index + 1];
@@ -1446,6 +1480,7 @@ export function lowerToFrames(
               },
             };
           },
+          "sonorant_f2",
         );
       }
       const next = timings[index + 1];
@@ -1471,6 +1506,7 @@ export function lowerToFrames(
               },
             };
           },
+          "sonorant_f2",
         );
       }
     });
@@ -1508,15 +1544,13 @@ export function lowerToFrames(
           phonemeKey,
         )) {
           const currentValue = timing.item.get(formant.key);
-          let applied = false;
-          addLinearTransition(
+          const applied = addLinearTransition(
             timing.item,
             timing.durationMs,
             "leading",
             formant.spanMs,
             ({ startMs, endMs }) => {
               if (typeof currentValue !== "number") return null;
-              applied = true;
               return {
                 startMs,
                 endMs,
@@ -1529,6 +1563,7 @@ export function lowerToFrames(
                 },
               };
             },
+            "locus",
           );
           if (!applied) continue;
           // DECtalk p_us_st1.c applies the same locus boundary while drawing
@@ -1626,6 +1661,7 @@ export function lowerToFrames(
                 },
               };
             },
+            "locus",
           );
         }
       }

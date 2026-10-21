@@ -126,7 +126,7 @@ function productionParams(time: number): Record<string, number> {
 }
 
 describe("HRG lowering locus transitions", () => {
-  it("matches captured DECtalk P-to-AE forward locus cells and per-key spans", () => {
+  it.each([20, 200])("preserves locus output with a %i ms edge", (edgeMs) => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "seg_0", "P", "stop_closure", 83, {
@@ -170,7 +170,31 @@ describe("HRG lowering locus transitions", () => {
     timing.resolveMarkTime(nextClosureAnchor.rightMarkId, 309);
     timing.commit();
 
-    const lowered = lowerToFrames(utterance, POLICY);
+    const lowered = lowerToFrames(utterance, {
+      ...POLICY,
+      transitions: {
+        ...POLICY.transitions,
+        min_transition_edge_ms: { ...POLICY.transitions.min_transition_edge_ms, value: edgeMs },
+      },
+    });
+    if (edgeMs === 200) {
+      // A dropped leading locus must not enable its closure or release-glue
+      // trajectories merely because its candidate fields were inspected.
+      for (const item of [closure, release, vowel, nextClosure]) {
+        const frames = lowered.frames.filter((frame) => frame.segmentId === item.id);
+        expect(frames.length).toBeGreaterThan(0);
+        expect(frames.every((frame) => frame.params.F3 === item.get("F3"))).toBe(true);
+      }
+      expect(utterance.diagnostics.getEntries()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "HRG_LOWER_TRANSITION_WINDOW_LIMITED",
+            data: expect.objectContaining({ itemId: vowel.id, kind: "locus", applied: null }),
+          }),
+        ]),
+      );
+      return;
+    }
     const closureStart = lowered.frames.find(
       (frame) => frame.segmentId === closure.id && Math.abs(frame.time - 0.0192) <= 1e-9,
     );

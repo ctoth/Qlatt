@@ -1,13 +1,11 @@
 // Lienard & Di Benedetto 1999: compare modal and effort-realized controls
 // on identical frontend frames, isolating effort from other source contours.
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
-import { expandFormantBanks } from "../src/formant-bank";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const phrase = process.argv.slice(2).join(" ") || "The quick brown fox jumps over the lazy dog.";
-const { semantics, graph } = await loadExperimentConfig("klatt80-baseline");
-expandFormantBanks(graph, semantics);
+const { semantics } = await loadExperimentConfig("klatt80-baseline");
 const { topoEvaluator } = createConfiguredEvaluator();
 const { track } = textToKlattTrackDetailed(phrase);
 console.log(`Phrase: ${phrase}`);

@@ -55,6 +55,15 @@ fixtures. Newer frame-program outputs also write the existing parameter maps;
 the emitter retains their actual source IDs without requiring synthetic writes.
 
 ## Next step
+Claude resumed conversation67c0fa5b and reviewed all subsequent semantic changes
+through f0bd137f, including eight added files: union43 PR files. No new actionable
+findings; accepted that response. Observations without real failing producers do
+not justify new guards or machinery. Historical measurements remain unchanged.
+Normally integrated origin/master447d28f5 with no conflicts, preserving the
+prepared backend boundary and owner-based F0 loading. The revised browser
+baseline harness now supplies createBrowserRuntimeAssetLoader to preloadF0Filters;
+its runner only produces frontend tracks and has no backend configuration caller.
+No local CI, browser execution or measurements were run for this integration.
 The revised candidate and accepted Claude response are published. Initial shard1
 also exposed manifests missing the new shared include and a newer control-window
 fixture expecting the old direct source ID. Added the actual acquired paths and

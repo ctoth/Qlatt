@@ -398,13 +398,31 @@ render host includes these events in its diagnostic report.
 Failed CEL realization reporting is separate from these structural diagnostics.
 Normal default selection and its provenance are unchanged.
 
-All five experiment graphs pass `bacon check` against their declared registry
-layers (`meta.primitives` is a list merged in order, later entries winning per
-primitive). Qlatt extension data (`formantBanks`, including its
-`connections` to bank-generated nodes) lives under the graph's `meta:` key, so
-the static documents validate without knowledge of Qlatt's macros. Audio-rate
-connections into node parameters are first-class in the schema
-(`to: { node, param }`).
+Authored graphs may reference macro-generated nodes and do not necessarily pass
+standalone `bacon check`. `loadExperimentConfig` resolves inheritance, then
+`prepareExperimentConfig` clones the result, expands Qlatt macros, checks Bacon
+structure and Qlatt semantic references/bindings, and checks realization order.
+Explicit dependencies preserve prior-input reads where an input and realization
+share a name; absent dependency lists are inferred from unambiguous realization
+references. The runtime consumes that prepared plain config;
+it does not expand it again. Audio-rate parameter destinations remain
+`to: { node, param }`. Invalid static bindings fail before audio allocation;
+failures caused by runtime input values retain their existing diagnostics.
+
+Run `node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node
+scripts/check-experiments.ts` to check every manifest entry, including inherited
+experiments. The report lists unreachable definitions and their owners without
+pruning them. Source attribution follows authored documents through composition
+and expansion. This does not define #248's portable envelope or URL identities.
+
+The current `stevens91` entry is rejected: its cascade-only formants 7–10 do not
+declare parallel amplitude inputs `A7`–`A10` or realizations `a7Linear`–`a10Linear`,
+but inherited baseline `fricA7`–`fricA10` and their linear rules reference them.
+The first diagnostic names the baseline `realize_each` expression at line 1119
+and expanded field `/realize/fricA7/expr`. The report exits nonzero for this
+invalid entry; it does not claim every bundled model is valid. Model repair is
+tracked separately in #254. Its authored formant bank and inherited PLSTEP
+policy retain independent unit coverage, without an unchecked runtime route.
 
 Each `meta.formantBanks.*.formants[]` entry with `parallelSource` must declare
 `ampRange: [minimum, maximum]` and `ampDefault`, alongside `ndbScale` and `sign`.

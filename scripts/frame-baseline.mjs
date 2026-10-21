@@ -108,7 +108,10 @@ try {
     await page.goto("http://127.0.0.1:8134/");
     results = await page.evaluate(async (phrases) => {
       const { preloadF0Filters } = await import("/src/f0-filters-loader.ts");
-      await preloadF0Filters("/worklets/f0-filters.wasm");
+      const { createBrowserRuntimeAssetLoader } = await import(
+        "/src/runtime-assets/browser-loader.ts"
+      );
+      await preloadF0Filters(createBrowserRuntimeAssetLoader("/worklets/"));
       const { measureFrames } = await import("/scripts/frame-baseline-run.ts");
       return measureFrames(phrases);
     }, phrases);

@@ -13,9 +13,10 @@
       import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
       import { createKlattRuntime } from "../src/klatt-runtime.ts";
       import { summarizeTrack } from "../src/rendering/track-summary.ts";
+      import { createBrowserRuntimeAssetLoader } from "../src/runtime-assets/browser-loader.ts";
       import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
 
-      const F0_FILTERS_WASM_URL = `${import.meta.env.BASE_URL}worklets/f0-filters.wasm`;
+      const WORKLET_BASE_PATH = `${import.meta.env.BASE_URL}worklets/`;
 
       async function renderOfflineRuntime({
         phrase,
@@ -46,7 +47,7 @@
         // Layered-additive F0 frontends (e.g. dectalk-english) call a
         // synchronous WASM kernel; preload its bytes before the sync call.
         if (!Array.isArray(track)) {
-          await preloadF0Filters(F0_FILTERS_WASM_URL);
+          await preloadF0Filters(createBrowserRuntimeAssetLoader(WORKLET_BASE_PATH));
         }
         const frontend = Array.isArray(track)
           ? undefined
@@ -74,9 +75,7 @@
         const runtime = await createKlattRuntime({
           diagnostics,
           audioContext: ctx,
-          graph: config.graph,
-          semantics: config.semantics,
-          registry: config.registry,
+          config,
           workletBasePath: `${import.meta.env.BASE_URL}worklets/`,
         });
         runtime.connectToDestination();

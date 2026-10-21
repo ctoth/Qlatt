@@ -12,7 +12,9 @@ import {
   parseFormantBanks,
 } from "../src/formant-bank";
 import type { BaconGraph } from "../src/klatt-runtime";
+import { loadSemanticsDocumentSync } from "../src/semantics/load-semantics";
 import type { SemanticsDocument } from "../src/semantics/types";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const validBank = {
   cascade: { input: "input", output: "cascadeOutput" },
@@ -337,8 +339,21 @@ describe("bundled formant-bank declarations", () => {
     "qlatt-beauty",
     "steinecke95",
   ]) {
-    it(`validates and expands ${experimentId}`, async () => {
-      const { graph, semantics } = await loadExperimentConfig(experimentId);
+    it(`validates the authored bank in ${experimentId}`, async () => {
+      if (experimentId === "stevens91") {
+        await expect(loadExperimentConfig(experimentId)).rejects.toThrow(
+          /E_SEMANTICS_REFERENCE.*\/realize\/fricA7\/expr.*'A7'/,
+        );
+      }
+      // Stevens' bank is valid independently of its inherited, unsupported
+      // parallel frication rules; this is macro coverage, not a runtime route.
+      const { graph, semantics } =
+        experimentId === "stevens91"
+          ? {
+              graph: loadYamlDocumentSync<BaconGraph>("/experiments/stevens91/graph.yaml"),
+              semantics: loadSemanticsDocumentSync("/experiments/klatt80-baseline/semantics.yaml"),
+            }
+          : await loadExperimentConfig(experimentId);
 
       expect(() => expandFormantBanks(graph, semantics)).not.toThrow();
       expect(graph.meta?.formantBanks).toBeUndefined();

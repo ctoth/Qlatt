@@ -7,8 +7,9 @@
  * 3. Cleans up the message handler on timeout
  */
 import { describe, expect, it, vi } from "vitest";
-import { createKlattRuntime, waitForNodeReady } from "../src/klatt-runtime";
+import { waitForNodeReady } from "../src/klatt-runtime";
 import { initWasmModule } from "../src/worklets/wasm-utils";
+import { createPreparedRuntime } from "./runtime-fixture";
 
 // ---------------------------------------------------------------------------
 // Mock AudioWorkletNode with a controllable MessagePort
@@ -175,7 +176,7 @@ describe("KlattRuntime worklet lifecycle", () => {
       }
     }
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: {
         audioWorklet: { addModule: vi.fn(async () => {}) },
       } as unknown as AudioContext,
@@ -185,6 +186,7 @@ describe("KlattRuntime worklet lifecycle", () => {
       },
       semantics: { name: "test", params: {} },
       registry: {
+        bacon: "0.1",
         primitives: {
           source: {
             worklet: "source-processor.js",
@@ -194,7 +196,7 @@ describe("KlattRuntime worklet lifecycle", () => {
         },
       },
       audioWorkletNodeCtor: MockAudioWorkletNode as unknown as NonNullable<
-        Parameters<typeof createKlattRuntime>[0]["audioWorkletNodeCtor"]
+        Parameters<typeof createPreparedRuntime>[0]["audioWorkletNodeCtor"]
       >,
       assetLoader: {
         resolveWorkletModule: (moduleName) => moduleName,
@@ -231,7 +233,7 @@ describe("KlattRuntime worklet lifecycle", () => {
         }
       }
 
-      const runtimePromise = createKlattRuntime({
+      const runtimePromise = createPreparedRuntime({
         audioContext: {
           audioWorklet: { addModule: vi.fn(async () => {}) },
         } as unknown as AudioContext,
@@ -241,6 +243,7 @@ describe("KlattRuntime worklet lifecycle", () => {
         },
         semantics: { name: "test", params: {} },
         registry: {
+          bacon: "0.1",
           primitives: {
             source: {
               worklet: "source-processor.js",
@@ -250,7 +253,7 @@ describe("KlattRuntime worklet lifecycle", () => {
           },
         },
         audioWorkletNodeCtor: UnreadyAudioWorkletNode as unknown as NonNullable<
-          Parameters<typeof createKlattRuntime>[0]["audioWorkletNodeCtor"]
+          Parameters<typeof createPreparedRuntime>[0]["audioWorkletNodeCtor"]
         >,
         assetLoader: {
           resolveWorkletModule: (moduleName) => moduleName,

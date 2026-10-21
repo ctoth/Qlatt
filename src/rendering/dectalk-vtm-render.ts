@@ -109,9 +109,7 @@ export async function renderDectalkVtmTrack(
       diagnostics,
       provenance,
       audioContext: ctx as unknown as AudioContext,
-      graph: config.graph,
-      semantics: config.semantics,
-      registry: config.registry,
+      config,
       assetLoader,
       audioWorkletNodeCtor: NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
       ...(process.env.QLATT_RENDER_DEBUG === "1"

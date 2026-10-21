@@ -4,6 +4,15 @@ import { loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
 import type { SemanticsConstants, SemanticsDocument } from "../semantics/types";
 import { isPlainObject, loadYamlDocumentOrNull } from "../yaml-loader";
 import { assertFrontendVocabulary } from "./frontend-vocabulary";
+import {
+  type ConfigSources,
+  composeSources,
+  constantReplacements,
+  documentSources,
+  type PreparedExperimentConfig,
+  prepareExperimentConfig,
+  sourcePath,
+} from "./prepare-experiment-config";
 
 type ExperimentManifestEntry = {
   id: string;
@@ -18,6 +27,7 @@ export interface ExperimentConfig {
   graph: BaconGraph;
   semantics: SemanticsDocument;
   registry: Registry;
+  sources?: ConfigSources;
 }
 
 function mergeConstants(parent: SemanticsConstants, child: SemanticsConstants): SemanticsConstants {
@@ -81,8 +91,8 @@ async function loadJsonDocument<T>(specPath: string): Promise<T> {
 export async function loadExperimentConfig(
   experimentId: string,
   frontendId?: string,
-): Promise<ExperimentConfig> {
-  const config = await loadConfig(experimentId);
+): Promise<PreparedExperimentConfig> {
+  const config = prepareExperimentConfig(await loadConfig(experimentId), experimentId);
   if (frontendId !== undefined) await assertFrontendVocabulary(frontendId, config);
   return config;
 }
@@ -126,18 +136,55 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
       loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
       loadYamlDocumentOrNull<Registry>(`${basePath}/registry.yaml`),
     ]);
+    const sources: ConfigSources = {
+      graph: documentSources(childGraph, `${basePath}/graph.yaml`),
+      semantics: documentSources(childSemantics, `${basePath}/semantics.yaml`),
+      registry: documentSources(childRegistry, `${basePath}/registry.yaml`),
+    };
 
     if (!parent) {
       if (!childGraph || !childSemantics || !childRegistry) {
         throw new Error(`Incomplete experiment config for '${id}' (${context})`);
       }
-      return { graph: childGraph, semantics: childSemantics, registry: childRegistry };
+      return { graph: childGraph, semantics: childSemantics, registry: childRegistry, sources };
     }
 
     return {
       graph: childGraph ?? parent.graph,
       semantics: mergeSemantics(parent.semantics, childSemantics),
       registry: mergeRegistry(parent.registry, childRegistry),
+      sources: {
+        graph: childGraph ? sources.graph : parent.sources!.graph,
+        registry: childRegistry
+          ? composeSources(
+              parent.sources!.registry,
+              Object.fromEntries(
+                Object.entries(sources.registry).filter(
+                  ([path]) => path === "/primitives" || path.startsWith("/primitives/"),
+                ),
+              ),
+              Object.keys(childRegistry.primitives ?? {}).map((name) =>
+                sourcePath(["primitives", name]),
+              ),
+            )
+          : parent.sources!.registry,
+        semantics: childSemantics
+          ? composeSources(parent.sources!.semantics, sources.semantics, [
+              ...Object.keys(childSemantics)
+                .filter((key) => !["params", "realize", "constants"].includes(key))
+                .map((key) => sourcePath([key])),
+              ...["params", "realize"].flatMap((key) =>
+                Object.keys(childSemantics[key as "params" | "realize"] ?? {}).map((name) =>
+                  sourcePath([key, name]),
+                ),
+              ),
+              ...constantReplacements(
+                parent.semantics.constants ?? {},
+                childSemantics.constants ?? {},
+              ),
+            ])
+          : parent.sources!.semantics,
+      },
     };
   }
 

@@ -46,9 +46,9 @@ describe("harness runtime replacement", () => {
 
     await loadNewRuntimeConfig();
 
-    expect(state.newRuntimeSemantics?.params?.AV.default).toBe(50);
-    expect(state.newRuntimeGraph?.name).toBe("klatt80-synth");
-    expect(state.newRuntimeRegistry?.primitives["tilt-filter"]).toBeDefined();
+    expect(state.newRuntimeConfig?.semantics?.params?.AV.default).toBe(50);
+    expect(state.newRuntimeConfig?.graph?.name).toBe("klatt80-synth");
+    expect(state.newRuntimeConfig?.registry?.primitives["tilt-filter"]).toBeDefined();
     expect(state.currentExperimentId).toBe("test-inherit");
     expect(status.textContent).toBe("Status: test-inherit config loaded");
   });
@@ -71,11 +71,11 @@ describe("harness runtime replacement", () => {
     const { state } = await import("./harness/state.js");
     const { loadNewRuntimeConfig } = await import("./harness/experiment.js");
     await loadNewRuntimeConfig();
-    const graph = state.newRuntimeGraph;
+    const graph = state.newRuntimeConfig?.graph;
     frontend.value = "dectalk-english";
     await expect(loadNewRuntimeConfig()).rejects.toThrow(/E_FRONTEND_VOCABULARY.*breathiness/);
     frontend.value = "qlatt-english";
     await expect(loadNewRuntimeConfig()).resolves.toBeUndefined();
-    expect(state.newRuntimeGraph).toBe(graph);
+    expect(state.newRuntimeConfig?.graph).toBe(graph);
   });
 });

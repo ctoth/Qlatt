@@ -92,7 +92,7 @@ export function formatValue(spec, value) {
 }
 
 export function getSemanticsDefault(paramName, fallback) {
-  const entry = state.newRuntimeSemantics?.params?.[paramName];
+  const entry = state.newRuntimeConfig?.semantics?.params?.[paramName];
   return entry?.default ?? fallback;
 }
 

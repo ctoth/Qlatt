@@ -8,7 +8,7 @@ Started from origin/master ad91bc80. Implemented unchanged-index apply span rete
 Retain numeric authored paths only below rules.<name>.apply. At compiled handoff, omit indexed apply spans if the composed apply array contains foreach or for_each_field expansion. Read actual composed directive objects so aliases cannot conceal expansion. Other direct rule locations remain available. Match typed numeric paths using bracket notation; omit ambiguous authored string keys. Semantic expression paths use values, structural field errors use keys.
 
 # Surprises
-None. Other agents are active; preserve their edits.
+Hosted quality job 119122685812 reported formatter wrapping in the existing test file. Applied the exact requested predicate/assertion layout; production unchanged, no local CI run. Other agents are active; preserve their edits.
 
 # Next step
 Publish for hosted CI and Claude review. Full #224 remains open.

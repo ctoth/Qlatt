@@ -273,7 +273,8 @@ describe("direct rule errors through composition", () => {
             ],
           ] as const) {
             const source = entries.find(
-              (entry) => entry.value.path.join(".") === `rules.unknown_path_relation.${authoredPath}`,
+              (entry) =>
+                entry.value.path.join(".") === `rules.unknown_path_relation.${authoredPath}`,
             )?.[position];
             expect(source).toBeDefined();
             expect(
@@ -622,7 +623,9 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     expect(origins).not.toHaveProperty("vocal_effort");
     expect(spans.some((entry) => entry.value.path[1] === "vocal_effort")).toBe(false);
     expect(
-      spans.some((entry) => entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number"),
+      spans.some(
+        (entry) => entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number",
+      ),
     ).toBe(true);
     for (const name of [
       "place_f2_locus",
@@ -632,11 +635,13 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     ]) {
       expect(rules).toHaveProperty(name);
       expect(
-        spans.some((entry) => entry.value.path[1] === name && typeof entry.value.path[3] === "number"),
+        spans.some(
+          (entry) => entry.value.path[1] === name && typeof entry.value.path[3] === "number",
+        ),
       ).toBe(false);
-      expect(spans.some((entry) => entry.value.path.join(".") === `rules.${name}.select.where`)).toBe(
-        true,
-      );
+      expect(
+        spans.some((entry) => entry.value.path.join(".") === `rules.${name}.select.where`),
+      ).toBe(true);
     }
   }
 

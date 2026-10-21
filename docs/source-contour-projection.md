@@ -1,6 +1,6 @@
 # Source contour projection
 
-The frontend's `source_contour_path` selects the YAML policy that resolves voice
+The frontend's `resources.source_contour` selects the YAML policy that resolves voice
 quality and projects it onto Segment targets before final frame lowering.
 `projection` is required; an empty list disables source projection. Formant
 scaling still uses the active inventory's formant keys.

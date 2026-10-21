@@ -94,7 +94,7 @@ export function rulepackMapOrigins(
   return MAP_ORIGINS.get(spec) ?? {};
 }
 
-/** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
+/** Parse authored YAML and normalize resource aliases before document composition. */
 function parseRulepackDocument(source: string, label: string): PlainObject {
   const authored = parseYamlString(source, label, {
     resource: label.replace(/^(included|base) rulepack /, ""),

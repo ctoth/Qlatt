@@ -2,7 +2,7 @@
 Remove global VQ data acquisition and thread selected channels through existing consumers for #141.
 
 # State
-Implemented from d8308238 after #355 merged. Preparing PR for hosted CI and Claude review; no local CI run.
+Implemented from d8308238 after #355 merged. PR #361 awaits Claude review and replacement hosted CI; no local CI run.
 
 # Decisions and why
 - Smallest coherent change: roughly 220-350 production lines plus existing fixtures. Use one cached composite per VQ path containing parsed channels and Rd policy; retain the existing rdPolicy member.
@@ -16,5 +16,7 @@ Wrapping the existing direction schema in a factory changes its indentation, inc
 
 Source inspection found that the preexisting unconditional neutral affect object also made the F1/F2/F3 clamp run on no-delta paths. With supervisor verification, moved that existing clamp outside the optional affect branch, preserving its exact thresholds and diagnostic. The existing lowering fixture now covers no-channel/no-delta clamp behavior.
 
+Initial quality job 119063670778 reported one formatter error in test/apply-affect.test.ts:18. Applied the emitted wrapper line break; no behavior change.
+
 # Next step
-Publish PR and inspect hosted CI; respond to independent Claude review. #141 remains open for relocation and remaining resource ownership.
+Inspect replacement hosted CI and respond to independent Claude review. #141 remains open for relocation and remaining resource ownership.

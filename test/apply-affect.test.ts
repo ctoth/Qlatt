@@ -15,7 +15,11 @@ function applyAffectToTrack(
   track: Parameters<typeof applyWithPolicy>[0],
   affect: Parameters<typeof applyWithPolicy>[1],
 ) {
-  return applyWithPolicy(track, affect, { frontendId: "qlatt-beauty", rdPolicy, vqChannels: channels });
+  return applyWithPolicy(track, affect, {
+    frontendId: "qlatt-beauty",
+    rdPolicy,
+    vqChannels: channels,
+  });
 }
 
 /**

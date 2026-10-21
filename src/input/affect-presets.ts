@@ -1,6 +1,6 @@
 import { isPlainObject } from "../yaml-loader";
 import type { AffectPreset } from "./affect";
-import { VQ_FIELDS } from "./vq-channels";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 export interface AffectLibrary {
   presets: ReadonlyMap<string, AffectPreset>;
@@ -36,7 +36,6 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
   if (!Array.isArray(root.presets) || root.presets.length === 0)
     throw new Error("presets must be nonempty");
   const presets = new Map<string, AffectPreset>();
-  const fields = new Set(VQ_FIELDS);
   for (const entry of root.presets) {
     const row = object(entry, "preset");
     if (typeof row.name !== "string" || row.name.trim().length === 0)
@@ -59,7 +58,6 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
     const vq = object(row.vq, `${name}.vq`);
     const values: Record<string, number> = {};
     for (const [key, value] of Object.entries(vq)) {
-      if (!fields.has(key)) throw new Error(`${name}: unknown voice-quality channel ${key}`);
       values[key] = finite(value, `${name}.${key}`);
     }
     if (row.note !== undefined && typeof row.note !== "string")
@@ -126,6 +124,19 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
     variants,
     degree: { points, citations: strings(degree.citations, "degree.citations", false) },
   };
+}
+
+/** Check selected channels independently of the path-cached structural library. */
+export function validateAffectPresetChannels(
+  library: AffectLibrary,
+  channels: readonly VoiceQualityChannel[],
+): void {
+  const fields = new Set(channels.map((row) => row.channel));
+  for (const preset of library.presets.values()) {
+    for (const key of Object.keys(preset.vq)) {
+      if (!fields.has(key)) throw new Error(`${preset.name}: unknown voice-quality channel ${key}`);
+    }
+  }
 }
 
 /** Piecewise linear evaluation; the asset declares the curve and endpoint clamp values. */

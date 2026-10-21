@@ -7,7 +7,7 @@
  *
  * Everything is a *delta over the neutral render* (Rutledge_1995 multiplicative
  * style-vectors; HAMLET/Murray_1993 rules as the final TTS stage): a neutral
- * affect (NEUTRAL_VQ / degree 0) is the identity — the track is returned
+ * affect (selected channel neutrals / degree 0) is the identity — the track is returned
  * numerically unchanged, so a default no-affect render bit-matches a plain one.
  *
  * Channel mapping (per design/beauty-synthesis/13-direction-track-format.md §2
@@ -40,9 +40,9 @@
 
 import type { KlattFrame } from "../tts-frontend-types";
 import type { CompiledAffect } from "./affect";
-import { NEUTRAL_VQ, type VoiceQualityDelta } from "./direction-track";
+import type { VoiceQualityDelta } from "./direction-track";
 import { projectRd, type RdPolicy } from "./rd-policy";
-import { VQ_PARAM_CHANNELS } from "./vq-channels";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 /** Result of applying an affect: the new track plus the citations consumed. */
 export interface AffectApplication {
@@ -64,7 +64,7 @@ function isCompiledAffect(value: CompiledAffect | VoiceQualityDelta): value is C
 export function applyAffectToTrack(
   track: readonly KlattFrame[],
   affect: CompiledAffect | VoiceQualityDelta,
-  context: { frontendId: string; rdPolicy?: RdPolicy },
+  context: { frontendId: string; rdPolicy?: RdPolicy; vqChannels: readonly VoiceQualityChannel[] },
 ): AffectApplication {
   const vq: VoiceQualityDelta = isCompiledAffect(affect) ? affect.vq : affect;
   const baseCitations = isCompiledAffect(affect) ? affect.citations : [];
@@ -118,8 +118,8 @@ export function applyAffectToTrack(
       Object.assign(params, projectRd(params, vq.rdDelta, context.rdPolicy));
     }
 
-    for (const row of VQ_PARAM_CHANNELS) {
-      if (!row.apply_track) continue;
+    for (const row of context.vqChannels) {
+      if (row.projection !== "param" || !row.apply_track) continue;
       const value = vq[row.channel] ?? row.neutral;
       const base = params[row.backend_param];
       if (value === row.neutral || typeof base !== "number" || !Number.isFinite(base)) continue;
@@ -145,8 +145,9 @@ export function applyAffectToTrack(
 }
 
 /** True when this delta is the neutral identity (applying it is a no-op). */
-export function isNeutralDelta(vq: VoiceQualityDelta): boolean {
-  return (Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>).every(
-    (key) => vq[key] === NEUTRAL_VQ[key],
-  );
+export function isNeutralDelta(
+  channels: readonly VoiceQualityChannel[],
+  vq: VoiceQualityDelta,
+): boolean {
+  return channels.every((row) => vq[row.channel] === row.neutral);
 }

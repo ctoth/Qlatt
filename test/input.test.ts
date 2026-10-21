@@ -13,7 +13,7 @@ import { parseAffectPresets } from "../src/input/affect-presets";
 import type { DirectionInput, DirectionTrack } from "../src/input/direction-track";
 import {
   NEUTRAL_DIMENSIONS,
-  NEUTRAL_VQ,
+  neutralVoiceQualityDelta,
   parseDirectionTrack,
   serializeDirectionTrack,
 } from "../src/input/direction-track";
@@ -25,11 +25,14 @@ import {
   spansAt,
   tokenizeScore,
 } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
-const affectOptions = { frontendId: "fixture", affectLibrary: library };
+const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const NEUTRAL_VQ = neutralVoiceQualityDelta(channels);
+const affectOptions = { frontendId: "fixture", affectLibrary: library, vqChannels: channels };
 
 describe("input contract — Direction Track schema", () => {
   it("round-trips syllable stress and rejects invalid indices and levels", () => {
@@ -324,7 +327,7 @@ describe("input contract — authored syllable stress", () => {
 
 describe("input contract — neutral base case", () => {
   it("neutralAffect() is the identity dimensional + VQ vector", () => {
-    const n = neutralAffect(library);
+    const n = neutralAffect(library, channels);
     expect(n.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(n.vq).toEqual(NEUTRAL_VQ);
   });
@@ -341,7 +344,7 @@ describe("input contract — neutral base case", () => {
   });
 
   it("degree 0 of any preset collapses to the neutral vector", () => {
-    const zero = compileAffect(library, "angry", 0);
+    const zero = compileAffect(library, channels, "angry", 0);
     expect(zero.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(zero.vq).toEqual(NEUTRAL_VQ);
   });
@@ -349,7 +352,7 @@ describe("input contract — neutral base case", () => {
 
 describe("input contract — affect compiler (cited presets)", () => {
   it("compiles 'angry' to the cited V/A/D + Rd/F0 deltas (Rutledge/France/Murray)", () => {
-    const c = compileAffect(library, "angry", 1);
+    const c = compileAffect(library, channels, "angry", 1);
     // Dimensional: negative valence, high arousal, dominant (doc 03 §1a).
     expect(c.dimensions.valence).toBeLessThan(0);
     expect(c.dimensions.arousal).toBeGreaterThan(0.5);
@@ -364,7 +367,7 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("compiles 'tender' to a positive-valence breathy substrate (doc 03 §6 composite)", () => {
-    const c = compileAffect(library, "tender", 1);
+    const c = compileAffect(library, channels, "tender", 1);
     expect(c.dimensions.valence).toBeGreaterThan(0);
     expect(c.dimensions.arousal).toBeLessThan(0); // low-arousal intimate
     expect(c.vq.rdDelta).toBeGreaterThan(0); // breathy (Gobl)
@@ -373,8 +376,8 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("scales linearly with degree (the continuous styledegree knob)", () => {
-    const half = compileAffect(library, "angry", 0.5);
-    const full = compileAffect(library, "angry", 1);
+    const half = compileAffect(library, channels, "angry", 0.5);
+    const full = compileAffect(library, channels, "angry", 1);
     // additive field rdDelta: half is half of full
     expect(half.vq.rdDelta).toBeCloseTo(full.vq.rdDelta / 2, 6);
     // multiplicative field f0Scale: interpolated from 1
@@ -399,8 +402,8 @@ describe("input contract — affect compiler (cited presets)", () => {
 
 describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () => {
   it("manic_male and manic_female are acoustically INVERTED", () => {
-    const male = compileAffect(library, "manic", 1, { sex: "male" });
-    const female = compileAffect(library, "manic", 1, { sex: "female" });
+    const male = compileAffect(library, channels, "manic", 1, { sex: "male" });
+    const female = compileAffect(library, channels, "manic", 1, { sex: "female" });
 
     // Loudness inverts: male louder (+), female quieter (-).
     expect(male.vq.intensityBoost).toBeGreaterThan(0);
@@ -426,7 +429,7 @@ describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () 
 
   it("a clinical preset REQUIRES a sex parameter (throws without one)", () => {
     expect(isClinicalSexRequired(library, "manic")).toBe(true);
-    expect(() => compileAffect(library, "manic", 1)).toThrow(/sex/i);
+    expect(() => compileAffect(library, channels, "manic", 1)).toThrow(/sex/i);
     expect(() => resolveAffectPreset(library, "depressive")).toThrow(/sex/i);
   });
 });
@@ -494,7 +497,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBeCloseTo(2, 6);
     expect(pitch.delta?.f0VarianceScale).toBe(1);
@@ -511,7 +516,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBe(1);
     expect(pitch.delta?.f0VarianceScale).toBe(1.5);
@@ -534,7 +541,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     };
 
-    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+    const pitch = parseDirectionInput(input, affectOptions).directions.find(
+      (d) => d.kind === "pitch",
+    )!;
 
     expect(pitch.delta?.f0Scale).toBeCloseTo(0.5, 6);
     expect(pitch.delta?.f0VarianceScale).toBe(0.75);
@@ -626,7 +635,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         ],
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
     const g = result.directions.find((d) => d.kind === "gesture")!;
     expect(g.tag).toBe("gesture");
     expect(g.citations).toContain("Gobl_2003");

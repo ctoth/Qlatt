@@ -1,8 +1,13 @@
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
-import { type AffectLibrary, parseAffectPresets } from "../input/affect-presets";
+import {
+  type AffectLibrary,
+  parseAffectPresets,
+  validateAffectPresetChannels,
+} from "../input/affect-presets";
 import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
+import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
 import type { AreaFunctionDerivation } from "../provenance";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
@@ -76,7 +81,11 @@ export type FrontendResources = {
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
   sourceContour?: { path: string; spec: SourceContourSpec };
   textParser?: { config: TextParserConfig; table: TextParserTable };
-  vqChannels?: { path: string; rdPolicy: RdPolicy };
+  vqChannels?: {
+    path: string;
+    channels: readonly VoiceQualityChannel[];
+    rdPolicy: RdPolicy;
+  };
   affectPresets?: { path: string; library: AffectLibrary };
 };
 
@@ -863,9 +872,30 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const vqChannelsPath =
     declaredResources.vq_channels == null
       ? undefined
-      : requireAsset(declaredResources.vq_channels, "vq_channels", (path) =>
-          readRdPolicy(loadYamlDocumentSync(path)),
-        );
+      : requireAsset(declaredResources.vq_channels, "vq_channels", (path) => {
+          const document = loadYamlDocumentSync(path);
+          return {
+            channels: parseVoiceQualityChannels(document),
+            rdPolicy: readRdPolicy(document),
+          };
+        });
+  const vqChannels =
+    vqChannelsPath === undefined
+      ? undefined
+      : {
+          path: vqChannelsPath,
+          ...(FRONTEND_ASSET_CACHE.get(vqChannelsPath) as {
+            channels: readonly VoiceQualityChannel[];
+            rdPolicy: RdPolicy;
+          }),
+        };
+  const affectLibrary =
+    affectPresetsPath === undefined
+      ? undefined
+      : (FRONTEND_ASSET_CACHE.get(affectPresetsPath) as AffectLibrary);
+  if (affectLibrary && vqChannels) {
+    validateAffectPresetChannels(affectLibrary, vqChannels.channels);
+  }
   return {
     inventory,
     inventoryPath,
@@ -875,22 +905,15 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
-    ...(affectPresetsPath === undefined
+    ...(affectPresetsPath === undefined || !affectLibrary
       ? {}
       : {
           affectPresets: {
             path: affectPresetsPath,
-            library: FRONTEND_ASSET_CACHE.get(affectPresetsPath) as AffectLibrary,
+            library: affectLibrary,
           },
         }),
-    ...(vqChannelsPath === undefined
-      ? {}
-      : {
-          vqChannels: {
-            path: vqChannelsPath,
-            rdPolicy: FRONTEND_ASSET_CACHE.get(vqChannelsPath) as RdPolicy,
-          },
-        }),
+    ...(vqChannels ? { vqChannels } : {}),
     ...(textParserConfig === null
       ? {}
       : {

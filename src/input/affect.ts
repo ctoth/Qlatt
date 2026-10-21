@@ -39,6 +39,7 @@ import {
   scaleDimensions,
   scaleVoiceQualityDelta,
 } from "./direction-track";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 /** High-level grouping of presets (affects the layer-application order downstream). */
 export type AffectGroup = "emotion" | "epistemic" | "pragmatic" | "speech_act" | "clinical";
@@ -135,6 +136,7 @@ export function resolveAffectPreset(
  */
 export function compileAffect(
   library: AffectLibrary,
+  channels: readonly VoiceQualityChannel[],
   name: string,
   degree = 1,
   options: CompileAffectOptions = {},
@@ -176,7 +178,11 @@ export function compileAffect(
     degree: scaledDegree,
     resolvedSex: preset.requiresSex || preset.group === "clinical" ? options.sex : undefined,
     dimensions: scaleDimensions(preset.dimensions, scaledDegree),
-    vq: scaleVoiceQualityDelta(materializeVoiceQualityDelta(preset.vq), scaledDegree),
+    vq: scaleVoiceQualityDelta(
+      channels,
+      materializeVoiceQualityDelta(channels, preset.vq),
+      scaledDegree,
+    ),
     citations: [...preset.citations],
     decision,
     decisions: [...records, decision],
@@ -184,6 +190,9 @@ export function compileAffect(
 }
 
 /** The neutral compiled affect (the (c) empty-direction base case). */
-export function neutralAffect(library: AffectLibrary): CompiledAffect {
-  return compileAffect(library, "neutral", 0);
+export function neutralAffect(
+  library: AffectLibrary,
+  channels: readonly VoiceQualityChannel[],
+): CompiledAffect {
+  return compileAffect(library, channels, "neutral", 0);
 }

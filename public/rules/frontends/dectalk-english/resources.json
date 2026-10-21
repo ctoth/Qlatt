@@ -41,7 +41,6 @@
     "/rules/normalization/lexical.yaml",
     "/rules/normalization/numbers.yaml",
     "/rules/normalization/recognition.yaml",
-    "/rules/normalization/time.yaml",
-    "/rules/policy/vq-channels.yaml"
+    "/rules/normalization/time.yaml"
   ]
 }

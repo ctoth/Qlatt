@@ -40,7 +40,7 @@ import {
   parseDirectionTrack,
   scaleVoiceQualityDelta,
 } from "./direction-track";
-import { VQ_FIELDS } from "./vq-channels";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 /** The kind of resolved direction (drives the tag + downstream HRG relation). */
 export type DirectionKind =
@@ -123,103 +123,106 @@ export interface ParseOptions {
   provenance?: ProvenanceCollector;
   frontendId?: string;
   affectLibrary?: AffectLibrary;
+  vqChannels?: readonly VoiceQualityChannel[];
 }
 
-const DELTA_FIELDS = Object.fromEntries(
-  VQ_FIELDS.map((field) => [field, { kind: "number" } as const]),
-);
-const ALL_DELTA_FIELDS = Object.freeze(Object.keys(DELTA_FIELDS));
-
 /** Item schema consumed by the HRG attachment stage for resolved directions. */
-export const DIRECTION_ITEM_SCHEMA = {
-  features: {
-    kind: {
-      kind: "string",
-      values: [
-        "voice_identity",
-        "global_affect",
-        "local_affect",
-        "emphasis",
-        "stress",
-        "break",
-        "pitch",
-        "rate",
-        "voice_quality",
-        "gesture",
-      ],
-    },
-    tag: {
-      kind: "string",
-      values: [
-        "affect",
-        "voice_quality",
-        "emphasis",
-        "break",
-        "gesture",
-        "pitch",
-        "rate",
-        "voice",
-        "metrical_stress",
-      ],
-    },
-    scope: {
-      kind: "union",
-      variants: [
-        {
-          kind: "object",
-          fields: { kind: { kind: "literal", value: "utterance" } },
-        },
-        {
-          kind: "object",
-          fields: {
-            kind: { kind: "literal", value: "token_range" },
-            startToken: { kind: "number" },
-            endToken: { kind: "number" },
-          },
-        },
-      ],
-    },
-    label: { kind: "string" },
-    stress: { kind: "number" },
-    syllable_ids: { kind: "array", items: { kind: "string" } },
-    delta: { kind: "object", fields: DELTA_FIELDS },
-    delta_fields: {
-      kind: "array",
-      items: { kind: "string", values: ALL_DELTA_FIELDS },
-    },
-    precedence: { kind: "number" },
-    declaration_order: { kind: "number" },
-    affect: {
-      kind: "object",
-      fields: {
-        label: { kind: "string" },
-        group: { kind: "string" },
-        degree: { kind: "number" },
-        resolvedSex: { kind: "string", values: ["male", "female"] },
-        dimensions: {
-          kind: "object",
-          fields: {
-            valence: { kind: "number" },
-            arousal: { kind: "number" },
-            dominance: { kind: "number" },
-          },
-        },
-        citations: { kind: "array", items: { kind: "string" } },
+export function buildDirectionItemSchema(
+  channels: readonly VoiceQualityChannel[] = [],
+): ItemTypeSchema {
+  const fields = Object.fromEntries(
+    channels.map((row) => [row.channel, { kind: "number" } as const]),
+  );
+  return {
+    features: {
+      kind: {
+        kind: "string",
+        values: [
+          "voice_identity",
+          "global_affect",
+          "local_affect",
+          "emphasis",
+          "stress",
+          "break",
+          "pitch",
+          "rate",
+          "voice_quality",
+          "gesture",
+        ],
       },
-      optional: ["resolvedSex"],
-    },
-    voice: {
-      kind: "object",
-      fields: {
-        name: { kind: "string" },
-        sex: { kind: "string", values: ["male", "female"] },
-        baseF0Hz: { kind: "number" },
+      tag: {
+        kind: "string",
+        values: [
+          "affect",
+          "voice_quality",
+          "emphasis",
+          "break",
+          "gesture",
+          "pitch",
+          "rate",
+          "voice",
+          "metrical_stress",
+        ],
       },
-      optional: ["name", "sex", "baseF0Hz"],
+      scope: {
+        kind: "union",
+        variants: [
+          {
+            kind: "object",
+            fields: { kind: { kind: "literal", value: "utterance" } },
+          },
+          {
+            kind: "object",
+            fields: {
+              kind: { kind: "literal", value: "token_range" },
+              startToken: { kind: "number" },
+              endToken: { kind: "number" },
+            },
+          },
+        ],
+      },
+      label: { kind: "string" },
+      stress: { kind: "number" },
+      syllable_ids: { kind: "array", items: { kind: "string" } },
+      delta: { kind: "object", fields },
+      delta_fields: {
+        kind: "array",
+        items: { kind: "string", values: Object.keys(fields) },
+      },
+      precedence: { kind: "number" },
+      declaration_order: { kind: "number" },
+      affect: {
+        kind: "object",
+        fields: {
+          label: { kind: "string" },
+          group: { kind: "string" },
+          degree: { kind: "number" },
+          resolvedSex: { kind: "string", values: ["male", "female"] },
+          dimensions: {
+            kind: "object",
+            fields: {
+              valence: { kind: "number" },
+              arousal: { kind: "number" },
+              dominance: { kind: "number" },
+            },
+          },
+          citations: { kind: "array", items: { kind: "string" } },
+        },
+        optional: ["resolvedSex"],
+      },
+      voice: {
+        kind: "object",
+        fields: {
+          name: { kind: "string" },
+          sex: { kind: "string", values: ["male", "female"] },
+          baseF0Hz: { kind: "number" },
+        },
+        optional: ["name", "sex", "baseF0Hz"],
+      },
+      citations: { kind: "array", items: { kind: "string" } },
     },
-    citations: { kind: "array", items: { kind: "string" } },
-  },
-} as const satisfies ItemTypeSchema;
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Tokenization
@@ -498,7 +501,8 @@ function lowerAffect(
       `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "programmatic"}' requires affect_presets`,
     );
   }
-  const compiled = compileAffect(options.affectLibrary, spec.preset, degree, {
+  const channels = requireChannels(options);
+  const compiled = compileAffect(options.affectLibrary, channels, spec.preset, degree, {
     sex,
     provenance,
     subject: scope === "utterance" ? "utterance" : tokenSubject(scope),
@@ -528,7 +532,7 @@ function lowerAffect(
     hrgRelation: "Affect",
     affect: compiled,
     delta: compiled.vq,
-    deltaFields: [...ALL_DELTA_FIELDS],
+    deltaFields: channels.map((row) => row.channel),
     label: spec.preset,
     citations: decision.citations,
     decision,
@@ -627,7 +631,7 @@ function lowerSpan(
   if (span.pitch) {
     const f0Scale = span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
     const f0VarianceScale = span.pitch.rangeScale ?? 1;
-    const delta = materializeVoiceQualityDelta({
+    const delta = materializeVoiceQualityDelta(requireChannels(options), {
       f0Scale,
       f0VarianceScale,
     });
@@ -664,7 +668,7 @@ function lowerSpan(
   if (span.rate !== undefined) {
     // rate is a speaking-rate multiplier; durationScale is its inverse.
     const durationScale = span.rate > 0 ? 1 / span.rate : 1;
-    const delta = materializeVoiceQualityDelta({ durationScale });
+    const delta = materializeVoiceQualityDelta(requireChannels(options), { durationScale });
     const decision = provenance.add({
       stage: "frontend",
       type: "rate",
@@ -686,7 +690,7 @@ function lowerSpan(
   }
 
   if (span.voiceQuality) {
-    const delta = materializeVoiceQualityDelta(span.voiceQuality);
+    const delta = materializeVoiceQualityDelta(requireChannels(options), span.voiceQuality);
     const decision = provenance.add({
       stage: "frontend",
       type: "voice_quality",
@@ -708,7 +712,16 @@ function lowerSpan(
   }
 
   if (span.gesture) {
-    out.push(lowerGesture(provenance, span.gesture.name, span.gesture.degree ?? 1, range, subject));
+    out.push(
+      lowerGesture(
+        provenance,
+        span.gesture.name,
+        span.gesture.degree ?? 1,
+        range,
+        subject,
+        requireChannels(options),
+      ),
+    );
   }
 
   return out;
@@ -720,10 +733,11 @@ function lowerGesture(
   degree: number,
   range: TokenRange,
   subject: string,
+  channels: readonly VoiceQualityChannel[],
 ): Direction {
   const def = GESTURE_LIBRARY[name];
-  const full = materializeVoiceQualityDelta(def.delta);
-  const delta = scaleVoiceQualityDelta(full, degree);
+  const full = materializeVoiceQualityDelta(channels, def.delta);
+  const delta = scaleVoiceQualityDelta(channels, full, degree);
   const decision = provenance.add({
     stage: "frontend",
     type: "gesture",
@@ -792,6 +806,15 @@ export function effectiveSpanFieldAt<K extends keyof DirectionSpan>(
 // ---------------------------------------------------------------------------
 // helpers
 // ---------------------------------------------------------------------------
+
+function requireChannels(options: ParseOptions): readonly VoiceQualityChannel[] {
+  if (!options.vqChannels) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "programmatic"}' requires vq_channels`,
+    );
+  }
+  return options.vqChannels;
+}
 
 function tokenSubject(range: TokenRange): string {
   return range.startToken === range.endToken

@@ -32,7 +32,7 @@
  */
 
 import type { AffectCategory } from "./affect";
-import { VQ_MULTIPLICATIVE_FIELDS, VQ_NEUTRAL } from "./vq-channels";
+import type { VoiceQualityChannel } from "./vq-channels";
 
 /** A leaf scalar modifier value. */
 export type DeltaValue = number;
@@ -75,15 +75,11 @@ export interface VoiceQualityDelta {
 }
 
 /** The neutral baseline: applying this to any render is a no-op (the (c) case). */
-export const NEUTRAL_VQ = VQ_NEUTRAL as Readonly<VoiceQualityDelta>;
-
-/**
- * Which fields are multiplicative (neutral = 1) vs additive (neutral = 0).
- * Used by the degree-interpolation math so a `degree` knob moves smoothly from
- * neutral to the full preset (the Azure `styledegree` / Alexa `intensity`
- * continuous-degree pattern).
- */
-export const MULTIPLICATIVE_VQ_FIELDS = VQ_MULTIPLICATIVE_FIELDS;
+export function neutralVoiceQualityDelta(
+  channels: readonly VoiceQualityChannel[],
+): VoiceQualityDelta {
+  return Object.fromEntries(channels.map((row) => [row.channel, row.neutral])) as VoiceQualityDelta;
+}
 
 /** The dimensional substrate: valence × arousal × dominance, each in [-1, 1]. */
 export interface DimensionalVector {
@@ -209,7 +205,7 @@ export interface DirectionSpan {
   rate?: number;
   /** Local affect override (preset + degree), distinct from global. */
   affect?: AffectSpec;
-  /** Direct voice-quality delta override (partial; merged onto NEUTRAL_VQ). */
+  /** Direct voice-quality delta override (partial; merged onto selected channel neutrals). */
   voiceQuality?: Partial<VoiceQualityDelta>;
   gesture?: GestureRef;
 }
@@ -288,25 +284,21 @@ export const GESTURE_LIBRARY: Readonly<Record<GestureName, GestureDefinition>> =
 // Delta algebra
 // ---------------------------------------------------------------------------
 
-/** True if `field` is a multiplicative (neutral = 1) VQ field. */
-export function isMultiplicativeField(field: keyof VoiceQualityDelta): boolean {
-  return typeof field === "string" && MULTIPLICATIVE_VQ_FIELDS.includes(field);
-}
-
 /**
  * Scale a full VQ delta toward neutral by `degree` ∈ [0, 1]. Multiplicative
- * fields interpolate from 1, additive fields from 0, so degree=0 ⇒ NEUTRAL_VQ
+ * fields interpolate from 1, additive fields from 0, so degree=0 ⇒ neutral
  * and degree=1 ⇒ the input unchanged. This is the continuous-degree knob.
  */
 export function scaleVoiceQualityDelta(
+  channels: readonly VoiceQualityChannel[],
   delta: VoiceQualityDelta,
   degree: number,
 ): VoiceQualityDelta {
   const d = clampUnit(degree);
-  const out = { ...NEUTRAL_VQ } as VoiceQualityDelta;
-  for (const key of Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>) {
-    const value = delta[key] ?? NEUTRAL_VQ[key];
-    out[key] = nz(isMultiplicativeField(key) ? 1 + (value - 1) * d : value * d);
+  const out = neutralVoiceQualityDelta(channels);
+  for (const row of channels) {
+    const value = delta[row.channel] ?? row.neutral;
+    out[row.channel] = nz(row.algebra === "mul" ? 1 + (value - 1) * d : value * d);
   }
   return out;
 }
@@ -332,24 +324,27 @@ function nz(value: number): number {
  * fold a partial span override onto a full vector.
  */
 export function composeVoiceQualityDelta(
+  channels: readonly VoiceQualityChannel[],
   base: VoiceQualityDelta,
   over: Partial<VoiceQualityDelta>,
 ): VoiceQualityDelta {
-  const out = { ...NEUTRAL_VQ, ...base };
-  for (const key of Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>) {
+  const out = { ...neutralVoiceQualityDelta(channels), ...base };
+  for (const row of channels) {
+    const key = row.channel;
     const o = over[key];
     if (o === undefined) continue;
-    const value = base[key] ?? NEUTRAL_VQ[key];
-    out[key] = isMultiplicativeField(key) ? value * o : value + o;
+    const value = base[key] ?? row.neutral;
+    out[key] = row.algebra === "mul" ? value * o : value + o;
   }
   return out;
 }
 
 /** Fold a partial VQ override onto the neutral baseline into a full vector. */
 export function materializeVoiceQualityDelta(
+  channels: readonly VoiceQualityChannel[],
   partial: Partial<VoiceQualityDelta>,
 ): VoiceQualityDelta {
-  return composeVoiceQualityDelta({ ...NEUTRAL_VQ }, partial);
+  return composeVoiceQualityDelta(channels, neutralVoiceQualityDelta(channels), partial);
 }
 
 function clampUnit(value: number): number {

@@ -4,13 +4,18 @@ import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { applyAffectToTrack } from "../src/input/apply-affect";
-import { NEUTRAL_VQ } from "../src/input/direction-track";
+import { neutralVoiceQualityDelta } from "../src/input/direction-track";
 import { projectRd, readRdPolicy } from "../src/input/rd-policy";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const NEUTRAL_VQ = neutralVoiceQualityDelta(channels);
 
 const policy = readRdPolicy({
   effective_rd: loadYaml("min: 0.5\nmax: 1.5\ncitations: [Fant_1997]\n"),
 });
-const context = { frontendId: "fixture", rdPolicy: policy };
+const context = { frontendId: "fixture", rdPolicy: policy, vqChannels: channels };
 
 describe("declared effective Rd policy", () => {
   it("inherits declared VQ resources and permits an undeclared role", () => {
@@ -24,7 +29,7 @@ describe("declared effective Rd policy", () => {
 
   it("requires the role only when a nonzero Rd delta consumes it", () => {
     const track = [{ time: 0, params: { Rd: 0.7 } }];
-    const absent = { frontendId: "without-vq" };
+    const absent = { frontendId: "without-vq", vqChannels: channels };
     expect(applyAffectToTrack(track, NEUTRAL_VQ, absent).track).toEqual(track);
     expect(() => applyAffectToTrack(track, { ...NEUTRAL_VQ, rdDelta: 1 }, absent)).toThrow(
       "E_FRONTEND_CONFIG: frontend 'without-vq' requires vq_channels",

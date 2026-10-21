@@ -14,13 +14,9 @@
  */
 
 import { describeRenderStatus, getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
+import { neutralVoiceQualityDelta } from "../../input/direction-track";
 import { projectRd, type RdPolicy } from "../../input/rd-policy";
-import {
-  VQ_FIELDS,
-  VQ_MULTIPLICATIVE_FIELDS,
-  VQ_NEUTRAL,
-  VQ_PARAM_CHANNELS,
-} from "../../input/vq-channels";
+import type { VoiceQualityChannel } from "../../input/vq-channels";
 import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
 import { frameValueIndex, isFrameValues } from "./frame-program";
@@ -255,6 +251,7 @@ export interface LowerOptions {
 export type LowerContext = {
   frontendId?: string;
   rdPolicy?: RdPolicy;
+  vqChannels?: readonly VoiceQualityChannel[];
   f0Model?: LayeredF0ModelConfig;
   /**
    * Segment features that hold per-frame column values written by frame
@@ -374,9 +371,7 @@ type ResolvedF0Point = {
   valueHz: number;
 };
 
-const AFFECT_FIELDS = VQ_FIELDS;
-
-type AffectField = (typeof AFFECT_FIELDS)[number];
+type AffectField = string;
 type AffectValues = Record<AffectField, number>;
 
 type ResolvedAffect = {
@@ -394,17 +389,6 @@ type AffectDirective = {
   values: AffectValues;
 };
 
-const NEUTRAL_AFFECT: Readonly<AffectValues> = VQ_NEUTRAL;
-
-const MULTIPLICATIVE_AFFECT_FIELDS = new Set(VQ_MULTIPLICATIVE_FIELDS);
-
-const AFFECT_PROJECTION_TABLE = VQ_PARAM_CHANNELS.map((row) => ({
-  backendKey: row.backend_param,
-  affectField: row.channel,
-  mode: row.algebra === "mul" ? "scale" : "add",
-  floor: row.floor ?? -Infinity,
-}));
-
 function isFeatureObject(
   value: FeatureValue | undefined,
 ): value is { readonly [key: string]: FeatureValue } {
@@ -415,16 +399,23 @@ function finiteFeatureNumber(value: FeatureValue | undefined): number | undefine
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function isAffectField(value: FeatureValue): value is AffectField {
-  return typeof value === "string" && AFFECT_FIELDS.some((field) => field === value);
+function isAffectField(
+  value: FeatureValue,
+  channels: readonly VoiceQualityChannel[],
+): value is AffectField {
+  return typeof value === "string" && channels.some((row) => row.channel === value);
 }
 
-function parseAffectValues(value: FeatureValue | undefined, itemId: string): AffectValues {
+function parseAffectValues(
+  value: FeatureValue | undefined,
+  itemId: string,
+  channels: readonly VoiceQualityChannel[],
+): AffectValues {
   if (!isFeatureObject(value)) {
     throw new Error(`E_HRG_LOWER_AFFECT_DELTA: Affect Item '${itemId}' requires a typed delta`);
   }
-  const parsed = { ...NEUTRAL_AFFECT };
-  for (const field of AFFECT_FIELDS) {
+  const parsed = neutralVoiceQualityDelta(channels);
+  for (const { channel: field } of channels) {
     const number = finiteFeatureNumber(value[field]);
     if (number == null) {
       throw new Error(`E_HRG_LOWER_AFFECT_DELTA: Affect Item '${itemId}' has invalid '${field}'`);
@@ -434,8 +425,15 @@ function parseAffectValues(value: FeatureValue | undefined, itemId: string): Aff
   return parsed;
 }
 
-function composeAffectField(base: number, over: number, field: AffectField): number {
-  return MULTIPLICATIVE_AFFECT_FIELDS.has(field) ? base * over : base + over;
+function composeAffectField(
+  base: number,
+  over: number,
+  field: AffectField,
+  channels: readonly VoiceQualityChannel[],
+): number {
+  return channels.some((row) => row.channel === field && row.algebra === "mul")
+    ? base * over
+    : base + over;
 }
 
 function parseControlFields(value: FeatureValue | undefined): Record<string, ResolvedControlField> {
@@ -1815,9 +1813,15 @@ export function lowerToFrames(
   });
 
   const affectItems = utterance.getRelation("Affect")?.listItems() ?? [];
+  const channels = context.vqChannels ?? [];
   const affectDirectives = affectItems.flatMap((item): AffectDirective[] => {
     const delta = item.get("delta");
     if (delta == null) return [];
+    if (!context.vqChannels) {
+      throw new Error(
+        `E_FRONTEND_CONFIG: frontend '${context.frontendId ?? options.id ?? "programmatic"}' requires vq_channels`,
+      );
+    }
     const deltaWrite = item.latestWrite("delta");
     const rawFields = item.get("delta_fields");
     const rawScope = item.get("scope");
@@ -1839,7 +1843,7 @@ export function lowerToFrames(
     }
     const fields = new Set<AffectField>();
     for (const field of rawFields) {
-      if (!isAffectField(field)) {
+      if (!isAffectField(field, channels)) {
         utterance.diagnostics.error(
           "Affect Item names a field outside the live Direction Track contract",
           { itemId: item.id, field },
@@ -1871,7 +1875,7 @@ export function lowerToFrames(
     }
     let values: AffectValues;
     try {
-      values = parseAffectValues(delta, item.id);
+      values = parseAffectValues(delta, item.id, channels);
     } catch (error) {
       utterance.diagnostics.error(
         "Affect Item delta failed final-lowering validation",
@@ -1908,12 +1912,13 @@ export function lowerToFrames(
     }
     return null;
   };
-  const resolveAffect = (item?: Item): ResolvedAffect => {
-    const values = { ...NEUTRAL_AFFECT };
+  const resolveAffect = (item?: Item): ResolvedAffect | undefined => {
+    if (!context.vqChannels) return undefined;
+    const values = neutralVoiceQualityDelta(channels);
     const decisions: Partial<Record<AffectField, string>> = {};
     for (const directive of globalAffectDirectives) {
       for (const field of directive.fields) {
-        values[field] = composeAffectField(values[field], directive.values[field], field);
+        values[field] = composeAffectField(values[field], directive.values[field], field, channels);
         decisions[field] = directive.decisionId;
       }
     }
@@ -1941,7 +1946,7 @@ export function lowerToFrames(
         `E_HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED: Segment '${item.id}' has no Word attachment`,
       );
     }
-    for (const field of AFFECT_FIELDS) {
+    for (const { channel: field } of channels) {
       const winner = local
         .filter((directive) => directive.fields.has(field))
         .sort(
@@ -1949,7 +1954,7 @@ export function lowerToFrames(
             right.precedence - left.precedence || right.declarationOrder - left.declarationOrder,
         )[0];
       if (!winner) continue;
-      values[field] = composeAffectField(values[field], winner.values[field], field);
+      values[field] = composeAffectField(values[field], winner.values[field], field, channels);
       decisions[field] = winner.decisionId;
     }
     return { values, decisions };
@@ -1957,13 +1962,15 @@ export function lowerToFrames(
   const globalAffect = resolveAffect();
   const affectByItem = new Map(timings.map((timing) => [timing.item, resolveAffect(timing.item)]));
   const outputTimingByItem = new Map<Item, { startMs: number; scale: number }>();
-  const globalPauseScale = globalAffect.values.durationScale * globalAffect.values.pauseScale;
+  const globalPauseScale = globalAffect
+    ? globalAffect.values.durationScale * globalAffect.values.pauseScale
+    : 1;
   if (!Number.isFinite(globalPauseScale) || globalPauseScale <= 0) {
     utterance.diagnostics.error(
       "Global Affect duration/pause projection must be finite and positive",
       {
-        durationScale: globalAffect.values.durationScale,
-        pauseScale: globalAffect.values.pauseScale,
+        durationScale: globalAffect?.values.durationScale,
+        pauseScale: globalAffect?.values.pauseScale,
       },
       "HRG_LOWER_AFFECT_TIME_REJECTED",
     );
@@ -1989,12 +1996,14 @@ export function lowerToFrames(
   const leadingAxisMs = timings[0]?.startMs ?? 0;
   let outputCursorMs =
     initialSilenceMs * edgeOutputScale +
-    leadingAxisMs * globalAffect.values.durationScale * outputClockRatio;
+    leadingAxisMs * (globalAffect?.values.durationScale ?? 1) * outputClockRatio;
   for (const timing of timings) {
     const affect = affectByItem.get(timing.item) ?? globalAffect;
     const isPause =
       context.silence !== undefined && timing.item.get(phonemeKey) === context.silence.symbol;
-    const segmentScale = affect.values.durationScale * (isPause ? affect.values.pauseScale : 1);
+    const segmentScale = affect
+      ? affect.values.durationScale * (isPause ? affect.values.pauseScale : 1)
+      : 1;
     if (!Number.isFinite(segmentScale) || segmentScale <= 0) {
       utterance.diagnostics.error(
         "Segment Affect duration/pause projection must be finite and positive",
@@ -2729,25 +2738,26 @@ export function lowerToFrames(
         const decision = affect.decisions.rdDelta;
         if (decision) provenance.RdPhraseOffset = decision;
       }
-      // Project the pure {backendKey, affectField, mode, floor} affect rows via
+      // Project the declared affect rows via
       // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are
       // explicit engineering bounds. The F1/F2/F3 >=1 Hz clamp runs after the
       // table loop: only the f1/f2/f3 Delta rows touch F1/F2/F3, so applying the
       // clamp after the intervening (B/TL/AH/GO/jitter) rows is order-equivalent.
-      for (const row of AFFECT_PROJECTION_TABLE) {
-        if (row.mode === "add") applyAdd(row.backendKey, row.affectField);
-        else applyScale(row.backendKey, row.affectField, row.floor);
+      for (const row of channels) {
+        if (row.projection !== "param") continue;
+        if (row.algebra === "add") applyAdd(row.backend_param, row.channel);
+        else applyScale(row.backend_param, row.channel, row.floor ?? -Infinity);
       }
-      for (const key of ["F1", "F2", "F3"]) {
-        const requested = params[key];
-        if (typeof requested !== "number" || requested >= 1) continue;
-        params[key] = 1;
-        utterance.diagnostics.warn(
-          "Affect projection clamped a formant frequency above zero",
-          { itemId: item.id, key, requested, clamped: 1, min: 1 },
-          "HRG_LOWER_VALUE_CLAMPED",
-        );
-      }
+    }
+    for (const key of ["F1", "F2", "F3"]) {
+      const requested = params[key];
+      if (typeof requested !== "number" || requested >= 1) continue;
+      params[key] = 1;
+      utterance.diagnostics.warn(
+        "Affect projection clamped a formant frequency above zero",
+        { itemId: item.id, key, requested, clamped: 1, min: 1 },
+        "HRG_LOWER_VALUE_CLAMPED",
+      );
     }
   };
 

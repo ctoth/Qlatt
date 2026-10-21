@@ -1,19 +1,83 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { load } from "js-yaml";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-afterEach(() => {
-  vi.doUnmock("../src/yaml-loader");
-  vi.resetModules();
-});
+import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { parseDirectionInput } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { isPlainObject, loadYamlDocumentSync } from "../src/yaml-loader";
 
 describe("declarative voice-quality channels", () => {
+  it("checks cached preset membership against each selected channel resource", () => {
+    const directory = mkdtempSync(join(tmpdir(), "qlatt-vq-"));
+    try {
+      const presetPath = join(directory, "presets.yaml");
+      const channelPath = join(directory, "channels.yaml");
+      const document = loadYamlDocumentSync("/rules/policy/vq-channels.yaml");
+      if (!isPlainObject(document) || !Array.isArray(document.channels)) {
+        throw new Error("expected channels document");
+      }
+      writeFileSync(presetPath, JSON.stringify(loadYamlDocumentSync("/rules/affect/presets.yaml")));
+      writeFileSync(
+        channelPath,
+        JSON.stringify({
+          ...document,
+          channels: document.channels.filter(
+            (row) => isPlainObject(row) && row.channel !== "f0Scale",
+          ),
+        }),
+      );
+      const spec = loadBundledRulepackSpec("qlatt-english");
+      const first = loadFrontendResources({
+        ...spec,
+        resources: { affect_presets: presetPath, vq_channels: "/rules/policy/vq-channels.yaml" },
+      });
+      expect(first.affectPresets?.library.presets.has("tender")).toBe(true);
+      expect(first.vqChannels?.channels.some((row) => row.channel === "f0Scale")).toBe(true);
+      expect(first.vqChannels?.rdPolicy.min).toBe(0.3);
+      rmSync(presetPath);
+      expect(() =>
+        loadFrontendResources({
+          ...spec,
+          resources: { affect_presets: presetPath, vq_channels: channelPath },
+        }),
+      ).toThrow("unknown voice-quality channel f0Scale");
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps DECtalk's no-delta path and rejects an actual VQ consumer", () => {
+    const options = { frontendId: "dectalk-english" };
+    const baseline = textToKlattTrackDetailed("hello", undefined, undefined, options);
+    const directed = textToKlattTrackDetailed("hello", undefined, undefined, {
+      ...options,
+      directionTrack: { version: "1", global: { voice: {} } },
+    });
+    expect(directed.track).toEqual(baseline.track);
+    const input = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1" as const,
+        spans: [
+          { id: "pitch", anchor: { unit: "word" as const, start: 0 }, pitch: { semitones: 1 } },
+        ],
+      },
+    };
+    expect(() => parseDirectionInput(input, options)).toThrow(
+      "E_FRONTEND_CONFIG: frontend 'dectalk-english' requires vq_channels",
+    );
+  });
+
   it.each([
     ["add", 0, 4, 14],
     ["mul", 1, 2, 20],
   ] as const)(
     "carries a new YAML %s channel through every consumer",
     async (algebra, neutral, delta, expected) => {
-      vi.resetModules();
       const extra = load(`
 channel: testChannel
 algebra: ${algebra}
@@ -23,51 +87,46 @@ backend_param: TEST
 citations:
   - "engineering estimate: extension regression"
 `);
-      vi.doMock("../src/yaml-loader", async (importOriginal) => {
-        const actual = await importOriginal<typeof import("../src/yaml-loader")>();
-        return {
-          ...actual,
-          loadYamlDocumentSync: (path: string) => {
-            const document = actual.loadYamlDocumentSync(path);
-            if (path === "/rules/policy/vq-channels.yaml") {
-              if (!actual.isPlainObject(document) || !Array.isArray(document.channels)) {
-                throw new Error("expected channels document");
-              }
-              return { ...document, channels: [...document.channels, extra] };
-            }
-            return document;
-          },
-        };
+      const document = loadYamlDocumentSync("/rules/policy/vq-channels.yaml");
+      if (!isPlainObject(document) || !Array.isArray(document.channels)) {
+        throw new Error("expected channels document");
+      }
+      const channels = parseVoiceQualityChannels({
+        ...document,
+        channels: [...document.channels, extra],
       });
       const direction = await import("../src/input/direction-track");
       const parser = await import("../src/input/parse");
       const { applyAffectToTrack } = await import("../src/input/apply-affect");
       const { Utterance, lowerToFrames } = await import("../src/declarative-frontend/hrg");
-      expect(Reflect.get(direction.NEUTRAL_VQ, "testChannel")).toBe(neutral);
-      const vq = direction.materializeVoiceQualityDelta({
-        ...direction.NEUTRAL_VQ,
+      expect(direction.neutralVoiceQualityDelta(channels).testChannel).toBe(neutral);
+      const vq = direction.materializeVoiceQualityDelta(channels, {
         testChannel: delta,
       });
-      expect(Reflect.get(direction.scaleVoiceQualityDelta(vq, 0.5), "testChannel")).toBe(
+      expect(direction.scaleVoiceQualityDelta(channels, vq, 0.5).testChannel).toBe(
         neutral + (delta - neutral) * 0.5,
       );
-      const parsed = parser.parseDirectionInput({
-        score: { text: "red" },
-        directionTrack: {
-          version: "1",
-          spans: [{ id: "extension", anchor: { unit: "word", start: 0 }, voiceQuality: vq }],
+      const parsed = parser.parseDirectionInput(
+        {
+          score: { text: "red" },
+          directionTrack: {
+            version: "1",
+            spans: [{ id: "extension", anchor: { unit: "word", start: 0 }, voiceQuality: vq }],
+          },
         },
-      });
+        { vqChannels: channels },
+      );
       expect(parsed.directions[0].delta?.testChannel).toBe(delta);
       expect(
         applyAffectToTrack([{ time: 0, phoneme: "EH", params: { TEST: 10 } }], vq, {
           frontendId: "fixture",
+          vqChannels: channels,
         }).track[0].params.TEST,
       ).toBe(expected);
       const utterance = new Utterance(
         {
           itemTypes: {
-            direction: parser.DIRECTION_ITEM_SCHEMA,
+            direction: parser.buildDirectionItemSchema(channels),
             segment: {
               features: {
                 active: { kind: "boolean" },
@@ -112,29 +171,33 @@ citations:
       build.resolveMarkTime(utterance.axis.start.id, 0);
       build.resolveMarkTime(utterance.axis.end.id, 100);
       build.commit();
-      const frames = lowerToFrames(utterance, {
-        columns: ["TEST"],
-        timeline: {
-          initial_silence_ms: { value: 0 },
-          final_silence_ms: { value: 0 },
-          duration_floors: { stop_release_ms: { value: 1 }, default_ms: { value: 1 } },
-          event_points: {
-            include_segment_start: true,
-            include_control_boundaries: true,
-            include_f0_anchors: true,
-            include_transition_steady_time: true,
+      const frames = lowerToFrames(
+        utterance,
+        {
+          columns: ["TEST"],
+          timeline: {
+            initial_silence_ms: { value: 0 },
+            final_silence_ms: { value: 0 },
+            duration_floors: { stop_release_ms: { value: 1 }, default_ms: { value: 1 } },
+            event_points: {
+              include_segment_start: true,
+              include_control_boundaries: true,
+              include_f0_anchors: true,
+              include_transition_steady_time: true,
+            },
+          },
+          transitions: {
+            min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
+            default_transition_ms: { value: 0 },
+            blend: { factor: { value: 0.5 }, keys: [], smooth_types: [] },
+          },
+          f0: {
+            renderer: { type: "point_interpolation" },
+            output_clamp: { min_hz: { value: 0 }, max_hz: { value: 500 } },
           },
         },
-        transitions: {
-          min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
-          default_transition_ms: { value: 0 },
-          blend: { factor: { value: 0.5 }, keys: [], smooth_types: [] },
-        },
-        f0: {
-          renderer: { type: "point_interpolation" },
-          output_clamp: { min_hz: { value: 0 }, max_hz: { value: 500 } },
-        },
-      });
+        { vqChannels: channels },
+      );
       expect(
         frames.frames.filter((frame) => frame.phoneme === "EH").map((frame) => frame.params.TEST),
       ).toEqual(expect.arrayContaining([expected]));

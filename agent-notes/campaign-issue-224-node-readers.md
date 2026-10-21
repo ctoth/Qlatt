@@ -2,7 +2,7 @@
 Retire the remaining approved direct-Node YAML readers for #224 using the existing shared parser.
 
 # State
-Implementation authorized after #459 merged. Base is d187a168. No local CI or generators run.
+PR #462 is published from base d187a168 after #459 merged and its owned tree/branches were cleaned. No local CI or generators run. Initial hosted quality job119323848153 found import ordering in the voice importer and wrapping in yaml-loader; applied those exact formatting corrections. Private Claude full eight-file review is running.
 
 # Decisions and why
 Smallest change: five explicit .ts suffixes in yaml-loader/sync-resource-cache's actual import closure, plus four direct-Node script readers and the existing ts-node DECtalk voice importer (about 22–30 changed production lines). Node requires explicit local extensions; tsconfig already permits .ts imports. The existing registry CLI subprocess fixture exercises this entry point in hosted CI.
@@ -12,4 +12,4 @@ Pass each actual input path to parseYamlString. Preserve the comparison script's
 None. #256 remains held separately pending Q's diagnostic continuation answer.
 
 # Next step
-Implement the approved reader changes, publish, and obtain private Claude review and hosted CI.
+Respond to private Claude review and inspect final hosted CI; supervisor owns merge.

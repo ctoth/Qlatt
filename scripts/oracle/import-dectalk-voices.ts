@@ -43,13 +43,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseYamlString } from "../../src/yaml-loader";
 import {
   OWN_BLOCK_VOICE,
   type SpeakerDefinition,
   type SpeakerDefinitionData,
   voiceFieldsOfDefinition,
 } from "../../src/dectalk-speaker-definition.ts";
+import { parseYamlString } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);

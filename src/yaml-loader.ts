@@ -1,6 +1,10 @@
 import { isAlias, isMap, isNode, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils.ts";
-import { isAbsentResourceAnswer, requestFailureDetail, requestTextSync } from "./resource-answer.ts";
+import {
+  isAbsentResourceAnswer,
+  requestFailureDetail,
+  requestTextSync,
+} from "./resource-answer.ts";
 import {
   isAbsentSyncResource,
   keepSyncResource,

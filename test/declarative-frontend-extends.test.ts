@@ -336,10 +336,36 @@ describe("direct rule errors through composition", () => {
               },
             },
           };
+          const fixtureSections = {
+            rules,
+            functions,
+            predicates,
+            patterns,
+            relations: fixtureRelations,
+            maps: { fixture_map: { bad: 3 } },
+            string_sets: { fixture_set: [3] },
+            tags: { fixture_tag: "" },
+            frame_programs: {
+              fixture_frame: {
+                relation: "Segment",
+                write: "duration",
+                tag: "duration_floor",
+                citations: ["Fixture source"],
+                unit: { all: ["current.phonem"] },
+                frame_ms: "current.phonem",
+                lead_in_frames: "current.phonem",
+                tail_frames: "current.phonem",
+                features: { bad: { value: "fixture_outer(current)", edge: true } },
+                group: { start: "u.missing", totals: { bad: "u.missing" } },
+                registers: { x: 0 },
+                outputs: { F0: "r.missing", unknown: "r.missing" },
+              },
+            },
+          };
           const frontend = writeExtendingFrontend(
             dir,
-            included ? { rules, functions, predicates, patterns, relations: fixtureRelations } : {},
-            included ? {} : { rules, functions, predicates, patterns, relations: fixtureRelations },
+            included ? fixtureSections : {},
+            included ? {} : fixtureSections,
           );
           const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
           const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
@@ -395,6 +421,46 @@ describe("direct rule errors through composition", () => {
           }
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
+          const expectLocation = (code: string, path: string, position: "key" | "value") => {
+            const source = entries.find(
+              (entry) => entry.value.path.join(".") === path.replace(/\[(\d+)\]/g, ".$1"),
+            )?.[position];
+            expect(source).toBeDefined();
+            const block = diagnosticBlocks.find((entry) => entry.includes(`${code} at ${path}:`));
+            expect(block).toContain(`[${resource}:${source?.line}:${source?.column}]`);
+            return block;
+          };
+          expectLocation("E_MAP_INVALID", "maps.fixture_map.bad", "key");
+          expectLocation("E_STRING_SET_INVALID", "string_sets.fixture_set[0]", "value");
+          expectLocation("E_TAG_MEANING_INVALID", "tags.fixture_tag", "key");
+          for (const path of [
+            "unit.all[0]",
+            "frame_ms",
+            "lead_in_frames",
+            "tail_frames",
+            "features.bad.value",
+          ]) {
+            expectLocation(
+              "E_RULE_FEATURE_UNKNOWN",
+              `frame_programs.fixture_frame.${path}`,
+              "value",
+            );
+          }
+          for (const path of ["group.start", "group.totals.bad", "outputs.F0", "outputs.unknown"]) {
+            expectLocation("E_FRAME_NAME_UNKNOWN", `frame_programs.fixture_frame.${path}`, "value");
+          }
+          expectLocation(
+            "E_FRAME_OUTPUT_COLUMN",
+            "frame_programs.fixture_frame.outputs.unknown",
+            "key",
+          );
+          expect(
+            expectLocation(
+              "E_RULE_FEATURE_UNKNOWN",
+              "frame_programs.fixture_frame.features.bad.value",
+              "value",
+            ),
+          ).toContain("macro body [");
           for (const [code, path, position] of [
             ["E_SCALAR_FLOOR_FIELD_UNKNOWN", "floor_field", "key"],
             ["E_RULE_FEATURE_UNKNOWN", "floor_fallback.value", "value"],
@@ -713,6 +779,8 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
       "predicates.is_sonorant",
       "predicates.is_fixture_nasal",
       "relations.Syllable.features.fixtureFeature",
+      "maps.phoneme_release_map.P_CL",
+      "tags.fixture_tag",
     ]) {
       const matches = spans.filter((entry) => entry.value.path.join(".") === path);
       expect(matches).toHaveLength(1);
@@ -732,6 +800,14 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     );
     expect(baseRelation?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
     expect(baseRelation?.key?.line).toBe(450);
+    for (const path of ["maps.phoneme_aspiration_map.P_CL", "tags.duration_floor"]) {
+      expect(spans.find((entry) => entry.value.path.join(".") === path)?.value.resource).toBe(
+        "/rules/frontends/qlatt-english/pipeline.yaml",
+      );
+    }
+    expect(
+      spans.some((entry) => entry.value.path.join(".") === "maps.phoneme_release_map.T_CL"),
+    ).toBe(false);
   }
 
   it("adds, overrides and inherits entries by key (synchronous loader)", () => {

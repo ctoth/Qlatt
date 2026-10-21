@@ -52,7 +52,7 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored rule/predicate/pattern/relation spans, compiled rule paths, and macro parents. */
+/** Authored diagnostic spans, compiled rule paths, and macro body parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
@@ -120,6 +120,10 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
           entry.value.path[0] === "predicates" ||
           entry.value.path[0] === "patterns" ||
           entry.value.path[0] === "relations" ||
+          entry.value.path[0] === "maps" ||
+          entry.value.path[0] === "string_sets" ||
+          entry.value.path[0] === "tags" ||
+          entry.value.path[0] === "frame_programs" ||
           (entry.value.path[0] === "rules" &&
             (entry.value.path.every((part) => typeof part === "string") ||
               (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
@@ -447,7 +451,11 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
     Object.freeze([
       ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
       ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(({ value: { path } }) => {
-        if ((path[0] !== "predicates" && path[0] !== "relations") || typeof path[1] !== "string") {
+        if (
+          typeof path[0] !== "string" ||
+          !INHERITED_SHADOWED_FILE_KEYS.some((key) => key === path[0]) ||
+          typeof path[1] !== "string"
+        ) {
           return false;
         }
         const childEntries = childFile[path[0]];
@@ -809,6 +817,10 @@ function parseComposedRulepack(
       entry.value.path[0] === "predicates" ||
       entry.value.path[0] === "patterns" ||
       entry.value.path[0] === "relations" ||
+      entry.value.path[0] === "maps" ||
+      entry.value.path[0] === "string_sets" ||
+      entry.value.path[0] === "tags" ||
+      entry.value.path[0] === "frame_programs" ||
       entry.value.path.every((part) => typeof part === "string"),
   );
   for (const { compiled, authored } of paths) {

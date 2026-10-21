@@ -4664,7 +4664,15 @@ export function assertValidSpec(
     );
     // Semantic and syntax diagnostics share these expression leaf paths.
     // A diagnostic code alone cannot distinguish an expression from a field name.
+    const frameExpressionPath =
+      diagnostic.code !== "E_FRAME_PROGRAM_SCHEMA" &&
+      diagnostic.code !== "E_FRAME_OUTPUT_COLUMN" &&
+      /^frame_programs\.[^.]+\.(?:unit(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?|frame_ms|lead_in_frames|tail_frames|features\.[^.]+\.value|group\.(?:start|totals\.[^.]+)|outputs\.[^.]+)$/.test(
+        diagnostic.path,
+      );
+    const stringSetElement = /^string_sets\.[^.]+\[\d+\]$/.test(diagnostic.path);
     const expressionPath =
+      frameExpressionPath ||
       /^relations\.[^.]+\.scalars\.[^.]+\.floor_fallback\.value$/.test(diagnostic.path) ||
       /^patterns\.[^.]+\.(?:sequence\[\d+\]\.where|constraint)(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?$/.test(
         diagnostic.path,
@@ -4678,7 +4686,7 @@ export function assertValidSpec(
       );
     const documentSpan =
       origin && exact
-        ? diagnostic.code === "E_CEL_INVALID" || expressionPath
+        ? diagnostic.code === "E_CEL_INVALID" || expressionPath || stringSetElement
           ? origin.value
           : origin.key
         : undefined;

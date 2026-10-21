@@ -26,6 +26,11 @@ remain outside this slice; #141 stays open.
 
 # Surprises
 
+Replacement quality reported TS2353 for the injected-dictionary fixture: I put
+the preserved resources field directly in a CompiledRulepack argument although
+that inferred type omits it. The fixture now uses a typed intermediate combining
+the existing compiled spec type with its resource map; no runtime schema change.
+
 Hosted quality requested one collapsed filter expression after the local fixture
 variable became shorter. Hosted shard 1 also exposed an existing browser fixture
 that assumed importing rule-pack populated the inventory cache: it required a

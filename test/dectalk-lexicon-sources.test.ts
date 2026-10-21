@@ -105,9 +105,14 @@ describe("lexicon sources in decision records", () => {
     const transcription: TranscriptionConfig = spec.transcription;
     const sources = { ...transcription.sources };
     delete sources.dictionary;
+    const noLexicon: typeof spec & { resources: Record<string, string> } = {
+      ...spec,
+      resources: {},
+      dictionary_path: null,
+    };
     expect(() =>
       transcribeText("hello", {
-        compiledSpec: { ...spec, resources: {}, dictionary_path: null },
+        compiledSpec: noLexicon,
         transcriptionConfig: { ...transcription, sources },
         dictionaryMap: {},
         dictLookup: () => ["HH", "EH1", "L", "OW0"],

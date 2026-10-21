@@ -218,6 +218,16 @@ describe("direct rule errors through composition", () => {
                   value: { fields: { duration: { value: "current.phonem" } } },
                   tag: "duration_floor",
                 },
+                {
+                  foreach: [{ op: "set" }, { op: "add" }],
+                  template: {
+                    for_each_field: ["duration"],
+                    field: "{field}",
+                    op: "{op}",
+                    value: "fixture_outer(current)",
+                    tag: "duration_floor",
+                  },
+                },
               ],
               citations: ["Klatt 1976"],
             },
@@ -286,6 +296,8 @@ describe("direct rule errors through composition", () => {
           for (const [code, path, authoredPath, position] of [
             ["E_CEL_INVALID", "apply[0].value", "apply.0.value", "value"],
             ["E_RULE_APPLY_FIELD_UNKNOWN", "apply[0].valu", "apply.0.valu", "key"],
+            ["E_RULE_FEATURE_UNKNOWN", "apply[3].value", "apply.3.template.value", "value"],
+            ["E_RULE_FEATURE_UNKNOWN", "apply[4].value", "apply.3.template.value", "value"],
             [
               "E_RULE_FEATURE_UNKNOWN",
               "apply[2].value.fields.duration.value",
@@ -716,11 +728,26 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
         spans.some(
           (entry) => entry.value.path[1] === name && typeof entry.value.path[3] === "number",
         ),
-      ).toBe(false);
+      ).toBe(true);
       expect(
         spans.some((entry) => entry.value.path.join(".") === `rules.${name}.select.where`),
       ).toBe(true);
     }
+    const burst = spans.find(
+      (entry) =>
+        entry.compiledPath?.join(".") === "rules.burst_spectral_template.apply.8.dispatch.0.when",
+    );
+    expect(burst?.value.path.join(".")).toBe(
+      "rules.burst_spectral_template.apply.0.dispatch.0.when",
+    );
+    expect(burst?.value.line).toBe(342);
+    expect(burst?.parents?.[0].documentSpan.path).toEqual(["functions", "bilabial", "body"]);
+    const trailing = spans.find(
+      (entry) =>
+        entry.compiledPath?.join(".") === "rules.place_f2_locus.apply.0.dispatch.8.default",
+    );
+    expect(trailing?.value.path.join(".")).toBe("rules.place_f2_locus.apply.0.dispatch.1.default");
+    expect(trailing?.key?.line).toBe(36);
   }
 
   it("inherits an undefined, phased base rule; the child's definition wins (synchronous loader)", () => {

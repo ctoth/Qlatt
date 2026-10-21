@@ -46,11 +46,19 @@ export interface PlstepPolicy {
   citations: string[];
 }
 
+/** Experiment-owned display thresholds, with their cited or estimated basis. */
+export type TrackAnalysisPolicy = Record<
+  "maxVoicingIssues" | "lowParallelScale" | "lowParallelGain",
+  { value: number; basis: string }
+>;
+
 /** Semantics document structure */
 export interface SemanticsDocument {
   name: string;
   /** Optional burst telemetry policy; audio bursts remain graph-owned. */
   plstep?: PlstepPolicy;
+  /** Optional policy for gain and voicing diagnostic displays. */
+  analysis?: TrackAnalysisPolicy;
   /** Default scheduling mode for all bindings.
    *  'ramp' = linearRampToValueAtTime (Klatt 1980 inter-frame interpolation).
    *  'step' = setValueAtTime (legacy default).

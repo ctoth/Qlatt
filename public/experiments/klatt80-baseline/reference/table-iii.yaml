@@ -24,12 +24,3 @@ conformance:
   plstepAfGateDb:
     value: 40
     basis: "engineering estimate: retained high-AF missing-burst heuristic, not the engine trigger threshold"
-  maxVoicingIssues:
-    value: 6
-    basis: "engineering estimate: retained diagnostic display cap"
-  lowParallelScale:
-    value: 0.05
-    basis: "engineering estimate: retained low parallel-scale warning threshold"
-  lowParallelGain:
-    value: 0.001
-    basis: "engineering estimate: retained low parallel-gain warning threshold"

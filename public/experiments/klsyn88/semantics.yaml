@@ -4,6 +4,17 @@
 bacon: "0.1"
 name: klsyn88
 
+analysis:
+  maxVoicingIssues:
+    value: 6
+    basis: "engineering estimate: retained diagnostic display cap"
+  lowParallelScale:
+    value: 0.05
+    basis: "engineering estimate: retained low parallel-scale warning threshold"
+  lowParallelGain:
+    value: 0.001
+    basis: "engineering estimate: retained low parallel-gain warning threshold"
+
 # Interpreter burst telemetry policy (audio triggering remains in graph.yaml).
 # Klatt 1980 PARCOE.FOR: frication onset, NNAF - NAFLAS >= 49.
 # Preserve the host convention: initial and omitted parameters mean off (0 dB).

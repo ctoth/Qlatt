@@ -25,6 +25,7 @@ describe("analyzeTrackGains", () => {
       {},
       48000,
       semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     expect(result!.ranges.masterGain).not.toBeNull();
@@ -43,6 +44,7 @@ describe("analyzeTrackGains", () => {
       {},
       48000,
       semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 62 + (-119)) = dbToLinear(-10) ≈ 0.316
@@ -61,6 +63,7 @@ describe("analyzeTrackGains", () => {
       {},
       48000,
       semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 40 + (-134)) = dbToLinear(-47) — still nonzero (> -72 floor)
@@ -79,6 +82,7 @@ describe("analyzeTrackGains", () => {
       {},
       48000,
       semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     // dbToLinear(47 + 55 + (-119)) = dbToLinear(-17) — nonzero
@@ -86,7 +90,7 @@ describe("analyzeTrackGains", () => {
   });
 
   it("returns null for empty track", () => {
-    const result = analyzeTrackGains([], {}, 48000, semantics);
+    const result = analyzeTrackGains([], {}, 48000, semantics, semantics.analysis!);
     expect(result).toBeNull();
   });
 
@@ -102,6 +106,7 @@ describe("analyzeTrackGains", () => {
       { parallelGainScale: 1n },
       48000,
       semantics,
+      semantics.analysis!,
     );
     expect(result).not.toBeNull();
     expect(result!.ranges.fricGain!.max).toBeGreaterThan(0);

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { checkPureExpression } from "../src/declarative-frontend/cel-expressions";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import {
+  type AttributeEvidence,
   AttributeItemIdentity,
   checkRequestedAttributes,
   RequestedAttributes,
@@ -32,13 +33,13 @@ const definitions = {
   mathValue: "max(own, shared)",
 };
 
-function compiled(define = definitions) {
+function compiled(define = definitions, duration: Record<string, unknown> = {}) {
   return compileRuleEngineSpec({
     parameters: { scale: 2 },
     relations: {
       Segment: {
         type: "base",
-        scalars: { duration: {}, missing: {} },
+        scalars: { duration, missing: {} },
         features: { active: [true, false], param_scope: [] },
       },
     },
@@ -54,7 +55,7 @@ function compiled(define = definitions) {
   });
 }
 
-function fixture() {
+function fixture(spec = compiled()) {
   const graph = new Utterance({
     itemTypes: {
       segment: {
@@ -71,7 +72,7 @@ function fixture() {
   const item = graph.createItem("segment", "first");
   item.set("duration", 10, meta);
   graph.segments.append(item, meta);
-  const program = checkRequestedAttributes(compiled(), "sample");
+  const program = checkRequestedAttributes(spec, "sample");
   const request = new RequestedAttributes(graph, program);
   return { graph, item, program, request };
 }
@@ -239,21 +240,61 @@ describe("requested attributes on supplied graphs", () => {
       ["shared", "branch", "sum"],
     ];
     const start = performance.now();
+    const evidenceCounts: number[] = [];
     for (const order of orders) {
       const cached = new RequestedAttributes(graph, program);
+      const evidence = new Set<object>();
+      const collect = (node: AttributeEvidence) => {
+        if (evidence.has(node)) return;
+        evidence.add(node);
+        node.parents.forEach(collect);
+      };
       for (const name of order) {
         const reference = new RequestedAttributes(graph, program).evaluate(item, name);
-        expect(cached.evaluate(item, name)).toEqual(reference);
+        const result = cached.evaluate(item, name);
+        expect(result).toEqual(reference);
+        if (result.evidence) collect(result.evidence);
       }
       expect(cached.evaluationCount).toBe(4);
+      evidenceCounts.push(evidence.size);
     }
     console.info("supplied-graph attribute fixture", {
       elapsedMs: performance.now() - start,
       evaluationsPerOrder: 4,
+      evidenceNodesPerOrder: evidenceCounts,
       transactions: graph.journal().length,
     });
     const before = graph.diagnostics.getEntries();
     runGraphRuleEngine(graph, compiled());
     expect(graph.diagnostics.getEntries()).toEqual(before);
+  });
+
+  it("preserves required nonempty stage diagnostics across request modes, order and cache hits", () => {
+    // The bundled qlatt-english pipeline declares duration.max = 500.
+    const spec = compiled(definitions, { max: 500 });
+    const outputs = [];
+    for (const mode of ["values", "evidence"] as const) {
+      for (const order of [[], ["own"], ["sum", "branch"], ["branch", "sum"]]) {
+        const { graph, item, request } = fixture(spec);
+        item.set("duration", 600, meta);
+        for (const name of order) request.evaluate(item, name, mode);
+        runGraphRuleEngine(graph, spec);
+        const observed = graph.diagnostics.getEntries();
+        expect(observed).toHaveLength(1);
+        expect(observed[0]).toMatchObject({
+          code: "W_DURATION_CLAMP",
+          data: { before: 600, after: 500, maximum: 500 },
+        });
+        for (const name of order) {
+          const result = request.evaluate(item, name, mode);
+          expect(request.evaluate(item, name, mode)).toBe(result);
+        }
+        expect(graph.diagnostics.getEntries()).toEqual(observed);
+        outputs.push(
+          observed.map(({ level, message, code, data }) => ({ level, message, code, data })),
+        );
+      }
+    }
+    for (const output of outputs) expect(output).toEqual(outputs[0]);
   });
 });

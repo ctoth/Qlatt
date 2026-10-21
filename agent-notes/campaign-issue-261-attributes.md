@@ -54,6 +54,13 @@ the review corrections still require their own hosted results.
 Review-correction quality job119213264077 requested two import layout corrections
 in requested-attributes.ts. Applied its exact order and single-line import through
 apply_patch; no local CI rerun.
+Acceptance audit identified two explicitly requested evidence gaps: aggregate
+evidence counts and a nonempty diagnostic comparison. The existing measurement
+now counts unique immutable evidence nodes across returned roots. A focused case
+uses the bundled duration maximum of 500 and the actual W_DURATION_CLAMP producer
+to compare ordered diagnostic payloads across no/fewer/reordered requests, both
+accumulator modes and cache hits. Only timestamps are excluded across executions.
+This adds no production behavior; hosted CI owns validation of the added case.
 
 ## Next step
 Push the accepted review corrections and inspect hosted CI on their exact head.

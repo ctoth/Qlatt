@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
 import { createDiagnostics } from "../../diagnostics.ts";
+import { preloadF0Filters } from "../../f0-filters-loader.ts";
 import { createKlattInterpreter } from "../../klatt-interpreter.ts";
 import { createKlattRuntime } from "../../klatt-runtime.ts";
 import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
@@ -68,6 +69,7 @@ export function createNodeRuntimeBackend({
       const config = structuredClone(preparedConfig);
       mark("assetsConfig");
       try {
+        await preloadF0Filters(assetLoader);
         const diagnostics = createDiagnostics({ maxEntries: 1000 });
         const frontend = textToKlattTrackDetailed(
           request.phrase,

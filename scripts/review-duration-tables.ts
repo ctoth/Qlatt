@@ -19,8 +19,8 @@ if (mode === "capture" || mode === "golden") {
   const root = resolve(first);
   const output = resolve(second);
   const originalCwd = process.cwd();
-  // Node resource loaders resolve YAML and dictionaries from cwd/public.
-  // A Vite root alone changes source imports but not those asset reads.
+  // Keep the capture's working directory aligned with the selected checkout.
+  // Node resource loaders themselves use their source package's asset root.
   process.chdir(root);
   const server = await createServer({ root, server: { middlewareMode: true, hmr: false } });
   try {

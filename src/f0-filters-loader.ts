@@ -90,7 +90,7 @@ export async function preloadF0Filters(assetLoader: RuntimeAssetLoader): Promise
 }
 
 function loadBytesFromNode(): ArrayBuffer {
-  // Reuse the project's filesystem probe (cwd/public, cwd, absolute). The wasm
+  // Reuse the package-relative filesystem probe. The wasm
   // is a build artifact copied to public/worklets by build.ps1 / build.sh.
   const bytes = readBinaryFromFsSync("/public/worklets/f0-filters.wasm");
   if (!bytes) {

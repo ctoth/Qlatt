@@ -192,7 +192,9 @@ export function createNodeRuntimeBackend({
                 : undefined;
               const tokenId = segment?.get("sourceTokenId");
               const token =
-                typeof tokenId === "string" ? frontend.utterance.getItem(tokenId) : undefined;
+                typeof tokenId === "string"
+                  ? frontend.utterance.getItem(tokenId.split(":")[0])
+                  : undefined;
               const sourceId = token?.get("sourceNormalizationId");
               const source =
                 typeof sourceId === "string" ? frontend.utterance.getItem(sourceId) : undefined;

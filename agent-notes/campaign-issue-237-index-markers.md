@@ -2,7 +2,7 @@
 Deliver #237 index requests through the existing server and NVDA playback path without splitting speech at each index.
 
 # State
-PR #460 open from merged master2448a9f4 after #456. Owned origins worktree and branches removed cleanly. Existing fixtures cover UTF-16/whitespace, repeated-source server mapping, same-sample ordering, PCM slicing, rate/pitch padding boundaries, index-only input and canceled callbacks. Hosted quality119319999502 requested one assertion wrap; applied its exact formatting. No local CI. Claude full review active, session3ac4d4d6-fdde-4fcf-af16-3c6c0d6bd02e; hosted runtime checks pending.
+PR #460 open from merged master2448a9f4 after #456. Owned origins worktree and branches removed cleanly. Existing fixtures cover UTF-16/whitespace, repeated-source server mapping, same-sample ordering, PCM slicing, rate/pitch padding boundaries, index-only input and canceled callbacks. Hosted quality119319999502 requested one assertion wrap; applied its exact formatting. All seven hosted checks pass on4932fe37; no local CI. Claude completed its full six-file review in session3ac4d4d6-fdde-4fcf-af16-3c6c0d6bd02e with no source-backed defects. Supervisor independently verifies the review and final delta.
 
 # Decisions and why
 - Smallest approved change: about110–160 production lines in speak-server.ts and qlatt.py, plus100–160 lines in existing TS/Python fixtures. Existing raw sourceSpans select the first frame starting at or after each requested UTF-16 offset; no eligible frame means PCM end.
@@ -13,5 +13,7 @@ PR #460 open from merged master2448a9f4 after #456. Owned origins worktree and b
 # Surprises
 None yet. Source-backed review confirmed native feed accepts an empty boundary callback after previously queued audio, and queues callbacks after firing existing callbacks (nvwave.py313–361; wasapi.cpp468–493).
 
+Accepted Claude's completed review. Its rate/pitch callback-delay and whitespace-only observations had no identified real NVDA producer and were explicitly nonfindings; adjacent-string joining matches the existing caller contract. The Python fixture includes manually deferred cancellation callbacks, but does not establish live playback timing or leading-silence behavior. Live acceptance remains open. No new machinery or extra review round added in response.
+
 # Next step
-Implement the approved server/driver path and existing fixtures, publish for hosted CI and full Claude review. Supervisor independently verifies and merges.
+Await final response-head hosted checks and supervisor verification/merge. Full scoped controls and live acceptance remain open.

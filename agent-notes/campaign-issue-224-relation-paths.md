@@ -4,7 +4,7 @@ Carry authored relation locations through composition and validation, including 
 
 # State
 
-Started from PR410 final 7259b6a8; supervisor sequences its merge. Implemented relation source capture, whole-name shadow selection and fallback-expression classification. Existing fixtures check error coordinates and child/base source selection. No local CI; hosted validation pending.
+Started from PR410 final 7259b6a8; that prerequisite has merged. Implemented relation source capture, whole-name shadow selection and fallback-expression classification. Existing fixtures check error coordinates and child/base source selection. Six initial hosted checks passed; quality job119161540313 requested one if-condition formatting change, applied exactly. No local CI; replacement hosted validation pending.
 
 # Decisions and why
 

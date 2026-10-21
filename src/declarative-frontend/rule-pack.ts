@@ -433,10 +433,7 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
     Object.freeze([
       ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
       ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(({ value: { path } }) => {
-        if (
-          (path[0] !== "predicates" && path[0] !== "relations") ||
-          typeof path[1] !== "string"
-        ) {
+        if ((path[0] !== "predicates" && path[0] !== "relations") || typeof path[1] !== "string") {
           return false;
         }
         const childEntries = childFile[path[0]];

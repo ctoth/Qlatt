@@ -274,7 +274,9 @@ export async function speakWithNewRuntime(track, baseF0) {
   const branchPolicy = state.newRuntimeSemantics?.analysis?.branch_switch;
   console.log(
     "[QLATT] Branch switch summary",
-    branchPolicy ? summarizeBranchSwitch(track, branchPolicy) : "(no experiment branch-switch policy)",
+    branchPolicy
+      ? summarizeBranchSwitch(track, branchPolicy)
+      : "(no experiment branch-switch policy)",
   );
   console.log("[QLATT] First events", track.slice(0, 6));
 

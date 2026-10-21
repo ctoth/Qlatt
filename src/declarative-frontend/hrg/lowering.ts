@@ -2,7 +2,7 @@
  * HRG lowering — the single final pass: project leaf `Segment` features into a
  * sparse timestamped Klatt automation-event track (the synthesizer's input vocabulary,
  * `KlattFrame` from tts-frontend-types). Each emitted param carries the
- * decision id of the write that produced it, so the lowered track is itself
+ * decision id of its evaluation or source computation, so the lowered track is itself
  * queryable (see provenance-query.ts).
  *
  * Segment, F0Point, Tilt, and PhraseCommand values are projected here. Affect
@@ -2053,6 +2053,11 @@ export function lowerToFrames(
     const scaleParents = [
       ...(affect?.parents.durationScale ?? []),
       ...(isPause ? (affect?.parents.pauseScale ?? []) : []),
+      ...(context.silence
+        ? [timing.item.latestWrite(phonemeKey)?.decisionId, context.silence.decisionId].filter(
+            (id): id is string => !!id,
+          )
+        : []),
     ];
     outputTimingParentsByItem.set(timing.item, [
       ...new Set([...outputCursorParents, ...scaleParents]),
@@ -2633,8 +2638,8 @@ export function lowerToFrames(
     writeValue(params, "F0", resolved.valueHz, "f0_sample", [sample]);
   };
 
-  // appendFrame builds one KlattFrame by running these ordered sub-steps below,
-  // each of which mutates the shared params/provenance maps in place.
+  // After all event clocks are committed, these ordered numeric steps update
+  // each event's parameter/provenance maps without graph mutation.
 
   /**
    * Silence-edge frames: copy the selected silence resource's params, and for

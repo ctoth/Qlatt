@@ -18,6 +18,24 @@ No local CI, browser runs or measurements have been executed.
 Initial hosted quality job 119258167959 reported four formatting/import-order
 errors in lowering and two existing fixtures. Applied its exact layouts; no
 production behavior changed by this correction. Test shards still pending.
+Replacement quality reached typecheck and rejected readonly citations; copy the
+array at the existing mutable DecisionRecord boundary. Initial test shards
+exposed unsupported indexed has() in the new definition; installed cel-js
+macros.js requires a member chain rooted in an identifier. A named frame_segment
+definition retains optional absence using supported has(frame_segment.F1).
+Integrated newer frame-program fixtures now declare Frame schema. The F0 search
+oracle retains exact numeric comparisons and includes both interpolation parents.
+Keyed-shadow fixtures enumerate actual authored pipeline keys, not transitive
+includes, and retain exact updated source coordinate assertions.
+
+Claude reviewed all 35 initial PR files in two passes, conversation
+67c0fa5b-00d4-4eaa-8dcb-15c89018c4af. Accepted the concrete fixture caller correction,
+removed stale parameterOrder, directed revised measurement output to a separate
+directory, and included actual phoneme/silence decision sources in pause gating.
+Clarified that programmatic lowering still requires the explicit Frame schema;
+no general undeclared-schema fallback was promised. Corrected stale lowering
+comments. No new guards or speculative NaN machinery were added. Historical
+binary artifacts remain unchanged and revised measurement acceptance is pending.
 
 ## Decisions and why
 - Smallest approved revision: 240–340 production lines including deletions,

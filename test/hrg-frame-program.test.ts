@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, replayJournal, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import {
   FRAME_VALUES_SCHEMA,
   type FrameRule,
@@ -626,7 +627,7 @@ const META = {
 
 /** open (15 ms), a pipe that extends it (10 ms), shut (10 ms): 5 ms frames. */
 function tankUtterance(): Utterance {
-  const utterance = new Utterance(SCHEMA);
+  const utterance = new Utterance(withFrameSchema(SCHEMA));
   const transaction = utterance.beginTransaction(META);
   const items = (
     [

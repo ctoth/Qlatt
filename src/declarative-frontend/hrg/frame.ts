@@ -76,7 +76,7 @@ export class FrameValues {
       reason: `${producer}: ${this.item.id}.${key} = ${value}`,
       parents: [...new Set(parents.filter((parent): parent is string => !!parent))],
       citations: citations.length
-        ? citations
+        ? [...citations]
         : ["Qlatt #243: preserve the existing lowering transformation"],
     }).id;
   }

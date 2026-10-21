@@ -7,7 +7,8 @@ rules:
       where: "true"
     define:
       frame_segments: "assoc(current, 'segment')"
-      copied_f1: "size(frame_segments) > 0 && has(frame_segments[0].F1) ? frame_segments[0].F1 : null"
+      frame_segment: "size(frame_segments) > 0 ? frame_segments[0] : null"
+      copied_f1: "frame_segment != null && has(frame_segment.F1) ? frame_segment.F1 : null"
     apply: []
     citations:
       - "Qlatt #243: preserve Segment F1 copying; frame_copy"
@@ -22,7 +23,6 @@ relations:
       segmentRatio: []
       ordinal: []
       silenceEdge: []
-      parameterOrder: []
       phoneme: []
       word: []
       _f0VarianceCenter: []

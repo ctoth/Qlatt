@@ -32,6 +32,8 @@ as parents. Remaining imperative transformations are explicitly recorded as
 `frame_value_computed`, retaining transition endpoints, F0 samples and variance
 centers. They are not presented as checked definitions. Programmatic lowering
 without a supplied checked copy program retains imperative copying.
+Every caller still supplies the declared Frame schema via `withFrameSchema`;
+omitting a checked copy program does not remove that schema requirement.
 
 Revised measurement acceptance is pending. The reports below describe the old
 transaction-based candidate, not this revision. No new performance claim or
@@ -45,9 +47,15 @@ its own Vite server on port 8134. Set `CHROME_PATH` if Chrome/Edge is elsewhere.
 Run Node and browser commands separately; avoid competing benchmark/test jobs.
 
 ```powershell
-node scripts/frame-baseline.mjs node test/fixtures/frame-foundation/after-node.json.gz test/fixtures/frame-foundation/baseline-node.json.gz
-node scripts/frame-baseline.mjs browser test/fixtures/frame-foundation/after-browser.json.gz test/fixtures/frame-foundation/baseline-browser.json.gz
-node scripts/summarize-frame-baseline.mjs
+# Use a new shared output directory; keep the historical fixtures unchanged.
+$reports = "C:/temp/qlatt-frame-revision"
+# In the baseline checkout, with its matching harness:
+node scripts/frame-baseline.mjs node "$reports/baseline-node.json.gz"
+node scripts/frame-baseline.mjs browser "$reports/baseline-browser.json.gz"
+# In the revised candidate checkout, on the same machine/browser/configuration:
+node scripts/frame-baseline.mjs node "$reports/after-node.json.gz" "$reports/baseline-node.json.gz"
+node scripts/frame-baseline.mjs browser "$reports/after-browser.json.gz" "$reports/baseline-browser.json.gz"
+node scripts/summarize-frame-baseline.mjs "$reports"
 ```
 
 Omit the final argument to capture a baseline. The frozen baseline commit is

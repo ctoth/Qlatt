@@ -132,7 +132,7 @@ describe("Frame foundation", () => {
     const request = new RequestedAttributes(utterance, program);
     const first = request.evaluate(frame, "copied_f1");
     expect(request.evaluate(frame, "copied_f1")).toBe(first);
-    expect(request.evaluationCount).toBe(2);
+    expect(request.evaluationCount).toBe(3);
     expect(request.evaluate(frame, "copied_f1", "values").value).toBe(first.value);
     expect(first.evidence!.reads.some((read) => read.subject === `${items[0].id}.F1`)).toBe(true);
     const projected = new WeakMap();

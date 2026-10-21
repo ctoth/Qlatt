@@ -1,5 +1,5 @@
 import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
-import { expandSpecCelMacros, parseCelMacroBlock } from "./cel-macros";
+import { expandSpecCelMacros, type MacroExpansionObserver, parseCelMacroBlock } from "./cel-macros";
 
 type PlainObject = Record<string, unknown>;
 
@@ -416,12 +416,12 @@ function normalizeRule(ruleInput: unknown): PlainObject {
   };
 }
 
-export function parseDslSpec(source: unknown) {
+export function parseDslSpec(source: unknown, observeMacroExpansion?: MacroExpansionObserver) {
   const parsed = typeof source === "string" ? parseYamlString(source, "dsl spec") : source;
   if (!isPlainObject(parsed)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
-  const raw = expandSpecCelMacros(parsed, parseCelMacroBlock(parsed.functions));
+  const raw = expandSpecCelMacros(parsed, parseCelMacroBlock(parsed.functions), observeMacroExpansion);
   if (Object.hasOwn(raw, "streams")) {
     throw new Error("E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'");
   }

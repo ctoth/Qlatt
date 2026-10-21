@@ -42,7 +42,10 @@ export type CelMacroDefinition = {
   readonly expandedBody: string;
   readonly citations: readonly string[];
   readonly description: string | null;
+  readonly dependencies: readonly CelMacroDefinition[];
 };
+
+export type MacroExpansionObserver = (path: string, macros: readonly CelMacroDefinition[]) => void;
 
 export type CelMacroTable = ReadonlyMap<string, CelMacroDefinition>;
 
@@ -411,6 +414,7 @@ export function parseCelMacroBlock(raw: unknown): CelMacroTable {
         ]),
       ]),
       description: definition.description,
+      dependencies: Object.freeze([...dependencies.values()]),
     });
     table.set(name, macro);
     return macro;
@@ -445,17 +449,21 @@ function expandValue(
   macros: CelMacroTable,
   path: string,
   citations: Set<string>,
+  observe?: MacroExpansionObserver,
 ): unknown {
   if (typeof value === "string") {
     const called = calledMacroNames(value, new Set(macros.keys()));
     if (called.length === 0) return value;
+    observe?.(path, [...new Set(called)].map((name) => macros.get(name)!));
     for (const name of called) {
       for (const citation of macros.get(name)?.citations ?? []) citations.add(citation);
     }
     return expandCelMacros(value, macros, path);
   }
   if (Array.isArray(value)) {
-    return value.map((entry, index) => expandValue(entry, macros, `${path}[${index}]`, citations));
+    return value.map((entry, index) =>
+      expandValue(entry, macros, `${path}[${index}]`, citations, observe),
+    );
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
@@ -463,7 +471,7 @@ function expandValue(
         key,
         NON_EXPRESSION_KEYS.has(key) && !path.endsWith(".define") && !FRAME_NAME_MAP.test(path)
           ? entry
-          : expandValue(entry, macros, `${path}.${key}`, citations),
+          : expandValue(entry, macros, `${path}.${key}`, citations, observe),
       ]),
     );
   }
@@ -474,6 +482,7 @@ function expandValue(
 export function expandSpecCelMacros<T extends Record<string, unknown>>(
   spec: T,
   macros: CelMacroTable,
+  observe?: MacroExpansionObserver,
 ): T {
   if (macros.size === 0) return spec;
   const expanded: Record<string, unknown> = { ...spec };
@@ -485,7 +494,7 @@ export function expandSpecCelMacros<T extends Record<string, unknown>>(
       const citations = new Set<string>();
       for (const key of ["when", "speak", "vocabulary_keys"]) {
         if (typeof entry[key] === "string")
-          entry[key] = expandValue(entry[key], macros, `${path}.${key}`, citations);
+          entry[key] = expandValue(entry[key], macros, `${path}.${key}`, citations, observe);
       }
       if (Array.isArray(entry.citations))
         entry.citations = [...new Set([...entry.citations, ...citations])];
@@ -507,7 +516,7 @@ export function expandSpecCelMacros<T extends Record<string, unknown>>(
     expanded[root] = Object.fromEntries(
       Object.entries(entries).map(([name, value]) => {
         const citations = new Set<string>();
-        const result = expandValue(value, macros, `${root}.${name}`, citations);
+        const result = expandValue(value, macros, `${root}.${name}`, citations, observe);
         sources.set(`${root}.${name}`, citations);
         return [name, result];
       }),

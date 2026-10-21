@@ -196,7 +196,7 @@ describe("direct rule errors through composition", () => {
             unknown_path_relation: {
               kind: "scalar",
               select: { relation: "Segment", where: "path(current, 'R:Missing') != null" },
-              constraint: { expr: "current.phonem == 'AA'" },
+              constraint: { expr: "fixture_outer(current)" },
               aply: [],
               apply: [
                 {
@@ -222,10 +222,14 @@ describe("direct rule errors through composition", () => {
               citations: ["Klatt 1976"],
             },
           };
+          const functions = {
+            fixture_inner: { params: ["item"], body: "item.phonem == 'AA'" },
+            fixture_outer: { params: ["item"], body: "fixture_inner(item)" },
+          };
           const frontend = writeExtendingFrontend(
             dir,
-            included ? { rules } : {},
-            included ? {} : { rules },
+            included ? { rules, functions } : {},
+            included ? {} : { rules, functions },
           );
           const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
           const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
@@ -268,6 +272,15 @@ describe("direct rule errors through composition", () => {
               ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
+          for (const name of ["fixture_outer", "fixture_inner"]) {
+            const body = entries.find(
+              (entry) => entry.value.path.join(".") === `functions.${name}.body`,
+            )?.value;
+            expect(body).toBeDefined();
+            expect(String(failure)).toContain(
+              `macro body [${resource}:${body?.line}:${body?.column}]`,
+            );
+          }
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
           for (const [code, path, authoredPath, position] of [
@@ -303,6 +316,57 @@ describe("direct rule errors through composition", () => {
       });
     }
   }
+});
+
+describe("macro source ancestry", () => {
+  it("keeps the bundled call site primary and selects an overriding function body", () => {
+    const sourcePath = "rules.vocal_effort.select.where";
+    const base = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
+      (entry) => entry.value.path.join(".") === sourcePath,
+    );
+    expect(base?.value.resource).toBe("/rules/frontends/qlatt-english/phases/prosody.yaml");
+    expect(base?.parents?.[0].documentSpan.path).toEqual([
+      "functions",
+      "has_voiced_formants",
+      "body",
+    ]);
+    expect(base?.parents?.[0].documentSpan.resource).toBe(
+      "/rules/frontends/qlatt-english/frontend.yaml",
+    );
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-macro-origins-"));
+    try {
+      const resource = writeExtendingFrontend(
+        dir,
+        {},
+        {
+          functions: {
+            has_voiced_formants: { body: "fixture_helper(item)" },
+            fixture_helper: { params: ["item"], body: "has(item.F1)" },
+          },
+        },
+      );
+      const child = rulepackRuleDocumentSpans(loadRulepackSpecFromPath(resource)).find(
+        (entry) => entry.value.path.join(".") === sourcePath,
+      );
+      const authored = parseYamlString(readFileSync(resource, "utf8"), resource, {
+        resource,
+        role: "rulepack",
+      });
+      const body = yamlDocumentSpans(authored).find(
+        (entry) => entry.value.path.join(".") === "functions.has_voiced_formants.body",
+      );
+      expect(child?.value).toEqual(base?.value);
+      expect(child?.parents?.[0].documentSpan).toEqual(body?.value);
+      const helper = yamlDocumentSpans(authored).find(
+        (entry) => entry.value.path.join(".") === "functions.fixture_helper.body",
+      );
+      expect(child?.parents?.[0].parents[0].documentSpan).toEqual(helper?.value);
+      expect(Object.isFrozen(child?.parents)).toBe(true);
+      expect(JSON.parse(JSON.stringify(child))).toEqual(child);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("authored parameter origins through composition", () => {

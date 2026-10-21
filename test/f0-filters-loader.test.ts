@@ -47,7 +47,10 @@ describe("f0-filters-loader", () => {
   it("preserves the original binary read failure instead of reporting a missing build", async () => {
     vi.resetModules();
     const fresh = await import("../src/f0-filters-loader");
-    const cause = Object.assign(new Error("permission denied"), { code: "EACCES", path: WASM_PATH });
+    const cause = Object.assign(new Error("permission denied"), {
+      code: "EACCES",
+      path: WASM_PATH,
+    });
     const read = vi.spyOn(fs, "readFileSync").mockImplementation(() => {
       throw cause;
     });

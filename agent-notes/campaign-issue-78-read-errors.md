@@ -9,7 +9,7 @@ Smallest change: about 10–20 production lines and 25–45 existing fixture lin
 This does not change URL/resource roots or schemas. existsSync probing still cannot distinguish every parent-directory access failure, so this is not full #78 acceptance.
 
 # Surprises
-None.
+Initial quality job 119195265260 requested only the F0 fixture's Object.assign object reflow. Applied the exact formatting correction; the unrelated approximate-constant warning was not an error and is unchanged.
 
 # Next step
 Publish for hosted CI and independent Claude review; supervisor owns merge. No local CI run.

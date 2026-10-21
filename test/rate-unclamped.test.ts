@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as hrg from "../src/declarative-frontend/hrg";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
+import { browserRenderOptions } from "../src/rendering/backends/browser-runtime";
+import { trackOnlyBackend } from "../src/rendering/backends/track-only";
+import type { RenderRequest } from "../src/rendering/types";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
@@ -13,6 +18,73 @@ import type { KlattFrame } from "../src/tts-frontend-types";
 // and its diagnostics are test/dectalk-speaking-rate.test.ts).
 
 const PHRASE = "The quick brown fox jumps over the lazy dog.";
+
+afterEach(() => vi.restoreAllMocks());
+
+describe("frontend transition defaults", () => {
+  it("preserves omission through rendering request adapters", async () => {
+    const request: RenderRequest = {
+      repoRoot: process.cwd(),
+      phrase: "hello world",
+      frontendId: "qlatt-english",
+      experimentId: "klatt80-baseline",
+      engine: "runtime",
+      rate: 1,
+      sampleRate: 22050,
+      leadTime: 0,
+      tailTime: 0,
+      includeTrack: true,
+      noiseSeed: 1,
+      persistWav: false,
+      allowBrowserRender: false,
+      renderHost: "auto",
+    };
+    const spec = structuredClone(rulepack.loadBundledRulepackSpec(request.frontendId));
+    hrg.readLowerOptions(spec.output.lowering).transitions.default_transition_ms.value = 60;
+    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+    expect(browserRenderOptions(request).transitionMs).toBeUndefined();
+    const result = await trackOnlyBackend.render(request);
+    expect(result.transitionMs).toBeUndefined();
+    expect(result.track).toEqual(textToKlattTrack(request.phrase, undefined, 60));
+  });
+
+  it.each(["qlatt-english", "qlatt-beauty"])(
+    "%s uses its cited default only when the override is omitted",
+    (frontendId) => {
+      const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
+      const policy = hrg.readLowerOptions(spec.output.lowering);
+      // Deliberately differs from the bundled 30 ms to expose a masked default.
+      policy.transitions.default_transition_ms.value = 60;
+      vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+      const lower = vi.spyOn(hrg, "lowerToFrames");
+      const options = { frontendId, rate: 2 };
+      const implicit = textToKlattTrackDetailed("hello world", 110, undefined, options).track;
+      expect(lower.mock.lastCall?.[1].transitions.default_transition_ms).toEqual({
+        ...policy.transitions.default_transition_ms,
+        value: 30,
+      });
+      expect(textToKlattTrack("hello world", 110, undefined, options)).toEqual(implicit);
+      expect(textToKlattTrack("hello world", 110, 60, options)).toEqual(implicit);
+      textToKlattTrack("hello world", 110, 10, options);
+      expect(lower.mock.lastCall?.[1].transitions.default_transition_ms.value).toBe(5);
+      textToKlattTrack("hello world", 110, 0, options);
+      expect(lower.mock.lastCall?.[1].transitions.default_transition_ms.value).toBe(0);
+    },
+  );
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    "still rejects an explicit nonfinite transition override %s",
+    (transitionMs) => {
+      expect(() => textToKlattTrack("hello", 110, transitionMs)).toThrow(
+        "E_HRG_LOWER_POLICY_NUMBER",
+      );
+    },
+  );
+
+  it("retains the bundled default output", () => {
+    expect(textToKlattTrack("hello world")).toEqual(textToKlattTrack("hello world", undefined, 30));
+  });
+});
 
 function totalDurationMs(track: KlattFrame[]): number {
   if (track.length === 0) return 0;

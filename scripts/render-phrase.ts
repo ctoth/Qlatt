@@ -25,7 +25,7 @@ const speaker = args.get("speaker");
 const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
 const engine = args.get("engine") ?? "runtime";
 const rate = Number(args.get("rate") ?? 1);
-const transitionMs = Number(args.get("transition-ms") ?? 30);
+const transitionMs = args.has("transition-ms") ? Number(args.get("transition-ms")) : undefined;
 const sampleRate = Number(args.get("sample-rate") ?? 22050);
 const outJson = args.get("out-json")
   ? path.resolve(args.get("out-json") as string)

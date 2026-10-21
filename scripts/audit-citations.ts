@@ -20,7 +20,9 @@ export function auditDocument(file: string, document: unknown): Entry[] {
     if (!isPlainObject(values)) return;
     for (const [name, value] of Object.entries(values)) {
       let status: Entry["status"];
-      if (category === "constants" || !isPlainObject(value)) status = "no-slot";
+      if (!["rules", "realize", "realize_each"].includes(category) || !isPlainObject(value)) {
+        status = "no-slot";
+      }
       else if (!("citations" in value)) status = "absent";
       else {
         const citations = value.citations;
@@ -84,6 +86,7 @@ export function auditCitations(root: string) {
       "realize_each counts authored rule templates separately, not generated instances.",
       "Constants count top-level raw CEL values; even a nested citations key is literal data.",
       "String realizations and other non-mapping entries have no citation metadata slot.",
+      "Params, primitives and nodes have no supported citation slot; arbitrary meta fields are not interpreted.",
       "Present means nonempty string-array metadata, not source verification or schema acceptance.",
       "Comments, source kinds, paper links and scientific fidelity are not inferred.",
       "These scoped counts are not comparable to the historical 740-entry audit.",

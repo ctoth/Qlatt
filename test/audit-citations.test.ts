@@ -33,7 +33,7 @@ realize_each:
       [["realize", "empty"], "invalid"],
       [["realize", "blank"], "invalid"],
       [["realize", "wrong"], "invalid"],
-      [["params", "F0"], "absent"],
+      [["params", "F0"], "no-slot"],
       [["constants", "number"], "no-slot"],
       [["constants", "mapping"], "no-slot"],
       [["realize_each", 0, "rules", "F{i}"], "present"],
@@ -42,12 +42,13 @@ realize_each:
   });
 
   it.each([
-    ["public/rules/example.yaml", "rules"],
-    ["public/experiments/x/registry.yaml", "primitives"],
-    ["public/experiments/x/graph.yaml", "nodes"],
-  ])("counts authored %s entries", (file, category) => {
-    expect(auditDocument(file, { [category]: { example: { citations: ["source"] } } })).toEqual([
-      { file, path: [category, "example"], category, status: "present" },
+    ["public/rules/example.yaml", "rules", { citations: ["source"] }, "present"],
+    ["public/rules/example.yaml", "rules", { kind: "scalar" }, "absent"],
+    ["public/experiments/x/registry.yaml", "primitives", { native: "GainNode" }, "no-slot"],
+    ["public/experiments/x/graph.yaml", "nodes", { type: "gain" }, "no-slot"],
+  ] as const)("counts authored %s entries", (file, category, value, status) => {
+    expect(auditDocument(file, { [category]: { example: value } })).toEqual([
+      { file, path: [category, "example"], category, status },
     ]);
   });
 });

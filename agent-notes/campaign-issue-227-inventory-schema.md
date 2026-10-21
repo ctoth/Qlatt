@@ -28,6 +28,10 @@ Initial hosted quality job119222031200 requested layout changes in the shared
 schema compiler, inventory mapping and one fixture assertion. Applied its exact
 formatting through apply_patch. The independent Claude full-PR review is running
 in conversation69c91365-1ca0-479d-a6db-10f2a15b1fc2.
+Hosted shard2 job119223121789 found the comparison report's inventory hash stale
+after adding declarations. The full generated report differed on that line only;
+the generated target fragment matched. Confirmed the normalized source hash using
+the generator's existing SHA-256 calculation and updated that report metadata.
 
 ## Next step
 Publish for hosted CI and full Claude review, correct actual scoped findings,

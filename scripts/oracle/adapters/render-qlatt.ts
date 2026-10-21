@@ -112,8 +112,6 @@ export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArti
     "node",
     "--frontend-id",
     input.frontendId ?? "dectalk-english",
-    "--experiment-id",
-    input.frontendId ?? "dectalk-english",
     "--rate",
     String(qlattRate),
     "--sample-rate",

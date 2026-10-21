@@ -12,11 +12,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadBundledFrontendManifest } from "../../src/declarative-frontend/rule-pack.ts";
 import { FRAME_SAMPLES } from "../../src/dectalk-vtm-track.ts";
-import {
-  defaultExperimentFor,
-  type FrontendManifest,
-} from "../../src/experiments/frontend-pairing.ts";
+import { defaultExperimentFor } from "../../src/experiments/frontend-pairing.ts";
+import { loadExperimentManifest } from "../../src/experiments/load-experiment-config.ts";
 import { renderDectalkVtmTrack, renderToInt16 } from "../../src/rendering/dectalk-vtm-render.ts";
 import { PLAYBACK_LEAD_SEC } from "../../src/track-playback.ts";
 import { textToKlattTrack } from "../../src/tts-frontend.ts";
@@ -71,23 +70,13 @@ export function readVoiceCorpus(corpusPath: string): OracleCorpusDocument {
   return JSON.parse(fs.readFileSync(corpusPath, "utf8")) as OracleCorpusDocument;
 }
 
-let pairing: { manifest: FrontendManifest; experimentIds: string[] } | undefined;
-
 /** The experiment the page pairs a frontend with. */
-export function experimentFor(frontendId: string): string {
-  pairing ??= {
-    manifest: JSON.parse(
-      fs.readFileSync(path.join(repoRoot, "public", "rules", "frontends", "manifest.json"), "utf8"),
-    ) as FrontendManifest,
-    experimentIds: (
-      JSON.parse(
-        fs.readFileSync(path.join(repoRoot, "public", "experiments", "manifest.json"), "utf8"),
-      ) as { experiments: { id: string }[] }
-    ).experiments.map((experiment) => experiment.id),
-  };
-  const experimentId = defaultExperimentFor(frontendId, pairing.manifest, pairing.experimentIds);
-  if (!experimentId) throw new Error(`frontend '${frontendId}' is paired with no experiment`);
-  return experimentId;
+export async function experimentFor(frontendId: string): Promise<string> {
+  return defaultExperimentFor(
+    frontendId,
+    loadBundledFrontendManifest(),
+    (await loadExperimentManifest()).experiments.map((entry) => entry.id),
+  );
 }
 
 /** Render one corpus entry from text and count the samples equal to `<fixtureDir>/<id>.wav`. */
@@ -127,7 +116,7 @@ export async function compareVoiceEntry(
       track,
       sampleRate: oracle.sampleRate,
       frontendId,
-      experimentId: experimentFor(frontendId),
+      experimentId: await experimentFor(frontendId),
       startTime: PAGE_START_DELAY_SEC,
     });
     result.problems = render.diagnostics

@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadBundledFrontendManifest } from "../src/declarative-frontend/rule-pack.ts";
 import { createDiagnostics } from "../src/diagnostics.ts";
+import { defaultExperimentFor } from "../src/experiments/frontend-pairing.ts";
+import { loadExperimentManifest } from "../src/experiments/load-experiment-config.ts";
 import { selectRenderBackend } from "../src/rendering/select-backend.ts";
 import type { RenderRequest } from "../src/rendering/types.ts";
 import { writeWav } from "../src/rendering/write-wav.ts";
@@ -23,7 +26,13 @@ const frontendId = args.get("frontend-id") ?? "qlatt-english";
 // A voice of the frontend's registry, as the page's voice selection gives it
 // (test/harness/runtime.js). Absent: the frontend's default voice.
 const speaker = args.get("speaker");
-const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
+const experimentId =
+  args.get("experiment-id") ??
+  defaultExperimentFor(
+    frontendId,
+    loadBundledFrontendManifest(),
+    (await loadExperimentManifest()).experiments.map((entry) => entry.id),
+  );
 const engine = args.get("engine") ?? "runtime";
 const rate = args.has("rate") ? Number(args.get("rate")) : undefined;
 const transitionMs = args.has("transition-ms") ? Number(args.get("transition-ms")) : undefined;

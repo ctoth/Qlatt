@@ -29,6 +29,7 @@ const definitions = {
   member: "ahead(current, 1)",
   linked: "size(assoc(current, 'link'))",
   anchor: "midpoint(current)",
+  mathValue: "max(own, shared)",
 };
 
 function compiled(define = definitions) {
@@ -222,6 +223,13 @@ describe("requested attributes on supplied graphs", () => {
     );
     expect(bundled.definitions.place.path).toEqual(["rules", "place_f2_locus", "define", "place"]);
     expect(bundled.definitions.place.sources[0].value.resource).toContain("formant.yaml");
+    const nasal = checkRequestedAttributes(
+      loadBundledRulepackSpec("qlatt-english"),
+      "nasal_windows",
+    );
+    expect(nasal.definitions.anticipatory_start_ms.expression).toContain("max(");
+    const { item, request } = fixture();
+    expect(request.evaluate(item, "mathValue").value).toBe(20);
   });
 
   it("matches same-stage uncached requests across order permutations and reports bounded counts", () => {

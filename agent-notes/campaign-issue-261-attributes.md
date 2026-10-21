@@ -40,8 +40,19 @@ Claude full-PR review is running in session b47a09cf-295e-4b57-a381-23eecb34ce89
 Initial test shard3 job119207509989 rejected every fixture because its definition
 name `optional` collides with CEL's registered optional namespace. Renamed that
 fixture definition to `missingValue`; production namespace validation unchanged.
+Claude completed two passes through d72e95ec. Accepted both verified comments:
+reuse the existing stable GraphRuleEvaluationOwner per request instead of building
+a CEL environment per miss, and share existing fixed maths implementations so the
+real nasal_windows max expression is admitted. No effectful helper was enabled.
+Also matched the existing offset helper's nonnumeric-argument handling exactly.
+Review report: ~/.claude/reviews/ctoth-Qlatt-434-claude-report.md; supervisor owns
+the final ledger/gate. No broader derived-view machinery was requested or added.
+Hosted shard 3 at d72e95ec passed all seven requested-attribute tests. Its supplied
+graph fixture reported 10.157 ms across order permutations and uncached comparisons,
+four evaluations per order and zero transactions. This is fixture evidence only;
+the review corrections still require their own hosted results.
 
 ## Next step
-Publish for hosted CI and independent Claude review; correct actual findings and
-record the implementer response. Counts/timing are a supplied-graph fixture only,
+Push the accepted review corrections and inspect hosted CI on their exact head.
+Counts/timing are a supplied-graph fixture only,
 not evidence of production speedup or the final browser performance gate.

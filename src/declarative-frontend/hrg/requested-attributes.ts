@@ -2,7 +2,6 @@ import { isPlainObject } from "../../yaml-loader";
 import {
   type CheckedPureExpression,
   checkPureExpression,
-  evaluateExpression,
   ItemViewType,
 } from "../cel-expressions";
 import {
@@ -14,7 +13,12 @@ import type { DiagnosticDocumentSpans } from "../validation";
 import type { Item } from "./item";
 import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { evalPath, isNavOp } from "./path";
-import { mergeParameterRecords, projectPolicyValues } from "./rule-engine";
+import {
+  GraphRuleEvaluationOwner,
+  mergeParameterRecords,
+  projectPolicyValues,
+  PURE_GRAPH_MATH,
+} from "./rule-engine";
 import type { Utterance } from "./utterance";
 
 export interface CheckedAttribute extends CheckedPureExpression {
@@ -140,6 +144,7 @@ function immutable(value: unknown): unknown {
  * Engineering scope: whole-generation invalidation, no selective reuse.
  */
 export class RequestedAttributes {
+  private readonly owner = new GraphRuleEvaluationOwner();
   private generation = -1n;
   private readonly caches = {
     values: new Map<string, AttributeResult>(),
@@ -317,7 +322,9 @@ export class RequestedAttributes {
         const source = resolve(value);
         const items = members();
         const index = source ? items.indexOf(source) : -1;
-        return view(index < 0 ? undefined : items[index + Math.trunc(Number(amount))]);
+        const distance =
+          typeof amount === "number" || typeof amount === "bigint" ? Math.trunc(Number(amount)) : 1;
+        return view(index < 0 ? undefined : items[index + distance]);
       };
       const point = (value: unknown, ratio: unknown) => {
         const source = resolve(value);
@@ -331,6 +338,7 @@ export class RequestedAttributes {
           : null;
       };
       const functions: Record<string, (...args: unknown[]) => unknown> = {
+        ...PURE_GRAPH_MATH,
         ahead: (source, amount = 1) => offset(source, amount),
         behind: (source, amount = 1) => offset(source, -Number(amount)),
         midpoint: (source) => point(source, 0.5),
@@ -429,7 +437,7 @@ export class RequestedAttributes {
         },
       );
       this.evaluations++;
-      const value = capture(evaluateExpression(definition.expression, values, functions));
+      const value = capture(this.owner.evaluate(definition.expression, values, functions));
       const result = Object.freeze({
         value,
         ...(mode === "evidence"

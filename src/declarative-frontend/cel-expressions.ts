@@ -598,7 +598,7 @@ export function evaluateExpression(
   return coerceResult(compiled(isRecord(context) ? context : {}));
 }
 
-/** Read-only HRG helpers supported by requested attributes; no effectful kernels. */
+/** Read-only HRG helpers and fixed maths; no effectful kernels. */
 export const PURE_ATTRIBUTE_HELPERS = [
   "path",
   "assoc",
@@ -608,6 +608,14 @@ export const PURE_ATTRIBUTE_HELPERS = [
   "at_ratio",
   "at_sync",
   "at_offset",
+  "max",
+  "min",
+  "exp",
+  "sqrt",
+  "abs",
+  "log",
+  "pow",
+  "contains",
 ] as const;
 
 export interface CheckedPureExpression {

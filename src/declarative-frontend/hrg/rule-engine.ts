@@ -359,6 +359,13 @@ function buildEvaluationScope(
     if (!result) {
       result = transaction.view(item, {
         get: (property) => {
+          if (property === "segment" && item.type === "frame") {
+            const links = utterance.latestAssociationWrites(item, "segment");
+            for (const link of links) transaction.dependOn(link.decisionId);
+            const active = links.filter((link) => link.active);
+            if (active.length > 1) throw new Error(`E_FRAME_SEGMENT_CARDINALITY: ${item.id}`);
+            return view(active[0] ? utterance.getItem(active[0].toItemId) : undefined);
+          }
           if (!DERIVED_VIEW_NAMES.has(property)) return NOT_DERIVED;
           if (property === "sync_left" || property === "sync_right") {
             const anchor = utterance.temporalAnchor(item);
@@ -387,15 +394,16 @@ function buildEvaluationScope(
           return NOT_DERIVED;
         },
         has: (property) =>
-          DERIVED_VIEW_NAMES.has(property) &&
-          (property === "sync_left" ||
-            property === "sync_right" ||
-            (property === "syllable" && structureAncestor(item, "syllable") != null) ||
-            (property === "word" && structureAncestor(item, "word") != null) ||
-            (property === "parent" && structureRelation?.node(item)?.parent != null) ||
-            (property === "daughters" && structureChildren(item).length > 0) ||
-            (property === "is_final" && item.type === "syllable") ||
-            property === "next_boundary"),
+          (property === "segment" && item.type === "frame") ||
+          (DERIVED_VIEW_NAMES.has(property) &&
+            (property === "sync_left" ||
+              property === "sync_right" ||
+              (property === "syllable" && structureAncestor(item, "syllable") != null) ||
+              (property === "word" && structureAncestor(item, "word") != null) ||
+              (property === "parent" && structureRelation?.node(item)?.parent != null) ||
+              (property === "daughters" && structureChildren(item).length > 0) ||
+              (property === "is_final" && item.type === "syllable") ||
+              property === "next_boundary")),
       });
       views.set(item, result);
       itemByView.set(result, item);

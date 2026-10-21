@@ -1098,11 +1098,12 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
   };
 
   function expectKeywiseInheritance(child: Dict, spec: CompiledRulepack, dir: string): void {
+    const authoredPipeline = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/pipeline.yaml`);
     for (const [section, declared] of Object.entries(sections)) {
       const compiled = child[section] as Dict;
       const base = english[section];
-      for (const key of Object.keys(base)) {
-        // Inherits every base entry the child leaves untouched.
+      for (const key of Object.keys(authoredPipeline[section] as Dict)) {
+        // Shadow inheritance covers this file's entries, not its nested includes.
         if (!(key in declared)) expect(compiled[key], `${section}.${key}`).toEqual(base[key]);
       }
       for (const key of Object.keys(declared)) expect(compiled, section).toHaveProperty(key);
@@ -1137,13 +1138,13 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
       (entry) => entry.value.path.join(".") === "predicates.is_pausable_consonant",
     );
     expect(inherited?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
-    expect(inherited?.value.line).toBe(12);
+    expect(inherited?.value.line).toBe(14);
     const baseRelation = spans.find(
       (entry) =>
         entry.value.path.join(".") === "relations.Segment.scalars.duration.floor_fallback.value",
     );
     expect(baseRelation?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
-    expect(baseRelation?.key?.line).toBe(475);
+    expect(baseRelation?.key?.line).toBe(477);
     for (const path of ["maps.phoneme_aspiration_map.P_CL", "tags.duration_floor"]) {
       expect(spans.find((entry) => entry.value.path.join(".") === path)?.value.resource).toBe(
         "/rules/frontends/qlatt-english/pipeline.yaml",

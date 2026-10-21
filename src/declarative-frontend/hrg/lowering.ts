@@ -2,7 +2,7 @@
  * HRG lowering — the single final pass: project leaf `Segment` features into a
  * sparse timestamped Klatt automation-event track (the synthesizer's input vocabulary,
  * `KlattFrame` from tts-frontend-types). Each emitted param carries the
- * decision id of the write that produced it, so the lowered track is itself
+ * decision id of its evaluation or source computation, so the lowered track is itself
  * queryable (see provenance-query.ts).
  *
  * Segment, F0Point, Tilt, and PhraseCommand values are projected here. Affect
@@ -19,10 +19,16 @@ import { projectRd, type RdPolicy } from "../../input/rd-policy";
 import type { VoiceQualityChannel } from "../../input/vq-channels";
 import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
+import { emitFrame, FrameValues, recordFrameEvaluation } from "./frame";
 import { frameValueIndex, isFrameValues } from "./frame-program";
 import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
 import type { Item } from "./item";
 import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
+import {
+  type AttributeEvidence,
+  type CheckedAttributes,
+  RequestedAttributes,
+} from "./requested-attributes";
 import { applyScalarOp } from "./scalar-op";
 import type { FeatureValue } from "./types";
 import type { Utterance } from "./utterance";
@@ -249,6 +255,8 @@ export interface LowerOptions {
 }
 
 export type LowerContext = {
+  /** Checked copy definition supplied by the compiled frontend. */
+  frameCopy?: CheckedAttributes;
   frontendId?: string;
   rdPolicy?: RdPolicy;
   vqChannels?: readonly VoiceQualityChannel[];
@@ -260,6 +268,7 @@ export type LowerContext = {
    */
   frameValueFeatures?: readonly string[];
   speakerParams?: Readonly<Record<string, unknown>>;
+  speakerDecisionId?: string;
   speakerSex?: string;
   /**
    * By parameter scope (parameter-scope.ts), "" for no scope: what an F0
@@ -359,6 +368,7 @@ type ResolvedControlWindow = {
 };
 
 type ResolvedSegmentTransition = {
+  sources?: readonly Item[];
   startMs: number;
   fields: Readonly<Record<string, number>>;
   endMs?: number;
@@ -367,6 +377,7 @@ type ResolvedSegmentTransition = {
 
 type ResolvedF0Point = {
   decisionId: string;
+  parents?: readonly string[];
   timeMs: number;
   valueHz: number;
 };
@@ -377,6 +388,7 @@ type AffectValues = Record<AffectField, number>;
 type ResolvedAffect = {
   values: AffectValues;
   decisions: Partial<Record<AffectField, string>>;
+  parents: Partial<Record<AffectField, string[]>>;
 };
 
 type AffectDirective = {
@@ -1148,6 +1160,7 @@ export function resolveF0AtTime(
     const fraction = (timeMs - left.timeMs) / spanMs;
     return {
       decisionId: fraction < 1 ? left.decisionId : right.decisionId,
+      parents: [...(left.parents ?? [left.decisionId]), ...(right.parents ?? [right.decisionId])],
       timeMs,
       valueHz: left.valueHz + (right.valueHz - left.valueHz) * fraction,
     };
@@ -1452,7 +1465,9 @@ export function lowerToFrames(
         if (typeof currentValue !== "number" || typeof nextValue !== "number") continue;
         fields[key] = currentValue + (nextValue - currentValue) * blendFactor;
       }
-      return Object.keys(fields).length > 0 ? { startMs, fields } : null;
+      return Object.keys(fields).length > 0
+        ? { startMs, fields, sources: [timing.item, nextTiming.item] }
+        : null;
     });
   });
   if (options.transitions.blend.smooth_all_boundaries === true) {
@@ -1479,7 +1494,9 @@ export function lowerToFrames(
           if (typeof currentValue !== "number" || typeof previousValue !== "number") continue;
           fields[key] = currentValue + (previousValue - currentValue) * blendFactor;
         }
-        return Object.keys(fields).length > 0 ? { startMs: 0, endMs, fields } : null;
+        return Object.keys(fields).length > 0
+          ? { startMs: 0, endMs, fields, sources: [timing.item, previous.item] }
+          : null;
       });
     });
   }
@@ -1517,6 +1534,7 @@ export function lowerToFrames(
           ({ startMs, endMs }) => {
             if (typeof previousValue !== "number") return null;
             return {
+              sources: [timing.item, previous.item],
               startMs,
               endMs,
               fields: {},
@@ -1542,6 +1560,7 @@ export function lowerToFrames(
           ({ startMs, endMs }) => {
             if (typeof nextValue !== "number") return null;
             return {
+              sources: [timing.item, next.item],
               startMs,
               endMs,
               fields: {},
@@ -1599,6 +1618,7 @@ export function lowerToFrames(
             ({ startMs, endMs }) => {
               if (typeof currentValue !== "number") return null;
               return {
+                sources: [timing.item, previousObstruent],
                 startMs,
                 endMs,
                 fields: {},
@@ -1627,6 +1647,7 @@ export function lowerToFrames(
                 (formant.boundaryValue - obstruentValue) *
                   Math.min(1, transitionElapsedMs / previousTiming.durationMs);
               appendTransition(previousObstruent, {
+                sources: [timing.item, previousObstruent],
                 startMs: Math.min(nativeFrameMs, previousTiming.durationMs),
                 endMs: previousTiming.durationMs,
                 fields: {},
@@ -1665,6 +1686,7 @@ export function lowerToFrames(
                         (transitionElapsedMs + glueTransitionMs) / previousTiming.durationMs,
                       );
               appendTransition(glueTiming.item, {
+                sources: [timing.item, previousObstruent, glueTiming.item],
                 startMs: 0,
                 endMs: glueTransitionMs,
                 fields: {},
@@ -1696,6 +1718,7 @@ export function lowerToFrames(
             ({ startMs, endMs }) => {
               if (typeof currentValue !== "number") return null;
               return {
+                sources: [timing.item, nextObstruent],
                 startMs,
                 endMs,
                 fields: {},
@@ -1916,13 +1939,16 @@ export function lowerToFrames(
     if (!context.vqChannels) return undefined;
     const values = neutralVoiceQualityDelta(channels);
     const decisions: Partial<Record<AffectField, string>> = {};
+    const parents: Partial<Record<AffectField, string[]>> = {};
     for (const directive of globalAffectDirectives) {
       for (const field of directive.fields) {
         values[field] = composeAffectField(values[field], directive.values[field], field, channels);
         decisions[field] = directive.decisionId;
+        parents[field] ??= [];
+        parents[field].push(directive.decisionId);
       }
     }
-    if (!item) return { values, decisions };
+    if (!item) return { values, decisions, parents };
     const tokenIndex = tokenIndexForSegment(item);
     const local = affectDirectives.filter(
       (directive) =>
@@ -1956,12 +1982,23 @@ export function lowerToFrames(
       if (!winner) continue;
       values[field] = composeAffectField(values[field], winner.values[field], field, channels);
       decisions[field] = winner.decisionId;
+      parents[field] ??= [];
+      parents[field].push(winner.decisionId);
     }
-    return { values, decisions };
+    return { values, decisions, parents };
   };
   const globalAffect = resolveAffect();
   const affectByItem = new Map(timings.map((timing) => [timing.item, resolveAffect(timing.item)]));
-  const outputTimingByItem = new Map<Item, { startMs: number; scale: number }>();
+  const outputTimingByItem = new Map<
+    Item,
+    { startMs: number; scale: number; durationMs: number }
+  >();
+  const outputTimingParentsByItem = new Map<Item, string[]>();
+  const globalClockParents = [
+    ...(globalAffect?.parents.durationScale ?? []),
+    ...(globalAffect?.parents.pauseScale ?? []),
+  ];
+  let outputCursorParents = [...globalClockParents];
   const globalPauseScale = globalAffect
     ? globalAffect.values.durationScale * globalAffect.values.pauseScale
     : 1;
@@ -2015,7 +2052,31 @@ export function lowerToFrames(
       );
     }
     const outputScale = segmentScale * outputClockRatio;
-    outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: outputScale });
+    outputTimingByItem.set(timing.item, {
+      startMs: outputCursorMs,
+      scale: outputScale,
+      durationMs: timing.durationMs,
+    });
+    const scaleParents = [
+      ...(affect?.parents.durationScale ?? []),
+      ...(isPause ? (affect?.parents.pauseScale ?? []) : []),
+      ...(context.silence
+        ? [timing.item.latestWrite(phonemeKey)?.decisionId, context.silence.decisionId].filter(
+            (id): id is string => !!id,
+          )
+        : []),
+    ];
+    outputTimingParentsByItem.set(timing.item, [
+      ...new Set([...outputCursorParents, ...scaleParents]),
+    ]);
+    const durationWrite = timing.item.latestWrite(durationKey);
+    outputCursorParents = [
+      ...new Set([
+        ...outputCursorParents,
+        ...scaleParents,
+        ...(durationWrite ? [durationWrite.decisionId] : []),
+      ]),
+    ];
     outputCursorMs += timing.durationMs * outputScale;
   }
   const outputFinalResetMs = outputCursorMs;
@@ -2074,6 +2135,10 @@ export function lowerToFrames(
       }
       f0PointsByTime.set(timeMs, {
         decisionId: valueWrite.decisionId,
+        parents: [
+          valueWrite.decisionId,
+          ...(utterance.temporalAnchor(point) ? [utterance.temporalAnchor(point)!.decisionId] : []),
+        ],
         timeMs,
         valueHz,
       });
@@ -2379,6 +2444,16 @@ export function lowerToFrames(
           Number.isFinite(entry.timeMs),
       )
       .sort((left, right) => left.timeMs - right.timeMs);
+    const controlInputs = f0ControlItems.map((item, index) => ({
+      timeMs: (commands[index]?.time ?? 0) * 1000,
+      parents: [
+        ...["value", "layer", "duration_frames", "profile_points", "tag"].flatMap((key) => {
+          const write = item.latestWrite(key);
+          return write ? [write.decisionId] : [];
+        }),
+        ...(utterance.temporalAnchor(item) ? [utterance.temporalAnchor(item)!.decisionId] : []),
+      ],
+    }));
     f0Points = rendered.map((point) => {
       let producer = commandWrites[0];
       for (const command of commandWrites) {
@@ -2395,6 +2470,15 @@ export function lowerToFrames(
       }
       return {
         decisionId: producer.decisionId,
+        parents: [
+          ...new Set([
+            producer.decisionId,
+            ...controlInputs
+              .filter((input) => input.timeMs <= point.time * 1000 + 1e-6)
+              .flatMap((input) => input.parents),
+            ...(context.speakerDecisionId ? [context.speakerDecisionId] : []),
+          ]),
+        ],
         timeMs: point.time * 1000,
         valueHz: point.f0,
       };
@@ -2417,6 +2501,7 @@ export function lowerToFrames(
   const f0Sampling = layeredF0 ? "step" : "linear";
 
   const f0VarianceSamplesByDecision = new Map<string, number[]>();
+  const f0VarianceParentsByDecision = new Map<string, Set<string>>();
   timings.forEach((timing, index) => {
     const affect = affectByItem.get(timing.item);
     if (!affect || affect.values.f0VarianceScale === 1 || !segmentCanVoice(timing.item)) return;
@@ -2440,6 +2525,11 @@ export function lowerToFrames(
       throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale is unstamped`);
     }
     const samples = f0VarianceSamplesByDecision.get(decisionId) ?? [];
+    const sampleParents = f0VarianceParentsByDecision.get(decisionId) ?? new Set<string>();
+    for (const key of ["AV", "AVS", "control_windows"]) {
+      const write = timing.item.latestWrite(key);
+      if (write) sampleParents.add(write.decisionId);
+    }
     const sampleCountBeforeSegment = samples.length;
     const startMs = initialSilenceMs + timing.startMs;
     const endMs = initialSilenceMs + timing.endMs;
@@ -2447,7 +2537,10 @@ export function lowerToFrames(
       const atFinalBoundary =
         index === timings.length - 1 && Math.abs(point.timeMs - endMs) <= 1e-6;
       if (point.timeMs >= startMs - 1e-6 && (point.timeMs < endMs - 1e-6 || atFinalBoundary)) {
-        if (point.valueHz > 0) samples.push(point.valueHz);
+        if (point.valueHz > 0) {
+          samples.push(point.valueHz);
+          for (const parent of point.parents ?? [point.decisionId]) sampleParents.add(parent);
+        }
       }
     }
     if (samples.length === sampleCountBeforeSegment) {
@@ -2455,9 +2548,19 @@ export function lowerToFrames(
         f0Points.length > 0
           ? resolveF0AtTime(f0Points, startMs, f0Sampling)?.valueHz
           : finiteFeatureNumber(timing.item.get("F0"));
-      if (contourValue != null && contourValue > 0) samples.push(contourValue);
+      if (contourValue != null && contourValue > 0) {
+        samples.push(contourValue);
+        const sampled = resolveF0AtTime(f0Points, startMs, f0Sampling);
+        if (sampled)
+          for (const parent of sampled.parents ?? [sampled.decisionId]) sampleParents.add(parent);
+        else {
+          const write = timing.item.latestWrite("F0");
+          if (write) sampleParents.add(write.decisionId);
+        }
+      }
     }
     f0VarianceSamplesByDecision.set(decisionId, samples);
+    f0VarianceParentsByDecision.set(decisionId, sampleParents);
   });
   const f0VarianceCenterByDecision = new Map<string, number>();
   for (const [decisionId, samples] of f0VarianceSamplesByDecision) {
@@ -2468,11 +2571,82 @@ export function lowerToFrames(
     );
   }
 
-  const frames: KlattFrame[] = [];
-  const provenanceByFrame: Array<Record<string, string>> = [];
+  const frameRows: { time: number; values: FrameValues }[] = [];
+  const events: {
+    writer: FrameValues;
+    item?: Item;
+    timeMs: number;
+    segmentOffsetMs: number;
+    silenceEdge?: "initial" | "final";
+  }[] = [];
+  const requested = context.frameCopy
+    ? new RequestedAttributes(utterance, context.frameCopy)
+    : undefined;
+  const evaluationDecisions = new WeakMap<AttributeEvidence, string>();
+  const frameValues = new WeakMap<Record<string, number>, FrameValues>();
+  const writeValue = (
+    params: Record<string, number>,
+    key: string,
+    value: number | null,
+    producer: string,
+    parents: readonly (string | undefined)[],
+    citations: readonly string[] = [],
+  ): void => {
+    const writer = frameValues.get(params);
+    if (!writer) throw new Error("E_FRAME_WRITER_REQUIRED");
+    writer.write(key, value, producer, parents, citations);
+  };
+  const transitionInputs = (
+    params: Record<string, number>,
+    key: string,
+    item: Item,
+    transition: ResolvedSegmentTransition,
+  ): string[] => {
+    const writer = frameValues.get(params)!;
+    const parents: string[] = [];
+    for (const source of transition.sources ?? [item]) {
+      for (const field of [key, phonemeKey, typeKey, durationKey, "transition_ms"]) {
+        const write = source.latestWrite(field);
+        if (write) parents.push(write.decisionId);
+      }
+    }
+    const citations = [
+      "Qlatt #243: existing midpoint, sonorant and locus transition formulas",
+      "Allen, Hunnicutt & Klatt 1987",
+    ];
+    const linear = transition.linearFields?.[key];
+    const start = writer.derive(
+      `_transition_${key}_start`,
+      linear?.startValue ?? transition.fields[key],
+      "transition",
+      parents,
+      citations,
+    );
+    const offset = writer.item.latestWrite("segmentOffsetMs")?.decisionId;
+    if (!linear) return [start, ...(offset ? [offset] : [])];
+    const end = writer.derive(
+      `_transition_${key}_end`,
+      linear.endValue,
+      "transition",
+      parents,
+      citations,
+    );
+    return [start, end, ...(offset ? [offset] : [])];
+  };
+  const writeF0Sample = (params: Record<string, number>, resolved: ResolvedF0Point): void => {
+    const writer = frameValues.get(params)!;
+    const parents = [
+      ...(resolved.parents ?? [resolved.decisionId]),
+      writer.item.latestWrite("controlTimeMs")?.decisionId,
+    ];
+    const sample = writer.derive("_f0ContourSample", resolved.valueHz, "f0_sample", parents, [
+      "Qlatt #243: existing point interpolation or layered F0 kernel at control time",
+    ]);
+    writeValue(params, "F0", resolved.valueHz, "f0_sample", [sample]);
+  };
 
-  // appendFrame builds one KlattFrame by running these ordered sub-steps below,
-  // each of which mutates the shared params/provenance maps in place.
+  // After all event clocks are committed, these ordered numeric steps update
+  // each event's parameter/provenance maps without graph mutation.
 
   /**
    * Silence-edge frames: copy the selected silence resource's params, and for
@@ -2506,8 +2680,7 @@ export function lowerToFrames(
       for (const key of paramKeys) {
         const value = sourceParams[key];
         if (typeof value === "number" && Number.isFinite(value)) {
-          params[key] = value;
-          provenance[key] = context.silence.decisionId;
+          writeValue(params, key, value, "frame_copy", [context.silence.decisionId]);
         }
       }
     }
@@ -2518,8 +2691,7 @@ export function lowerToFrames(
           const value = firstSegment.get(key);
           const write = firstSegment.latestWrite(key);
           if (typeof value === "number" && write) {
-            params[key] = value;
-            provenance[key] = write.decisionId;
+            writeValue(params, key, value, "frame_copy", [write.decisionId], write.citations);
           }
         }
         for (const window of controlWindowsByItem.get(firstSegment) ?? []) {
@@ -2529,11 +2701,12 @@ export function lowerToFrames(
           for (const [key, field] of Object.entries(window.fields)) {
             const value = resolveControlField(params[key], field);
             if (value == null || !Number.isFinite(value)) {
-              delete params[key];
-              delete provenance[key];
+              writeValue(params, key, null, "control_window", [provenance[key], window.decisionId]);
             } else {
-              params[key] = value;
-              provenance[key] = window.decisionId;
+              writeValue(params, key, value, "control_window", [
+                provenance[key],
+                window.decisionId,
+              ]);
             }
           }
         }
@@ -2542,17 +2715,24 @@ export function lowerToFrames(
   };
 
   /** Copy the Segment Item's own stamped scalar params into the frame. */
-  const applyItemParams = (
-    params: Record<string, number>,
-    provenance: Record<string, string>,
-    item: Item,
-  ): void => {
+  const applyItemParams = (params: Record<string, number>, item: Item): void => {
     for (const key of paramKeys) {
       const value = item.get(key);
       if (typeof value === "number") {
-        params[key] = value;
+        if (key === "F1" && requested && context.frameCopy) {
+          const writer = frameValues.get(params)!;
+          const result = requested.evaluate(writer.item, "copied_f1");
+          params[key] = result.value as number;
+          writer.provenance[key] = recordFrameEvaluation(
+            utterance,
+            context.frameCopy,
+            result.evidence!,
+            evaluationDecisions,
+          );
+          continue;
+        }
         const write = item.latestWrite(key);
-        if (write) provenance[key] = write.decisionId;
+        writeValue(params, key, value, "frame_copy", [write?.decisionId], write?.citations);
       }
     }
   };
@@ -2560,7 +2740,6 @@ export function lowerToFrames(
   /** Apply steady (static) and linear transition fields active at this offset. */
   const applyItemTransitions = (
     params: Record<string, number>,
-    provenance: Record<string, string>,
     item: Item,
     segmentOffsetMs: number,
   ): void => {
@@ -2579,9 +2758,13 @@ export function lowerToFrames(
               (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined),
           );
         if (superseded) continue;
-        params[key] = value;
-        const write = item.latestWrite(key);
-        if (write) provenance[key] = write.decisionId;
+        writeValue(
+          params,
+          key,
+          value,
+          "transition",
+          transitionInputs(params, key, item, transition),
+        );
       }
       if (transition.linearFields && transition.endMs != null) {
         const durationMs = transition.endMs - transition.startMs;
@@ -2590,9 +2773,13 @@ export function lowerToFrames(
             ? 1
             : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
         for (const [key, values] of Object.entries(transition.linearFields)) {
-          params[key] = values.startValue + (values.endValue - values.startValue) * fraction;
-          const write = item.latestWrite(key);
-          if (write) provenance[key] = write.decisionId;
+          writeValue(
+            params,
+            key,
+            values.startValue + (values.endValue - values.startValue) * fraction,
+            "transition",
+            transitionInputs(params, key, item, transition),
+          );
         }
       }
     }
@@ -2612,11 +2799,9 @@ export function lowerToFrames(
       for (const [key, field] of Object.entries(window.fields)) {
         const value = resolveControlField(params[key], field);
         if (value == null || !Number.isFinite(value)) {
-          delete params[key];
-          delete provenance[key];
+          writeValue(params, key, null, "control_window", [provenance[key], window.decisionId]);
         } else {
-          params[key] = value;
-          provenance[key] = window.decisionId;
+          writeValue(params, key, value, "control_window", [provenance[key], window.decisionId]);
         }
       }
     }
@@ -2633,12 +2818,15 @@ export function lowerToFrames(
       const phoneme = item.get(phonemeKey);
       const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
       if (!layeredF0 && (phoneme === context.silence?.symbol || !voiced)) {
-        params.F0 = 0;
+        writeValue(params, "F0", 0, "f0_sample", [
+          provenance.AV,
+          provenance.AVS,
+          item.latestWrite(phonemeKey)?.decisionId,
+        ]);
       } else {
         const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
         if (resolvedF0) {
-          params.F0 = resolvedF0.valueHz;
-          provenance.F0 = resolvedF0.decisionId;
+          writeF0Sample(params, resolvedF0);
         }
       }
     }
@@ -2656,18 +2844,20 @@ export function lowerToFrames(
         const base = params[key];
         const delta = affect.values[field];
         if (typeof base !== "number" || delta === 0) return;
-        params[key] = base + delta;
-        const decision = affect.decisions[field];
-        if (decision) provenance[key] = decision;
+        writeValue(params, key, base + delta, "affect", [
+          provenance[key],
+          ...(affect.parents[field] ?? []),
+        ]);
       };
       const applyScale = (key: string, field: AffectField, floor: number): void => {
         const base = params[key];
         const scale = affect.values[field];
         if (typeof base !== "number" || scale === 1) return;
         const requested = base * scale;
-        params[key] = Math.max(floor, requested);
-        const decision = affect.decisions[field];
-        if (decision) provenance[key] = decision;
+        writeValue(params, key, Math.max(floor, requested), "affect", [
+          provenance[key],
+          ...(affect.parents[field] ?? []),
+        ]);
         if (params[key] !== requested) {
           utterance.diagnostics.warn(
             "Affect projection clamped a scaled backend parameter",
@@ -2699,8 +2889,20 @@ export function lowerToFrames(
             );
           }
           const requestedF0 = center + (params.F0 - center) * affect.values.f0VarianceScale;
-          params.F0 = Math.max(0.001, requestedF0);
-          provenance.F0 = decision;
+          const centerDecision = frameValues
+            .get(params)!
+            .derive(
+              "_f0VarianceCenter",
+              center,
+              "affect",
+              [...(f0VarianceParentsByDecision.get(decision) ?? [])],
+              ["Qlatt affect contract: voiced contour mean before variance scaling"],
+            );
+          writeValue(params, "F0", Math.max(0.001, requestedF0), "affect", [
+            provenance.F0,
+            centerDecision,
+            ...(affect.parents.f0VarianceScale ?? []),
+          ]);
           if (params.F0 !== requestedF0) {
             utterance.diagnostics.warn(
               "Affect F0-variance projection clamped voiced F0 above zero",
@@ -2716,9 +2918,10 @@ export function lowerToFrames(
           }
         }
         if (affect.values.f0Scale !== 1) {
-          params.F0 *= affect.values.f0Scale;
-          const decision = affect.decisions.f0Scale;
-          if (decision) provenance.F0 = decision;
+          writeValue(params, "F0", params.F0 * affect.values.f0Scale, "affect", [
+            provenance.F0,
+            ...(affect.parents.f0Scale ?? []),
+          ]);
         }
       }
       if (affect.values.rdDelta !== 0) {
@@ -2727,16 +2930,18 @@ export function lowerToFrames(
             `E_FRONTEND_CONFIG: frontend '${context.frontendId ?? options.id ?? "programmatic"}' requires vq_channels`,
           );
         }
-        Object.assign(
-          params,
-          projectRd(params, affect.values.rdDelta, context.rdPolicy, {
-            speakerParams: context.speakerParams,
-            diagnostics: utterance.diagnostics,
-            itemId: item.id,
-          }),
-        );
-        const decision = affect.decisions.rdDelta;
-        if (decision) provenance.RdPhraseOffset = decision;
+        const projected = projectRd(params, affect.values.rdDelta, context.rdPolicy, {
+          speakerParams: context.speakerParams,
+          diagnostics: utterance.diagnostics,
+          itemId: item.id,
+        });
+        const parents = [
+          provenance.Rd ?? context.speakerDecisionId,
+          provenance.RdPhraseOffset,
+          ...(affect.parents.rdDelta ?? []),
+        ];
+        writeValue(params, "Rd", projected.Rd, "affect", parents);
+        writeValue(params, "RdPhraseOffset", projected.RdPhraseOffset, "affect", parents);
       }
       // Project the declared affect rows via
       // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are
@@ -2752,7 +2957,14 @@ export function lowerToFrames(
     for (const key of ["F1", "F2", "F3"]) {
       const requested = params[key];
       if (typeof requested !== "number" || requested >= 1) continue;
-      params[key] = 1;
+      writeValue(
+        params,
+        key,
+        1,
+        "affect",
+        [provenance[key]],
+        ["Qlatt engineering bound: formants >= 1 Hz"],
+      );
       utterance.diagnostics.warn(
         "Affect projection clamped a formant frequency above zero",
         { itemId: item.id, key, requested, clamped: 1, min: 1 },
@@ -2832,80 +3044,106 @@ export function lowerToFrames(
     outputTimeOverrideMs?: number,
     silenceEdge?: "initial" | "final",
   ): void => {
-    const params: Record<string, number> = {};
-    const provenance: Record<string, string> = {};
-    if (!item && silenceEdge) {
-      applySilenceEdgeParams(params, provenance, segmentOffsetMs, silenceEdge);
-      // The initial silence is the lead-in of the first Segment's frames.
-      if (silenceEdge === "initial" && timings[0]) {
-        applyFrameValues(params, provenance, timings[0].item, segmentOffsetMs);
-      }
-      // After the last frame: the values a frame program declares for then.
-      const lastItem = timings[timings.length - 1]?.item;
-      if (silenceEdge === "final" && lastItem) {
-        for (const feature of frameValueFeatures) {
-          const values = lastItem.get(feature);
-          if (!isFrameValues(values) || !values.after) continue;
-          const decisionId = lastItem.latestWrite(feature)?.decisionId;
-          for (const [key, value] of Object.entries(values.after)) {
-            if (!paramKeys.includes(key)) continue;
-            params[key] = value;
-            if (decisionId) provenance[key] = decisionId;
-          }
-        }
-      }
-    }
-    if (item) {
-      applyItemParams(params, provenance, item);
-      applyItemTransitions(params, provenance, item, segmentOffsetMs);
-      for (const [key, curve] of holmes.curves.get(item) ?? []) {
-        if (!paramKeys.includes(key)) continue;
-        params[key] = sampleHolmesCurve(curve, segmentOffsetMs);
-        provenance[key] = curve.decisionId;
-      }
-      applyControlWindows(params, provenance, item, segmentOffsetMs);
-      applyFrameValues(params, provenance, item, segmentOffsetMs);
-      applyItemF0Sample(params, provenance, item, timeMs);
-      applyAffectProjection(params, provenance, item);
-    }
-    if (!item && silenceEdge && layeredF0 && f0Points.length > 0 && paramKeys.includes("F0")) {
-      const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
-      if (resolvedF0) {
-        params.F0 = resolvedF0.valueHz;
-        provenance.F0 = resolvedF0.decisionId;
-      }
-    }
     const outputTimeMs =
       outputTimeOverrideMs ??
       (item
         ? (outputTimingByItem.get(item)?.startMs ?? timeMs) +
           segmentOffsetMs * (outputTimingByItem.get(item)?.scale ?? 1)
         : timeMs);
-    const frame: KlattFrame = {
-      time: outputTimeMs / 1000,
-      params,
-      provenance,
-    };
-    if (item) {
-      frame.segmentId = item.id;
-      const phoneme = item.get(phonemeKey);
-      if (typeof phoneme === "string") frame.phoneme = phoneme;
-      const word = item.get("word");
-      if (typeof word === "string") frame.word = word;
-    } else if (phonemeOverride) {
-      frame.phoneme = phonemeOverride;
-    }
-    if (Number.isNaN(frame.time)) framesHoldNaN = true;
-    const insertionIndex = framesHoldNaN
-      ? frames.findIndex((existing) => existing.time > frame.time)
-      : firstFrameAfter(frames, frame.time);
-    if (insertionIndex < 0) {
-      frames.push(frame);
-      provenanceByFrame.push(provenance);
+    const clock = utterance.beginTransaction({
+      ruleId: "lowering.frame_clock",
+      phase: "frame_clock",
+      tag: "frame_clock",
+      reason: "Preserve the existing automation event and its control/output clocks",
+      citations: ["Klatt 1980", "Qlatt #243: event timeline and separate clock origins"],
+    });
+    const ordinal = (utterance.getRelation("Frames")?.listItems().length ?? 0) + frameRows.length;
+    const frameItem = clock.createItem("frame", `frame:${ordinal}`);
+    const anchor = item ? utterance.intervalAnchor(item) : undefined;
+    if (anchor && item) {
+      clock.dependOn(anchor.decisionId);
+      clock.read(item, durationKey);
+      clock.associate("segment", frameItem, item);
+      // Segment anchors keep their original origin. Offset the point into control time.
+      clock.anchorPoint(
+        frameItem,
+        anchor.leftMarkId,
+        anchor.rightMarkId,
+        0,
+        initialSilenceMs + segmentOffsetMs,
+      );
+      clock.set(frameItem, "segmentOffsetMs", segmentOffsetMs);
+      clock.set(
+        frameItem,
+        "segmentRatio",
+        segmentOffsetMs / outputTimingByItem.get(item)!.durationMs,
+      );
     } else {
-      frames.splice(insertionIndex, 0, frame);
-      provenanceByFrame.splice(insertionIndex, 0, provenance);
+      const firstAnchor = timings[0] && utterance.intervalAnchor(timings[0].item);
+      const lastTiming = timings[timings.length - 1];
+      const lastAnchor = lastTiming && utterance.intervalAnchor(lastTiming.item);
+      const edgeMarkId =
+        silenceEdge === "initial" ? firstAnchor?.leftMarkId : lastAnchor?.rightMarkId;
+      const edgeTime = edgeMarkId ? utterance.axis.getMarkTime(edgeMarkId) : null;
+      if (edgeMarkId && edgeTime != null) {
+        clock.anchorPoint(frameItem, edgeMarkId, edgeMarkId, 0, timeMs - edgeTime);
+      } else {
+        const mark = utterance.createMarkBetween(utterance.axis.start.id, utterance.axis.end.id, {
+          reason: "Resolved silence event control time",
+          citations: ["Qlatt #243: silence event anchors"],
+        });
+        clock.resolveMarkTime(mark.id, timeMs);
+        clock.anchorPoint(frameItem, mark.id, mark.id, 0);
+      }
+      if (silenceEdge) clock.set(frameItem, "silenceEdge", silenceEdge);
     }
+    clock.set(frameItem, "controlTimeMs", timeMs);
+    clock.set(frameItem, "ordinal", ordinal);
+    clock.commit();
+    const outputClock = utterance.beginTransaction({
+      ruleId: "lowering.output_clock",
+      phase: "frame_clock",
+      tag: "affect",
+      reason: "Project this event onto the output clock without changing its control anchor",
+      citations: ["Qlatt #243: affect-scaled output time; preserve controller output overrides"],
+    });
+    outputClock.read(frameItem, "controlTimeMs");
+    const clockParents = item
+      ? (outputTimingParentsByItem.get(item) ?? [])
+      : silenceEdge === "initial"
+        ? globalClockParents
+        : outputCursorParents;
+    for (const parent of clockParents) outputClock.dependOn(parent);
+    if (outputTimeOverrideMs != null) {
+      const point = f0Points.find((point) => Math.abs(point.timeMs - timeMs) <= 1e-6);
+      for (const parent of point?.parents ?? (point ? [point.decisionId] : []))
+        outputClock.dependOn(parent);
+    }
+    outputClock.set(frameItem, "outputTimeMs", outputTimeMs);
+    outputClock.commit();
+    const metadata = utterance.beginTransaction({
+      ruleId: "lowering.frame_metadata",
+      phase: "frame",
+      tag: "frame_copy",
+      reason: "Retain public phoneme and word metadata",
+      citations: ["Qlatt #243: public row compatibility"],
+    });
+    if (item) {
+      const phoneme = metadata.read(item, phonemeKey);
+      if (typeof phoneme === "string") metadata.set(frameItem, "phoneme", phoneme);
+      const word = metadata.read(item, "word");
+      if (typeof word === "string") metadata.set(frameItem, "word", word);
+    } else if (phonemeOverride) metadata.set(frameItem, "phoneme", phonemeOverride);
+    metadata.commit();
+    const writer = new FrameValues(utterance, frameItem);
+    events.push({ writer, item, timeMs, segmentOffsetMs, silenceEdge });
+    const row = { time: outputTimeMs / 1000, values: writer };
+    if (Number.isNaN(row.time)) framesHoldNaN = true;
+    const insertionIndex = framesHoldNaN
+      ? frameRows.findIndex((existing) => existing.time > row.time)
+      : firstFrameAfter(frameRows, row.time);
+    if (insertionIndex < 0) frameRows.push(row);
+    else frameRows.splice(insertionIndex, 0, row);
   };
 
   const initialEventTimes = new Set<number>([0]);
@@ -3009,6 +3247,74 @@ export function lowerToFrames(
   if (totalMs > finalResetMs)
     appendFrame(totalMs, undefined, context.silence?.symbol, 0, outputTotalMs, "final");
 
+  for (const { values } of frameRows) {
+    const frameItem = values.item;
+    const tx = utterance.beginTransaction({
+      ruleId: "lowering.frame_order",
+      phase: "frame",
+      tag: "frame_clock",
+      reason: "Stable output-time event ordering",
+      citations: ["Qlatt #243: equal-time row ordering"],
+    });
+    tx.read(frameItem, "outputTimeMs");
+    tx.read(frameItem, "ordinal");
+    tx.append("Frames", frameItem);
+    tx.commit();
+  }
+  // Every graph effect is complete. Evaluate in original event enumeration order,
+  // independently of stable output-time ordering, on this one graph generation.
+  for (const { writer, item, timeMs, segmentOffsetMs, silenceEdge } of events) {
+    const { params, provenance } = writer;
+    frameValues.set(params, writer);
+    if (!item && silenceEdge) {
+      applySilenceEdgeParams(params, provenance, segmentOffsetMs, silenceEdge);
+      // The initial silence is the lead-in of the first Segment's frames.
+      if (silenceEdge === "initial" && timings[0]) {
+        applyFrameValues(params, provenance, timings[0].item, segmentOffsetMs);
+      }
+      // After the last frame: the values a frame program declares for then.
+      const lastItem = timings[timings.length - 1]?.item;
+      if (silenceEdge === "final" && lastItem) {
+        for (const feature of frameValueFeatures) {
+          const values = lastItem.get(feature);
+          if (!isFrameValues(values) || !values.after) continue;
+          const decisionId = lastItem.latestWrite(feature)?.decisionId;
+          for (const [key, value] of Object.entries(values.after)) {
+            if (!paramKeys.includes(key)) continue;
+            params[key] = value;
+            if (decisionId) provenance[key] = decisionId;
+          }
+        }
+      }
+    }
+    if (item) {
+      applyItemParams(params, item);
+      applyItemTransitions(params, item, segmentOffsetMs);
+      for (const [key, curve] of holmes.curves.get(item) ?? []) {
+        if (!paramKeys.includes(key)) continue;
+        writeValue(
+          params,
+          key,
+          sampleHolmesCurve(curve, segmentOffsetMs),
+          "transition",
+          [curve.decisionId],
+          ["Holmes, Mattingly & Shearme 1964"],
+        );
+      }
+      applyControlWindows(params, provenance, item, segmentOffsetMs);
+      applyFrameValues(params, provenance, item, segmentOffsetMs);
+      applyItemF0Sample(params, provenance, item, timeMs);
+      applyAffectProjection(params, provenance, item);
+    }
+    if (!item && silenceEdge && layeredF0 && f0Points.length > 0 && paramKeys.includes("F0")) {
+      const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
+      if (resolvedF0) {
+        writeF0Sample(params, resolvedF0);
+      }
+    }
+  }
+  const frames = frameRows.map(({ values }) => emitFrame(utterance, values));
+  const provenanceByFrame = frames.map((frame) => frame.provenance ?? {});
   return {
     frames,
     provenanceByFrame,

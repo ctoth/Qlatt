@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import {
   loadBundledRulepackSpec,
   loadFrontendResources,
@@ -138,7 +139,7 @@ citations:
         }).track[0].params.TEST,
       ).toBe(expected);
       const utterance = new Utterance(
-        {
+        withFrameSchema({
           itemTypes: {
             direction: parser.buildDirectionItemSchema(channels),
             segment: {
@@ -158,7 +159,7 @@ citations:
             Word: { kind: "list", itemTypes: ["word"] },
             SylStructure: { kind: "tree", itemTypes: ["word", "segment"] },
           },
-        },
+        }),
         parsed.provenance,
       );
       parser.attachDirectionsToUtterance(parsed, utterance);

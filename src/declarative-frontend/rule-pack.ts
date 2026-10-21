@@ -43,6 +43,7 @@ import {
   yamlDocumentSpans,
 } from "../yaml-loader";
 import type { CelMacroDefinition } from "./cel-macros";
+import { FRAME_COPY_RULE } from "./hrg/frame";
 import {
   type FrontendResources,
   type InventorySpec,
@@ -1190,9 +1191,13 @@ export type UnphasedRule = Readonly<{
  * Rules that no frontend runs (#219). A rule is unphased when every compiled
  * spec that contains it lists it in no phase. A rule declared by a base
  * frontend and phased only by an extending frontend is not unphased, because
- * the extending frontend's compiled spec contains and phases it.
+ * the extending frontend's compiled spec contains and phases it. Explicit host
+ * requests consume define-only rules, but never excuse unexecuted effects.
  */
-export function unphasedRules(specs: ReadonlyMap<string, CompiledRulepack>): UnphasedRule[] {
+export function unphasedRules(
+  specs: ReadonlyMap<string, CompiledRulepack>,
+  hostRequestedRules: readonly string[] = [],
+): UnphasedRule[] {
   const definedIn = new Map<string, string[]>();
   const phased = new Set<string>();
   const origins = new Map<string, string>();
@@ -1200,6 +1205,33 @@ export function unphasedRules(specs: ReadonlyMap<string, CompiledRulepack>): Unp
     const rules = isPlainObject(spec.rules) ? spec.rules : {};
     const ruleOrigins = rulepackRuleOrigins(spec);
     for (const name of Object.keys(rules)) {
+      // Match only the normalized pure-definition shape. Unknown fields and
+      // every nonempty effect surface still require phase membership.
+      if (
+        hostRequestedRules.includes(name) &&
+        Object.entries(rules[name]).every(([key, value]) => {
+          if (["select", "define", "citations"].includes(key)) return true;
+          if (["apply", "insert_points", "associate", "disassociate"].includes(key)) {
+            return Array.isArray(value) && value.length === 0;
+          }
+          if (["suppress", "delete"].includes(key)) return value === false;
+          return (
+            [
+              "kind",
+              "op",
+              "match",
+              "constraint",
+              "contour",
+              "scan",
+              "splice",
+              "insert_point",
+              "insert_f0_layer",
+            ].includes(key) && value == null
+          );
+        })
+      ) {
+        continue;
+      }
       const list = definedIn.get(name) ?? [];
       list.push(frontendId);
       definedIn.set(name, list);
@@ -1227,6 +1259,7 @@ export function unphasedRules(specs: ReadonlyMap<string, CompiledRulepack>): Unp
 export function findUnphasedBundledRules(): UnphasedRule[] {
   return unphasedRules(
     new Map(listBundledFrontendIds().map((id) => [id, loadBundledRulepackSpec(id)])),
+    [FRAME_COPY_RULE],
   );
 }
 

@@ -1,28 +1,31 @@
 import { describe, expect, it } from "vitest";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 
 function fixture(withBoundary = true, reverse = false, externalMs = 30, internalMs = 20) {
   const formants = { kind: "object", fields: { F2: { kind: "number" } } } as const;
-  const utterance = new Utterance({
-    itemTypes: {
-      segment: {
-        features: {
-          phoneme: { kind: "string" },
-          type: { kind: "string" },
-          duration: { kind: "number" },
-          F2: { kind: "number" },
-          boundary_fixed: formants,
-          boundary_proportion: formants,
-          boundary_rank: { kind: "number" },
-          boundary_external_ms: formants,
-          boundary_internal_ms: formants,
-          boundary_citations: { kind: "array", items: { kind: "string" } },
+  const utterance = new Utterance(
+    withFrameSchema({
+      itemTypes: {
+        segment: {
+          features: {
+            phoneme: { kind: "string" },
+            type: { kind: "string" },
+            duration: { kind: "number" },
+            F2: { kind: "number" },
+            boundary_fixed: formants,
+            boundary_proportion: formants,
+            boundary_rank: { kind: "number" },
+            boundary_external_ms: formants,
+            boundary_internal_ms: formants,
+            boundary_citations: { kind: "array", items: { kind: "string" } },
+          },
         },
       },
-    },
-    relations: { Segment: { kind: "list", itemTypes: ["segment"] } },
-  });
+      relations: { Segment: { kind: "list", itemTypes: ["segment"] } },
+    }),
+  );
   const meta = {
     ruleId: "fixture",
     phase: "input",

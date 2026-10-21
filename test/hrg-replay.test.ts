@@ -84,6 +84,9 @@ describe("HRG checkpoints and deterministic replay", () => {
 
     const link = utterance.beginTransaction({ ...META, ruleId: "link" });
     link.associate("cv", from, to);
+    link.associate("cv", to, from);
+    link.associate("other", from, to);
+    link.associate("cv", from, from);
     link.commit();
     const unlink = utterance.beginTransaction({ ...META, ruleId: "unlink" });
     unlink.disassociate("cv", from, to);
@@ -97,6 +100,17 @@ describe("HRG checkpoints and deterministic replay", () => {
     expect(
       replayed.associationWrites(replayedFrom, "cv", replayedTo).map((write) => write.active),
     ).toEqual([true, false]);
+    expect(replayed.latestAssociationWrites(replayedFrom, "cv")).toEqual(
+      utterance.latestAssociationWrites(from, "cv"),
+    );
+    expect(
+      replayed
+        .latestAssociationWrites(replayedFrom, "cv")
+        .map((write) => [write.toItemId, write.active]),
+    ).toEqual([
+      ["to", false],
+      ["from", true],
+    ]);
   });
 
   it("preserves original decision ids when non-graph decisions precede transactions", () => {

@@ -41,6 +41,7 @@ function scanF0(points: readonly Point[], timeMs: number, sampling: "linear" | "
     const fraction = (timeMs - left.timeMs) / spanMs;
     return {
       decisionId: fraction < 1 ? left.decisionId : right.decisionId,
+      parents: [left.decisionId, right.decisionId],
       timeMs,
       valueHz: left.valueHz + (right.valueHz - left.valueHz) * fraction,
     };

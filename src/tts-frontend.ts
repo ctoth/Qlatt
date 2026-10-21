@@ -6,9 +6,11 @@ import {
   readLowerOptions,
   Utterance,
 } from "./declarative-frontend/hrg";
+import { FRAME_COPY_RULE, withFrameSchema } from "./declarative-frontend/hrg/frame";
 import { FRAME_VALUES_SCHEMA, frameValueFeatures } from "./declarative-frontend/hrg/frame-program";
 import type { Item } from "./declarative-frontend/hrg/item";
 import { PARAMETER_SCOPE_FEATURE } from "./declarative-frontend/hrg/parameter-scope";
+import { checkRequestedAttributes } from "./declarative-frontend/hrg/requested-attributes";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
@@ -521,10 +523,9 @@ function buildTextToKlattTrackDetailed(
     /^F[1-9]\d*$/.test(key),
   );
   const provenance = options.provenance ?? createProvenanceCollector();
-  const utteranceSchema = buildUtteranceSchema(
-    resources.inventory,
-    spec,
-    resources.vqChannels?.channels,
+  const utteranceSchema = withFrameSchema(
+    buildUtteranceSchema(resources.inventory, spec, resources.vqChannels?.channels),
+    lowering.columns,
   );
   const utterance = new Utterance(utteranceSchema, provenance, options.diagnostics ?? undefined);
   for (const relationName of Object.keys(utteranceSchema.relations)) {
@@ -1451,6 +1452,8 @@ function buildTextToKlattTrackDetailed(
     },
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
+    frameCopy: checkRequestedAttributes(spec, FRAME_COPY_RULE),
+    speakerDecisionId: speakerDecision.id,
     frontendId: options.frontendPath ?? frontendId,
     rdPolicy: resources.vqChannels?.rdPolicy,
     vqChannels: resources.vqChannels?.channels,

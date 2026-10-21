@@ -66,7 +66,7 @@ export class Utterance {
   private readonly typeCounters = new Map<string, number>();
   private readonly anchorHistoryByItemId = new Map<string, TemporalAnchorWrite[]>();
   private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
-  private readonly associationHistoryByEdge = new Map<string, AssociationWrite[]>();
+  private readonly associationHistoryBySource = new Map<string, Map<string, AssociationWrite[]>>();
   private readonly transactionJournal: TransactionJournalEntry[] = [];
   private readonly transactionRejections: TransactionRejection[] = [];
   private transactionCounter = 0;
@@ -302,7 +302,8 @@ export class Utterance {
     this._assertOwnedItem(to);
     if (!name) throw new Error("E_HRG_ASSOCIATION_NAME: association name is required");
     const key = this.associationKey(from, name, to);
-    const history = this.associationHistoryByEdge.get(key) ?? [];
+    let edges = this.associationHistoryBySource.get(from.id);
+    const history = edges?.get(key) ?? [];
     const prior = history[history.length - 1];
     const parents = Utterance.dedupeParents(input.parents, prior?.decisionId);
     const decision = this.recordVersionedWrite({
@@ -324,7 +325,12 @@ export class Utterance {
         tag: input.tag,
       }),
     });
-    this.pushHistory(this.associationHistoryByEdge, key, write);
+    if (!edges) {
+      edges = new Map();
+      this.associationHistoryBySource.set(from.id, edges);
+      this.undo.record(() => this.associationHistoryBySource.delete(from.id));
+    }
+    this.pushHistory(edges, key, write);
     this.generation++;
     return write;
   }
@@ -333,14 +339,15 @@ export class Utterance {
     this._assertOwnedItem(from);
     this._assertOwnedItem(to);
     return Object.freeze([
-      ...(this.associationHistoryByEdge.get(this.associationKey(from, name, to)) ?? []),
+      ...(this.associationHistoryBySource.get(from.id)?.get(this.associationKey(from, name, to)) ??
+        []),
     ]);
   }
 
   latestAssociationWrites(from: Item, name: string): readonly AssociationWrite[] {
     this._assertOwnedItem(from);
     const writes: AssociationWrite[] = [];
-    for (const history of this.associationHistoryByEdge.values()) {
+    for (const history of this.associationHistoryBySource.get(from.id)?.values() ?? []) {
       const latest = history[history.length - 1];
       if (latest?.fromItemId === from.id && latest.name === name) writes.push(latest);
     }
@@ -494,7 +501,8 @@ export class Utterance {
     const markTimes = [...this.markTimeHistoryById.entries()]
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([markId, writes]) => ({ markId, writes }));
-    const associations = [...this.associationHistoryByEdge.entries()]
+    const associations = [...this.associationHistoryBySource.values()]
+      .flatMap((edges) => [...edges.entries()])
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, writes]) => ({ key, writes }));
     const canonical = JSON.stringify({ items, relations, associations, marks, anchors, markTimes });

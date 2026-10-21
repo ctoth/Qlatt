@@ -1,4 +1,6 @@
 version: v1
+include:
+  - ../../frame-schema.yaml
 functions:
   # Bundled condition inventory (#133): the rime boundary (annotation), the
   # postlexical bindings and structural in_s_cluster share dectalk_same_word;

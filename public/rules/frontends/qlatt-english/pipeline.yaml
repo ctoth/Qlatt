@@ -1,4 +1,6 @@
 version: v1
+include:
+  - ../../frame-schema.yaml
 predicates:
   is_hertz_nucleus_vowel: >-
     current.type == 'vowel' && next != null

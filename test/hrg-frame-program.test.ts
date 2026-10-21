@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, replayJournal, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import {
   FRAME_VALUES_SCHEMA,
   type FrameRule,
@@ -626,7 +627,7 @@ const META = {
 
 /** open (15 ms), a pipe that extends it (10 ms), shut (10 ms): 5 ms frames. */
 function tankUtterance(): Utterance {
-  const utterance = new Utterance(SCHEMA);
+  const utterance = new Utterance(withFrameSchema(SCHEMA));
   const transaction = utterance.beginTransaction(META);
   const items = (
     [
@@ -724,7 +725,9 @@ describe("frame rules in the rule engine", () => {
       "tank_target_shut c",
       "tank_approach c",
     ]);
-    expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+    expect(replayJournal(withFrameSchema(SCHEMA), utterance.journal()).graphDigest()).toBe(
+      utterance.graphDigest(),
+    );
   });
 
   it("gives an Item that starts inside a frame the frames it overlaps", () => {
@@ -929,7 +932,9 @@ describe("frame values in lowering", () => {
       { rule: "tank_target_shut", first: 0, last: 0, count: 1, lead_in: false, tail: true },
       { rule: "tank_approach", first: 0, last: 0, count: 1, lead_in: false, tail: true },
     ]);
-    expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+    expect(replayJournal(withFrameSchema(SCHEMA), utterance.journal()).graphDigest()).toBe(
+      utterance.graphDigest(),
+    );
   });
 
   it("gives the columns named in `after` a value at the instant the run ends", () => {

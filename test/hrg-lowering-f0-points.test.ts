@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import {
   loadBundledRulepackSpec,
   loadInventorySpecFromPath,
@@ -169,7 +170,7 @@ function buildUtterance(
   points: readonly BaselinePoint[],
   policy: LowerOptions,
 ): Utterance {
-  const utterance = new Utterance(schemaFor(policy.columns));
+  const utterance = new Utterance(withFrameSchema(schemaFor(policy.columns)));
   const build = utterance.beginTransaction(META);
   const segmentItems = segments.map((entry) => {
     const item = build.createItem("segment", entry.id);

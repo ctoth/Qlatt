@@ -9,8 +9,8 @@ import {
   unphasedRules,
 } from "../src/declarative-frontend/rule-pack";
 
-// #219: a rule that no frontend lists in a phase never runs. Its citation
-// then describes behaviour the synthesizer does not have.
+// #219: unphased effects never run. Host-requested pure definitions (#261/#243)
+// are evaluated separately and must not excuse an unphased effect.
 
 const relations = {
   Segment: { type: "base", features: { type: ["vowel"] }, scalars: { duration: {} } },
@@ -50,6 +50,29 @@ describe("unphased rule detection", () => {
         ]),
       ),
     ).toEqual([]);
+    expect(unphasedRules(new Map([["base", base]]), ["orphan"])).toEqual(
+      unphasedRules(new Map([["base", base]])),
+    );
+    const requested = compileRuleEngineSpec({
+      tags,
+      relations,
+      rules: {
+        orphan: {
+          select: { relation: "Segment", where: "true" },
+          define: { duration: "current.duration" },
+          apply: [],
+          citations: ["Klatt 1976"],
+        },
+      },
+      phases: [],
+    });
+    expect(unphasedRules(new Map([["requested", requested]]))).toHaveLength(1);
+    expect(unphasedRules(new Map([["requested", requested]]), ["orphan"])).toEqual([]);
+    const deletion = compileRuleEngineSpec({
+      ...requested,
+      rules: { orphan: { ...requested.rules.orphan, delete: true } },
+    });
+    expect(unphasedRules(new Map([["requested", deletion]]), ["orphan"])).toHaveLength(1);
   });
 
   it("records which rulepack file declares each bundled rule", () => {

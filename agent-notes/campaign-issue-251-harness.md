@@ -6,8 +6,9 @@ Deliver the browser-harness consolidation slice of #251, using the shared experi
 
 Implemented from base 95d3165a: harness change adds 5 lines and removes 77;
 existing lifecycle test gains 25 lines for the bundled inheritance fixture.
-Own only this note, test/harness/experiment.js and
-test/harness-runtime-lifecycle.test.ts. Dependencies are absent in this
+Own this note, test/harness/experiment.js,
+test/harness-runtime-lifecycle.test.ts, and the existing state.d.ts declarations.
+Dependencies are absent in this
 worktree, so no local test was run; validation awaits PR CI.
 
 # Decisions and why
@@ -27,7 +28,10 @@ PR CI supplies validation; no local CI duplication or dependency installation.
 
 # Surprises
 
-None. #251 remains open: document-relative resources, origins, serialization,
+The harness state declaration omitted semantics and registry despite their
+existing runtime fields. Added their nullable types for the test assertions,
+with supervisor approval; no runtime interface change.
+#251 remains open: document-relative resources, origins, serialization,
 and relocation are outside this slice. No URL, asset, API, or schema changes.
 
 # Next step

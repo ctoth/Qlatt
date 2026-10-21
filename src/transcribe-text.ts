@@ -18,27 +18,45 @@ import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
 import { loadFrontendResources, parseInventorySymbol } from "./declarative-frontend/inventory";
 import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
-import { pronounce } from "./g2p";
+import { pronounce, pronounceClause } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
-import type {
-  TranscriptionConfig,
-  TranscriptionOptions,
-  TranscriptionToken,
+import {
+  LEXICON_SOURCE_KEYS,
+  type LexiconSource,
+  type LexiconSourceKey,
+  type TranscriptionConfig,
+  type TranscriptionOptions,
+  type TranscriptionToken,
 } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Citation constants for provenance tracking
 // ---------------------------------------------------------------------------
 
-const CMU_DICTIONARY_CITATION = "CMU Pronouncing Dictionary";
-const FALLBACK_PRONUNCIATION_CITATION =
-  "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)";
-const MORPHOLOGY_PRONUNCIATION_CITATION =
-  "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)";
+// The shared English lexicon: what a frontend that declares no
+// `transcription.sources` entry for a source uses. There is no shared spelling
+// source; a frontend whose lexicon spells letters declares its own.
+const SHARED_LEXICON_SOURCES: Partial<Record<LexiconSourceKey, LexiconSource>> = {
+  dictionary: { name: "CMU dictionary", citation: "CMU Pronouncing Dictionary" },
+  "lts-rules": {
+    name: "Elovitz LTS + configured lexical stress",
+    citation:
+      "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)",
+  },
+  morphology: {
+    name: "Morphological decomposition",
+    citation:
+      "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)",
+  },
+};
 const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const LETTER_NAME_PRONUNCIATION_CITATION =
   "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
+const NUMBER_PRONUNCIATION_CITATION =
+  "DECtalk 4.63 LTS/l_us_pr1.c (ls_proc_do_number, ls_proc_do_4_digits) with the phone lists of LTS/l_us_con.c";
+const PHONEMIC_PRONUNCIATION_CITATION =
+  "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on as phonemes) with the character table usa_ascky_rev of INCLUDE/usa_phon.tab:70";
 
 const TOKEN_SCHEMA = {
   itemTypes: {
@@ -65,6 +83,41 @@ type OrthographyInputToken = {
   tokenId: string;
   word: string;
   isPunctuation: boolean;
+  /** A punctuation token that is not in the source text: a text rule supplied it. */
+  supplied?: boolean;
+  /** What is written in the source text where a supplied mark stands. */
+  suppliedFor?: string;
+  /** A punctuation token a text rule sent itself: it was not read as a delimiter. */
+  sentMark?: boolean;
+  /** A letter or a digit stands right before the token's span in the source text. */
+  writtenAgainstPrevious?: boolean;
+  /**
+   * The written word this token comes from ends in one of the frontend's
+   * `word_stretch_end_characters` ("Mr.", "dogs'").
+   */
+  endsWordStretch?: boolean;
+  /** The frontend's named marks at the start or the end of the written word. */
+  writtenMarks?: string[];
+  /**
+   * The token comes from the same place in the text as the word token before
+   * it: a text rule made several words of one written word ("NW" spelled).
+   */
+  continuesWrittenWord?: boolean;
+  /**
+   * The token's word is what was written, and that has a capital first
+   * letter and a lower-case second one ("New"): the form a dictionary search
+   * that looks at a word's case calls capitalised.
+   */
+  writtenCapitalised?: boolean;
+  /**
+   * The word was written with an apostrophe at an end ("'and"), was not in
+   * the dictionary so, and is looked up again without it.
+   */
+  edgeStripped?: boolean;
+  /** What was written, when a text rule composed the token's word anew. */
+  written?: string;
+  /** The modes of the text that are on where the token's span begins. */
+  textModes?: string[];
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
@@ -72,8 +125,20 @@ type OrthographyInputToken = {
 
 type RequiredTranscriptionTables = {
   diagnosticSymbols: Record<string, string[]>;
+  /** False when the frontend turns phoneme-symbol input off. */
+  symbolInput: boolean;
+  /** False when the frontend's dictionary is searched by the written word only. */
+  elidedApostropheLookup: boolean;
+  /** What each pronunciation source is, for the decision record of a word. */
+  sources: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letterNames: Record<string, string[]>;
   punctuationTokens: Set<string>;
+  /** Characters that end a stretch of words when a written word ends in one. */
+  wordStretchEndCharacters: string;
+  /** The lengths of gathered text at which a stretch of words ends (gatheredStretchEnds). */
+  wordStretchLimits?: readonly [number, number];
+  /** Characters at a written word's start and end, with the name of each (writtenWordMarks). */
+  writtenWordMarks?: { open: Record<string, string>; close: Record<string, string> };
 };
 
 // ---------------------------------------------------------------------------
@@ -94,19 +159,27 @@ const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDiction
  *
  * Also handles alternate pronunciation entries like "read(1)".
  */
-function makeDictLookup(map: Record<string, string | undefined>): DictLookup {
+function makeDictLookup(
+  map: Record<string, string | undefined>,
+  elidedApostrophe = true,
+): DictLookup {
   return (word: string): string[] | null => {
     const lowerWord = word.toLowerCase();
     const candidates: string[] = [lowerWord];
 
     // Handle elided spellings where the dictionary key keeps leading apostrophe
-    // (e.g., "'cuse") but normalized input token may not ("cuse").
-    if (!lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
+    // (e.g., "'cuse") but normalized input token may not ("cuse"). A frontend
+    // turns this off with `transcription.elided_apostrophe_lookup: false`.
+    if (elidedApostrophe && !lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
     // Handle converse elision: input may omit or include trailing apostrophe.
-    if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
-    if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+    if (elidedApostrophe) {
+      if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
+      if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+    }
     // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
-    if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
+    // Not for a frontend that looks words up as written: its text rules keep
+    // the period on an abbreviation, and "sat" must not find "sat.".
+    if (elidedApostrophe && !lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
 
     for (const candidate of candidates) {
       const entry = map[candidate];
@@ -193,13 +266,107 @@ function getSpecTranscriptionConfig(specSource: unknown): TranscriptionConfig | 
   return (specSource as { transcription?: TranscriptionConfig })?.transcription;
 }
 
+/** The frontend's declared lexicon sources over the shared English ones. */
+function requireLexiconSources(
+  declared: TranscriptionConfig["sources"],
+): Partial<Record<LexiconSourceKey, LexiconSource>> {
+  if (declared === undefined) return SHARED_LEXICON_SOURCES;
+  if (!declared || typeof declared !== "object" || Array.isArray(declared)) {
+    throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources must be a map");
+  }
+  const sources = { ...SHARED_LEXICON_SOURCES };
+  for (const [key, value] of Object.entries(declared)) {
+    if (!(LEXICON_SOURCE_KEYS as readonly string[]).includes(key)) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources.${key} is not a lexicon source (${LEXICON_SOURCE_KEYS.join(", ")})`,
+      );
+    }
+    const name = (value as LexiconSource | undefined)?.name;
+    const citation = (value as LexiconSource | undefined)?.citation;
+    if (
+      typeof name !== "string" ||
+      name.length === 0 ||
+      typeof citation !== "string" ||
+      citation.length === 0
+    ) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources.${key} needs a name and a citation`,
+      );
+    }
+    sources[key as LexiconSourceKey] = { name, citation };
+  }
+  return sources;
+}
+
 function requireTranscriptionTables(
   config: TranscriptionConfig | undefined,
 ): RequiredTranscriptionTables {
   if (!config || typeof config !== "object") {
     throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription config is required");
   }
+  const symbolInput = config.diagnostic_symbol_input;
+  if (symbolInput !== undefined && typeof symbolInput !== "boolean") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.diagnostic_symbol_input must be true or false",
+    );
+  }
+  const elidedApostropheLookup = config.elided_apostrophe_lookup;
+  if (elidedApostropheLookup !== undefined && typeof elidedApostropheLookup !== "boolean") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.elided_apostrophe_lookup must be true or false",
+    );
+  }
+  const stretchEnd = config.word_stretch_end_characters;
+  if (stretchEnd !== undefined && typeof stretchEnd !== "string") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_end_characters must be a string",
+    );
+  }
+  const stretchLimits = config.word_stretch_length_limits;
+  if (
+    stretchLimits !== undefined &&
+    !(
+      Array.isArray(stretchLimits) &&
+      stretchLimits.length === 2 &&
+      stretchLimits.every((limit) => Number.isInteger(limit) && limit > 0)
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_length_limits must be two positive whole numbers",
+    );
+  }
+  const marks = config.written_word_marks;
+  const markNames = (side: unknown): side is Record<string, string> | undefined =>
+    side === undefined ||
+    (typeof side === "object" &&
+      side !== null &&
+      !Array.isArray(side) &&
+      Object.entries(side).every(
+        ([character, name]) =>
+          character.length === 1 && typeof name === "string" && name.length > 0,
+      ));
+  if (
+    marks !== undefined &&
+    !(
+      typeof marks === "object" &&
+      marks !== null &&
+      markNames(marks.open) &&
+      markNames(marks.close)
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.written_word_marks must be open and close maps from one character to a name",
+    );
+  }
   return {
+    wordStretchEndCharacters: stretchEnd ?? "",
+    ...(stretchLimits
+      ? { wordStretchLimits: [stretchLimits[0] as number, stretchLimits[1] as number] as const }
+      : {}),
+    ...(marks ? { writtenWordMarks: { open: marks.open ?? {}, close: marks.close ?? {} } } : {}),
+    symbolInput: symbolInput !== false,
+    elidedApostropheLookup: elidedApostropheLookup !== false,
+    sources: requireLexiconSources(config.sources),
     diagnosticSymbols: requirePronunciationMap(config.diagnostic_symbols, "diagnostic_symbols"),
     letterNames: requirePronunciationMap(config.letter_names, "letter_names"),
     punctuationTokens: new Set(requireStringArray(config.punctuation_tokens, "punctuation_tokens")),
@@ -212,6 +379,84 @@ function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
 
 function isPunctuationTokenWithTables(word: string, tables: RequiredTranscriptionTables): boolean {
   return tables.punctuationTokens.has(word);
+}
+
+/**
+ * The places in `text` where the text gathered so far is handed on because of
+ * its length alone: the index of the character at which more than `limits[0]`
+ * characters have been gathered and the character is white space, or at which
+ * more than `limits[1]` have been gathered whatever the character.
+ *
+ * DECtalk's letter-to-sound gathers the characters it is sent and parses and
+ * speaks them together (LTS/ls_task.c:365-372) when a white space character
+ * follows a clause-mark character, when the character is the clause end 0x0b,
+ * or at these two lengths (`temp>400` at white space, `temp>480`); a
+ * character that is not text does the same (:446-470). Gathering starts
+ * again after each. `endCharacters` are the clause-mark characters; the
+ * characters 0x80 to 0x9f are a text parser's marks around what is not text.
+ */
+function gatheredStretchEnds(
+  text: string,
+  endCharacters: string,
+  limits: readonly [number, number],
+): number[] {
+  const ends: number[] = [];
+  let gathered = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index] as string;
+    const code = char.charCodeAt(0);
+    if (code >= 0x80 && code <= 0x9f) {
+      gathered = 0;
+      continue;
+    }
+    const white = /\s/.test(char);
+    const afterMark = index > 0 && endCharacters.includes(text[index - 1] as string);
+    if ((white && afterMark) || code === 0x0b) {
+      gathered = 0;
+    } else if ((gathered > limits[0] && white) || gathered > limits[1]) {
+      ends.push(index);
+      gathered = 0;
+    } else {
+      gathered += 1;
+    }
+  }
+  return ends;
+}
+
+/**
+ * The named marks of the written word that starts at `start` in `text`: the
+ * name of its first character if `marks.open` has it, and of its last if
+ * `marks.close` has it and something is left after an opening mark. A written
+ * word is what stands between two white spaces. A token that is not at the
+ * start of its written word (a later part of it) has none.
+ *
+ * DECtalk's letter-to-sound parses the words it has gathered this way before
+ * it speaks them (LTS/ls_task.c:5066-5106): a word is the characters up to
+ * white space, `(` or `"` in front sets a mark and is skipped, and `)` or `"`
+ * at the end sets one when `k - start >= 1`.
+ */
+function writtenWordMarks(
+  text: string,
+  start: number,
+  marks: { open: Record<string, string>; close: Record<string, string> },
+): string[] {
+  // A token's span may begin with the white space before its word.
+  let first = start;
+  while (first < text.length && /\s/u.test(text[first] as string)) first += 1;
+  let from = first;
+  while (from > 0 && !/\s/u.test(text[from - 1] as string)) from -= 1;
+  if (/[\p{L}\p{N}]/u.test(text.slice(from, first))) return [];
+  let to = first;
+  while (to < text.length && !/\s/u.test(text[to] as string)) to += 1;
+  const word = text.slice(from, to);
+  const found: string[] = [];
+  const open = Object.hasOwn(marks.open, word[0] ?? "") ? marks.open[word[0] as string] : null;
+  if (open) found.push(open);
+  if (word.length - (open ? 1 : 0) >= 1) {
+    const last = word.at(-1) as string;
+    if (Object.hasOwn(marks.close, last)) found.push(marks.close[last] as string);
+  }
+  return found;
 }
 
 function getDiagnosticSymbolPronunciationWithTables(
@@ -229,6 +474,8 @@ function rewriteOrthographyTokens(
   tables: RequiredTranscriptionTables,
   compiledSpec: CompiledRulepack,
   existingUtterance?: Utterance,
+  captureTooling?: boolean,
+  textModeSpans?: Readonly<Record<string, readonly (readonly number[])[]>>,
 ): OrthographyInputToken[] {
   const entries = words.filter(
     (entry) => (typeof entry === "string" ? entry : entry.word).length > 0,
@@ -244,11 +491,113 @@ function rewriteOrthographyTokens(
       citations: ["Allen et al. 1987 Ch.2-3"],
     });
   const sharedInput = typeof entries[0] === "string" ? beginInput() : null;
+  // Punctuation tokens that a text rule supplied: the mark is not in the
+  // source text the token comes from (a text's end closed as a sentence).
+  const suppliedPunctuation = new Set<string>();
+  // For each of them, what is written in the source text where it stands.
+  const suppliedFor = new Map<string, string>();
+  // Punctuation tokens a text rule sent itself (terminal kind 'sent_mark'):
+  // the mark was not read as the delimiter of the word before it.
+  const sentMarks = new Set<string>();
+  // Tokens whose source span has a letter or a digit right in front of it:
+  // the token is written against the word before it ("p" and phonemic text
+  // in the text parser's "p's"; not "'90s" after "The ", whose apostrophe is
+  // stripped from a word of its own).
+  const writtenAgainst = new Set<string>();
+  // Word tokens whose written word ends in a character that ends a stretch
+  // of words for the frontend (an abbreviation's period, a final apostrophe).
+  const stretchEnds = new Set<string>();
+  // Each word token with the text it was written in and where it ends there.
+  const writtenWords: Array<{ tokenId: string; text: string; end: number }> = [];
+  // What was written, for each word token a text rule composed anew.
+  const composedFrom = new Map<string, string>();
+  // The frontend's named marks on the written word, for the token it starts with.
+  const markedWords = new Map<string, string[]>();
+  // Word tokens made from the same place in the text as the word token right
+  // before them. A written word is one word wherever words are counted,
+  // however many are spoken for it: DECtalk counts each item between white
+  // space once (LTS/ls_task.c:5066-5075).
+  const continuesWritten = new Set<string>();
+  // Word tokens that are their written word in lower case, where that word
+  // has a capital first letter and a lower-case second one.
+  const writtenCapitalised = new Set<string>();
+  // For each token, the modes of the text that are on where its span begins.
+  const modesAt = new Map<string, string[]>();
+  let writtenBefore: { textId: string; start: number; end: number } | null = null;
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
-    const punctuation = isPunctuationTokenWithTables(word, tables);
+    // A terminal a text rule declared a word is one, whatever its text: a
+    // mark standing alone that the frontend's lexicon speaks by its name.
+    const declaredWord = typeof entry !== "string" && entry.source.get("kind") === "word";
+    const punctuation = !declaredWord && isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
+    if (punctuation && typeof entry !== "string" && entry.source.get("kind") === "sent_mark") {
+      sentMarks.add(token.id);
+    }
+    let writtenHere: typeof writtenBefore = null;
+    if (typeof entry !== "string") {
+      const sourceTextId = String(entry.source.get("sourceTextId"));
+      const sourceText = utterance.getItem(sourceTextId)?.get("text");
+      const start = entry.source.get("sourceStart");
+      const end = entry.source.get("sourceEnd");
+      if (typeof sourceText === "string" && typeof start === "number" && typeof end === "number") {
+        if (!punctuation && end > start) {
+          writtenHere = { textId: sourceTextId, start, end };
+          // Or from the place where that word token's text ends, with no
+          // white space between and no mark spoken between ("12%" read as
+          // a number and the sign's word: one item between white space).
+          if (
+            writtenBefore?.textId === sourceTextId &&
+            ((writtenBefore.start === start && writtenBefore.end === end) ||
+              // (A token's text may begin with the white space before its
+              // word: that is no such place. Nor is the end of phonemic
+              // text, which is no item of letter-to-sound's: the character
+              // before must be a letter or a digit.)
+              (writtenBefore.end === start &&
+                !/\s/.test(sourceText[start] ?? " ") &&
+                /[A-Za-z0-9]/.test(sourceText[start - 1] ?? " ")))
+          ) {
+            continuesWritten.add(token.id);
+          }
+        }
+        const written = sourceText.slice(start, end);
+        if (textModeSpans) {
+          const on = Object.keys(textModeSpans).filter((mode) =>
+            (textModeSpans[mode] ?? []).some(
+              (span) => (span[0] as number) <= start && start < (span[1] as number),
+            ),
+          );
+          if (on.length > 0) modesAt.set(token.id, on);
+        }
+        if (punctuation && !written.includes(word)) {
+          suppliedPunctuation.add(token.id);
+          suppliedFor.set(token.id, written);
+        }
+        if (start > 0 && /[A-Za-z0-9]/.test(sourceText[start - 1] as string)) {
+          writtenAgainst.add(token.id);
+        }
+        if (
+          !punctuation &&
+          written.length > 0 &&
+          tables.wordStretchEndCharacters.includes(written.at(-1) as string)
+        ) {
+          stretchEnds.add(token.id);
+        }
+        if (!punctuation) writtenWords.push({ tokenId: token.id, text: sourceText, end });
+        if (!punctuation && tables.writtenWordMarks) {
+          const marks = writtenWordMarks(sourceText, start, tables.writtenWordMarks);
+          if (marks.length > 0) markedWords.set(token.id, marks);
+        }
+        if (!punctuation && /^[A-Z][a-z]/.test(written) && written.toLowerCase() === word) {
+          writtenCapitalised.add(token.id);
+        }
+        // A word a text rule composed is known to its neighbours by what
+        // was written ("9:30" for a time written out as phonemic text).
+        if (declaredWord && written !== word) composedFrom.set(token.id, written);
+      }
+    }
+    writtenBefore = writtenHere;
     if (typeof entry !== "string") {
       input.read(entry.source, "normalizedText");
       input.set(token, "sourceNormalizationId", entry.source.id);
@@ -263,7 +612,28 @@ function rewriteOrthographyTokens(
     if (!sharedInput) input.commit();
   });
   sharedInput?.commit();
-  runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
+  // A stretch of words also ends where the text gathered since the last end
+  // grows past the frontend's limit: the last word written before that place.
+  if (tables.wordStretchLimits) {
+    const places = new Map<string, number[]>();
+    for (const word of writtenWords) {
+      const ends =
+        places.get(word.text) ??
+        gatheredStretchEnds(word.text, tables.wordStretchEndCharacters, tables.wordStretchLimits);
+      places.set(word.text, ends);
+    }
+    for (const [text, ends] of places) {
+      const words = writtenWords.filter((word) => word.text === text);
+      for (const place of ends) {
+        const last = words.findLast((word) => word.end <= place);
+        if (last) stretchEnds.add(last.tokenId);
+      }
+    }
+  }
+  runGraphRuleEngine(utterance, compiledSpec, {
+    phases: ["orthography"],
+    ...(captureTooling === undefined ? {} : { captureTooling }),
+  });
 
   return utterance
     .relation("Token")
@@ -281,6 +651,18 @@ function rewriteOrthographyTokens(
         tokenId: token.id,
         word,
         isPunctuation: tokenType === "punctuation",
+        ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
+        ...(suppliedFor.has(token.id) ? { suppliedFor: suppliedFor.get(token.id) as string } : {}),
+        ...(sentMarks.has(token.id) ? { sentMark: true } : {}),
+        ...(writtenAgainst.has(token.id) ? { writtenAgainstPrevious: true } : {}),
+        ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
+        ...(markedWords.has(token.id)
+          ? { writtenMarks: markedWords.get(token.id) as string[] }
+          : {}),
+        ...(continuesWritten.has(token.id) ? { continuesWrittenWord: true } : {}),
+        ...(writtenCapitalised.has(token.id) ? { writtenCapitalised: true } : {}),
+        ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
+        ...(modesAt.has(token.id) ? { textModes: modesAt.get(token.id) as string[] } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
@@ -320,9 +702,6 @@ export function transcribeText(
   // recovery). An explicit `dictLookup` override still wins for the lookup
   // (used e.g. for diagnostic injection in tests).
   const effectiveDictMap = options.dictionaryMap ?? CMU_DICT_MAP;
-  const effectiveDictLookup =
-    options.dictLookup ??
-    (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
   const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
   const resources = loadFrontendResources(compiledSpec);
   const ltsPath = options.ltsPath ?? resources.ltsPath;
@@ -330,20 +709,69 @@ export function transcribeText(
   const stressPolicyPath = options.stressPolicyPath ?? resources.stressPolicyPath;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
+  const effectiveDictLookup =
+    options.dictLookup ??
+    (options.dictionaryMap || !transcriptionTables.elidedApostropheLookup
+      ? makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup)
+      : cmuDictLookup);
 
+  // A frontend with its own dictionary or letter-to-sound file says what they
+  // are: the shared names would put a source it did not use into the record.
+  // The paths are compared as the two rulepacks declare them: loading the
+  // shared frontend's resources here would make every frontend read the
+  // shared letter-to-sound file.
+  const declaredPath = (spec: CompiledRulepack, key: "dictionary_path" | "lts_path"): unknown =>
+    (spec as unknown as Record<string, unknown>)[key] ?? null;
+  const ownsFile = (key: "dictionary_path" | "lts_path"): boolean =>
+    declaredPath(compiledSpec, key) !== declaredPath(QLATT_ENGLISH_RULEPACK, key);
+  const undeclared = [
+    ...(ownsFile("dictionary_path") ? ["dictionary"] : []),
+    ...(ownsFile("lts_path") ? ["lts-rules", "morphology"] : []),
+  ].filter((key) => options.compiledSpec && cfg?.sources?.[key as LexiconSourceKey] === undefined);
+  if (undeclared.length > 0) {
+    throw new Error(
+      `E_TRANSCRIPTION_CONFIG_REQUIRED: the frontend has its own lexicon files and must declare transcription.sources.${undeclared.join(", transcription.sources.")}`,
+    );
+  }
+  const lexiconSource = (key: LexiconSourceKey): LexiconSource => {
+    const used = transcriptionTables.sources[key];
+    if (!used) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: a word was pronounced by '${key}' but transcription.sources.${key} is not declared`,
+      );
+    }
+    return used;
+  };
   const _isEffectivePunctuation = (word: string): boolean =>
     isPunctuationTokenWithTables(word, transcriptionTables);
   const getEffectiveSymbol = (word: string): string[] | null => {
     return getDiagnosticSymbolPronunciationWithTables(word, transcriptionTables);
   };
 
-  const orthographyWords = rewriteOrthographyTokens(
+  const writtenWords = rewriteOrthographyTokens(
     typeof text === "string" ? text.split(" ") : text,
     provenance,
     transcriptionTables,
     compiledSpec,
     options.utterance,
+    options.captureTooling,
+    options.textModeSpans,
   );
+  // A frontend that searches its dictionary by the written word looks a word
+  // up with its apostrophes first and, on a miss, without the ones at its
+  // ends ("'em" is the dictionary's word, "'hello'" is "hello"; DECtalk 4.63
+  // LTS/ls_task.c:2161 lookup as written, 2244-2325 strip, 2477-2478 lookup
+  // again).
+  const orthographyWords = transcriptionTables.elidedApostropheLookup
+    ? writtenWords
+    : writtenWords.map((token) => {
+        if (token.isPunctuation || !/^'|'$/.test(token.word)) return token;
+        if (effectiveDictLookup(token.word)) return token;
+        const stripped = token.word.replace(/^'+|'+$/g, "");
+        // The word was not found as written: a lookup that is made before
+        // the apostrophes are stripped has missed it (edgeStripped).
+        return stripped.length > 0 ? { ...token, word: stripped, edgeStripped: true } : token;
+      });
   const flatPhonemeList: TranscriptionToken[] = [];
   const dictionaryMisses: { word: string; token: string; applied: string }[] = [];
   const emptyPronunciations: { word: string; token: string; applied: string; duration: number }[] =
@@ -354,8 +782,60 @@ export function transcribeText(
   // Use effective lookup functions for symbol mode detection
   const nonPunctuation = orthographyWords.filter((w) => w.word.length > 0 && !w.isPunctuation);
   const useSymbolMode =
+    transcriptionTables.symbolInput &&
     nonPunctuation.length > 0 &&
     nonPunctuation.every((w) => !w.pronunciationKey && getEffectiveSymbol(w.word) !== null);
+
+  // The words between two punctuation marks are pronounced in each other's
+  // context (a frontend's lexicon may choose between a word's entries by its
+  // neighbours). A word spoken by its letter name or as a symbol takes no
+  // part.
+  const inClause = new Map<number, PronunciationResult>();
+  if (!useSymbolMode) {
+    // A run that ends at a mark a text rule supplied does not stand against
+    // punctuation: the text has none there.
+    const pronounceRun = (
+      run: readonly number[],
+      atWrittenPunctuation = true,
+      endMark?: string,
+      endMarkSent = false,
+    ): void => {
+      const results = pronounceClause(
+        run.map((position) => orthographyWords[position].word),
+        effectiveDictLookup,
+        {
+          ltsPath,
+          morphologyPath,
+          stressPolicyPath,
+          atWrittenPunctuation,
+          ...(endMark === undefined ? {} : { endMark }),
+          ...(endMarkSent ? { endMarkSent } : {}),
+          stretchEnds: run.map((position) => orthographyWords[position].endsWordStretch === true),
+          written: run.map((position) => orthographyWords[position].written),
+          writtenCapitalised: run.map(
+            (position) => orthographyWords[position].writtenCapitalised === true,
+          ),
+          edgeStripped: run.map((position) => orthographyWords[position].edgeStripped === true),
+          modes: run.map((position) => orthographyWords[position].textModes),
+        },
+      );
+      run.forEach((position, order) => {
+        inClause.set(position, results[order]);
+      });
+    };
+    let run: number[] = [];
+    orthographyWords.forEach((token, position) => {
+      if (token.isPunctuation) {
+        if (run.length > 0) {
+          pronounceRun(run, token.supplied !== true, token.word, token.sentMark === true);
+        }
+        run = [];
+      } else if (token.word && typeof token.pronunciationKey !== "string") {
+        run.push(position);
+      }
+    });
+    if (run.length > 0) pronounceRun(run);
+  }
 
   for (let index = 0; index < orthographyWords.length; ) {
     const inputToken = orthographyWords[index];
@@ -373,6 +853,9 @@ export function transcribeText(
         isPunctuation: true,
         symbol: inputToken.symbol ?? word,
         word: word, // Associate punctuation with itself as the 'word'
+        ...(inputToken.supplied ? { supplied: true } : {}),
+        ...(inputToken.suppliedFor === undefined ? {} : { suppliedFor: inputToken.suppliedFor }),
+        ...(inputToken.sentMark ? { sentMark: true } : {}),
       });
       index += 1;
     } else {
@@ -382,7 +865,12 @@ export function transcribeText(
 
       // Recover CMUdict compounds after normalization splits tokens.
       // Citation anchor: CMUdict orthography includes hyphenated and apostrophe-linked compounds.
-      const maxCompoundSpan = 4;
+      // Not for a frontend that looks a word up as it is written
+      // (elided_apostrophe_lookup: false): its text rules keep a written
+      // hyphen on the word, and two words written apart are two words
+      // (DECtalk 4.63 speaks "zip code" as two words and "zipcode" as its
+      // dictionary's one).
+      const maxCompoundSpan = transcriptionTables.elidedApostropheLookup ? 4 : 0;
       for (
         let span = Math.min(maxCompoundSpan, orthographyWords.length - index);
         span >= 2;
@@ -424,11 +912,12 @@ export function transcribeText(
               word: sourceWord.toLowerCase(),
             }
           : symbolPronunciation == null
-            ? pronounce(sourceWord, effectiveDictLookup, {
+            ? ((consumedWords === 1 ? inClause.get(index) : undefined) ??
+              pronounce(sourceWord, effectiveDictLookup, {
                 ltsPath,
                 morphologyPath,
                 stressPolicyPath,
-              })
+              }))
             : {
                 phonemes: symbolPronunciation,
                 source: "unknown",
@@ -441,24 +930,65 @@ export function transcribeText(
       let citations: string[];
       if (letterPronunciation != null) {
         decisionType = "letter_name_pronunciation_selected";
-        reason = `Used letter-name pronunciation for '${sourceWord}' via ${inputToken.pronunciationKey}`;
-        citations = [LETTER_NAME_PRONUNCIATION_CITATION];
+        // A frontend that declares its spelling source names the letters from
+        // it; the shared letter names are the default.
+        const declared = cfg?.sources?.spelling;
+        reason = declared
+          ? `Used ${declared.name} for '${sourceWord}' via ${inputToken.pronunciationKey ?? ""}`
+          : `Used letter-name pronunciation for '${sourceWord}' via ${inputToken.pronunciationKey}`;
+        citations = [declared ? declared.citation : LETTER_NAME_PRONUNCIATION_CITATION];
       } else if (symbolPronunciation != null) {
         decisionType = "symbol_pronunciation_selected";
         reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;
         citations = [SYMBOL_PRONUNCIATION_CITATION];
+      } else if (pronResult.source === "number") {
+        decisionType = "number_pronunciation_selected";
+        reason = `Spoke the digits '${sourceWord}' as ${(pronResult.parts ?? []).length.toString()} words from the frontend's number phone lists`;
+        citations = [NUMBER_PRONUNCIATION_CITATION];
+      } else if (pronResult.source === "phonemic") {
+        decisionType = "phonemic_pronunciation_selected";
+        reason = `Spoke the phonemic text '${sourceWord.slice(1, -1)}' as the phones its characters name: ${pronResult.phonemes.join(" ")}`;
+        citations = [PHONEMIC_PRONUNCIATION_CITATION];
       } else if (pronResult.source === "dictionary") {
+        const used = lexiconSource("dictionary");
         decisionType = "dictionary_pronunciation_selected";
-        reason = `Used CMU dictionary pronunciation for '${sourceWord}'`;
-        citations = [CMU_DICTIONARY_CITATION];
+        reason = `Used ${used.name} pronunciation for '${sourceWord}'`;
+        citations = [used.citation];
       } else if (pronResult.source === "morphology") {
+        const used = lexiconSource("morphology");
         decisionType = "morphology_pronunciation_selected";
-        reason = `Morphological decomposition for '${sourceWord}' (root: ${pronResult.rootWord ?? "?"})`;
-        citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
+        reason = `${used.name} for '${sourceWord}' (root: ${pronResult.rootWord ?? "?"})`;
+        citations = [used.citation];
+      } else if (pronResult.source === "spelling") {
+        const used = lexiconSource("spelling");
+        decisionType = "spelling_pronunciation_selected";
+        reason = `Word '${sourceWord}' ${pronResult.word.length === 1 ? "is one letter" : "has no vowel"} and is not in the dictionary; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "position") {
+        const used = lexiconSource("position");
+        decisionType = "position_pronunciation_selected";
+        reason = `Word '${sourceWord}' is spoken by where it stands; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "number-abbreviation") {
+        const used = lexiconSource("number-abbreviation");
+        decisionType = "number_abbreviation_pronunciation_selected";
+        reason = `Word '${sourceWord}' follows a number; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "mode-character") {
+        const used = lexiconSource("mode-character");
+        decisionType = "mode_character_pronunciation_selected";
+        reason = `Word '${sourceWord}' is one character and the ${pronResult.mode ?? ""} mode of the text is on where it stands; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "hyphenated") {
+        const used = lexiconSource("hyphenated");
+        decisionType = "hyphenated_pronunciation_selected";
+        reason = `Word '${sourceWord}' is written with a hyphen; used ${used.name}`;
+        citations = [used.citation];
       } else {
+        const used = lexiconSource("lts-rules");
         decisionType = "fallback_pronunciation_selected";
-        reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + configured lexical stress`;
-        citations = [FALLBACK_PRONUNCIATION_CITATION];
+        reason = `Word '${sourceWord}' not in dictionary; used ${used.name}`;
+        citations = [used.citation];
         dictionaryMisses.push({
           word: sourceWord,
           token: inputToken.tokenId,
@@ -507,15 +1037,146 @@ export function transcribeText(
         }
       }
 
+      // A token spoken as several words (a number in digits) gives each word
+      // its own identity, so that each becomes a Word: `<token>:<n>` and
+      // `<digits>#<n>`. A pause between two of them is a comma's silence.
+      const spokenParts: Array<{
+        phonemes: readonly string[];
+        tokenId: string;
+        word: string;
+        phraseStart?: "vp" | "pp";
+        pauseBefore?: boolean;
+        morphemeAfter?: readonly number[];
+        rulesBlockedAt?: readonly number[];
+        numbersAt?: readonly { at: number; numbers: readonly number[] }[];
+      }> =
+        "parts" in pronResult && pronResult.parts && pronResult.parts.length > 0
+          ? pronResult.parts.map((part, partIndex) => ({
+              phonemes: part.phonemes,
+              tokenId: `${inputToken.tokenId}:${partIndex.toString()}`,
+              word: `${sourceWord}#${(partIndex + 1).toString()}`,
+              ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
+              ...(part.pauseBefore ? { pauseBefore: true } : {}),
+              ...(part.morphemeAfter ? { morphemeAfter: part.morphemeAfter } : {}),
+              ...(part.rulesBlockedAt ? { rulesBlockedAt: part.rulesBlockedAt } : {}),
+              ...(part.numbersAt ? { numbersAt: part.numbersAt } : {}),
+            }))
+          : [
+              {
+                phonemes: pronResult.phonemes,
+                tokenId: inputToken.tokenId,
+                word: sourceWord,
+                ...("phraseStart" in pronResult && pronResult.phraseStart
+                  ? { phraseStart: pronResult.phraseStart }
+                  : {}),
+              },
+            ];
       if (pronResult.phonemes.length > 0) {
-        for (const phoneWithStress of pronResult.phonemes) {
+        const spokenPhones = spokenParts.flatMap((part) =>
+          part.phonemes.map((phoneWithStress, phoneIndex) => ({
+            part,
+            phoneIndex,
+            phoneWithStress,
+          })),
+        );
+        for (const { part, phoneIndex, phoneWithStress } of spokenPhones) {
+          // The first number written on a phone in phonemic text is its
+          // duration in milliseconds; none, or 0, leaves it to the rules
+          // (DECtalk 4.63 PH/ph_task.c:835-852, p_us_tim.c:192).
+          // The second is its pitch: a note to sing or a target in hertz
+          // (PH/ph_sort.c:1657-1728); what it is, is the frontend's rules'.
+          const writtenNumbers = part.numbersAt?.find((entry) => entry.at === phoneIndex)?.numbers;
+          const writtenDuration = writtenNumbers?.[0];
+          const writtenPitch = writtenNumbers?.[1];
+          if (phoneIndex === 0 && part.pauseBefore) {
+            flatPhonemeList.push({
+              phoneme: resources.inventory.silence_symbol,
+              stress: null,
+              sourceTokenId: `${part.tokenId}:pause`,
+              continuesWrittenWord: true,
+              isPunctuation: true,
+              symbol: ",",
+              word: ",",
+              _pronDecisionId: stressDecisionId,
+            });
+          }
           const match = parseInventorySymbol(phoneWithStress, resources.inventory);
           if (match) {
             flatPhonemeList.push({
               phoneme: match.phoneme,
               stress: match.stress,
-              sourceTokenId: inputToken.tokenId,
-              word: sourceWord,
+              sourceTokenId: part.tokenId,
+              word: part.word,
+              // Phonemic text is no word of letter-to-sound's: it is sent on
+              // symbol by symbol (CMD/cm_text.c:1118-1144). Text a rule
+              // composed for a written word and named the word in (a word
+              // spelled in the spelling mode) is that word, which
+              // letter-to-sound has in its list.
+              ...(pronResult.source === "phonemic" &&
+              !("forWrittenWord" in pronResult && pronResult.forWrittenWord)
+                ? { phonemicText: true }
+                : {}),
+              // The last word of phonemic text has no word boundary after it
+              // (joinPhonemicText below).
+              ...(pronResult.source === "phonemic" &&
+              !("wordBoundaryAfter" in pronResult && pronResult.wordBoundaryAfter) &&
+              part === spokenParts.at(-1)
+                ? { _joinsNextWord: true }
+                : {}),
+              // Phonemic text written against the word before it has no word
+              // boundary before it either (joinPhonemicText below).
+              ...(pronResult.source === "phonemic" &&
+              inputToken.writtenAgainstPrevious &&
+              part === spokenParts[0]
+                ? { _joinsPreviousWord: true }
+                : {}),
+              // A phrase start after the token's last word is the next
+              // word's (startPhraseAtNextWord below).
+              ...("phraseStartAfter" in pronResult &&
+              pronResult.phraseStartAfter &&
+              part === spokenParts.at(-1)
+                ? { _phraseStartAfter: pronResult.phraseStartAfter }
+                : {}),
+              // The rules that read a word's classes are the phonetic stage's.
+              ...("formClasses" in pronResult && pronResult.formClasses
+                ? {
+                    formClasses: pronResult.receivedFormClasses ?? pronResult.formClasses,
+                    textFormClasses: pronResult.formClasses,
+                  }
+                : {}),
+              ...(part !== spokenParts[0] || inputToken.continuesWrittenWord
+                ? { continuesWrittenWord: true }
+                : {}),
+              ...("conjunctionRole" in pronResult && pronResult.conjunctionRole
+                ? { conjunctionRole: pronResult.conjunctionRole }
+                : {}),
+              ...(inputToken.endsWordStretch ? { endsWordStretch: true } : {}),
+              ...(inputToken.writtenMarks && part === spokenParts[0]
+                ? { writtenMarks: inputToken.writtenMarks }
+                : {}),
+              ...("readAhead" in pronResult && pronResult.readAhead ? { readAhead: true } : {}),
+              ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
+              ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
+              ...(part.rulesBlockedAt?.includes(phoneIndex) ? { rulesBlocked: true } : {}),
+              ...(writtenDuration !== undefined && writtenDuration !== 0
+                ? { writtenDurationMs: writtenDuration }
+                : {}),
+              ...(writtenPitch !== undefined && writtenPitch !== 0 ? { writtenPitch } : {}),
+              // A silence among a word's phones: phonemic text wrote it.
+              ...(match.phoneme === resources.inventory.silence_symbol
+                ? { writtenSilence: true }
+                : {}),
+              // Indices of a one-word result are indices into its phones.
+              ...(spokenParts.length === 1 &&
+              "rulesBlockedAt" in pronResult &&
+              pronResult.rulesBlockedAt?.includes(phoneIndex)
+                ? { rulesBlocked: true }
+                : {}),
+              ...(spokenParts.length === 1 &&
+              "boundaryAfterAt" in pronResult &&
+              pronResult.boundaryAfterAt?.includes(phoneIndex)
+                ? { morphemeBoundaryAfter: true }
+                : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {
@@ -529,10 +1190,24 @@ export function transcribeText(
               type: "phoneme_symbol_rejected",
               subject: inputToken.tokenId,
               reason: `Rejected '${phoneWithStress}' against inventory symbol_grammar '${resources.inventory.symbol_grammar}'`,
-              citations: [resources.inventoryPath],
+              citations: [...resources.inventoryDocuments],
               parents: stressDecisionId ? [stressDecisionId] : [],
             });
           }
+        }
+        // A pause the lexicon puts after the word (a part number that ends
+        // in a slowly spelled part): a comma's, and no written mark.
+        if ("pauseAfter" in pronResult && pronResult.pauseAfter) {
+          flatPhonemeList.push({
+            phoneme: resources.inventory.silence_symbol,
+            stress: null,
+            sourceTokenId: `${inputToken.tokenId}:pause-after`,
+            continuesWrittenWord: true,
+            isPunctuation: true,
+            symbol: ",",
+            word: ",",
+            _pronDecisionId: stressDecisionId,
+          });
         }
       } else {
         emptyPronunciations.push({
@@ -565,5 +1240,206 @@ export function transcribeText(
       { count: emptyPronunciations.length, affected: emptyPronunciations },
       "EMPTY_PRONUNCIATION_SILENCE",
     );
+  joinPhonemicText(flatPhonemeList, provenance);
+  startPhraseAtNextWord(flatPhonemeList, provenance);
   return flatPhonemeList; // Return the flat list of phoneme objects
+}
+
+/**
+ * A phrase start that a token's reading ends in belongs to the word after
+ * it. DECtalk's time routine sends the hour, a verb-phrase start, and the
+ * minutes unless they are "00" (LTS/l_us_pr1.c:1182-1199); the text task then
+ * sends the word boundary (LTS/ls_task.c:3612-3625) and the next word. Of two
+ * markers in a row the phonemic stage keeps the stronger (PH/ph_task.c:856-885):
+ * the word boundary after the phrase start is dropped, and so is a
+ * prepositional-phrase start the next word brings. Punctuation after the
+ * token ends the clause and the mark with it.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "Dinner is at 6:00 sharp." has S IH K S, verb-phrase start,
+ * SH AA R P; "We close at 5:30 today." has the mark between F AY V and
+ * TH RR T IY and a word boundary before "today".
+ */
+function startPhraseAtNextWord(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  phones.forEach((phone, index) => {
+    const mark = phone._phraseStartAfter;
+    if (!mark) return;
+    delete phone._phraseStartAfter;
+    const next = phones[index + 1];
+    // Every phone of the token's last word carries the mark; act at the last.
+    if (!next || next.sourceTokenId === phone.sourceTokenId || next.isPunctuation) return;
+    for (let at = index + 1; phones[at]?.sourceTokenId === next.sourceTokenId; at += 1) {
+      (phones[at] as TranscriptionToken).phraseStart = mark;
+    }
+    provenance?.add({
+      stage: "transcribe",
+      type: "phrase_start_from_previous_word",
+      subject: next.sourceTokenId,
+      reason: `'${next.word}' starts a ${mark === "vp" ? "verb" : "prepositional"} phrase: '${phone.word}' ends in that mark`,
+      citations: [
+        "DECtalk 4.63 LTS/l_us_pr1.c:1182-1199 (ls_proc_do_time: the hour, a verb-phrase start, the minutes unless 00)",
+        "DECtalk 4.63 PH/ph_task.c:856-885 (of two markers in a row the stronger is kept)",
+      ],
+      parents: phone._pronDecisionId ? [phone._pronDecisionId] : [],
+    });
+  });
+}
+
+/**
+ * Phonemic text has no word boundary after it: its phones and those of the
+ * word that follows are one word. DECtalk's letter-to-sound sends the symbol
+ * that ends a word after each word it reads (LTS/ls_task.c:1144-1260
+ * ls_task_do_right_punct, the word boundary unless a mark was stripped from
+ * the word); phonemic text is sent on symbol by symbol with nothing after it
+ * (CMD/cm_text.c:1118-1144). A phrase mark in front of the next word still
+ * parts the two, and so does punctuation.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "john.smith@example.com", which its text parser writes with
+ * phonemic text for each period, is JH AA N, boundary, D AA T S M IH TH,
+ * boundary, AE T, boundary, IX G Z AE M P EL, boundary, D AA T K AA M;
+ * "...but nobody came." starts D AA T B AH T; "...and then" has the phrase
+ * mark of "and" after D AA T.
+ */
+function joinPhonemicText(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  for (let start = 0; start < phones.length; ) {
+    const first = phones[start] as TranscriptionToken;
+    if (!first._joinsNextWord) {
+      start += 1;
+      continue;
+    }
+    let end = start;
+    while (
+      end < phones.length &&
+      phones[end]?._joinsNextWord &&
+      phones[end]?.sourceTokenId === first.sourceTokenId
+    ) {
+      end += 1;
+    }
+    const next = phones[end];
+    const run = phones.slice(start, end);
+    for (const phone of run) delete phone._joinsNextWord;
+    // The words before phonemic text are a stretch of their own: an item
+    // that is not a character makes letter-to-sound parse and speak the text
+    // it has gathered before the item is sent on (LTS/ls_task.c:446-470).
+    const before = phones[start - 1];
+    if (before && !before.isPunctuation) {
+      for (let at = start - 1; phones[at]?.sourceTokenId === before.sourceTokenId; at -= 1) {
+        (phones[at] as TranscriptionToken).endsWordStretch = true;
+      }
+    }
+    if (
+      next &&
+      !next.isPunctuation &&
+      !next.phraseStart &&
+      // Phonemic text after phonemic text is joined when its own turn comes.
+      next.sourceTokenId !== first.sourceTokenId
+    ) {
+      const {
+        formClasses,
+        textFormClasses,
+        conjunctionRole,
+        readAhead,
+        endsWordStretch,
+        continuesWrittenWord,
+      } = next;
+      for (const phone of run) {
+        phone.sourceTokenId = next.sourceTokenId;
+        phone.word = next.word;
+        if (formClasses) phone.formClasses = formClasses;
+        if (textFormClasses) phone.textFormClasses = textFormClasses;
+        if (conjunctionRole) phone.conjunctionRole = conjunctionRole;
+        if (readAhead) phone.readAhead = readAhead;
+        if (endsWordStretch) phone.endsWordStretch = endsWordStretch;
+        if (next.writtenMarks) phone.writtenMarks = next.writtenMarks;
+        if (continuesWrittenWord) phone.continuesWrittenWord = continuesWrittenWord;
+        else delete phone.continuesWrittenWord;
+      }
+      // The word's own text begins here: its class reached the phonetics
+      // after the phonemic text had gone by (PH/ph_task.c:598-601).
+      next.wordTextStart = true;
+      provenance?.add({
+        stage: "transcribe",
+        type: "phonemic_text_joined",
+        subject: next.sourceTokenId,
+        reason: `Phonemic text ${run.map((phone) => phone.phoneme).join(" ")} has no word boundary after it: one word with '${next.word}'`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+          "DECtalk 4.63 LTS/ls_task.c:1144-1260 (ls_task_do_right_punct: the word boundary is sent after a word letter-to-sound read)",
+        ],
+        parents: first._pronDecisionId ? [first._pronDecisionId] : [],
+      });
+    } else if (next && !next.isPunctuation && next.phraseStart === "pp") {
+      // The phrase start parts the two words, with no word boundary before
+      // it: the phone sort gives the phonemic text's last phone the phrase
+      // start's boundary alone (PH/ph_sort.c:1462-1496).
+      for (let at = end; phones[at]?.sourceTokenId === next.sourceTokenId; at += 1) {
+        (phones[at] as TranscriptionToken).phraseStartUnbounded = true;
+      }
+      provenance?.add({
+        stage: "transcribe",
+        type: "phrase_start_without_word_boundary",
+        subject: next.sourceTokenId,
+        reason: `Phonemic text ${run.map((phone) => phone.phoneme).join(" ")} has no word boundary after it: '${next.word}' starts its phrase with none before it`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+          "DECtalk 4.63 PH/ph_sort.c:1462-1496 (a word boundary and a phrase start each add their own value to the phone before them)",
+        ],
+        parents: first._pronDecisionId ? [first._pronDecisionId] : [],
+      });
+    }
+    start = end;
+  }
+  // Phonemic text written against the word before it ("p" and z in the text
+  // parser's "p's"): that word is the last of the text letter-to-sound had
+  // gathered, and what follows it is not a character, so its delimiter
+  // routine sends no word boundary (LTS/ls_task.c:1153-1154). The word is
+  // one with the phonemic text, and with whatever that was joined to above.
+  for (let at = 1; at < phones.length; at += 1) {
+    const phone = phones[at] as TranscriptionToken;
+    if (!phone._joinsPreviousWord) continue;
+    delete phone._joinsPreviousWord;
+    const before = phones[at - 1] as TranscriptionToken;
+    if (before.isPunctuation || before.sourceTokenId === phone.sourceTokenId) continue;
+    const joined: TranscriptionToken[] = [];
+    for (let back = at - 1; phones[back]?.sourceTokenId === before.sourceTokenId; back -= 1) {
+      joined.unshift(phones[back] as TranscriptionToken);
+    }
+    const { formClasses, textFormClasses, conjunctionRole, readAhead, continuesWrittenWord } =
+      phone;
+    for (const earlier of joined) {
+      earlier.sourceTokenId = phone.sourceTokenId;
+      earlier.word = phone.word;
+      if (formClasses) earlier.formClasses = formClasses;
+      else delete earlier.formClasses;
+      if (textFormClasses) earlier.textFormClasses = textFormClasses;
+      else delete earlier.textFormClasses;
+      if (conjunctionRole) earlier.conjunctionRole = conjunctionRole;
+      else delete earlier.conjunctionRole;
+      if (readAhead) earlier.readAhead = readAhead;
+      else delete earlier.readAhead;
+      if (continuesWrittenWord) earlier.continuesWrittenWord = continuesWrittenWord;
+      else delete earlier.continuesWrittenWord;
+      // The marks written on the word joined after it, as the phonemic
+      // text's own phones took them above.
+      if (phone.writtenMarks) earlier.writtenMarks = phone.writtenMarks;
+    }
+    provenance?.add({
+      stage: "transcribe",
+      type: "word_joined_to_phonemic_text",
+      subject: phone.sourceTokenId,
+      reason: `'${before.word}' is written against phonemic text ${phone.phoneme}…: no word boundary between them`,
+      citations: [
+        "DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1153-1154 (the delimiter routine sends nothing when the item after the word is not a character)",
+        "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+      ],
+      parents: phone._pronDecisionId ? [phone._pronDecisionId] : [],
+    });
+  }
 }

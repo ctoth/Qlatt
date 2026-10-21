@@ -1,0 +1,5 @@
+# Fixture voice for test/voice-rule-fields.test.ts. Not a synthesizer voice.
+name: low
+register: chest
+lift: 3
+citations: [fixture low voice]

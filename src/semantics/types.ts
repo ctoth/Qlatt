@@ -59,6 +59,29 @@ export interface SemanticsDocument {
   realize?: Record<string, RealizationRule | CelExpression>;
 }
 
+/**
+ * One `realize_each` entry: a family of realize rules written once and
+ * generated for every value of a single scalar index.
+ * See `src/semantics/realize-each.ts`.
+ */
+export interface RealizeEachEntry {
+  /** Placeholder name; `{<index>}` is substituted textually. */
+  index: string;
+  /** Values the index takes, in generation order. */
+  over: Array<number | string>;
+  /** Rule-name template → rule template. Every name must contain `{<index>}`. */
+  rules: Record<string, RealizationRule | CelExpression>;
+}
+
+/**
+ * A semantics document as written on disk. `expandRealizeEach` turns it into
+ * the `SemanticsDocument` every consumer evaluates; `realize_each` does not
+ * exist after loading.
+ */
+export interface AuthoredSemanticsDocument extends SemanticsDocument {
+  realize_each?: RealizeEachEntry[];
+}
+
 /** Parameter definition */
 export interface ParamDefinition {
   /** Report inputs outside range; realization rules still own the response. */

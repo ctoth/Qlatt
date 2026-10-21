@@ -54,11 +54,16 @@ rules:
       left: substring(value, 0, double(maps.tn_year_policy.half_length))
       right: substring(value, double(maps.tn_year_policy.half_length))
       round: "right == maps.tn_year_policy.round_half"
+    # A bare year stays digits for a frontend whose lexicon speaks digits
+    # itself (tn_recognition_policy.bare_numbers: digits); a year inside a
+    # date is still expanded here.
     expand_text:
-      allowed_types: [request]
+      allowed_types: [request, terminal]
       tag: normalization_date
       output: >-
-        value.startsWith(maps.tn_year_policy.zero)
+        maps.tn_recognition_policy.bare_numbers == 'digits' && current.outputType == 'source'
+          ? [{'type': 'terminal', 'text': value}]
+        : value.startsWith(maps.tn_year_policy.zero)
           ? tn_words(split(value, '').map(digit, vocabulary('tn_number_words', digit)).join(' '))
           : round
             ? (left.endsWith(maps.tn_year_policy.zero)

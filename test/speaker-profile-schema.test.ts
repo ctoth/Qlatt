@@ -54,6 +54,9 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 200,
+      // The span follows the level (pitch_composition.span_follows_level):
+      // the profile's 80 times the requested 200 over the reference 110.
+      f0_range_hz: 80 * (200 / 110),
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,
@@ -70,6 +73,7 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 150,
+      f0_range_hz: 80 * (150 / 110),
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,

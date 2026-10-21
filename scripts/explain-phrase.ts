@@ -35,7 +35,7 @@ type ParsedArgs = {
   subjectFilter: string | null;
   rangeRaw: string | null;
   outPath: string | null;
-  baseF0: number;
+  baseF0: number | undefined;
   transitionMs: number;
   verbose: boolean;
   whyDecisionId: string | null;
@@ -134,9 +134,10 @@ function parseArgv(argv: string[]): ParsedArgs {
     throw new Error(`Unsupported format '${format}'. Use text or json.`);
   }
 
-  const baseF0Raw = flags.get("base-f0") ?? "110";
-  const baseF0 = Number(baseF0Raw);
-  if (!Number.isFinite(baseF0) || baseF0 <= 0) {
+  // Absent: no base pitch is requested, and the frontend's voice keeps its own.
+  const baseF0Raw = flags.get("base-f0");
+  const baseF0 = baseF0Raw === undefined ? undefined : Number(baseF0Raw);
+  if (baseF0 !== undefined && (!Number.isFinite(baseF0) || baseF0 <= 0)) {
     throw new Error(`Invalid --base-f0 '${baseF0Raw}'`);
   }
 

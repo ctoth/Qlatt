@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-long-text-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "long-short-sentences", "text": "Go on. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go. Go.", "group": "frame-4096", "tags": ["over-4096-frames", "over-8192-frames"], "expectedFocus": ["trace"] }
+  ]
+}

@@ -26,6 +26,7 @@ members = [
   "crates/dynamics-compressor",
   "crates/reconstruction-filter",
   "crates/f0-filters",
+  "crates/dectalk-vtm",
 ]
 resolver = "2"
 

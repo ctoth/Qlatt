@@ -41,8 +41,20 @@ export interface RenderRequest {
   nodeParameterOverrides?: Record<string, number>;
   repoRoot: string;
   phrase: string;
+  /** A requested base pitch in Hz. Absent: the selected voice's own. */
   baseF0?: number;
+  /**
+   * A requested pitch as a ratio of the base pitch
+   * (/rules/policy/speaker-profile.yaml pitch_composition). Absent: 1.
+   */
+  pitchScale?: number;
   frontendId: string;
+  /**
+   * A voice of the frontend's registry (`speakers.voices`), given to the
+   * frontend as the page gives its voice selection. Absent: the frontend's
+   * default voice.
+   */
+  speaker?: string;
   experimentId: string;
   engine: string;
   rate: number;

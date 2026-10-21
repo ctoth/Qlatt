@@ -28,64 +28,8 @@ rules:
       - "Klatt 1980 (cascade/parallel source routing)"
       - "DECtalk 4.63 p_us_st1.c"
 
-  # HX has default (-1) formant-table entries in us_maltar[]. The source does
-  # not send those generic defaults: ph_setar.c asks for the following onset
-  # target and the initial GEN_SIL forward boundary uses that target. Carry the
-  # following vowel's declared formants into HH so the existing lowerer's
-  # initial-silence blend emits the same successor-conditioned state.
-  dectalk_hx_carries_following_vowel_formants:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.phoneme == 'HH' && next != null && next.type == 'vowel'"
-    apply:
-      - field: F1
-        op: set
-        value: next.F1
-        tag: coarticulation
-      - field: F2
-        op: set
-        value: next.F2
-        tag: coarticulation
-      - field: F3
-        op: set
-        value: next.F3
-        tag: coarticulation
-    citations:
-      - "DECtalk 4.63 p_us_rom.h us_maltar[HX]: F1/F2/F3 are -1 defaults"
-      - "DECtalk 4.63 ph_setar.c:384 and :1073-1117 (next onset target is getbegtar(nphone + 1))"
-      - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary takes tarnex)"
-      - "DECtalk 4.63 -lt oracle: Hello world frames 0-14 carry EH-conditioned HX F1/F2/F3"
-
-  # Clause-initial GEN_SIL retains DECtalk's initialized F3 state until the
-  # first velar stop, whose own current/coarticulated target begins at the
-  # first K packet. The lowerer renders the plosive-long locus transition from
-  # that distinct K target toward the following sonorant boundary.
-  dectalk_initial_k_f3:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'K' &&
-        current.type == 'stop_closure' &&
-        prev == null
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      silence_windows: params.policy.formant.initial_k_silence_formant_windows
-    apply:
-      - field: F3
-        op: set
-        value: params.policy.formant.initial_k_f3_hz
-        tag: coarticulation
-      - field: control_windows
-        op: set
-        value: "existing_windows + silence_windows"
-        tag: coarticulation
-    citations:
-      - "DECtalk 4.63 ph_setar.c gettar() (US_K F3 adjustment and unstressed formant coarticulation)"
-      - "DECtalk 4.63 p_us_st1.c:493-504,509-514,535-545 (initial GEN_SIL boundary and plosive-long locus smoothing)"
-      - "DECtalk 4.63 -lt oracle for 'Can you hear me?': GEN_SIL F3=2702; first K F3=2690"
-
+  # F1, F2, F3, B2 and B3 are drawn frame by frame in
+  # phases/formant-drawing.yaml; no rule here sets them.
   dectalk_obstruent_parallel_amplitudes:
     kind: scalar
     select:
@@ -106,8 +50,7 @@ rules:
       ref_is_front_vowel: >-
         ref != null &&
         ref.type == 'vowel' &&
-        has(ref.front) &&
-        ref.front == true
+        isTrue(ref, 'front')
       ref_is_back_rounded: >-
         ref != null &&
         ref_phoneme in ['AO0', 'AO1', 'OW0', 'OW1', 'OY0', 'OY1', 'UH0', 'UH1', 'UW0', 'UW1', 'OR0', 'OR1', 'UR0', 'UR1', 'W']
@@ -130,7 +73,7 @@ rules:
           - when: phoneme == 'JH'
             value: >-
               following_class == 'front' ? 42 : 45
-          - default: "has(current.A3) ? current.A3 : 0"
+          - default: "get(current, 'A3', 0)"
         tag: fricative_spectrum
       - field: A4
         op: set
@@ -151,14 +94,14 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 51 : 46)
-          - default: "has(current.A4) ? current.A4 : 0"
+          - default: "get(current, 'A4', 0)"
         tag: fricative_spectrum
       - field: A5
         op: set
         dispatch:
           - when: phoneme == 'S'
             value: 50
-          - default: "has(current.A5) ? current.A5 : 0"
+          - default: "get(current, 'A5', 0)"
         tag: fricative_spectrum
       - field: A6
         op: set
@@ -181,7 +124,7 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 44 : 38)
-          - default: "has(current.A6) ? current.A6 : 0"
+          - default: "get(current, 'A6', 0)"
         tag: fricative_spectrum
       - field: AB
         op: set
@@ -198,411 +141,14 @@ rules:
           - when: phoneme == 'DH'
             value: >-
               following_class in ['back_rounded', 'obstruent'] ? 43 : 46
-          - default: "has(current.AB) ? current.AB : 0"
+          - default: "get(current, 'AB', 0)"
         tag: fricative_spectrum
     citations:
       - "DECtalk 4.63 p_us_st1.c (A2-A6/AB selected through ptram + p_amp by following segment class)"
       - "DECtalk 4.63 p_us_rom.h (us_ptram/us_malamp US obstruent amplitude tables)"
 
-  # DECtalk 4.63 us_special_coartic() (p_us_st1.c:314-410): per-vowel F3 TARGET
-  # offset for vowels adjacent to W/R/RX. The function returns an Hz `temp` added
-  # to the formant target; here we add it to the steady F3. unstressed *1.5,
-  # phrase-final-stressed *0.5 scaling and the +-400 clamp mirror the source.
-  # /RR/ (syllabic-r) is excluded (p_us_st1.c:331). W/R/RX are DECtalk phoneme
-  # identities (cited literals), not a derivable place class.
-  dectalk_special_coartic_f3:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.type == 'vowel' && current.phoneme != 'RR'"
-    define:
-      # The preceding token of a vowel after a stop is the stop_release glue
-      # (<BASE>_REL); DECtalk's fonlas is the base stop. Skip release/aspiration
-      # glue to reach the base neighbour (generic, by type — no phoneme literals).
-      prev_base: >-
-        look_back_where(current, 3,
-          'candidate.type != "stop_release" && candidate.type != "stop_aspiration"')
-      prev_ph: "prev_base == null ? '' : prev_base.phoneme"
-      next_ph: "next == null ? '' : next.phoneme"
-      near_w_r: >-
-        prev_ph in ['W', 'R', 'RX'] || next_ph in ['W', 'R', 'RX']
-      raw_offset: >-
-        near_w_r ? params.policy.formant.special_coartic.f3_near_w_r_offset_hz : 0.0
-      is_unstressed: "!has(current.stress) || current.stress != 1"
-      is_phrase_final: "next == null || next.phoneme == 'SIL'"
-      scaled: >-
-        is_unstressed ? (raw_offset * params.policy.formant.special_coartic.unstressed_gain) :
-        (is_phrase_final ? (raw_offset * params.policy.formant.special_coartic.phrase_final_gain) : raw_offset)
-      clamp_hi: params.policy.formant.special_coartic.max_offset_hz
-      offset: >-
-        scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
-    apply:
-      - field: F3
-        op: add
-        value: offset
-        tag: coarticulation
-    citations:
-      - "DECtalk 4.63 p_us_st1.c:329-339 (F3 -150 Hz for vowels adjacent to W/R/RX)"
-      - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
-
-  # DECtalk 4.63 us_special_coartic() F2 TARGET offsets (p_us_st1.c:341-407):
-  #   - front vowel (USP_IY..AE) before [LX] or after [W]/[LL]/[LX] -> -150 Hz
-  #   - [UW] adjacent to an alveolar (us_place & FALVEL) -> +200 Hz
-  # las/nex effects are NOT cumulative (a single `temp`); the dispatch picks the
-  # first matching case in DECtalk order, then applies the same unstressed/
-  # phrase-final scaling and clamp as F3. DEFERRED (need diphpos, not exposed):
-  # AY/OY before LX (-250/-350) and unstressed YU 2nd-half (+400); also there is
-  # no YU/IX allophone in this inventory. front_vowels / alveolar are DATA lists.
-  dectalk_special_coartic_f2:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.type == 'vowel'"
-    define:
-      # Skip stop_release/aspiration glue to reach the base preceding phoneme
-      # (DECtalk fonlas); the following stop neighbour is already the base
-      # closure token, so `next` needs no glue-skip.
-      prev_base: >-
-        look_back_where(current, 3,
-          'candidate.type != "stop_release" && candidate.type != "stop_aspiration"')
-      prev_ph: "prev_base == null ? '' : prev_base.phoneme"
-      next_ph: "next == null ? '' : next.phoneme"
-      is_front: "current.phoneme in params.policy.formant.special_coartic.front_vowels"
-      front_near_lateral: >-
-        is_front && (next_ph == 'LX' || prev_ph in ['W', 'LL', 'LX'])
-      is_uw: "current.phoneme == 'UW'"
-      uw_near_alveolar: >-
-        is_uw && (
-          prev_ph in params.policy.formant.special_coartic.alveolar ||
-          next_ph in params.policy.formant.special_coartic.alveolar)
-      raw_offset: >-
-        front_near_lateral ? params.policy.formant.special_coartic.f2_front_near_lateral_offset_hz :
-        (uw_near_alveolar ? params.policy.formant.special_coartic.f2_uw_near_alveolar_offset_hz : 0.0)
-      is_unstressed: "!has(current.stress) || current.stress != 1"
-      is_phrase_final: "next == null || next.phoneme == 'SIL'"
-      scaled: >-
-        is_unstressed ? (raw_offset * params.policy.formant.special_coartic.unstressed_gain) :
-        (is_phrase_final ? (raw_offset * params.policy.formant.special_coartic.phrase_final_gain) : raw_offset)
-      clamp_hi: params.policy.formant.special_coartic.max_offset_hz
-      offset: >-
-        scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
-    apply:
-      - field: F2
-        op: add
-        value: offset
-        tag: coarticulation
-    citations:
-      - "DECtalk 4.63 p_us_st1.c:341-369 (front-vowel F2 -150 near LX/W/LL)"
-      - "DECtalk 4.63 p_us_st1.c:370-385 (UW F2 +200 adjacent alveolar)"
-      - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
-
-  dectalk_n_high_front_b3:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.phoneme == 'N'"
-    define:
-      prev_ph: "prev == null ? '' : prev.phoneme"
-      next_ph: "next == null ? '' : next.phoneme"
-      high_front_adjacent: >-
-        prev_ph in params.policy.formant.nasal_b3_preceding_f2backf ||
-        next_ph in params.policy.formant.nasal_b3_following_f2backi
-    constraint: high_front_adjacent
-    apply:
-      - field: B3
-        op: set
-        value: params.policy.formant.nasal_high_front_b3_hz
-        tag: nasal_bandwidth
-    citations:
-      - "DECtalk 4.63 p_us_st1.c:132-140 (N B3 is 1600 Hz adjacent to F2BACKF/F2BACKI phones)"
-
-  dectalk_the_dh_f1_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'the' &&
-        current.phoneme == 'DH' &&
-        next != null && next.phoneme == 'AX'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.the_dh_formant_trace_windows
-    apply:
-      - field: F1
-        op: set
-        value: params.policy.formant.the_dh_f1_hz
-        tag: segmental_context
-      - field: F2
-        op: set
-        value: params.policy.formant.the_dh_f2_hz
-        tag: segmental_context
-      - field: F3
-        op: set
-        value: params.policy.formant.the_dh_f3_hz
-        tag: segmental_context
-      - field: B1
-        op: set
-        value: params.policy.formant.the_dh_b1_hz
-        tag: segmental_context
-      - field: B2
-        op: set
-        value: params.policy.formant.the_dh_b2_hz
-        tag: segmental_context
-      - field: B3
-        op: set
-        value: params.policy.formant.the_dh_b3_hz
-        tag: segmental_context
-      - field: AV
-        op: set
-        value: params.policy.formant.the_dh_av_db
-        tag: segmental_context
-      - field: A6
-        op: set
-        value: params.policy.formant.the_dh_a6_db
-        tag: segmental_context
-      - field: AB
-        op: set
-        value: params.policy.formant.the_dh_ab_db
-        tag: segmental_context
-      - field: TL
-        op: set
-        value: params.policy.formant.the_tl_db
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2/F3/B1/B2/B3/AV/A6/AB/TLT values at frames 0-12)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_the_ax_f1_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.word == 'the' && current.phoneme == 'AX'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.the_ax_formant_trace_windows
-    apply:
-      - field: F1
-        op: set
-        value: params.policy.formant.the_ax_f1_hz
-        tag: segmental_context
-      - field: F2
-        op: set
-        value: params.policy.formant.the_ax_f2_hz
-        tag: segmental_context
-      - field: F3
-        op: set
-        value: params.policy.formant.the_ax_f3_hz
-        tag: segmental_context
-      - field: B1
-        op: set
-        value: params.policy.formant.the_ax_b1_hz
-        tag: segmental_context
-      - field: B2
-        op: set
-        value: params.policy.formant.the_ax_b2_hz
-        tag: segmental_context
-      - field: B3
-        op: set
-        value: params.policy.formant.the_ax_b3_hz
-        tag: segmental_context
-      - field: AV
-        op: set
-        value: params.policy.formant.the_ax_av_db
-        tag: segmental_context
-      - field: A6
-        op: set
-        value: params.policy.formant.the_ax_a6_db
-        tag: segmental_context
-      - field: AB
-        op: set
-        value: params.policy.formant.the_ax_ab_db
-        tag: segmental_context
-      - field: TL
-        op: set
-        value: params.policy.formant.the_tl_db
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6/AB/TLT values at frames 13-45)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_the_terminal_silence_f1_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'SIL' &&
-        has(current.punctuationSymbol) && current.punctuationSymbol == '.' &&
-        prev != null && prev.word == 'the'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.the_terminal_silence_formant_trace_windows
-    apply:
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP-to-AH values from frame 44 onward)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_initial_k_formant_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'cake' &&
-        current.phoneme == 'K' &&
-        current.type == 'stop_closure' &&
-        prev == null &&
-        next != null && next.type == 'stop_release'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_initial_k_formant_trace_windows
-    apply:
-      - field: F1
-        op: set
-        value: params.policy.formant.cake_initial_k_f1_hz
-        tag: segmental_context
-      - field: F2
-        op: set
-        value: params.policy.formant.cake_initial_k_f2_hz
-        tag: segmental_context
-      - field: F3
-        op: set
-        value: params.policy.formant.initial_k_f3_hz
-        tag: segmental_context
-      - field: B1
-        op: set
-        value: params.policy.formant.cake_initial_k_b1_hz
-        tag: segmental_context
-      - field: B2
-        op: set
-        value: params.policy.formant.cake_initial_k_b2_hz
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/TLT values at frames 0-15)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_initial_k_release_formant_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'cake' &&
-        current.phoneme == 'K_REL' &&
-        current.type == 'stop_release' &&
-        prev != null && prev.phoneme == 'K'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_initial_k_release_formant_trace_windows
-    apply:
-      - field: F1
-        op: set
-        value: params.policy.formant.cake_initial_k_release_f1_hz
-        tag: segmental_context
-      - field: F2
-        op: set
-        value: params.policy.formant.cake_initial_k_release_f2_hz
-        tag: segmental_context
-      - field: F3
-        op: set
-        value: params.policy.formant.cake_initial_k_release_f3_hz
-        tag: segmental_context
-      - field: B1
-        op: set
-        value: params.policy.formant.cake_initial_k_release_b1_hz
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/AP/A2/A3/A5/TLT values at frames 16-20)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_final_k_formant_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'cake' &&
-        current.phoneme == 'K' &&
-        current.type == 'stop_closure' &&
-        prev != null && prev.phoneme == 'EY' &&
-        next != null && next.phoneme == 'SIL'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_final_k_formant_trace_windows
-    apply:
-      - field: F2
-        op: set
-        value: params.policy.formant.cake_final_k_f2_hz
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2/F3/B1/B2/AP/A3/A5/TLT values at frames 58-72)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_dummy_ix_formant_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'cake' &&
-        current.phoneme == 'SIL' &&
-        has(current.dummy_vowel) && current.dummy_vowel == true
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_dummy_ix_formant_trace_windows
-    apply:
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_terminal_silence_formant_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'SIL' &&
-        has(current.punctuationSymbol) && current.punctuationSymbol == '.' &&
-        prev != null && prev.word == 'cake' &&
-        has(prev.dummy_vowel) && prev.dummy_vowel == true
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_terminal_silence_formant_trace_windows
-    apply:
-      - field: F2
-        op: set
-        value: params.policy.formant.cake_terminal_silence_f2_hz
-        tag: segmental_context
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: segmental_context
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP values from frame 78 onward)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
+  # B1 only: the other formant words of a silence are drawn in
+  # phases/formant-drawing.yaml.
   dectalk_silence_carries_formants:
     kind: scalar
     select:
@@ -613,29 +159,9 @@ rules:
         prev.phoneme != 'SIL' &&
         !(prev.type in ['stop_closure', 'stop_release', 'stop_aspiration'])
     apply:
-      - field: F1
-        op: set
-        value: "has(prev.F1) ? prev.F1 : current.F1"
-        tag: silence_boundary
-      - field: F2
-        op: set
-        value: "has(prev.F2) ? prev.F2 : current.F2"
-        tag: silence_boundary
-      - field: F3
-        op: set
-        value: "has(prev.F3) ? prev.F3 : current.F3"
-        tag: silence_boundary
       - field: B1
         op: set
         value: "has(prev.B1) ? prev.B1 : current.B1"
-        tag: silence_boundary
-      - field: B2
-        op: set
-        value: "has(prev.B2) ? prev.B2 : current.B2"
-        tag: silence_boundary
-      - field: B3
-        op: set
-        value: "has(prev.B3) ? prev.B3 : current.B3"
         tag: silence_boundary
     citations:
       - "DECtalk 4.63 oracle -lt trace: terminal GEN_SIL carries the preceding formant trajectory while AV/AP/A2-A6/AB fall silent"

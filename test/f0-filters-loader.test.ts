@@ -13,8 +13,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  describeRenderStatus,
   getF0FilterExports,
   isF0FilterLoaded,
+  RENDER_ERROR_NAMES,
   RENDER_OK,
   setF0FilterWasmBytes,
 } from "../src/f0-filters-loader";
@@ -190,5 +192,75 @@ describe("f0-filters-loader", () => {
     exports.dealloc_f64(cmdsPtr, cmds.length);
     exports.dealloc_f64(profilesPtr, profiles.length);
     exports.dealloc_f64(outPtr, 4);
+  });
+
+  it("names every error status the kernel returns", () => {
+    expect(RENDER_ERROR_NAMES).toEqual({
+      [RENDER_ERR_SCALARS]: "RENDER_ERR_SCALARS",
+      [RENDER_ERR_OUT]: "RENDER_ERR_OUT",
+      [RENDER_ERR_BUFFER]: "RENDER_ERR_BUFFER",
+      [RENDER_ERR_CMD_RANGE]: "RENDER_ERR_CMD_RANGE",
+      [RENDER_ERR_PROFILE_RANGE]: "RENDER_ERR_PROFILE_RANGE",
+      [-6]: "RENDER_ERR_PHASE_RANGE",
+    });
+    expect(describeRenderStatus(-6)).toBe("RENDER_ERR_PHASE_RANGE (-6)");
+    expect(describeRenderStatus(-99)).toBe("unknown status (-99)");
+  });
+
+  it("renders frame 4096 of a text instead of trapping", () => {
+    // The DECtalk renderer (coefficient filter with speaker scaling), 4090
+    // frames into a text: the 8 outputs after the discarded cell are frames
+    // 4092 to 4099. Frame 4096 indexed one past the kernel's cosine table.
+    const exports = getF0FilterExports();
+    const scalars = [
+      0.0064,
+      0.0064,
+      2,
+      2100 / 16384,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1100,
+      4100,
+      4096,
+      0.1,
+      -1e9,
+      1e9,
+      1300,
+      1300,
+      -1,
+      4090,
+    ];
+    const layers = [1, 0, 4, 0.01, 0.9, 0, 1];
+    const cmds = [0, 1300, 0, 0, 0];
+    const scalarsPtr = writeF64(exports, scalars);
+    const layersPtr = writeF64(exports, layers);
+    const cmdsPtr = writeF64(exports, cmds);
+    const outPtr = exports.alloc_f64(8);
+    const status = exports.render_f0(
+      scalarsPtr,
+      scalars.length,
+      layersPtr,
+      1,
+      cmdsPtr,
+      1,
+      0,
+      0,
+      outPtr,
+      8,
+    );
+    expect(status).toBe(RENDER_OK);
+    const out = Array.from(new Float64Array(exports.memory.buffer, outPtr, 8), (value) =>
+      Math.round(value * 10),
+    );
+    // 1100 + ((1299 + jitter - 1300) * 4100 >> 12): 1098 with no jitter.
+    expect(out[4]).toBe(1098);
+    exports.dealloc_f64(scalarsPtr, scalars.length);
+    exports.dealloc_f64(layersPtr, layers.length);
+    exports.dealloc_f64(cmdsPtr, cmds.length);
+    exports.dealloc_f64(outPtr, 8);
   });
 });

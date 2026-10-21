@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-europe-v1",
+  "description": "Texts spoken in DECtalk's europe mode, which reads a comma in a number as the decimal mark and a period as the mark between thousands, and a date with the day first: numbers written the mode's way and the other way, with a sign and a percent sign; money; dates in digits with slashes and hyphens, a date token and a date in words; a clock time, a telephone number and a text with no number, which the mode leaves alone; the mode turned off again, set, turned on and off inside a text, and on together with the math mode. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "me-01", "text": "[:mode europe on] Add 2,5 liters of water.", "group": "numbers" },
+    { "id": "me-02", "text": "[:mode europe on] The rate fell to 0,75 today.", "group": "numbers" },
+    { "id": "me-03", "text": "[:mode europe on] About 12.500 people came.", "group": "numbers" },
+    { "id": "me-04", "text": "[:mode europe on] It weighs 1.250.000 tons.", "group": "numbers" },
+    { "id": "me-05", "text": "[:mode europe on] They paid 3.456,75 in all.", "group": "numbers" },
+    { "id": "me-06", "text": "[:mode europe on] Mix 4.5 cups of flour.", "group": "other-way" },
+    { "id": "me-07", "text": "[:mode europe on] Nearly 6,200 seats were sold.", "group": "other-way" },
+    { "id": "me-08", "text": "[:mode europe on] It fell to -3,5 degrees.", "group": "numbers" },
+    { "id": "me-09", "text": "[:mode europe on] Sales rose 3,5% this year.", "group": "numbers" },
+    { "id": "me-10", "text": "[:mode europe on] The coat cost $45,90 on sale.", "group": "money" },
+    { "id": "me-11", "text": "[:mode europe on] He owes $2.300 to the bank.", "group": "money" },
+    { "id": "me-12", "text": "[:mode europe on] The fee is $7.25 now.", "group": "money" },
+    { "id": "me-13", "text": "[:mode europe on] We met on 5/9/1998 in town.", "group": "dates" },
+    { "id": "me-14", "text": "[:mode europe on] The bill is due 11-30-02.", "group": "dates" },
+    { "id": "me-15", "text": "[:mode europe on] She was born on 14-feb-1987.", "group": "dates" },
+    { "id": "me-16", "text": "[:mode europe on] On July 4, 1976 it rained.", "group": "dates" },
+    { "id": "me-17", "text": "[:mode europe on] The ferry leaves at 6:45 from the pier.", "group": "unchanged" },
+    { "id": "me-18", "text": "[:mode europe on] Call 555-0142 after lunch.", "group": "unchanged" },
+    { "id": "me-19", "text": "[:mode europe on] The wind blew all night long.", "group": "unchanged" },
+    { "id": "me-20", "text": "[:mode europe on][:mode europe off] Add 2,5 and 12.500.", "group": "command" },
+    { "id": "me-21", "text": "[:mode europe set] Add 2,5 liters.", "group": "command" },
+    { "id": "me-22", "text": "Add 2,5 now. [:mode europe on] Add 2,5 now. [:mode europe off] Add 2,5 now.", "group": "command" },
+    { "id": "me-23", "text": "The sum [:mode europe on] 12.500 and 2,5 [:mode europe off] is right.", "group": "command" },
+    { "id": "me-24", "text": "[:mode europe on][:mode math on] Take 2,5 - 1,5.", "group": "command" }
+  ]
+}

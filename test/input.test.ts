@@ -88,8 +88,10 @@ describe("input contract — Direction Track schema", () => {
 
 describe("input contract — authored syllable stress", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
+    // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+    const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
     it(`promotes to and demotes I before annotation (${frontendId})`, () => {
-      const control = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const control = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",
@@ -107,7 +109,7 @@ describe("input contract — authored syllable stress", () => {
           ],
         },
       });
-      const result = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const result = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",
@@ -167,7 +169,42 @@ describe("input contract — authored syllable stress", () => {
     });
   }
 
-  it("preserves level 3 on a single DECtalk word and adds the cited 19 and 38 ms", () => {
+  it("preserves level 3 on a single DECtalk word and adds the cited three and six frames", () => {
+    // "we" is an onset consonant and a vowel. ("you" is DECtalk's single
+    // allophone YU and has no onset.)
+    const result = textToKlattTrackDetailed("we", 110, 30, {
+      frontendId: "dectalk-english",
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
+      },
+    });
+    const live = result.utterance
+      .relation("Segment")
+      .listItems()
+      .filter((s) => s.get("active") !== false);
+    const nucleus = live.find((s) => s.get("type") === "vowel")!;
+    expect(nucleus.get("stress")).toBe(3);
+    const onset = live.find((s) => s.get("phoneme") === "W")!;
+    expect(onset.get("stress")).toBe(3);
+    expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
+    // p_us_tim.c Rule 8: NF20MS (3 frames) for emphasis and NF40MS (6) more on
+    // a syllabic. The onset consonant gets the 3 alone.
+    for (const [item, frames] of [
+      [nucleus, 9],
+      [onset, 3],
+    ] as const) {
+      const writes = item.writes("timing_added_frames");
+      const index = writes.findIndex((w) => w.ruleId === "dectalk_timing_8_emphasis");
+      expect(index).toBeGreaterThan(0);
+      expect(writes[index].tag).toBe("emphasis");
+      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBe(frames);
+    }
+  });
+
+  it("carries level 3 onto the live Segment of a vowel that a later rule re-emits", () => {
+    // "you" is one allophone, YU, with a formant trajectory: the structural
+    // phase replaces it with a copy carrying the trajectory windows.
     const result = textToKlattTrackDetailed("you", 110, 30, {
       frontendId: "dectalk-english",
       directionTrack: {
@@ -175,26 +212,11 @@ describe("input contract — authored syllable stress", () => {
         spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
       },
     });
-    const nucleus = result.utterance
+    const live = result.utterance
       .relation("Segment")
       .listItems()
-      .find((s) => s.get("type") === "vowel")!;
-    expect(nucleus.get("stress")).toBe(3);
-    const onset = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((s) => s.get("phoneme") === "Y")!;
-    expect(onset.get("stress")).toBe(3);
-    expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
-    const writes = nucleus.writes("duration");
-    for (const [tag, delta] of [
-      ["emphasis", 19],
-      ["emphasis_syllabic", 38],
-    ] as const) {
-      const index = writes.findIndex((w) => w.tag === tag);
-      expect(index).toBeGreaterThan(0);
-      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBeCloseTo(delta);
-    }
+      .filter((s) => s.get("active") !== false && s.get("type") === "vowel");
+    expect(live.map((s) => [s.get("phoneme"), s.get("stress")])).toEqual([["YU", 3]]);
   });
 
   it("honors the accent policy switch without discarding authored stress", () => {

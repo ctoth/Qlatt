@@ -104,7 +104,29 @@ function readFixture(): {
   ) {
     throw new Error("layered-intonation fixture/spec invalid");
   }
-  const policy = readLowerOptions(spec.output.lowering);
+  // The recorded graph holds Segment values. A column that only a frame
+  // program writes (hrg/frame-program.ts) has none and is not part of what
+  // this fixture reconstructs; F4, which a program also writes, stays.
+  const fullPolicy = readLowerOptions(spec.output.lowering);
+  const programColumns = new Set(
+    Object.values(isPlainObject(spec.frame_programs) ? spec.frame_programs : {}).flatMap(
+      (program) =>
+        isPlainObject(program) && isPlainObject(program.outputs)
+          ? Object.keys(program.outputs)
+          : [],
+    ),
+  );
+  const firstSegment = parsed.reconstructedGraph.items.find(
+    (item) => isPlainObject(item) && item.type === "segment",
+  );
+  const recorded = (column: string): boolean =>
+    isPlainObject(firstSegment) &&
+    isPlainObject(firstSegment.features) &&
+    Object.hasOwn(firstSegment.features, column);
+  const policy = {
+    ...fullPolicy,
+    columns: fullPolicy.columns.filter((column) => !programColumns.has(column) || recorded(column)),
+  };
   const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];

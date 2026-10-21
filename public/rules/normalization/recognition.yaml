@@ -2,6 +2,211 @@
 # retain legacy boundaries; eligibility and speaking are separate CEL rules.
 text_recognition:
   rules:
+    # A pause a frontend's text parser asks for (src/text-parser): the comma
+    # written as phonemic text, between the parser's two marks for it. Only
+    # for a frontend whose policy says its text carries such marks
+    # (tn_recognition_policy.parser_marks: phonemic).
+    - id: tn_parser_pause_source
+      pattern: '\x81,\x82'
+      flags: ''
+      class: parser_pause
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # Any other phonemic text of the parser is a word given by its phonemes
+    # (the words for "dot" and "colon" in an address). It stays one word, its
+    # marks on it, for the frontend's lexicon to read.
+    - id: tn_parser_phones_source
+      pattern: '\x81[^\x82]+\x82'
+      flags: ''
+      class: parser_phones
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # SPELLING MODE (maps.tn_text_mode_spans.spell, laid over the rulepack's
+    # maps when a mode command turned it on: the stretches of the parser's
+    # text the mode is on in, each a pair of offsets, from and up to; a rule
+    # here holds for a match that begins inside one; the three rules do not
+    # run at all for a text with no such stretch, `enabled`, and leave no
+    # record in it). Every word of the
+    # parser's text in the mode is spelled, whatever it is made of: the test stands in
+    # front of every other reading of a word, and a word is what stands
+    # between white space, less the marks at its end. White space after a
+    # word is then a comma's pause, not a word boundary, also when the text
+    # ends there: the clause end the parser's text carries after it has
+    # nothing left to end, so this rule takes it with the white space. A
+    # clause end right after the word, with no white space between (the
+    # parser writes a tab so), ends the word's clause as a period does:
+    # measured, "The tide<tab>went out." has a period after "tide".
+    # Measured on say.exe (test/oracle-corpora/dectalk-us-mode-spell-v1.json):
+    # "The tide went out." is T IY, EY CH, IY, comma, T IY, AY, D IY, IY,
+    # comma, and so on to a period; "tide" ends in a comma.
+    #
+    # Not spelled: one of the six auxiliaries as the first word of a
+    # sentence. The first-word test runs before the spelling test and speaks
+    # the auxiliary itself. The white space after it is a comma's pause all
+    # the same. The first word is the one after a period, a question mark or
+    # an exclamation mark; a clause end with no such mark before it (a command
+    # inside the text) starts no sentence. Measured: "Is it out? Was it in."
+    # has IH Z and W AH Z, "It is out." has AY, EH S; "The gate [:rate 200]
+    # was shut." has D AH B EL Y UW, EY, EH S for "was"
+    # (test/oracle-corpora/dectalk-us-first-word-after-command-v1.json).
+    - id: tn_spell_mode_first_verb_source
+      pattern: '(?<=^\s*|[.?!]\s+)(?<word>[A-Za-z]+)(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
+      flags: ''
+      class: spell_mode_first_verb
+      captures: {word: word, gap: gap}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
+      when: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+        && lower(captures.word) in get(maps, 'tn_first_verbs', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:656 and 688 (ls_task_set_what_state runs before ls_task_spell_mode), 1584-1625 and 4672-4728 (ls_task_lookup_first_verbs speaks the first word when it is in verbs[] and the word is finished)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1175-1236 (the first-word state is set again after a period, a question mark and an exclamation mark)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)'
+    - id: tn_spell_mode_word_source
+      pattern: '(?<=^|\s)(?<word>[^\s\x0b\x81\x82]*[^\s\x0b\x81\x82.,;:!?])(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
+      flags: ''
+      class: spell_mode_word
+      captures: {word: word, gap: gap}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
+      when: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:688 and 1835-1871 (ls_task_spell_mode: in the spelling mode every word goes to ls_spel_spell, ahead of the dictionary and every other reading)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)'
+    # A question mark that ends a sentence whose first word is one of the
+    # question words is sent as a period, in the spelling mode as outside it:
+    # the first-word test comes before the spelling test. Outside the mode
+    # the frontend's own rule does this from the first word it has spoken;
+    # here the first word is spelled and this rule reads it as written. The
+    # first word is the one after a period, a question mark or an exclamation
+    # mark that ends a word; a clause end with no such mark before it starts
+    # no sentence. Measured on say.exe: "What is it?" ends in a period's
+    # clause, "Is it out?" in a question's.
+    - id: tn_spell_mode_wh_mark_source
+      pattern: '(?<=(?:^\s*|[.?!]\s+)(?<first>[A-Za-z]+)(?=[\s.,;:!?])(?:[^.?!]|[.?!](?=\S))*)\?(?=\s|$)'
+      flags: ''
+      class: spell_mode_wh_mark
+      captures: {first: first}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
+      when: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+        && lower(captures.first) in get(maps, 'tn_wh_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:656 and 688 (ls_task_set_what_state runs before ls_task_spell_mode), 1584-1616 (the first word of a sentence is looked up in whdic)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after such a sentence is sent as PERIOD), LTS/l_us_con.c:1215-1226 whdic'
+    # The clause end the parser's text carries (the host's "speak this now",
+    # and the ends the parser's own rules write): it ends the words said since
+    # the last sentence or clause mark as a period does, and does nothing when
+    # there are none. So only the first of a run counts, and none at the start
+    # of the text or after a mark that has already ended the clause. An
+    # apostrophe written against that mark changes nothing: it is stripped
+    # from its word and nothing is spoken for it (LTS/l_us_con.c:132,
+    # LTS/ls_task.c:2303-2319). Measured on say.exe: "He said 'shut the
+    # door.'" ends in one period.
+    - id: tn_parser_clause_end_source
+      pattern: '(?<!(?:^|[.,;:!?\x0b]''?|\x81,\x82)\s*)\x0b'
+      flags: ''
+      class: parser_clause_end
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
+    # The same clause end after a period that is a word
+    # (tn_lone_period_source): the word "period" is one of the words it ends.
+    # Measured on say.exe: "She moved to Boston, MA 02134." ends
+    # P IY R IY AX D, a word boundary and the period symbol. And after any
+    # other mark that is a word because it stands right after phonemic text
+    # (tn_mark_after_phonemic_source): "Did he get two B's?" ends
+    # K W EH S CH AX N, M AA R K and the period symbol. Only the first
+    # clause end after such a word: the white space between may not be
+    # another clause end ("See ftp://files.example.com/pub/." ends `/ .` and
+    # two clause ends, the parser's and the host's, and has one period).
+    - id: tn_parser_clause_end_after_period_word_source
+      pattern: '(?<=(?:(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.|\x82[,;:?!])[^\S\x0b]*)\x0b'
+      flags: ''
+      class: parser_clause_end
+      captures: {}
+      when: >-
+        get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'
+        && get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
+    # A unit's abbreviation with its period, one or two words after a word
+    # that begins with a digit: kept as one token, which the frontend's
+    # lexicon reads from its table of units by the number. In any case of
+    # letters, and before the dictionary's abbreviations, as the lookup is.
+    # Only under tn_recognition_policy.abbreviations: dictionary, with the
+    # generated map tn_number_abbreviations. A closing bracket or quote after
+    # the period does not hide the unit, but a comma or another mark there
+    # does: measured on say.exe, "5 lb. now" is "pounds" and "5 lb., not" is
+    # "pound", the dictionary's word for "lb.", which the next rule finds.
+    - id: tn_number_abbreviation_source
+      pattern: '(?<=(?:^|\s)[0-9]\S*\s+(?:\S+\s+)?)(?<word>[A-Za-z]+)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s)"'']))'
+      flags: ''
+      class: number_abbreviation
+      captures: {word: word, final: final}
+      when: >-
+        get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'dictionary'
+        && lower(captures.word) in get(maps, 'tn_number_abbreviations', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3772 (a word that starts with a digit arms the unit lookup), 634 (each word counts it down from 3), 2125-2152 (a word followed by a period is looked up in nabtab first, and the period is eaten)'
+    # A word written with a period after it that the frontend's dictionary
+    # holds with the period: the abbreviation is the dictionary's word and the
+    # period is not a sentence end. Only for a frontend whose policy takes its
+    # abbreviations from its dictionary (tn_recognition_policy.abbreviations:
+    # dictionary); the generated map tn_dictionary_abbreviations says, per
+    # entry, which ways of writing the word find it (l lower case, C
+    # capitalised, U upper case). A word in mixed case is not in the map's
+    # terms and is left to the other rules.
+    # Punctuation written against the word does not hide it: an opening
+    # bracket or quote before it, and a comma, semicolon, colon, question or
+    # exclamation mark, closing bracket or quote after its period. DECtalk
+    # strips the punctuation at a word's ends and looks the word up again
+    # (LTS/ls_task.c:2244-2325, 2436-2482). Measured on say.exe: "Smith Jr.,
+    # a lawyer" is "junior" and a comma, "Main St.: go" "street" and a comma,
+    # "Smith Jr.? He" "junior" and a question, "The (Dept. of State)"
+    # "department", "(Smith Jr.) now" "junior" with no break, and "He is
+    # (Smith Jr.)" ends the sentence at the text's end. The same for the unit
+    # rule above and the dotted capitals below.
+    - id: tn_dictionary_abbreviation_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z][A-Za-z.]*?)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s,;:!?)"'']))'
+      flags: ''
+      class: dictionary_abbreviation
+      captures: {word: word, final: final}
+      when: >-
+        get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'dictionary'
+        && get(get(maps, 'tn_dictionary_abbreviations', {}), lower(captures.word) + '.', '').contains(
+          captures.word == lower(captures.word) ? 'l'
+            : matches(captures.word, '^[^a-z]+$') ? 'U'
+            : matches(captures.word, '^[A-Z][^A-Z]*$') ? 'C' : 'x')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2040-2160 (a word followed by a period is looked up as an abbreviation; on a hit the period is eaten)'
+        - 'DECtalk 4.63 LTS/ls_dict.c:916-920 (an entry that is the word plus a period), 960-964 (a lower-case letter matches only a lower-case entry letter)'
     - id: tn_abbreviation_source
       table: tn_abbreviations
       prefix: '\b'
@@ -9,37 +214,771 @@ text_recognition:
       flags: i
       class: abbreviation
       captures: {key: key, tail: tail}
-      when: 'true'
+      # The shared abbreviation list, unless the frontend has its own source.
+      when: "get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'shared'"
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; abbreviation prefix matching']
+    # A word of capitals with a period between each two ("U.S", "F.B.I"): every
+    # letter is spelled, and a period after the last letter belongs to the
+    # word, not to the sentence. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.initialisms: capitals).
+    - id: tn_dotted_capitals_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<letters>[A-Z](?:\.[A-Z])+)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s,;:!?)"''])|(?=[\s,;:!?)"'']|$))'
+      flags: ''
+      class: dotted_capitals
+      captures: {letters: letters, final: final}
+      when: "get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'capitals'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2840-2890 (a word of alternating upper-case letters and periods is spelled letter by letter with a word boundary between; the period it sits on is eaten)'
+    # A word all in capitals that the frontend's dictionary does not have and
+    # that is spelled by the letters it is made of: every letter a vowel, or,
+    # in a word of at most four letters, a first or a last pair of letters
+    # the generated maps mark. The same policy as the rule above; the maps
+    # (pairs, and the words the dictionary search finds) are generated.
+    - id: tn_spelled_capitals_source
+      pattern: '(?<=^|\s)(?<word>[A-Z]{2,})(?=[\s.,;:!?]|$)'
+      flags: ''
+      class: spelled_capitals
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'capitals'
+        && !(captures.word in get(maps, 'tn_capitals_in_dictionary', {}))
+        && (matches(captures.word, '^[AEIOUY]+$')
+            || (size(captures.word) <= 4
+                && (substring(captures.word, 0, 2) in get(maps, 'tn_spell_begin_pairs', {})
+                    || substring(captures.word, size(captures.word) - 2, size(captures.word))
+                         in get(maps, 'tn_spell_end_pairs', {}))))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_sp1.c:63-99 (ls_spel_say_it: a word of capitals is spelled when all its letters are vowels, or it has at most four letters and its first pair has SPELL_BEGIN or its last pair SPELL_END in spell_it)'
+        - 'DECtalk 4.63 LTS/ls_task.c:697 and 746 (the dictionary search comes before the test)'
+    # A word written with hyphens between its parts stays one word, hyphens
+    # and all: the frontend's lexicon reads it part by part. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.
+    # hyphenated_words: source). A doubled hyphen is not this rule's. A hyphen
+    # written at the word's end stays on it too ("Red- green."): the lexicon
+    # puts the compound mark after the word's last phone.
+    - id: tn_hyphenated_word_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+(?:-[A-Za-z]+)*-?)(?=[\s.,;:!?)"'']|$)'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'hyphenated_words', 'split') == 'source'
+        && captures.word.contains('-')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4208-4435 (ls_task_process_word reads a word with hyphens in it part by part)'
+    # A word with a slash in it that the frontend's dictionary holds as
+    # written ("yes/no", "and/or"), and a slash standing alone, which the
+    # dictionary holds too: one word. The generated map tn_slash_words is the
+    # dictionary's entries with a slash.
+    - id: tn_slash_word_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+/[A-Za-z]+|/)(?=[\s.,;:!?)"'']|$)'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "lower(captures.word) in get(maps, 'tn_slash_words', {})"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with a slash), LTS/ls_task.c:2040-2160 (the word is looked up as written before anything is stripped from it)'
+    # A closing parenthesis at a word's end, white space, and then a mark
+    # standing alone (the parser's `two) . ` and `now) ! "`): the parenthesis
+    # is stripped from the word and forces a comma; when a comma is sent so,
+    # all white space after the word is skipped and the next character is
+    # the word's delimiter, so the mark ends a clause that holds nothing.
+    # Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.stripped_parenthesis_mark: delimiter). Measured
+    # on say.exe: the parser's `said "Go now) . Then left. ` has N AW, a
+    # comma, a period, then DH EH N; `"Stop now) ! " Then` has N AW, a comma,
+    # an exclamation's clause end, then K W OW T; `"Is it this) ? " Then` has
+    # DH IH S, a comma, a question's clause end, then K W OW T; `"Wait now) ,
+    # then` has N AW and two commas.
+    - id: tn_stripped_parenthesis_mark_source
+      pattern: '(?<=[A-Za-z0-9])\)\s+(?<mark>[.!?,])(?=\s|$)'
+      flags: ''
+      class: stripped_parenthesis_mark
+      captures: {mark: mark}
+      when: "get(maps.tn_recognition_policy, 'stripped_parenthesis_mark', 'words') == 'delimiter'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:136 (")" is right-strippable and forces a break), LTS/ls_task.c:2303-2319 (stripping it sets the comma), 1547-1558 (the comma is sent, the white space after the word is skipped, and ls_task_do_right_punct reads the next character as the delimiter)'
+    # A parenthesis, an angle bracket or a curly brace on a word's edge: it
+    # is stripped from the word and forces a break, a comma before the word
+    # for an opening one and after the word for a closing one. DECtalk's
+    # text parser takes these marks away in its default mode, so they reach
+    # letter-to-sound when the parser hands the text on as written (its
+    # punctuation mode pass). Only between two words of a clause here, and
+    # only for a frontend whose policy asks for it
+    # (tn_recognition_policy.enclosing_marks: comma). Measured on say.exe in
+    # that mode: "See the (red) car." is S IY, DH AX, comma, R EH D, comma,
+    # K AA R; "The tide (at noon went out." has the one comma before AE T,
+    # "The tide at noon) went out." the one after N UW N; "See {red} and
+    # <blue> cars." has four commas.
+    # Not ported, measured: the opening mark on a clause's first word
+    # ("(Now) we left." begins with a comma's clause), a closing mark before
+    # a clause's own mark ("We left (now)." has the one period), and such a
+    # mark inside a word ("tide(at" is spelled, "left parenthesis" by name).
+    - id: tn_opening_mark_source
+      pattern: '(?<=[A-Za-z0-9]\s+)(?<open>[(<{]+)(?=[A-Za-z0-9])'
+      flags: ''
+      class: forced_comma
+      captures: {open: open}
+      when: "get(maps.tn_recognition_policy, 'enclosing_marks', 'dropped') == 'comma'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:135, 155 and the rows for "{" and "[" (left-strippable, forces a break), LTS/ls_task.c:2244-2275 (ls_task_strip_left_punctuation: such a mark sets the comma before the word)'
+    - id: tn_closing_mark_source
+      pattern: '(?<=[A-Za-z0-9])(?<close>[)>}]+)(?=\s+[A-Za-z0-9(<{])'
+      flags: ''
+      class: forced_comma
+      captures: {close: close}
+      when: "get(maps.tn_recognition_policy, 'enclosing_marks', 'dropped') == 'comma'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:136, 157 and the rows for "}" and "]" (right-strippable, forces a break), LTS/ls_task.c:2303-2319 (ls_task_strip_right_punctuation: such a mark sets the comma after the word)'
+    # A period standing alone after white space or after the parser's
+    # phonemic text (the parser's `Ph . D., ` and its pause before a
+    # sentence's period, `4 <pause>. `): a word, the dictionary's "period",
+    # and no clause end: the word reader keeps a mark that begins a word.
+    # Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.lone_period: word). Measured on say.exe:
+    # "Dr. White, Ph.D., spoke." has P IY, EY CH, P IY R IY AX D, D IY and a
+    # comma; "She moved to Boston, MA 02134. Then she left." has the pause,
+    # then P IY R IY AX D, DH EH N, SH IY, L EH F T in one clause.
+    # Any other mark right after the parser's phonemic text ("B's?" is the
+    # letter, phonemic z and the mark): the phonemic text ended the text
+    # letter-to-sound had gathered, so the mark begins a word and is kept as
+    # one, the dictionary's word for it. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.lone_period: word). Measured on
+    # say.exe: "Did he get two B's? Yes." has B IY Z, K W EH S CH AX N,
+    # M AA R K, Y EH S in one clause; "He got two B's! Yes." has
+    # EH K S K L AX M EY SH AX N, P OY N T; "Two c's, then" K AA M AX;
+    # "He got two B's; then" S EH M IY K OW L AX N.
+    - id: tn_mark_after_phonemic_source
+      pattern: '(?<=\x82)(?<word>[,;:?!])(?=\s|$)'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:125, 139, 153, 154 and 158 ("!" "," ":" ";" "?" are such characters), dapi/src/dic/dtalk_us.dic (their entries)'
+    # The same period with a comma, a semicolon or a colon on it (the parser
+    # writes "Ibid.," as `Ibid .,`): the period begins a word and is kept,
+    # the mark after it is not (white space follows it), so the word is the
+    # period and the mark its delimiter. Measured on say.exe: "Ibid., p. 44."
+    # has IH B IX D, P IY R IY AX D and a comma; "Smith et al., 2004." the
+    # same after AE L; "Ibid.; p. 44." the same with the semicolon's comma.
+    # (A question or an exclamation mark there has not been measured.)
+    - id: tn_lone_period_source
+      pattern: '(?<=\s|\x82)\.(?=[,;:]?(?:\s|$))'
+      flags: ''
+      class: lone_period
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:141 ("." is such a character), 697 and 746 of ls_task.c (the dictionary is searched for the word as written), dapi/src/dic/dtalk_us.dic (the entry ".")'
+    # A comma, a semicolon or a colon with an apostrophe on it at a word's
+    # end ("'Come in,' said…"): the apostrophe is stripped from the word and
+    # the mark with it, and the word's own routine sends the comma. No
+    # routine reads the mark as a delimiter, so what a delimiter does besides
+    # ending the clause does not happen (a written comma sends the class of
+    # the stretch's first word again). The mark is one the rule sends. Only
+    # for a frontend whose policy asks for it
+    # (tn_recognition_policy.mark_stripped_with_quote: sent). Measured on
+    # say.exe: "'Come in,' said the old man, 'and shut the door.'" has the
+    # symbols of the same text without the quotes; its packets are in
+    # dectalk-us-text-end-marks-v1.
+    - id: tn_mark_stripped_with_quote_source
+      pattern: '(?<=[A-Za-z0-9])(?<mark>[,;:])(?=''(?:\s|$))'
+      flags: ''
+      class: stripped_mark
+      captures: {mark: mark}
+      when: "get(maps.tn_recognition_policy, 'mark_stripped_with_quote', 'delimiter') == 'sent'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:132 (the apostrophe is strippable at a word''s end), LTS/ls_task.c:2303-2340 (stripping it takes a comma, a colon or a semicolon before it too and sets the comma), 1547-1549 (the next-word routine sends that comma), 1266-1279 (only the delimiter routine sets the form-class index back before a comma)'
+    # A period on a word with a comma, a semicolon or a colon right after it
+    # ("B., then", "cat., then", "Q.; then"): the period stays in the word
+    # and is not spoken; the mark after it is the word's delimiter. Only for
+    # a frontend whose policy asks for it
+    # (tn_recognition_policy.period_before_mark: silent). Measured on
+    # say.exe: "He met B., then left." has B IY and a comma, with no period;
+    # "He saw the cat., then left." has K AE T and a comma. A question mark
+    # after the period is the same ("?" is such a character too,
+    # LTS/l_us_con.c:158): "Is it Mary K.? Yes." has K EY and the question's
+    # clause end, "Who is J.? Ask him." JH EY and one period, the mark of a
+    # question that begins with a wh-word.
+    - id: tn_period_before_mark_source
+      pattern: '(?<=[A-Za-z])\.(?=[,;:?](?:\s|$))'
+      flags: ''
+      class: silent_mark
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'period_before_mark', 'clause_end') == 'silent'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1451-1463 (ls_task_readword: inside a word a character that "might" be in a word is kept when the next one is of that kind too), LTS/ls_util.c:887-900 (ls_util_is_might), LTS/l_us_con.c:139, 141, 153 and 154 ("," "." ":" ";" are such characters), LTS/ls_task.c:1266-1279 (the comma, colon or semicolon left as delimiter sends a comma)'
+    # A word of slashes and hyphens, both in it ("/-", "-/", "/-/"): one
+    # word for the part-number reader, which names each character. Only for
+    # a frontend whose policy asks for it
+    # (tn_recognition_policy.slash_dash_words: part_number). Measured on
+    # say.exe: "His score was 5 +/- 1." (the parser writes `5 + /- 1`) has
+    # P L AH S, S L AE SH, D AE SH, W AH N with no pause among them.
+    - id: tn_slash_dash_word_source
+      pattern: '(?<=^|\s)(?<token>[/-]+)(?=\s|$)'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'slash_dash_words', 'dropped') == 'part_number'
+        && matches(captures.token, '/') && matches(captures.token, '-')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4170 (ls_task_part_number: a word of slashes, digits, hyphens and letters with a slash or a digit in it is read by ls_proc_do_part_number)'
+    # A word with two periods on it ahead of the clause's own period (the
+    # parser writes " . . ." so: "on..."): the word with the two periods is
+    # spelled, each period by its name, and the third ends the clause. Only
+    # for a frontend whose policy asks for it
+    # (tn_recognition_policy.marked_words: spelled). Measured on say.exe:
+    # "It goes on . . . and on." has OW, EH N, P IY R IY AX D, P IY R IY AX D
+    # and a period's clause end. (The parser makes "on." of "on...", of
+    # "on . ." and of "on . . . .".)
+    - id: tn_dotted_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\.\.)(?<last>\.)(?=\s|$)'
+      flags: ''
+      class: marked_word
+      captures: {word: word, inner: inner, last: last}
+      when: "get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1451-1463 and LTS/ls_util.c:887-900 (a period is kept in the word when another follows it), LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
+    # A word with no letter and no digit, standing alone between white space,
+    # that the frontend's dictionary holds: "%", "@", "&", "+", "=", "#", "*",
+    # and a mark a text parser has left alone ("?", "!", ",", a quote). One
+    # word, the dictionary's ("percent", "at", "question mark", "comma").
+    # The generated map tn_symbol_words is the dictionary's entries with no
+    # letter and no digit. A period alone is not this rule's
+    # (tn_lone_period_source above). Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.symbol_words: dictionary). Measured on say.exe:
+    # "It is % here." has P RR S EH N T; the parser's `'no' ? " he` has
+    # K W EH S CH AX N, M AA R K, K W OW T between "no" and "he" and no
+    # clause end.
+    - id: tn_symbol_word_source
+      pattern: '(?<=^|\s)(?<word>[^\sA-Za-z0-9.\x00-\x1f\x7f-\x9f]+?)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'symbol_words', 'dropped') == 'dictionary'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped), 2040-2160 (the word is looked up as written)'
+    # A word of letters and digits with an underscore in it
+    # ("tom_west42"): one word, which the frontend's lexicon spells character
+    # by character. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.underscore_words: spelled).
+    - id: tn_underscore_word_source
+      pattern: '(?<=^|\s)(?<word>(?=[A-Za-z0-9_]*[A-Za-z0-9])[A-Za-z0-9_]*_[A-Za-z0-9_]*)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'underscore_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name)'
+    # Digits with an apostrophe between them ("5'10", a height; an inch mark
+    # after it is stripped): one word, which the frontend's lexicon spells,
+    # each digit by its name and the apostrophe by its own. Only for a
+    # frontend whose policy asks for it
+    # (tn_recognition_policy.digit_apostrophe_words: spelled). Measured on
+    # say.exe: `He is 5'10" and still growing.` has F AY V, AX P AA S T R AX
+    # F IY, W AH N, Z IY R OW; "12'6" is W AH N, T UW, the apostrophe, S IH K
+    # S. An apostrophe first or last is stripped ("'09", "6'"), and "80's"
+    # is the plural: not this rule's.
+    - id: tn_digit_apostrophe_source
+      pattern: '(?<=^|\s)(?<word>[0-9]+''[0-9]+)(?="?[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'digit_apostrophe_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4128-4158 (ls_task_part_number: a word with a digit and an apostrophe in it is spelled), LTS/ls_spel.c:151-170 (each character by its name), LTS/l_us_con.c:126 (the double quote is strippable at a word''s end)'
+    # A word with a plus sign between its letters or digits (the local part
+    # of a mail address, which DECtalk's text parser leaves whole:
+    # "ann+news@…"; elsewhere the parser writes the plus apart): one word,
+    # which the frontend's lexicon spells, the plus by its name. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.plus_words:
+    # spelled). Measured on say.exe: "Write to ann+news@example.net." has
+    # EY, EH N, EH N, P L AH S, EH N, IY, D AH B EL Y UW, EH S before AE T;
+    # "help_desk+orders" is spelled whole, "underscore" and "plus" included.
+    - id: tn_plus_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z0-9_]+(?:\+[A-Za-z0-9_]+)+)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'plus_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab (the row "Plus sign")'
+    # A word with a sign in it that letter-to-sound's last test does not let
+    # through (one of @ & = # $ * + %, with a letter or a digit, and periods
+    # among them): one word, which the frontend's lexicon spells, each sign
+    # by its name. DECtalk's text parser writes such signs apart or rewrites
+    # the word, so the word reaches letter-to-sound whole only when the
+    # parser hands the text on as it is written (its punctuation mode pass).
+    # Not a sum of money, a signed number, or a number with a percent sign,
+    # which the number routines read. Only for a frontend whose policy asks
+    # for it (tn_recognition_policy.sign_words: spelled). Measured on
+    # say.exe in that mode: "bob@example.com" is spelled whole, AE T and
+    # P IY R IY AX D among the letters; "a@b", "C++", "AT&T", "a=b",
+    # "Item#4" likewise; "#42" is "number sign four two" and "15$" "one five
+    # dollar".
+    - id: tn_sign_word_source
+      pattern: '(?<=^|\s)(?<word>(?=[A-Za-z0-9.]*[@&=#$*+%])(?=[@&=#$*+%.]*[A-Za-z0-9])[A-Za-z0-9@&=#$*+%](?:[A-Za-z0-9@&=#$*+%.]*[A-Za-z0-9@&=#$*+%])?)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'sign_words', 'split') == 'spelled'
+        && !matches(captures.word, '^[$+]+[0-9.]')
+        && !matches(captures.word, '^[0-9.]+%$')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (ls_task_part_number: a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab:92-127 (the names)'
+        - 'DECtalk 4.63 CMD/cm_text.c:379-399 (in the punctuation mode pass the text reaches letter-to-sound as written)'
+    # A percent sign right after a number: the dictionary's word for it,
+    # after the number. The number routine takes the sign with its number.
+    # Measured on say.exe in the mode pass: "12%" is "twelve percent" and
+    # "50.5%" "fifty point five percent". (Outside that mode the text parser
+    # writes the sign apart, "12 %", and tn_symbol_word_source reads it.)
+    - id: tn_number_percent_source
+      pattern: '(?<=[0-9])(?<word>%)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'symbol_words', 'dropped') == 'dictionary'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4001-4060 (a number with a percent sign after it: the number, then the sign''s word)'
+    # Digits, a colon and one digit, once or more ("3:2", "10:1", "3:2:1";
+    # not a clock time, whose minutes have two digits, and not the forms the
+    # text parser writes apart, "100 : 1"): one word, spelled digit by digit
+    # with the colon by its name. Only for a frontend whose policy asks for
+    # it (tn_recognition_policy.digit_colon_words: spelled). Measured on
+    # say.exe: "The ratio is 3:2" has TH R IY, K OW L AX N, T UW; "10:1" is
+    # W AH N, Z IY R OW, K OW L AX N, W AH N; "3:16" is "three sixteen".
+    - id: tn_digit_colon_source
+      pattern: '(?<![\w$.,:])(?<word>[0-9]+(?::[0-9])+)(?![\w:]|[.,][0-9])'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'digit_colon_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3603-3612 (a word that is no date and no time goes on), 4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab (the row "Colon")'
+    # A word with an accented letter in it ("café", "naïve", "Zürich"): one
+    # word, its accents kept. The frontend's lexicon looks it up as written
+    # and, when the dictionary does not have it, reads it by rule with each
+    # accented letter as its plain one. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.accented_words: kept). Measured on
+    # say.exe (which is handed one byte for each such letter): "café" is
+    # K EY F, the rules' reading of "cafe", where the dictionary's "cafe" is
+    # K AE F EY; "naïve" is N EY V; "exposé", which the dictionary has, is
+    # EH K S P OW Z EY. The letters are those INCLUDE/ls_fold.tab gives a
+    # plain letter for, less the two that are signs in the Windows code page
+    # (the multiplication and division signs: not measured).
+    - id: tn_accented_word_source
+      pattern: '(?<![A-Za-zÀ-ÖØ-öø-ý])(?<word>[A-Za-z]*[À-ÖØ-öø-ý][A-Za-zÀ-ÖØ-öø-ý]*)(?![A-Za-zÀ-ÖØ-öø-ý])'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'accented_words', 'cleaned') == 'kept'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:697 and 2040-2160 (the dictionary is searched for the word as written), 752-765 (the word is not folded before the rules and the dictionary is not searched again), LTS/l_us_ru1.c:108-112 (ls_rule_lts reads each character through ls_fold[]), INCLUDE/ls_fold.tab'
+    # A word with a question mark and an exclamation mark written on it, in
+    # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
+    # the clause and what stands before it stays on the word, which the
+    # frontend's lexicon then spells, the mark by its name. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.marked_words:
+    # spelled). Two marks of the same kind are not this rule's. A comma before
+    # the clause's mark is spelled the same way ("What,!"); a period there is
+    # not spoken and the word is not spelled ("What.!" is "what" and the
+    # exclamation's clause end; both measured on say.exe).
+    - id: tn_marked_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>[?!]+|,|\.)(?<last>[?!,])(?=\s|$)'
+      flags: ''
+      class: marked_word
+      captures: {word: word, inner: inner, last: last}
+      # Marks of one kind in a row, which DECtalk's text parser folds into
+      # one, reach letter-to-sound when the parser hands the text on as
+      # written (its punctuation mode pass), and are read the same way.
+      # Measured on say.exe in that mode: "No!!" is EH N, OW,
+      # EH K S K L AX M EY SH AX N, P OY N T and an exclamation's clause end,
+      # "No!!!" has the name twice, "Really??" ends in K W EH S CH AX N,
+      # M AA R K and a question's clause end, "So,," in K AA M AX and a
+      # comma. (Not ported: "What.." is spelled with one P IY R IY AX D.)
+      when: >-
+        get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'
+        && ((captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!', ',!', '.!', ',,']
+            || (captures.last != ',' && matches(captures.inner, '^[?!]+$')))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
+    # A hyphen that stands alone between two words: a word of its own, which
+    # the frontend's dictionary names. Only for a frontend whose policy asks
+    # for it (tn_recognition_policy.lone_dash: word). Two or more hyphens
+    # standing alone are no word of the dictionary's, and every one of them
+    # is stripped: nothing is spoken. Measured on say.exe in the punctuation
+    # mode pass, where they reach letter-to-sound: "One - two." has D AE SH,
+    # "She waited -- and left." and "One --- two." have nothing there.
+    - id: tn_lone_dash_source
+      pattern: '(?<=^|\s)(?<dash>-)(?=\s)'
+      flags: ''
+      class: lone_dash
+      captures: {dash: dash}
+      when: "get(maps.tn_recognition_policy, 'lone_dash', 'dropped') == 'word'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entry "-"), LTS/ls_task.c:2040-2160 (the word is looked up as written)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i
       class: initialism
       captures: {}
-      when: 'true'
+      # The shared rule, unless the frontend has its own.
+      when: "get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'shared'"
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; initialism recognition']
+    # A capital letter standing alone with a period after it and nothing
+    # stripped from it: "someone's initial". Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.initials: spelled), and not for a
+    # letter its dictionary takes as a word before this rule is reached.
+    - id: tn_initial_source
+      pattern: '(?<=^|\s)(?<letter>[A-Z])\.(?=\s|$)'
+      flags: ''
+      class: initial
+      captures: {letter: letter}
+      when: >-
+        get(maps.tn_recognition_policy, 'initials', 'word') == 'spelled'
+        && !get(maps.tn_recognition_policy, 'initial_exceptions', '').contains(captures.letter)
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2600-2623 (an upper case letter with no stripped punctuation, followed by a period, is taken to be an initial)'
     - id: tn_slash_date_source
       pattern: '\b(?<month>[0-1]?[0-9])/(?<day>[0-3]?[0-9])/(?<year>[0-9]{4})\b'
       flags: ''
       class: date
       captures: {month: month, day: day, year: year}
-      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      # Not for a frontend whose policy says such a word is no date to it
+      # (tn_recognition_policy.slash_dates: part_number): DECtalk's text
+      # parser rewrites the date before letter-to-sound sees it, and in its
+      # punctuation mode pass, where it does not, "3/4/2024" is a part
+      # number, "three slash four slash twenty twenty four" on say.exe.
+      when: >-
+        get(maps.tn_recognition_policy, 'slash_dates', 'date') == 'date'
+        && double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; legacy Qlatt month/day bounds, not calendar validation']
+    # Not for a frontend whose policy says such a word is no date to it
+    # (tn_recognition_policy.dashed_number_dates: part_number): DECtalk reads
+    # "2024-03-15" as a part number, "twenty twenty four dash zero three
+    # dash fifteen" on say.exe.
     - id: tn_iso_date_source
       pattern: '\b(?<year>[0-9]{4})-(?<month>[0-1][0-9])-(?<day>[0-3][0-9])\b'
       flags: ''
       class: date
       captures: {month: month, day: day, year: year}
-      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      when: >-
+        get(maps.tn_recognition_policy, 'dashed_number_dates', 'date') == 'date'
+        && double(captures.month) >= 1.0 && double(captures.month) <= 12.0
+        && double(captures.day) >= 1.0 && double(captures.day) <= 31.0
       speak: current.text
       vocabulary_keys: '[]'
-      citations: ['Ebden & Sproat 2015; ISO date roles']
+      citations:
+        - 'Ebden & Sproat 2015; ISO date roles'
+        - 'DECtalk 4.63 LTS/ls_task.c:3589-3652 (ls_task_date_processing takes a day, a month''s name and a year only), 4118-4170 (digits and hyphens are a part number)'
+    # A date word with its day, month and year apart, for a frontend whose
+    # text rules write it out as phonemic text
+    # (tn_recognition_policy.date_words: phonemic; the lexical rule
+    # tn_date_text). The same word as the rule after this one takes, less
+    # the one that frontend's lists do not read: a year of four digits that
+    # starts with 0, which is left to that rule.
+    - id: tn_date_text_source
+      pattern: '(?<![\w$.,:-])(?<day>[0-9]{1,2})-(?<month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-(?<year>[1-9][0-9]{3}|[0-9]{2}))?(?![\w-])'
+      flags: i
+      class: date_text
+      captures: {day: day, month: month, year: year}
+      when: >-
+        get(maps.tn_recognition_policy, 'date_words', 'token') == 'phonemic'
+        && lower(captures.month) in get(maps, 'tn_month_numbers', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date); LTS/l_us_pr1.c:369-370 (four digits with a leading zero are spelled)'
+    # A date word kept whole, for the same frontends as the rule after this
+    # one: a day of one or two digits, a hyphen, the three letters of a month
+    # in either case, and maybe a hyphen and a year of two or four digits
+    # ("3-May", "23-Aug-84", "2-Apr-2001"). It is the form DECtalk's text
+    # parser writes a date in; anything longer or shorter is not this word.
+    - id: tn_date_token_source
+      pattern: '(?<![\w$.,:-])(?<token>[0-9]{1,2}-(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-(?:[0-9]{4}|[0-9]{2}))?)(?![\w-])'
+      flags: i
+      class: number_token
+      captures: {token: token}
+      when: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date)'
+    # A word of digits and letters joined by hyphens or slashes, with a digit
+    # in it ("10-15", "1/8", "B-52"), kept whole for a frontend whose lexicon
+    # reads it as a fraction or a part number
+    # (tn_recognition_policy.part_numbers: source). Not the form DECtalk reads
+    # as a date, a day, a month's three letters and maybe a year ("3-May",
+    # "15-oct-20"): that is left to the other rules, as is a word with a
+    # percent sign after it. A word with a slash in it is one whether or not
+    # it has a digit, and the slash may stand first or last ("/usr/bin",
+    # "bin/"): the part-number reader takes a slash as it takes a digit.
+    # A hyphen may stand last too ("80-", as DECtalk's text parser leaves the
+    # first amount of "$80-$120"): the reader names every hyphen of the word
+    # (LTS/l_us_pr1.c:168-180), and say.exe has "eighty dash" for "80-".
+    - id: tn_part_number_source
+      pattern: '(?<![\w$.,:/-])(?<token>/?[A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)*[/-]?)(?![\w/%-]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'part_numbers', 'words') == 'source'
+        && (matches(captures.token, '/')
+            || (matches(captures.token, '[0-9]') && matches(captures.token, '-')))
+        && !matches(lower(captures.token),
+          '^[0-9]{1,2}-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(-[0-9]{2}([0-9]{2})?)?$')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3688-3707 (a fraction) and 4118-4180 (a part number: a word of digits, slashes, hyphens and letters that has a digit or a slash); the text task reads the whole word'
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date, the date form, which is tried first)'
+    # A number with a sign written on it ("-7", "+2.5", "-$20", "-.5",
+    # "-1/2"), kept whole for a frontend whose lexicon speaks the sign
+    # (tn_recognition_policy.signed_numbers: source). A word that begins with
+    # a hyphen and a digit and is no number ("-5th", "-10-15") is kept the
+    # same way: the lexicon reads it as a part number, the hyphen by name. A
+    # plus sign is kept only on a number.
+    - id: tn_signed_number_source
+      pattern: '(?<![\w$.,:/+-])(?<token>[-+]\$?\.?[0-9](?:[A-Za-z0-9,./-]*[A-Za-z0-9])?)(?![\w$:%/-]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'signed_numbers', 'words') == 'source'
+        && (captures.token.startsWith('-') || matches(captures.token, '^\\+\\$?[0-9.,]*[0-9]$'))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:80-110 (ls_proc_do_sign: "minus" and "plus" from their phone lists, then a word boundary), LTS/ls_task.c:3148-3215 (the sign is taken off the word and the number rules read the rest)'
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4180 (a word the number rules do not take, with a hyphen and a digit, is a part number)'
+    # THE EUROPE MODE (maps.tn_text_mode_spans.europe, the stretches of the
+    # text a mode command turned it on in): the number reader takes a comma
+    # before the fraction and a period between groups of three digits. The
+    # three rules below stand in front of the rules for the same words
+    # outside the mode and take their place for a word that begins inside
+    # such a stretch; they do not run at all for a text with no such stretch
+    # (`enabled`).
+    # A dollar amount written the mode's way, its whole part and its fraction
+    # digits apart as tn_money_text_source has them. Measured on say.exe
+    # (test/oracle-corpora/dectalk-us-mode-europe-v1.json): "$45,90" is
+    # "forty five dollars and ninety cents", "$2.300" "two thousand three
+    # hundred dollars".
+    - id: tn_europe_money_text_source
+      pattern: '(?<![\w$.,:])\$(?:(?<integer>[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)(?:,(?<fraction>[0-9]+))?|,(?<bare>[0-9]+))(?![\w$:]|[.,][0-9])(?=(?:\s+(?<next>[A-Za-z]+))?)'
+      flags: ''
+      class: money_text
+      captures: {integer: integer, fraction: fraction, bare: bare}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'money_amounts', 'token') == 'phonemic'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+        && (captures.next == null
+            || !(('quantityWords.' + lower(captures.next)) in get(maps, 'tn_number_phonemes', {})))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (in the europe mode fchar is "," and schar "."), 3181-3513 (ls_task_currency_processing reads the amount with them)'
+    # A number with a plural ending, its digits written the mode's way
+    # ("1.000s"), apart from the ending as tn_plural_number_source has them.
+    - id: tn_europe_plural_number_source
+      pattern: '(?<![\w$.,:])(?<digits>[0-9]{1,3}(?:\.[0-9]{3})+)''?s(?![\w$:]|[.,][0-9])'
+      flags: ''
+      class: plural_number
+      captures: {digits: digits}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'plural_numbers', 'token') == 'phonemic'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (schar is "." in the europe mode), 3936-3962 and 4031-4046 (a number with a plural ending)'
+    # Any other word of digits with a period or a comma in it, a dollar sign
+    # before it or not, kept whole: the frontend's lexicon reads it by the
+    # mode's two marks, and spells a word that is no number by them, each
+    # mark by its name. Measured on say.exe with the mode on: "2,5" is "two
+    # point five", "12.500" "twelve thousand five hundred", "3.456,75" "three
+    # thousand, four hundred and fifty six point seven five", "6,200" "six
+    # point two zero zero"; "4.5" is "four period five" and "$7.25" "dollar
+    # seven period two five".
+    - id: tn_europe_number_token_source
+      pattern: '(?<![\w$.,:])(?<token>\$?(?:[0-9]+(?:[.,][0-9]+)+|[.,][0-9]+(?:[.,][0-9]+)*))(?![\w$:%]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (the two marks of the europe mode), 897-1010 (ls_task_parse_number: the mark between groups only with three digits after it, then the mark before the fraction)'
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word the number rules do not take, with a character that is no letter, digit, hyphen, slash or apostrophe, is spelled)'
+    # A decimal number written with no digit before its point (".5", ".25"),
+    # kept whole for a frontend whose lexicon reads it
+    # (tn_recognition_policy.bare_decimals: source): the point is not a
+    # sentence end.
+    - id: tn_bare_decimal_source
+      pattern: '(?<![\w$.,:])(?<token>\.[0-9]+)(?![\w$:%]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: "get(maps.tn_recognition_policy, 'bare_decimals', 'words') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3747-3825 (a plain number is read from the word as written), LTS/l_us_pr1.c:497-749 (ls_proc_do_number: "point" and each fraction digit, with or without an integer part)'
+    # A clock time, hour:minutes or hour:minutes:seconds, with its digits
+    # apart, for a frontend whose text rules write it out as phonemic text
+    # (tn_recognition_policy.clock_times: phonemic; the lexical rule
+    # tn_clock_time). The word is bounded as tn_number_token_source bounds it.
+    - id: tn_clock_time_source
+      pattern: '(?<![\w$.,:])(?<hour>[0-9]{1,2}):(?<m1>[0-9])(?<m2>[0-9])(?::(?<s1>[0-9])(?<s2>[0-9]))?(?![\w$:]|[.,][0-9])'
+      flags: ''
+      class: clock_time
+      captures: {hour: hour, m1: m1, m2: m2, s1: s1, s2: s2}
+      when: "get(maps.tn_recognition_policy, 'clock_times', 'token') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:1090-1129 (ls_proc_is_time: one or two digits, a colon, two digits, and two more after another colon), LTS/ls_task.c:3622-3652 (the text task hands such a word to the time routine)'
+    # A number with a plural ending ("60s", "1990's", "1,000s"), its digits
+    # apart from the ending, for a frontend whose text rules write it out as
+    # phonemic text (tn_recognition_policy.plural_numbers: phonemic; the
+    # lexical rule tn_plural_number). Bounded as tn_number_token_source.
+    - id: tn_plural_number_source
+      pattern: '(?<![\w$.,:])(?<digits>[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)''?s(?![\w$:]|[.,][0-9])'
+      flags: ''
+      class: plural_number
+      captures: {digits: digits}
+      when: "get(maps.tn_recognition_policy, 'plural_numbers', 'token') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3936-3962 and 4031-4046 (a number with "s" or an apostrophe and "s" on it is read as the number and a plural ending)'
+    # A dollar amount with its whole part and its fraction digits apart, for
+    # a frontend whose text rules write it out as phonemic text
+    # (tn_recognition_policy.money_amounts: phonemic; the lexical rule
+    # tn_money_text). Not an amount that stands before one of the words that
+    # take "dollars" behind them ("$2 million"; the keys quantityWords.* of the
+    # frontend's generated map tn_number_phonemes): that one is left to the
+    # rule after this, and the frontend's lexicon reads the two words
+    # together.
+    - id: tn_money_text_source
+      pattern: '(?<![\w$.,:])\$(?:(?<integer>[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.(?<fraction>[0-9]+))?|\.(?<bare>[0-9]+))(?![\w$:]|[.,][0-9])(?=(?:\s+(?<next>[A-Za-z]+))?)'
+      flags: ''
+      class: money_text
+      captures: {integer: integer, fraction: fraction, bare: bare}
+      when: >-
+        get(maps.tn_recognition_policy, 'money_amounts', 'token') == 'phonemic'
+        && (captures.next == null
+            || !(('quantityWords.' + lower(captures.next)) in get(maps, 'tn_number_phonemes', {})))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3181-3513 (ls_task_currency_processing: the text task reads the amount after a dollar sign), 3234-3242 (it reads the next word ahead for one that takes "dollars" behind it)'
+    # A number-like word kept whole, for a frontend whose lexicon reads such
+    # words itself (tn_recognition_policy.number_tokens: source): a dollar
+    # amount, a number with thousands separators or fraction digits. Digits
+    # alone are left to the year and cardinal rules below; a clock time and
+    # a plural number to the two rules above. The word ends at a digit, so
+    # a sentence's own period or comma stays outside it.
+    - id: tn_number_token_source
+      pattern: '(?<![\w$.,:])(?<token>\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?|\$\.[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+\.[0-9]+)(?![\w$:]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3181-3513 (money), 3747-3825 (numbers): the text task reads the whole word'
+    # A word of digits with a period or a comma between them that is none of
+    # the numbers the rule above takes ("2,5", "1,23"), kept whole for the
+    # same frontends: the number reader does not take it (a comma stands
+    # between groups only with three digits after it) and the word is
+    # spelled, the mark by its name. Measured on say.exe: "Add 2,5 now." has
+    # T UW, K AA M AX, F AY V, with no pause. The rule runs only for those
+    # frontends (`enabled`), and its pattern passes over the words the rule
+    # above takes.
+    - id: tn_spelled_number_source
+      pattern: '(?<![\w$.,:])(?!(?:\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?|\$\.[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+\.[0-9]+)(?![\w$:]|[.,][0-9]))(?<token>\$?[0-9]+(?:[.,][0-9]+)+)(?![\w$:%]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      enabled: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:897-1010 (ls_task_parse_number: a comma is taken only with three digits after it), 4118-4150 (a word the number rules do not take, with a character that is no letter, digit, hyphen, slash or apostrophe, is spelled), LTS/ls_spel.c:151-170'
     - id: tn_explicit_time_source
       pattern: '\b(?<hour>[0-2]?[0-9]):(?<minute>[0-5][0-9])\s*(?<period>[ap]\.?m\.?)\b'
       flags: i

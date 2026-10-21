@@ -1,5 +1,6 @@
 import type { BaconGraph, Registry } from "../klatt-runtime";
 import { normalizePath, readFileFromFsSync } from "../path-utils";
+import { loadSemanticsDocument, loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
 import type { SemanticsDocument } from "../semantics/types";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../yaml-loader";
 import { assertFrontendVocabulary } from "./frontend-vocabulary";
@@ -52,6 +53,9 @@ function mergeRegistry(parent: Registry, child: Registry | null): Registry {
   };
 }
 
+// Both documents arrive with `realize_each` already expanded (each is loaded
+// through src/semantics/load-semantics.ts), so a child's concrete realize rule
+// overrides a parent's generated rule by key here.
 function mergeSemantics(
   parent: SemanticsDocument,
   child: SemanticsDocument | null,
@@ -103,7 +107,7 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
 
   const [childGraph, childSemantics, childRegistry] = await Promise.all([
     loadYamlDocumentOrNull<BaconGraph>(`${basePath}/graph.yaml`),
-    loadYamlDocumentOrNull<SemanticsDocument>(`${basePath}/semantics.yaml`),
+    loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
     loadYamlDocumentOrNull<Registry>(`${basePath}/registry.yaml`),
   ]);
 
@@ -117,7 +121,7 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
   const parentBase = `/experiments/${entry.extends}`;
   const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
     loadYamlDocument<BaconGraph>(`${parentBase}/graph.yaml`),
-    loadYamlDocument<SemanticsDocument>(`${parentBase}/semantics.yaml`),
+    loadSemanticsDocument(`${parentBase}/semantics.yaml`),
     loadYamlDocument<Registry>(`${parentBase}/registry.yaml`),
   ]);
 

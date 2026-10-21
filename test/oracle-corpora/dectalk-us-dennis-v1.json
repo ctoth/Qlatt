@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-dennis-v1",
+  "defaults": {
+    "voiceId": "dennis",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "dennis-call-me", "text": "Call me tomorrow.", "group": "voice", "tags": ["velars", "laterals", "nasals"], "expectedFocus": ["trace"] },
+    { "id": "dennis-hot-coffee", "text": "A cup of hot coffee.", "group": "voice", "tags": ["stops", "h", "fricatives"], "expectedFocus": ["trace"] },
+    { "id": "dennis-sang-well", "text": "They sang very well.", "group": "voice", "tags": ["velar-nasal", "glides"], "expectedFocus": ["trace"] },
+    { "id": "dennis-your-book", "text": "Is this your book?", "group": "voice", "tags": ["question", "fricatives"], "expectedFocus": ["trace"] },
+    { "id": "dennis-judge", "text": "judge.", "group": "voice", "tags": ["single-word", "affricate"], "expectedFocus": ["trace"] }
+  ]
+}

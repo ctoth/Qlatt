@@ -1,0 +1,12 @@
+{
+  "da-feet-inches": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "da-no-inch-mark": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "da-one-digit": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "da-text-end": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "da-two-digits-first": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "da-after-quoted-word": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "da-final-apostrophe-control": ["B1","AV","AP","A2","A4","A5","A6","A2_AMPLITUDE"],
+  "da-plural-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "da-leading-apostrophe-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "da-leading-apostrophe-plural": ["B1","AV","AP","A2","A5","A6","AB"]
+}

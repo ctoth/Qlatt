@@ -1,0 +1,60 @@
+# dectalk-us-sweep-b-v1: fifty more utterances for the sweep at DECtalk's
+# default rate, voice Paul. Same format and the same rule as
+# ../dectalk-us-sweep-v1: written before any of it was exported or compared,
+# and not to be edited to change a result.
+#
+# All written for this sweep: plain sentences about everyday things.
+
+## everyday
+The kettle is on the stove.
+Put the keys on the shelf by the door.
+My bicycle has a flat tire.
+The bus stops in front of the library.
+We planted tomatoes behind the garage.
+The window on the left does not close.
+Please turn off the light in the hall.
+There is a blanket in the bottom drawer.
+The clock on the wall runs five minutes fast.
+She left her umbrella on the train.
+The soup needs a little more salt.
+A gray cat sleeps under the porch.
+The mail comes before noon on most days.
+He painted the fence green last summer.
+The bridge is closed until Thursday.
+Fold the towels and stack them on the chair.
+Our neighbor grows roses along the wall.
+The ferry crosses the bay every hour.
+Winter mornings are dark and very quiet.
+A light wind moved the curtains.
+The road to the farm is muddy after rain.
+Wash the cups and leave them to dry.
+The baker opens his shop at six.
+Three sparrows sat on the wire.
+It takes ten minutes to walk to the school.
+The printer is out of paper again.
+Her suitcase was too heavy to lift.
+The garden gate squeaks when it opens.
+Clouds gathered over the hills by evening.
+He keeps a spare key under the mat.
+The children built a fort out of boxes.
+Fill the bucket halfway with warm water.
+The last bus leaves at a quarter past eleven.
+A thin layer of ice covered the pond.
+The carpenter measured the board twice.
+Snow fell all night and stopped at dawn.
+Set the table for six people.
+The lamp on my desk flickers sometimes.
+We counted nine boats in the harbor.
+The path through the woods is easy to follow.
+
+## long
+The woman at the counter said that the next train to the coast would leave from the far platform in about twenty minutes.
+Before the guests arrived, he swept the kitchen floor, wiped the table, and put a bowl of fruit in the middle of it.
+On the first warm day of spring, the whole street came outside to wash cars, trim hedges, and talk over the fences.
+Because the map was old and the signs had faded, it took them most of the afternoon to find the right trail.
+When the power came back on, every clock in the house was blinking and the radio started playing by itself.
+The farmer walked the length of the field, checked each row for weeds, and then went back to the barn for his tools.
+If the weather holds until the weekend, we plan to drive to the lake, pitch the tent, and stay for two nights.
+After the meeting ended, a few people stayed behind to stack the chairs and carry the cups to the sink.
+The shop on the corner sells bread in the morning, sandwiches at noon, and whatever is left at half price after five.
+Although she had read the instructions twice, the shelf still leaned to one side when she stood it against the wall.

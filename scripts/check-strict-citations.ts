@@ -111,8 +111,11 @@ export function runStrictCitationsCheck(argv: string[], io: CliIo = defaultIo())
     }
 
     const selectedPhrases = args.phraseLimit != null ? phrases.slice(0, args.phraseLimit) : phrases;
-    const baseF0 = args.baseF0Override ?? Number(corpus.baseF0 ?? 110);
-    if (!Number.isFinite(baseF0) || baseF0 <= 0) {
+    // Absent from the flag and the corpus: no base pitch is requested, and the
+    // frontend's voice keeps its own.
+    const corpusBaseF0 = corpus.baseF0 === undefined ? undefined : Number(corpus.baseF0);
+    const baseF0 = args.baseF0Override ?? corpusBaseF0;
+    if (baseF0 !== undefined && (!Number.isFinite(baseF0) || baseF0 <= 0)) {
       throw new Error(`Invalid baseF0 '${String(corpus.baseF0)}' in corpus`);
     }
 

@@ -1,0 +1,36 @@
+# dectalk-us-sweep-v1: a broad sweep at DECtalk's default rate, voice Paul.
+#
+# The list is the *.txt files of this directory, read in name order. One
+# utterance per line; a line starting with "## " opens a group; "#" lines and
+# blank lines are ignored. scripts/oracle/build-sweep-corpus.ts turns them into
+# ../dectalk-us-sweep-v1.json (ids are <group>-<number in group>).
+#
+# A measurement corpus, not a gate. The list was written before any of it was
+# exported or compared, and is not to be edited to change a result: add a new
+# list instead.
+#
+# Sources: "repo" is every phrase of test/golden/crystal-tempo-corpus-summary.json,
+# declarative-corpus-summary.json and linguistic-master/summary.json. Everything
+# else was written for this sweep.
+
+## repo
+A zoo can be fun on a sunny day.
+Bob bought a big blue balloon.
+Fresh frost forms on five fields.
+Gag, gang, and gunk go together.
+He had your dark suit in greasy wash water all year.
+Layer, lawyer, royal, rural.
+Nina mumbled many minimal numbers.
+Pat tapped a pot and picked a paper cup.
+S, f, sh, th, z, v, zh, dh.
+Say oh, ee, and oo again.
+She sells seashells by the seashore.
+Ship shape, sheep shop, and cheap chips.
+Shy sharks shimmer in shallow shoals.
+Sip zip, sip ship, sip sip.
+Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.
+The quick brown fox jumps over the lazy dog.
+They bathed the smooth leather.
+Thin thieves thought that they thrilled.
+Vera vapes very vivid violets.
+Zesty zest is easy to spot.

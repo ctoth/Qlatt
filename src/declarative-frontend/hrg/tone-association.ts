@@ -5,6 +5,7 @@
  */
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
+import { inheritParameterScope } from "./parameter-scope";
 import type { HrgTransaction } from "./transaction";
 import type { HrgSchema } from "./types";
 import type { Utterance } from "./utterance";
@@ -161,6 +162,7 @@ export function applyToneAssociation(
     fail("E_TONE_RELATION", "tone relation must admit exactly one item type");
   for (let i = 0; i < tones.length; i++) {
     const tone = tx.createItem(itemTypes[0], `${source.id}:${tx.metadata.ruleId}:tone:${i}`);
+    inheritParameterScope(tx, tone, source);
     tx.set(tone, "symbol", tones[i].symbol, String(spec.tag));
     tx.set(tone, "role", tones[i].role, String(spec.tag));
     tx.set(tone, "starred", tones[i].starred, String(spec.tag));

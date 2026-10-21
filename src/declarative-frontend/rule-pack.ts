@@ -1,6 +1,8 @@
+import { withVoiceRulePolicy } from "../dectalk-voice";
 import {
   cloneValue,
   isPlainObject,
+  isYamlNotFoundError,
   loadYamlSource,
   loadYamlSourceSync,
   parseYamlString,
@@ -82,6 +84,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "string_sets",
   "maps",
   "tags",
+  "frame_programs",
   "syllabification",
   "text_recognition",
   "phases",
@@ -130,6 +133,10 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
   RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
+  INHERITABLE_SHADOWED_RULES.set(merged, {
+    ...INHERITABLE_SHADOWED_RULES.get(root),
+    ...INHERITABLE_SHADOWED_RULES.get(child),
+  });
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -143,6 +150,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     "string_sets",
     "maps",
     "tags",
+    "frame_programs",
   ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
@@ -229,10 +237,101 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 // Only the child's root document is merged (NOT the base's resolved includes),
 // so the base contributes root-level data (parameters, output, …) while rules/
 // phases come from the child's own (fallback-resolved) include list.
+//
+// A child file that SHADOWS a base include (same relative path as an entry of
+// the base's own `include:` list, e.g. both frontends' pipeline.yaml) inherits
+// that base file's INHERITED_SHADOWED_FILE_KEYS dictionaries key-wise: an entry
+// the child declares replaces the base's entry of that name whole, and every
+// other base entry is inherited. It also inherits the base file's rules that
+// the child frontend runs but does not define (see INHERITED_SHADOWED_FILE_KEYS).
+// Everything else in a shadowing file (phases, include, string_sets, …) is
+// still the child's alone, and the base file's own nested includes are not
+// followed.
 
 /** Directory portion of a "/"-separated resource path. */
 function dirOfPath(path: string): string {
   return path.substring(0, path.lastIndexOf("/"));
+}
+
+/**
+ * Keyed sections a child file inherits from the base include it shadows.
+ * `string_sets` is not among them: inheriting it would hand an extending
+ * frontend every base set, and a child has no way to decline one.
+ *
+ * `rules` is inherited by a narrower test, for the same reason: a shadowing
+ * file inherits a rule of the base file only when no file of the child
+ * frontend defines a rule of that name AND one of the child frontend's phases
+ * names it. A base rule the child does not run stays out of its compiled
+ * rulepack, so leaving a rule out of every phase is how a child declines it;
+ * a rule the child defines anywhere replaces the base's whole. The phase lists
+ * are only complete once every include is resolved, so the base file's rules
+ * are carried as candidates (INHERITABLE_SHADOWED_RULES) and
+ * inheritPhasedShadowedRules settles them then. An inherited rule's origin is
+ * the base file its body was read from.
+ */
+const INHERITED_SHADOWED_FILE_KEYS = ["predicates", "maps", "tags", "relations"] as const;
+
+/** A base file's rule that a shadowing child file left undefined. */
+type InheritableRule = Readonly<{ rule: unknown; origin: string }>;
+/** Rule name -> the shadowed base file's rule, until the phases settle it. */
+const INHERITABLE_SHADOWED_RULES = new WeakMap<object, Readonly<Record<string, InheritableRule>>>();
+
+/**
+ * Add to a fully include-resolved document each candidate rule of a shadowed
+ * base file that the document does not define and one of its phases names.
+ */
+function inheritPhasedShadowedRules(resolved: PlainObject): void {
+  const candidates = INHERITABLE_SHADOWED_RULES.get(resolved);
+  if (!candidates) return;
+  const phased = new Set<unknown>();
+  for (const phase of Array.isArray(resolved.phases) ? resolved.phases : []) {
+    if (!isPlainObject(phase) || !Array.isArray(phase.rules)) continue;
+    for (const name of phase.rules) phased.add(name);
+  }
+  const defined = isPlainObject(resolved.rules) ? resolved.rules : {};
+  const inherited = Object.entries(candidates).filter(
+    ([name]) => !Object.hasOwn(defined, name) && phased.has(name),
+  );
+  if (inherited.length === 0) return;
+  resolved.rules = {
+    ...defined,
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.rule])),
+  };
+  RULE_ORIGINS.set(resolved, {
+    ...RULE_ORIGINS.get(resolved),
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.origin])),
+  });
+}
+
+/**
+ * Lay a child file's INHERITED_SHADOWED_FILE_KEYS over the base file it
+ * shadows: per section, base entries first, child entries replacing by name.
+ * The base file's rules become candidates for inheritPhasedShadowedRules.
+ */
+function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObject): PlainObject {
+  const merged: PlainObject = { ...childFile };
+  for (const key of INHERITED_SHADOWED_FILE_KEYS) {
+    const baseDict = baseFile[key];
+    if (!isPlainObject(baseDict)) continue;
+    const childDict = childFile[key];
+    merged[key] = {
+      ...(cloneValue(baseDict) as PlainObject),
+      ...(isPlainObject(childDict) ? childDict : {}),
+    };
+  }
+  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
+  RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
+  const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
+  INHERITABLE_SHADOWED_RULES.set(
+    merged,
+    Object.fromEntries(
+      Object.entries(isPlainObject(baseFile.rules) ? baseFile.rules : {}).map(([name, rule]) => [
+        name,
+        { rule: cloneValue(rule), origin: baseOrigins[name] as string },
+      ]),
+    ),
+  );
+  return merged;
 }
 
 /**
@@ -253,7 +352,25 @@ function deepMergeChildWins(base: unknown, child: unknown): unknown {
 }
 
 /** Base-directory fallback for include resolution under `extends`. */
-type IncludeFallback = { readonly fromDir: string; readonly toDir: string };
+type IncludeFallback = {
+  readonly fromDir: string;
+  readonly toDir: string;
+  /** Absolute paths of the base root document's own `include:` entries. */
+  readonly baseIncludes: ReadonlySet<string>;
+};
+
+function includeFallbackFor(
+  rootPath: string,
+  basePath: string,
+  baseDoc: PlainObject,
+): IncludeFallback {
+  const baseIncludes = Array.isArray(baseDoc.include) ? (baseDoc.include as string[]) : [];
+  return {
+    fromDir: dirOfPath(rootPath),
+    toDir: dirOfPath(basePath),
+    baseIncludes: new Set(baseIncludes.map((relPath) => resolveIncludePath(basePath, relPath))),
+  };
+}
 
 /**
  * Rewrite a child-directory absolute include path to its base-directory
@@ -268,6 +385,18 @@ function fallbackIncludePath(
   const prefix = fallback.fromDir + "/";
   if (!absPath.startsWith(prefix)) return null;
   return fallback.toDir + "/" + absPath.slice(prefix.length);
+}
+
+/**
+ * The base include a child-directory file shadows, or null when the base's
+ * `include:` list has no file at the same relative path.
+ */
+function shadowedBaseIncludePath(
+  absPath: string,
+  fallback: IncludeFallback | undefined,
+): string | null {
+  const basePath = fallbackIncludePath(absPath, fallback);
+  return basePath !== null && fallback?.baseIncludes.has(basePath) ? basePath : null;
 }
 
 /**
@@ -292,11 +421,15 @@ function resolveIncludesSync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = loadYamlSourceSync(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // Only a file the child directory does not have is read from the base;
+      // one that is there but could not be loaded is an error.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = loadYamlSourceSync(altPath);
       absPath = altPath;
     }
@@ -305,7 +438,13 @@ function resolveIncludesSync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(loadYamlSourceSync(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
@@ -342,7 +481,7 @@ function resolveExtendsSync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -370,7 +509,7 @@ async function resolveExtendsAsync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -393,11 +532,14 @@ async function resolveIncludesAsync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = await loadYamlSource(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // See resolveIncludesSync: fall back only when the file is absent.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = await loadYamlSource(altPath);
       absPath = altPath;
     }
@@ -406,7 +548,13 @@ async function resolveIncludesAsync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(await loadYamlSource(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
@@ -446,7 +594,7 @@ export function getRulepackValidationDiagnostics(
 
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
-  const spec = parseDslSpec(source);
+  const spec = parseDslSpec(withVoiceRulePolicy(source));
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
@@ -483,6 +631,20 @@ export function listBundledRulepackPaths(): string[] {
   return [...known].sort();
 }
 
+/**
+ * The error for a rule pack that could not be loaded: "path unknown" when the
+ * file does not exist, and the loader's own error for anything else.
+ */
+function rulepackPathUnknown(specPath: string, cause: unknown): unknown {
+  if (!isYamlNotFoundError(cause)) return cause;
+  const known = listBundledRulepackPaths();
+  return new Error(
+    `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
+    { cause },
+  );
+}
+
 export function loadRulepackSpecFromPath(
   specPath: string = DEFAULT_RULEPACK_PATH,
 ): CompiledRulepack {
@@ -492,12 +654,8 @@ export function loadRulepackSpecFromPath(
   let source = "";
   try {
     source = loadYamlSourceSync(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // Resolve `extends` (cross-frontend inheritance) first, then resolve includes
@@ -510,6 +668,7 @@ export function loadRulepackSpecFromPath(
     specPath,
   );
   const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,
@@ -517,7 +676,7 @@ export function loadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseDslSpec(withVoiceRulePolicy(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -574,12 +733,8 @@ export async function preloadRulepackSpecFromPath(
   let source = "";
   try {
     source = await loadYamlSource(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // See loadRulepackSpecFromPath: resolve `extends` then includes on the raw
@@ -589,6 +744,7 @@ export async function preloadRulepackSpecFromPath(
     specPath,
   );
   const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,
@@ -596,7 +752,7 @@ export async function preloadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseDslSpec(withVoiceRulePolicy(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));

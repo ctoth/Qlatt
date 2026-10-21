@@ -52,8 +52,9 @@ describe("graph-native rule engine select/scalar execution", () => {
   it.each([
     ["duration", {}, 2.5],
     ["duration", { unit: "s" }, 2.5],
-    ["duration", { unit: "ms" }, 3],
-    ["energy", { unit: "ms" }, 3],
+    ["duration", { unit: "ms" }, 2.5],
+    ["duration", { unit: "ms", quantum: 1 }, 3],
+    ["energy", { quantum: 1 }, 3],
     ["energy", {}, 2.5],
   ])("resolves %s using declared metadata %j", (field, metadata, expected) => {
     for (const op of ["set", "add", "mul", "min", "max"]) {
@@ -188,6 +189,61 @@ describe("graph-native rule engine select/scalar execution", () => {
 
     expect(first.utterance.getItem(first.vowelId)?.get("duration")).toBe(200);
     expect(second.utterance.getItem(second.vowelId)?.get("duration")).toBe(300);
+  });
+
+  it("reads a run's policy values as the parameters stand when it runs", () => {
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: { type: "base", features: { type: ["vowel", "stop"] }, scalars: { duration: {} } },
+      },
+      rules: {
+        scale_vowel: {
+          kind: "scalar",
+          select: { relation: "Segment", where: "current.type == 'vowel'" },
+          apply: [
+            { field: "duration", op: "mul", value: "params.timing.scale[0]", tag: "duration" },
+          ],
+          citations: ["Klatt 1976"],
+        },
+      },
+      phases: [{ name: "duration", rules: ["scale_vowel"] }],
+    });
+    const scaled = (parameters: Record<string, unknown>): unknown => {
+      const { utterance, vowelId } = fixture();
+      runGraphRuleEngine(utterance, spec, { parameters });
+      return utterance.getItem(vowelId)?.get("duration");
+    };
+    const policy = (scale: number) => ({
+      timing: { scale: { value: [scale], citations: ["Klatt 1976"] } },
+    });
+
+    // A tree that can still change is projected again by every run.
+    const changing = policy(2);
+    expect(scaled(changing)).toBe(200);
+    changing.timing.scale.value[0] = 3;
+    expect(scaled(changing)).toBe(300);
+    changing.timing.scale = { value: [4], citations: [] };
+    expect(scaled(changing)).toBe(400);
+
+    // A frozen tree over one that is not frozen can change too.
+    const shallow = Object.freeze(policy(2));
+    expect(scaled(shallow)).toBe(200);
+    shallow.timing.scale.value[0] = 5;
+    expect(scaled(shallow)).toBe(500);
+
+    // Trees frozen all the way down keep their own values.
+    const frozen = (scale: number) => {
+      const tree = policy(scale);
+      Object.freeze(tree.timing.scale.value);
+      Object.freeze(tree.timing.scale.citations);
+      Object.freeze(tree.timing.scale);
+      Object.freeze(tree.timing);
+      return Object.freeze(tree);
+    };
+    const two = frozen(2);
+    expect(scaled(two)).toBe(200);
+    expect(scaled(two)).toBe(200);
+    expect(scaled(frozen(3))).toBe(300);
   });
 
   it("applies declared Klatt scalar multiplication above the incompressible floor", () => {

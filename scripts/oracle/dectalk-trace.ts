@@ -35,6 +35,12 @@ export type DectalkTraceFrame = {
     AB: number;
     TLT: number;
   };
+  /**
+   * The packet words the `-lt` trace does not print (F4, AG, AL, AN, ABLADE,
+   * PS, CNK, DC, UE, ATB, PLACE), by packet-word name. Present only on frames
+   * decoded from a frame fixture, which takes them from the `P` trace record.
+   */
+  area?: Readonly<Record<string, number>>;
 };
 
 export type DectalkTraceSummary = {

@@ -4,7 +4,13 @@ citations:
   - Selkirk 1982 (onset maximization)
   - Allen, Hunnicutt & Klatt 1987 Ch.5 (voicing classification)
   - Elovitz et al. 1976 (AX schwa)
-vowels: [AA, AE, AH, AO, AW, AX, AY, EH, ER, EY, IH, IY, OW, OY, UH, UW]
+# The second row is the vowels only dectalk-english's dictionary and
+# letter-to-sound tables produce (DECtalk 4.63 l_all_ph.h US_RR, US_IX, US_IR,
+# US_AR, US_OR, US_UR, US_YU). That frontend uses this file through the shared
+# morphology and stress policy, and a root whose only vowel is one of them
+# ("nurse", "girl", "work") must still count as a syllable.
+vowels: [AA, AE, AH, AO, AW, AX, AY, EH, ER, EY, IH, IY, OW, OY, UH, UW,
+         RR, IX, IR, AR, OR, UR, YU]
 legal_onsets: ['P R', 'P L', 'T R', 'T W', 'K R', 'K L', 'K W', 'B R', 'B L', 'D R', 'G R', 'G L', 'F R', 'F L', 'TH R', 'SH R', 'S K', 'S P', 'S T', 'S M', 'S N', 'S L', 'S W', 'S K R', 'S P R', 'S T R', 'S P L', 'S K W']
 voicing_classes:
   voiceless_finals: [CH, F, K, P, S, SH, TH]

@@ -75,6 +75,9 @@ pwsh -File build.ps1          # Windows
 # Full Vitest suite (requires the WASM build above in this exact checkout)
 npm test
 
+# Dictionary audit (test/audit-dictionary.test.ts; excluded from npm test, runs nightly in CI)
+npm run test:audit
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 
@@ -110,7 +113,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
 | `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`) |
-| `--base-f0 <Hz>` | Fundamental frequency (default: 110) |
+| `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition duration (default: 30) |
 | `--strict-citations` | Exit code 2 if any decisions in the output window lack citations (respects --stage, --subject, --range filters) |
 | `--out <file>` | Write output to file instead of stdout |
@@ -156,7 +159,7 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 2. **Declarative HRG Rule Engine** (`src/declarative-frontend/hrg/rule-engine.ts`)
    - Processes rule phases defined in `public/rules/frontends/<frontend-id>/phases/*.yaml`
    - Reads and writes typed Items and Relations through atomic transactions
-   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments)
+   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments), `f0_layer` (insert a command or tilt for the layered F0 model), `frame` (guarded assignments to named registers, run every control frame; see `docs/frame-rules.md`)
    - Rules use CEL expressions for conditions and values
    - Navigation is relation-aware and preserves shared Item identity
    - Every committed write is versioned and provenance-stamped from the rule's
@@ -242,6 +245,7 @@ These are registered with the CEL evaluator for use in semantics expressions.
 ## Documentation
 
 - `docs/parameter-scheduling.md` - How parameters flow from text to audio (track structure, ramp vs step, semantics)
+- `docs/frame-rules.md` - Rules of kind `frame`: per-frame registers, how they are declared, validated, run and traced
 - `docs/adding-a-synthesizer.md` - Guide for adding new synthesizer configurations
 - `docs/synthesizer-architecture.md` - Overview of synthesizer architecture
 - `docs/yaml-graph-tests.md` - Testing YAML graph definitions

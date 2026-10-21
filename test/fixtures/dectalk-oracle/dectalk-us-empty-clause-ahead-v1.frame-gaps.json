@@ -1,0 +1,6 @@
+{
+  "empty-clause-question-who": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "empty-clause-question-is": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "empty-clause-quote-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-quote-comma": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

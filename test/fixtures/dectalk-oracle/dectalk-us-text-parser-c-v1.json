@@ -1,0 +1,47 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-c-v1.txt"
+ ],
+ "entries": {
+  "Say this [:index mark 5] and then that.": [
+   "Say this \\x83and then that. "
+  ],
+  "Say this [:index reply 7] and then that.": [
+   "Say this \\x83and then that. "
+  ],
+  "Say this [:i m 5] and then that.": [
+   "Say this \\x83and then that. "
+  ],
+  "Say this [:in mark 5] and then that.": [
+   "Say this \\x83and then that. "
+  ],
+  "Say this [:ind m 5] and then that.": [
+   "Say this \\x83and then that. "
+  ],
+  "Say this[:index mark 5]and then that.": [
+   "Say this\\x83and then that. "
+  ],
+  "[:index mark 1] Start here.": [
+   "\\x83Start here. "
+  ],
+  "End here [:index mark 2]": [
+   "End here \\x83"
+  ],
+  "Say this [:sync] and then that.": [
+   "Say this ",
+   " and then that. "
+  ],
+  "[:sync] Start here.": [
+   " Start here. "
+  ],
+  "End here [:sync]": [
+   "End here "
+  ],
+  "One [:index mark 1] two [:index mark 2] three.": [
+   "One \\x83two \\x83three. "
+  ]
+ }
+}

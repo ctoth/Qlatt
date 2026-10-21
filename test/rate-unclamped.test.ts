@@ -2,9 +2,15 @@ import { describe, expect, it } from "vitest";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
-// The requested speaking rate is never clamped. Duration floors (Klatt 1976
+// What limits a requested speaking rate, per frontend.
+//
+// qlatt-english: nothing clamps the request. Duration floors (Klatt 1976
 // incompressible portion) are the only limit on compression, and they are
 // projected by cited rules, not by a ceiling on the request.
+//
+// dectalk-english: the rate is DECtalk's words per minute and is held to
+// DECtalk's own limits, 50 and 550 (policy.rate.words_per_minute; the mapping
+// and its diagnostics are test/dectalk-speaking-rate.test.ts).
 
 const PHRASE = "The quick brown fox jumps over the lazy dog.";
 
@@ -17,8 +23,8 @@ function render(rate: number, frontendId = "qlatt-english"): KlattFrame[] {
   return textToKlattTrack(PHRASE, 110, 30, { frontendId, rate });
 }
 
-describe("speaking rate is not clamped", () => {
-  it("renders at 4x and 8x and keeps getting shorter until the floors hold", () => {
+describe("speaking rate limits", () => {
+  it("qlatt-english renders at 4x and 8x and keeps getting shorter until the floors hold", () => {
     const rates = [0.25, 0.5, 1, 2, 4, 8];
     const durations = rates.map((rate) => totalDurationMs(render(rate)));
     for (let index = 1; index < durations.length; index += 1) {
@@ -31,13 +37,15 @@ describe("speaking rate is not clamped", () => {
     for (const duration of durations) expect(duration).toBeGreaterThan(0);
   });
 
-  it("renders dectalk-english at 4x faster than at 2x", () => {
-    expect(totalDurationMs(render(4, "dectalk-english"))).toBeLessThan(
-      totalDurationMs(render(2, "dectalk-english")),
-    );
+  it("dectalk-english at 4x is DECtalk's fastest rate, still faster than 2x", () => {
+    // 4x is 720 words per minute; DECtalk allows 550. 2x is 360.
+    const fastest = render(4, "dectalk-english");
+    expect(fastest).toEqual(render(550 / 180, "dectalk-english"));
+    expect(render(8, "dectalk-english")).toEqual(fastest);
+    expect(totalDurationMs(fastest)).toBeLessThan(totalDurationMs(render(2, "dectalk-english")));
   });
 
-  it("keeps vowel formants between the target and schwa at extreme rates", () => {
+  it("qlatt-english keeps vowel formants between the target and schwa at extreme rates", () => {
     const detailed = (rate: number) =>
       textToKlattTrackDetailed(PHRASE, 110, 30, { frontendId: "qlatt-english", rate });
     const base = detailed(1).track;

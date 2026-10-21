@@ -1,0 +1,13 @@
+{
+  "at-plain": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "at-before-word": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "atms": ["B1","AV","AP","A2","A4","A5","A6"],
+  "atms-long": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ats": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ats-cited": ["B1","AV","AP","A2","A4","A5"],
+  "attic": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "atlas": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "hat": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "act": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "add": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

@@ -40,7 +40,6 @@ CONFIG_SPEC = {
     "frontend": "string(default='qlatt-english')",
 }
 
-BASE_F0_HZ = 110.0
 SAMPLE_RATE = 22050
 
 # Register the section at import so check() can read it before any instance exists.
@@ -112,8 +111,8 @@ class QlattServer:
             if event.get("event") in ("done", "error", "hello"):
                 return events
 
-    def speak(self, text, frontend, rate, base_f0):
-        events = self.request("speak", text=text, frontendId=frontend, rate=rate, baseF0=base_f0)
+    def speak(self, text, frontend, rate, pitch_scale):
+        events = self.request("speak", text=text, frontendId=frontend, rate=rate, pitchScale=pitch_scale)
         for event in events:
             if event.get("event") == "error":
                 raise RuntimeError(event.get("message", "render failed"))
@@ -207,9 +206,12 @@ class SynthDriver(SynthDriver):
         # rate clamp, see params.policy.rate in the qlatt-english rulepack).
         return 2.0 ** ((rate_setting - 50) / 50.0)
 
-    def _base_f0(self, pitch_setting):
-        # 0..100 slider -> one octave down to one octave up around 110 Hz.
-        return BASE_F0_HZ * (2.0 ** ((pitch_setting - 50) / 50.0))
+    def _pitch_scale(self, pitch_setting):
+        # 0..100 slider -> one octave down to one octave up around the
+        # selected frontend's own voice, neutral at 50: a ratio of that voice's
+        # base pitch, not a pitch in Hz (speak-server's "pitchScale"). The
+        # octave each way is an engineering estimate, the same mapping as rate.
+        return 2.0 ** ((pitch_setting - 50) / 50.0)
 
     # --- speaking -------------------------------------------------------
 
@@ -255,7 +257,7 @@ class SynthDriver(SynthDriver):
                 if text:
                     try:
                         pcm, markers, sample_rate = self._server.speak(
-                            text, self._voice, self._rate_scale(rate_setting), self._base_f0(pitch_setting)
+                            text, self._voice, self._rate_scale(rate_setting), self._pitch_scale(pitch_setting)
                         )
                     except Exception:
                         log.exception("qlatt render failed for %r", text)

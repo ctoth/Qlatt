@@ -142,6 +142,26 @@ describe("source-backed recognition", () => {
     ).toBe(true);
   });
 
+  it("does not run a rule whose `enabled` is false, and keeps no record of it", () => {
+    const outcomes = (enabled: string) => {
+      const utterance = recognize("12 3", [
+        { ...rule("pair", "[0-9]{2}", "false"), enabled },
+        rule("number", "[0-9]"),
+      ]);
+      return utterance.provenance
+        .getDecisions()
+        .flatMap((entry) =>
+          entry.recognition?.ruleId === "pair" ? [entry.recognition.outcome] : [],
+        );
+    };
+    // The rule runs and `when` rejects its match: one "ineligible" record.
+    expect(outcomes("true")).toEqual(["ineligible"]);
+    // The rule does not run: no record at all, and the other rule is unchanged.
+    expect(outcomes("source.text == 'no such text'")).toEqual([]);
+    expect(() => outcomes("'yes'")).toThrow(/E_RECOGNITION_RESULT/);
+    expect(() => outcomes("current.text == '12'")).toThrow(/E_RECOGNITION_CONFIG/);
+  });
+
   it("recognizes overlapping dates, fractions, decimals, currency and bare numbers in YAML order", () => {
     const utterance = new Utterance(NORMALIZATION_SCHEMA);
     recognizeText("2026-09-08 1/2 3.14 $4.50 42", utterance, loadRulepackSpecFromPath(fixturePath));
@@ -191,12 +211,20 @@ describe("source-backed recognition", () => {
   });
 
   it("uses the selected normalization resources when handing off source items", () => {
-    const spec = loadBundledRulepackSpec("dectalk-english");
-    const utterance = new Utterance(NORMALIZATION_SCHEMA);
-    recognizeText("123", utterance, spec);
-    expect(normalizeSourceItems(utterance, spec).map((entry) => entry.word)).toContain(
-      "hundredand",
-    );
+    // dectalk-english keeps a bare number as digits (its lexicon speaks them);
+    // qlatt-english writes it out. dectalk-english closes a text that has no
+    // punctuation at its end as a sentence where its text carries the host's
+    // clause end, which its text parser's output does (tn_parser_clause_end);
+    // text given straight to recognition, as here, has none.
+    const words = (frontend: string, text = "123"): string[] => {
+      const spec = loadBundledRulepackSpec(frontend);
+      const utterance = new Utterance(NORMALIZATION_SCHEMA);
+      recognizeText(text, utterance, spec);
+      return normalizeSourceItems(utterance, spec).map((entry) => entry.word);
+    };
+    expect(words("dectalk-english")).toEqual(["123"]);
+    expect(words("dectalk-english", "123 \x0b")).toEqual(["123", "."]);
+    expect(words("qlatt-english")).toContain("hundred");
   });
 
   it("runs the opt-in fixture through one Utterance and traces Token ancestry to the multi-token source", () => {

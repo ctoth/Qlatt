@@ -83,7 +83,9 @@ function resolve(minimum: number, stress = 1, override?: number, allocated = 120
           duration_model: [],
           durationFloor: [],
         },
-        scalars: { duration: { unit: "ms", resolution: "klatt", floor_field: "durationFloor" } },
+        scalars: {
+          duration: { unit: "ms", quantum: 1, resolution: "klatt", floor_field: "durationFloor" },
+        },
       },
     },
     rules: { floor: phase.rules.duration_floor_from_inventory, first: shorten, second: shorten },

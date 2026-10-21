@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-punct-pass-v1",
+  "description": "Texts with DECtalk's punctuation mode pass, in which the text stage hands every character on to letter-to-sound without reading clauses or running its rules: plain sentences and their marks, marks the text rules would have taken away or rewritten (brackets, quotes, dashes, an ellipsis, repeated marks), abbreviations and numbers the text rules would have written out, symbols, a command inside the mode, and the mode turned off again. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pp-01", "text": "[:punct pass] The tide went out.", "group": "plain" },
+    { "id": "pp-02", "text": "[:punct pass] The tide went out, and we left.", "group": "plain" },
+    { "id": "pp-03", "text": "[:punct pass] Did the tide go out?", "group": "plain" },
+    { "id": "pp-04", "text": "[:punct pass] The tide went out!", "group": "plain" },
+    { "id": "pp-05", "text": "[:punct pass] The tide went out. We left. Nobody came back.", "group": "plain" },
+    { "id": "pp-06", "text": "[:punct pass] The tide went out; we left: nobody came back.", "group": "plain" },
+    { "id": "pp-07", "text": "[:punct pass] The tide went out", "group": "no-mark" },
+    { "id": "pp-08", "text": "[:punct pass] The tide (at noon) went out; we left.", "group": "brackets" },
+    { "id": "pp-09", "text": "[:punct pass] She said \"go\" and left.", "group": "quotes" },
+    { "id": "pp-10", "text": "[:punct pass] It's the dog's bone, isn't it?", "group": "apostrophe" },
+    { "id": "pp-11", "text": "[:punct pass] She waited -- and left.", "group": "dash" },
+    { "id": "pp-12", "text": "[:punct pass] A well-known song.", "group": "dash" },
+    { "id": "pp-13", "text": "[:punct pass] Wait... what?", "group": "repeated-marks" },
+    { "id": "pp-14", "text": "[:punct pass] No!! Really??", "group": "repeated-marks" },
+    { "id": "pp-15", "text": "[:punct pass] Dr. Smith lives on Elm St. now.", "group": "abbreviation" },
+    { "id": "pp-16", "text": "[:punct pass] Mr. Jones met Mrs. Brown.", "group": "abbreviation" },
+    { "id": "pp-17", "text": "[:punct pass] He paid $5.50 at 3:30.", "group": "number" },
+    { "id": "pp-18", "text": "[:punct pass] There were 1,250 seats and 12% were empty.", "group": "number" },
+    { "id": "pp-19", "text": "[:punct pass] It opened on 3/4/2024.", "group": "number" },
+    { "id": "pp-20", "text": "[:punct pass] Call 555-1234 today.", "group": "number" },
+    { "id": "pp-21", "text": "[:punct pass] Write to bob@example.com soon.", "group": "symbol" },
+    { "id": "pp-22", "text": "[:punct pass] Salt & pepper, item #4.", "group": "symbol" },
+    { "id": "pp-23", "text": "[:punct pass] Either/or is fine.", "group": "symbol" },
+    { "id": "pp-24", "text": "[:punct pass] The tide went out. [:rate 220] We left.", "group": "command-inside" },
+    { "id": "pp-25", "text": "[:punct pass] The tide (at noon) went out. [:punct some] The tide (at noon) came in.", "group": "mode-off-again" },
+    { "id": "pp-26", "text": "The tide (at noon) went out. [:punct pass] The tide (at noon) came in.", "group": "mode-on-inside" },
+    { "id": "pp-27", "text": "[:punct pass] Red, green, and blue.", "group": "plain" },
+    { "id": "pp-28", "text": "[:punct pass] The U.S. team won.", "group": "abbreviation" }
+  ]
+}

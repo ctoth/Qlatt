@@ -7,6 +7,9 @@ import {
   readLowerOptions,
   Utterance,
 } from "./declarative-frontend/hrg";
+import { FRAME_VALUES_SCHEMA, frameValueFeatures } from "./declarative-frontend/hrg/frame-program";
+import type { Item } from "./declarative-frontend/hrg/item";
+import { PARAMETER_SCOPE_FEATURE } from "./declarative-frontend/hrg/parameter-scope";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
@@ -47,14 +50,18 @@ import {
   type SourceContourVoiceQuality,
 } from "./source-contour";
 import {
+  collectPitchCompositionCitations,
   collectSpeakerProfileCitations,
   DEFAULT_SPEAKER_PROFILE_PATH,
   loadSpeakerProfileSync,
   type ResolvedSpeakerProfile,
   resolveSpeakerProfile,
+  resolveSpeakerProfileDetailed,
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
+import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
+import type { TextScope } from "./text-scopes";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import { isPlainObject } from "./yaml-loader";
@@ -67,10 +74,22 @@ export type TextToKlattTrackOptions = {
   frontendPath?: string;
   rate?: number;
   speaker?: string | SpeakerProfileOverride;
+  /**
+   * A requested pitch as a ratio of the selected voice's base pitch
+   * (/rules/policy/speaker-profile.yaml pitch_composition.pitch_scale). For a
+   * caller that names its voice; a speaker override gives it as `pitch_scale`.
+   */
+  pitchScale?: number;
   voiceQuality?: VoiceQuality;
   directionTrack?: DirectionTrack;
   diagnostics?: Diagnostics | null;
   captureTooling?: boolean;
+  /**
+   * Called each time a stage of the pipeline has finished, with its name (a
+   * rule phase is `phase <name>`), so a caller can time the stages
+   * (scripts/measure-frontend-time.ts --stages).
+   */
+  onStage?: (stage: string) => void;
 };
 
 export type TextToKlattTrackDetailedResult = {
@@ -184,13 +203,51 @@ function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
   return variants.length === 1 ? variants[0] : { kind: "union", variants };
 }
 
-function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
+/**
+ * A Segment feature the rulepack declares with a type:
+ * `name: { kind: number | string | boolean, nullable?: true, values?: [...] }`.
+ * A feature declared as a bare list is a name only and gets no schema here.
+ */
+function declaredFeatureSchema(declaration: unknown): FeatureSchema | undefined {
+  if (!isPlainObject(declaration)) return undefined;
+  let schema: FeatureSchema;
+  if (declaration.kind === "number") schema = { kind: "number" };
+  else if (declaration.kind === "boolean") schema = { kind: "boolean" };
+  else if (declaration.kind === "string") {
+    const values = Array.isArray(declaration.values)
+      ? declaration.values.filter((value): value is string => typeof value === "string")
+      : undefined;
+    schema = values && values.length > 0 ? { kind: "string", values } : { kind: "string" };
+  } else {
+    throw new Error(
+      `E_FEATURE_KIND_UNKNOWN: Segment feature kind '${String(declaration.kind)}' is not number, string or boolean`,
+    );
+  }
+  return declaration.nullable === true
+    ? { kind: "union", variants: [schema, { kind: "null" }] }
+    : schema;
+}
+
+function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack): HrgSchema {
   const segmentFeatures: Record<string, FeatureSchema> = {
     phoneme: { kind: "string" },
     type: { kind: "string" },
     word: { kind: "string" },
+    morpheme_boundary_after: { kind: "boolean" },
+    // The first phone of the word's own text, after phones joined to it.
+    word_text_start: { kind: "boolean" },
+    rules_blocked: { kind: "boolean" },
+    written_duration_ms: { kind: "number" },
+    written_silence: { kind: "boolean" },
+    // A phone of phonemic text, not of a word letter-to-sound read.
+    phonemic_text: { kind: "boolean" },
+    written_pitch: { kind: "number" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
+    // The mark was sent by a text rule, not read as a word's delimiter.
+    punctuation_sent: { kind: "boolean" },
+    // For a mark a text rule supplied: what is written where it stands.
+    punctuation_written: { kind: "string" },
     stress: NUMBER_OR_NULL,
     duration: { kind: "number" },
     durationFloor: { kind: "number" },
@@ -222,6 +279,18 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
     weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
     glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
   };
+  const segmentRelation = spec.relations.Segment;
+  const declared =
+    isPlainObject(segmentRelation) && isPlainObject(segmentRelation.features)
+      ? segmentRelation.features
+      : {};
+  for (const [key, declaration] of Object.entries(declared)) {
+    const schema = declaredFeatureSchema(declaration);
+    if (schema) segmentFeatures[key] = schema;
+  }
+  for (const key of frameValueFeatures(spec.frame_programs)) {
+    segmentFeatures[key] = FRAME_VALUES_SCHEMA;
+  }
   for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
   for (const target of Object.values(inventory.phoneme_targets)) {
     for (const [key, value] of Object.entries(target)) {
@@ -256,7 +325,44 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
           sourceNormalizationId: { kind: "string" },
         },
       },
-      word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
+      word: {
+        features: {
+          text: { kind: "string" },
+          tokenIndex: { kind: "number" },
+          form_classes: { kind: "array", items: { kind: "string" } },
+          // The classes before the lexicon hands them to the phonetic rules.
+          text_form_classes: { kind: "array", items: { kind: "string" } },
+          // The marks the frontend names that the written word has at its
+          // start or its end (transcription.written_word_marks).
+          written_marks: { kind: "array", items: { kind: "string" } },
+          // The written word's place among the words between two punctuation
+          // marks, from 1, and how many there are.
+          clause_word_index: { kind: "number" },
+          clause_word_count: { kind: "number" },
+          // The word's place among the stretch's words as they are spoken one
+          // by one; 0 for a word the routine before it read ahead.
+          clause_spoken_index: { kind: "number" },
+          // The stretch of words ends at the text's end, where no mark is
+          // written (a text rule supplied the one that closes it).
+          clause_end_supplied: { kind: "boolean" },
+          // The word's part in a conjunction of several words.
+          conjunction_sequence: { kind: "string", values: ["first", "rest"] },
+          // A later word of the words one written word is spoken as.
+          continues_written_word: { kind: "boolean" },
+          // Set by a frontend's rules: the word can carry a clause break, its
+          // place in the stretch has one, and a break stands before it.
+          break_marker: { kind: "boolean" },
+          break_slot: { kind: "boolean" },
+          clause_break_before: { kind: "boolean" },
+          phrase_start: { kind: "string", values: ["vp", "pp"] },
+          // The word before is phonemic text: no word boundary stands before
+          // this word's phrase start.
+          phrase_start_unbounded: { kind: "boolean" },
+          // What a frontend's rules make of a prepositional-phrase start in
+          // its context (kept, dropped, or kept with no word boundary before it).
+          phrase_start_state: { kind: "string", values: ["pp", "word", "alone"] },
+        },
+      },
       syllable: {
         features: {
           index: { kind: "number" },
@@ -315,6 +421,31 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     : undefined;
   return {
     diagnostic_symbols: diagnosticSymbols,
+    // Passed as written; requireTranscriptionTables refuses a non-boolean.
+    ...(value.diagnostic_symbol_input !== undefined
+      ? { diagnostic_symbol_input: value.diagnostic_symbol_input as boolean }
+      : {}),
+    // Passed as written; requireTranscriptionTables checks each entry.
+    ...(value.sources !== undefined
+      ? { sources: value.sources as TranscriptionConfig["sources"] }
+      : {}),
+    ...(value.elided_apostrophe_lookup !== undefined
+      ? { elided_apostrophe_lookup: value.elided_apostrophe_lookup as boolean }
+      : {}),
+    // Passed as written; requireTranscriptionTables refuses a non-string.
+    ...(value.word_stretch_end_characters !== undefined
+      ? { word_stretch_end_characters: value.word_stretch_end_characters as string }
+      : {}),
+    // Passed as written; requireTranscriptionTables refuses anything but two numbers.
+    ...(value.word_stretch_length_limits !== undefined
+      ? { word_stretch_length_limits: value.word_stretch_length_limits as number[] }
+      : {}),
+    // Passed as written; requireTranscriptionTables refuses anything but two maps of names.
+    ...(value.written_word_marks !== undefined
+      ? {
+          written_word_marks: value.written_word_marks as TranscriptionConfig["written_word_marks"],
+        }
+      : {}),
     letter_names: letterNames,
     punctuation_tokens: punctuationTokens,
   };
@@ -332,6 +463,85 @@ function requirePolicyNumber(entry: unknown, path: string): number {
   if (value === undefined)
     throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be finite`);
   return value;
+}
+
+function policyCitations(entry: unknown): string[] {
+  return isPlainObject(entry) && Array.isArray(entry.citations)
+    ? entry.citations.filter((citation): citation is string => typeof citation === "string")
+    : [];
+}
+
+/**
+ * The speaking rate in words per minute for a frontend whose rules take it
+ * that way, or undefined for a frontend that declares no such mapping.
+ *
+ * `policy.rate.words_per_minute` says what the API's rate multiplier means:
+ * `unit` is the words per minute of rate 1, and `minimum` and `maximum` are
+ * the limits. The rate is a whole number of words per minute, as the
+ * synthesizer the frontend follows keeps it. `ported_minimum` and
+ * `ported_maximum`, when given, bound the rates for which every rate-dependent
+ * rule of the original is in the rulepack; outside them the result is that of
+ * the rules that are.
+ */
+function speakingRateWordsPerMinute(
+  mapping: unknown,
+  relativeRate: number,
+  frontendId: string,
+  diagnostics: Diagnostics | null | undefined,
+  provenance: ProvenanceCollector,
+): number | undefined {
+  if (!isPlainObject(mapping)) return undefined;
+  const unit = requirePolicyNumber(mapping.unit, "rate.words_per_minute.unit");
+  const minimum = requirePolicyNumber(mapping.minimum, "rate.words_per_minute.minimum");
+  const maximum = requirePolicyNumber(mapping.maximum, "rate.words_per_minute.maximum");
+  const requested = relativeRate * unit;
+  const rounded = Math.round(requested);
+  const used = Math.min(maximum, Math.max(minimum, rounded));
+  const data = { frontendId, requestedWordsPerMinute: requested, usedWordsPerMinute: used };
+  // In messages the requested rate is shown to a thousandth; `data` has it whole.
+  const shown = Number(requested.toFixed(3));
+  if (used !== rounded) {
+    diagnostics?.warn(
+      `Speaking rate ${shown} words per minute is outside ${minimum} to ${maximum}; using ${used}`,
+      { ...data, minimum, maximum },
+      "W_RATE_CLAMPED",
+    );
+  } else if (Math.abs(requested - rounded) > 1e-9) {
+    diagnostics?.info(
+      `Speaking rate ${shown} words per minute is not a whole number; using ${used}`,
+      data,
+      "I_RATE_ROUNDED",
+    );
+  }
+  const portedMinimum = readPolicyNumber(mapping.ported_minimum);
+  const portedMaximum = readPolicyNumber(mapping.ported_maximum);
+  if (
+    (portedMinimum !== undefined && used < portedMinimum) ||
+    (portedMaximum !== undefined && used > portedMaximum)
+  ) {
+    diagnostics?.warn(
+      `Speaking rate ${used} words per minute is outside ${String(portedMinimum)} to ${String(portedMaximum)}, ` +
+        "the range whose rate-dependent rules are all in the rulepack",
+      { ...data, portedMinimum, portedMaximum },
+      "W_RATE_RULES_NOT_PORTED",
+    );
+  }
+  provenance.add({
+    stage: "frontend",
+    type: "speaking_rate_selected",
+    subject: `frontend:${frontendId}:speaking_rate`,
+    reason:
+      `Rate ${Number(relativeRate.toFixed(6))} is ${shown} words per minute (rate 1 is ${unit}); ` +
+      `policy.timing.speaking_rate_wpm = ${used}` +
+      (used !== rounded ? ` (limits ${minimum} to ${maximum})` : ""),
+    citations: [
+      ...policyCitations(mapping.unit),
+      ...policyCitations(mapping.minimum),
+      ...policyCitations(mapping.maximum),
+    ],
+    parents: [],
+  });
+  return used;
 }
 
 function policyRecord(spec: CompiledRulepack): Record<string, unknown> {
@@ -372,6 +582,11 @@ function createStructure(
   segments: readonly ReturnType<Utterance["allItems"]>[number][],
   spec: CompiledRulepack,
   inventory: InventorySpec,
+  /**
+   * Tokens of supplied marks that end a stretch of words without being
+   * counted with it (a clause end a command made by sending a control item).
+   */
+  uncountedEnds: ReadonlySet<string> = new Set(),
 ): void {
   const tables = parseSyllabificationTables(spec.syllabification);
   const byToken = new Map<
@@ -395,6 +610,42 @@ function createStructure(
       citations: ["Taylor, Black & Caley 2001", "DECtalk 4.63 ph_syl.c ph_syllab"],
       stage: "transcribe",
     });
+  // Each written word's place between two punctuation marks. A number spoken
+  // as several words is one written word, and the pause inside it ends nothing.
+  // A written word that ends in one of the frontend's stretch-end characters
+  // ends the stretch too, once all of its tokens have gone by.
+  // `spoken` is the word's place among the stretch's words as they are
+  // spoken one by one: a word that the routine before it read ahead is not
+  // counted there and has no place (0).
+  type Stretch = { count: number; endSupplied: boolean; readAhead: number };
+  const newStretch = (): Stretch => ({ count: 0, endSupplied: false, readAhead: 0 });
+  const clausePlace = new Map<string, { index: number; spoken: number; clause: Stretch }>();
+  let clause = newStretch();
+  let endsAfterWord = false;
+  let spoken = 0;
+  for (const token of transcribed) {
+    if (token.isPunctuation) {
+      // A mark a text rule sent itself is no mark of the text: the stretch
+      // ends where the written text ends it (endsWordStretch on the word).
+      if (!token.continuesWrittenWord && !token.sentMark) {
+        if (token.supplied && !uncountedEnds.has(token.sourceTokenId.split(":")[0] as string)) {
+          clause.endSupplied = true;
+        }
+        clause = newStretch();
+        endsAfterWord = false;
+      }
+      continue;
+    }
+    if (clausePlace.has(token.sourceTokenId)) continue;
+    if (!token.continuesWrittenWord) {
+      if (endsAfterWord) clause = newStretch();
+      endsAfterWord = token.endsWordStretch === true;
+      clause.count += 1;
+      if (token.readAhead) clause.readAhead += 1;
+      spoken = token.readAhead ? 0 : clause.count - clause.readAhead;
+    }
+    clausePlace.set(token.sourceTokenId, { index: clause.count, spoken, clause });
+  }
   const sharedTransaction = Object.hasOwn(spec, "text_recognition") ? null : beginStructure();
   let wordIndex = 0;
   for (const [tokenId, group] of byToken) {
@@ -407,6 +658,31 @@ function createStructure(
     const word = transaction.createItem("word", `word_${wordIndex.toString()}`);
     transaction.set(word, "text", group[0].token.word);
     transaction.set(word, "tokenIndex", wordIndex);
+    // What the lexicon says of the word belongs to the Word: its Segments are
+    // replaced by allophone rules, the Word is not.
+    const { formClasses, textFormClasses, phraseStart, conjunctionRole } = group[0].token;
+    if (formClasses) transaction.set(word, "form_classes", [...formClasses]);
+    if (textFormClasses) transaction.set(word, "text_form_classes", [...textFormClasses]);
+    if (conjunctionRole) transaction.set(word, "conjunction_sequence", conjunctionRole);
+    const { writtenMarks } = group[0].token;
+    if (writtenMarks?.length) transaction.set(word, "written_marks", [...writtenMarks]);
+    const place = clausePlace.get(tokenId);
+    if (place) {
+      transaction.set(word, "clause_word_index", place.index);
+      transaction.set(word, "clause_word_count", place.clause.count);
+      transaction.set(word, "clause_spoken_index", place.spoken);
+      if (place.clause.endSupplied) transaction.set(word, "clause_end_supplied", true);
+    }
+    if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
+    // A later word of the words a written word is spoken as: what is said
+    // of the written word once (its form class arriving) is said at the
+    // first.
+    if (group[0].token.continuesWrittenWord) {
+      transaction.set(word, "continues_written_word", true);
+    }
+    if (group[0].token.phraseStartUnbounded) {
+      transaction.set(word, "phrase_start_unbounded", true);
+    }
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);
     const annotations = tables
@@ -480,7 +756,19 @@ function createStructure(
 }
 
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
-  return normalizeGraphText(text, loadBundledRulepackSpec(frontendId));
+  const spec = loadBundledRulepackSpec(frontendId);
+  // The same text the frontend speaks: after its text parser, when it has one.
+  const textParser = parseTextParserConfig(spec);
+  if (!textParser) return normalizeGraphText(text, spec);
+  const dictionaryPath = loadFrontendResources(spec).dictionaryPath;
+  const dictionary = dictionaryPath ? loadCmuDictionaryFromPathSync(dictionaryPath) : undefined;
+  const parsed = runTextParser(
+    textParser,
+    text,
+    (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+    createProvenanceCollector(),
+  );
+  return normalizeGraphText(parsed.text, spec);
 }
 export { transcribeText } from "./transcribe-text";
 
@@ -503,12 +791,9 @@ function buildTextToKlattTrackDetailed(
     /^F[1-9]\d*$/.test(key),
   );
   const provenance = options.provenance ?? createProvenanceCollector();
-  const utterance = new Utterance(
-    buildUtteranceSchema(resources.inventory),
-    provenance,
-    options.diagnostics ?? undefined,
-  );
-  for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
+  const utteranceSchema = buildUtteranceSchema(resources.inventory, spec);
+  const utterance = new Utterance(utteranceSchema, provenance, options.diagnostics ?? undefined);
+  for (const relationName of Object.keys(utteranceSchema.relations)) {
     utterance.relation(relationName);
   }
 
@@ -527,33 +812,136 @@ function buildTextToKlattTrackDetailed(
   if (typeof options.speaker === "string" && !registry) {
     throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
   }
+
+  // A frontend with a command text parser has its text rewritten by those
+  // rules before anything else reads it (src/text-parser). The parser also
+  // reads the text's commands, and a voice or rate command that stands
+  // before any spoken text sets the voice and the rate of the whole text:
+  // so it runs before the voice is chosen. The voice and the rate that were
+  // asked for are the state the text starts in, as say.exe's are.
+  const textParser = parseTextParserConfig(spec);
+  const rateUnit = readPolicyNumber(
+    recordOrEmpty(recordOrEmpty(policyRecord(spec).rate).words_per_minute).unit,
+  );
+  const rateReference =
+    readPolicyNumber(recordOrEmpty(policyRecord(spec).duration).rate_reference) || 1;
+  const parsedText = textParser
+    ? runTextParser(
+        textParser,
+        inputText,
+        (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+        provenance,
+        {
+          ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
+          ...(rateUnit !== undefined && Number.isFinite(options.rate ?? 1)
+            ? { initialRate: Math.round(((options.rate ?? 1) / rateReference) * rateUnit) }
+            : {}),
+        },
+      )
+    : null;
+  let commandVoice: string | undefined;
+  if (parsedText?.initial.voice !== undefined && registry) {
+    if (registry.voices.length === 0 || registry.voices.includes(parsedText.initial.voice)) {
+      commandVoice = parsedText.initial.voice;
+    } else {
+      options.diagnostics?.warn(
+        `The text asks for the voice '${parsedText.initial.voice}', which this frontend does not have; the voice stays`,
+        { voice: parsedText.initial.voice, available: registry.voices },
+        "W_TEXT_COMMAND_VOICE_UNKNOWN",
+      );
+    }
+  }
   const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
   const selectedVoice: ResolvedVoice | null = registry
     ? resolveVoice(
         registry,
-        typeof options.speaker === "string" ? options.speaker : registry.default,
+        commandVoice ?? (typeof options.speaker === "string" ? options.speaker : registry.default),
         speakerProfile,
+        // Entries of the voice's speaker definition that commands before any
+        // spoken text changed (src/text-parser/frontend.ts).
+        parsedText?.initial.definition ?? [],
       )
     : null;
   const speakerOverride: SpeakerProfileOverride | undefined =
     typeof options.speaker === "object" ? options.speaker : undefined;
+  // A voice's rule fields select data inside the rules (tables, constants);
+  // a caller's profile override may not change them.
+  const overriddenRuleFields = Object.keys(speakerOverride ?? {}).filter((field) =>
+    Object.hasOwn(registry?.ruleFields ?? {}, field),
+  );
+  if (overriddenRuleFields.length > 0) {
+    throw new Error(
+      `E_VOICE_RULE_FIELD_OVERRIDE: a speaker override may not set the voice rule field(s) ` +
+        `${overriddenRuleFields.join(", ")}; select a voice by name instead`,
+    );
+  }
 
-  const resolvedSpeaker = resolveSpeakerProfile({
+  const speakerResolution = resolveSpeakerProfileDetailed({
     baseF0,
+    pitchScale: options.pitchScale,
     speakerOverride,
     voiceProfile: selectedVoice?.override,
     profileSpec: speakerProfile,
   });
+  const resolvedSpeaker = speakerResolution.profile;
+  for (const issue of speakerResolution.issues) {
+    options.diagnostics?.warn(issue.message, issue.data, issue.code);
+  }
+  // What the profile's pitch_composition did: the reference level, the level
+  // asked for, their ratio and the span that follows from it.
+  const pitch = speakerResolution.pitch;
+  const pitchNote = pitch
+    ? `; pitch composition: reference_base_hz=${pitch.referenceBaseHz}, ` +
+      `effective_base_hz=${pitch.effectiveBaseHz} ` +
+      `(base ${pitch.requestedBaseHz} x pitch_scale ${pitch.pitchScale}), ` +
+      `ratio=${pitch.ratio}, span_hz=${pitch.spanHz} ` +
+      (pitch.spanFollowsLevel
+        ? `(span ${pitch.profileSpanHz} x ratio)`
+        : "(as requested, not scaled)")
+    : "";
   const speakerDecision = provenance.add({
     stage: "frontend",
     type: "speaker_profile_selected",
     subject: "speaker_profile",
     reason: `Resolved speaker profile ${Object.entries(resolvedSpeaker)
       .map(([name, value]) => `${name}=${value}`)
-      .join(", ")}`,
-    citations: collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+      .join(", ")}${pitchNote}`,
+    citations: [
+      ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+      ...collectPitchCompositionCitations(speakerProfile),
+      // The voice file and its sources, when the voice sets profile fields.
+      ...(selectedVoice && Object.keys(selectedVoice.override).length > 0
+        ? selectedVoice.citations
+        : []),
+    ].filter((value, index, all) => all.indexOf(value) === index),
   });
+  // What rules read as params.policy.voice: the selected voice's rule fields.
+  const voiceRuleFields =
+    selectedVoice && Object.keys(selectedVoice.ruleFields).length > 0
+      ? selectedVoice.ruleFields
+      : null;
+  if (selectedVoice && voiceRuleFields && registry) {
+    // Optional rule fields this voice does not give: a rule that reads one
+    // falls back to its own default, so the record says which they are.
+    const given = Object.entries(voiceRuleFields).filter(([, value]) => value !== null);
+    const notGiven = Object.keys(voiceRuleFields).filter((name) => voiceRuleFields[name] === null);
+    const notGivenNote =
+      notGiven.length > 0 ? `; not given by this voice: ${notGiven.join(", ")}` : "";
+    provenance.add({
+      stage: "frontend",
+      type: "voice_parameters_selected",
+      subject: `voice:${selectedVoice.name}`,
+      reason: `Rule parameters of voice ${selectedVoice.name}: ${given
+        .map(([name, value]) => `${name}=${value}`)
+        .join(", ")}${notGivenNote}`,
+      citations: [
+        ...selectedVoice.citations,
+        ...Object.values(registry.ruleFields).flatMap((field) => field.citations),
+      ],
+      parents: [speakerDecision.id],
+    });
+  }
 
   const sourcePath = spec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
   const source = resolveSourceContour({
@@ -575,10 +963,62 @@ function buildTextToKlattTrackDetailed(
     parents: [speakerDecision.id],
   });
 
+  const { onStage } = options;
+  const onPhaseEnd = onStage ? (phase: string) => onStage(`phase ${phase}`) : undefined;
+  onStage?.("setup");
   const transcriptionConfig = getTranscriptionConfig(spec);
-  recognizeText(inputText, utterance, spec);
-  const normalized = normalizeSourceItems(utterance, spec);
+  // The text parser's output (run above, before the voice was chosen) is the
+  // source text.
+  let textModeSpans: Record<string, number[][]> | undefined;
+  let specWithModes = spec;
+  if (parsedText) {
+    // The modes the text parser's commands turned on are laid over the
+    // rulepack's maps for the text rules to read
+    // (maps.tn_text_mode_spans): for each mode, the stretches of the parser's
+    // text it is on in, each from an offset up to another. A mode a command
+    // before the text turned on is on from 0; a command inside the text
+    // starts or ends a stretch where it stands.
+    const modeEvents = [
+      { offset: 0, modes: parsedText.initial.modes ?? [] },
+      ...parsedText.modeChanges,
+    ];
+    const modeSpans: Record<string, number[][]> = {};
+    modeEvents.forEach((event, index) => {
+      const end = modeEvents[index + 1]?.offset ?? Number.MAX_SAFE_INTEGER;
+      for (const mode of event.modes) {
+        modeSpans[mode] = [...(modeSpans[mode] ?? []), [event.offset, end]];
+      }
+    });
+    const withModes =
+      Object.keys(modeSpans).length > 0
+        ? {
+            ...spec,
+            maps: {
+              ...(spec.maps as Record<string, unknown> | undefined),
+              tn_text_mode_spans: modeSpans,
+            },
+          }
+        : spec;
+    specWithModes = withModes;
+    if (Object.keys(modeSpans).length > 0) textModeSpans = modeSpans;
+    recognizeText(parsedText.text, utterance, withModes, {
+      parents: parsedText.decisionIds,
+      reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
+    });
+  } else {
+    recognizeText(inputText, utterance, spec);
+  }
+  // Phase checkpoints and rule attempts are recorded only when asked for, in
+  // these phases as in the later ones: a checkpoint serializes the whole graph.
+  const captureTooling = options.captureTooling === true;
+  onStage?.("text parser and recognition");
+  // The text rules of the normalization phases read the same modes as the
+  // recognition rules, and so does the lexicon for each word.
+  const normalized = normalizeSourceItems(utterance, specWithModes, { captureTooling });
+  onStage?.("normalization phases");
   const transcribed = transcribeText(normalized, {
+    captureTooling,
+    ...(textModeSpans ? { textModeSpans } : {}),
     provenance,
     utterance,
     compiledSpec: spec,
@@ -591,19 +1031,20 @@ function buildTextToKlattTrackDetailed(
     dictLookup: dictionary == null && spec.skip_dictionary ? () => null : undefined,
   });
 
+  onStage?.("transcription");
   const inventoryDecision = provenance.add({
     stage: "frontend",
     type: "inventory_selected",
     subject: `inventory:${frontendId}`,
     reason: `Selected frontend inventory '${resources.inventoryPath}'`,
-    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
+    citations: [...resources.inventoryDocuments, ...(resources.inventory.citations ?? [])],
   });
   const construct = utterance.beginTransaction({
     ruleId: "inventory_materialization",
     phase: "transcribe",
     tag: "inventory",
     reason: "Materialize transcribed phonemes as typed Segment Items",
-    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
+    citations: [...resources.inventoryDocuments, ...(resources.inventory.citations ?? [])],
     stage: "transcribe",
   });
   construct.dependOn(inventoryDecision.id);
@@ -652,7 +1093,7 @@ function buildTextToKlattTrackDetailed(
           reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}${selection.defaultDurationMs === undefined ? "" : `; applied declared default duration ${selection.defaultDurationMs} ms`}${selection.areaFunction ? `; derived from area function ${selection.areaFunction.source} using ${selection.areaFunction.model}, speaker ${JSON.stringify(selection.areaFunction.speaker)}` : ""}`,
           inventorySelection: { ...selection, sourceTokenId: token.sourceTokenId },
           citations: [
-            resources.inventoryPath,
+            ...resources.inventoryDocuments,
             ...(selection.areaFunction?.citations ?? []),
             ...(selection.secondaryStressFallback
               ? (resources.inventory.secondary_stress_fallback?.citations ?? [])
@@ -664,10 +1105,23 @@ function buildTextToKlattTrackDetailed(
       },
     });
     construct.set(item, "phoneme", token.phoneme);
+    if (token.morphemeBoundaryAfter) construct.set(item, "morpheme_boundary_after", true);
+    if (token.wordTextStart) construct.set(item, "word_text_start", true);
+    if (token.rulesBlocked) construct.set(item, "rules_blocked", true);
+    if (token.writtenDurationMs !== undefined) {
+      construct.set(item, "written_duration_ms", token.writtenDurationMs);
+    }
+    if (token.writtenSilence) construct.set(item, "written_silence", true);
+    if (token.phonemicText) construct.set(item, "phonemic_text", true);
+    if (token.writtenPitch !== undefined) construct.set(item, "written_pitch", token.writtenPitch);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);
     construct.set(item, "punctuationSymbol", token.isPunctuation ? (token.symbol ?? null) : null);
+    if (token.isPunctuation && token.sentMark) construct.set(item, "punctuation_sent", true);
+    if (token.isPunctuation && token.suppliedFor !== undefined) {
+      construct.set(item, "punctuation_written", token.suppliedFor);
+    }
     construct.set(item, "active", true);
     for (const [key, value] of Object.entries(materialized)) {
       if (key === "phoneme" || key === "params") continue;
@@ -687,7 +1141,21 @@ function buildTextToKlattTrackDetailed(
     construct.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
   }
   construct.commit();
-  createStructure(utterance, transcribed, segments, spec, resources.inventory);
+  onStage?.("segments");
+  // The clause ends a command made by sending a control item
+  // (src/text-parser/frontend.ts itemClauseEnds), by the token of each.
+  const itemEndTokens = new Set<string>();
+  if (parsedText && parsedText.itemClauseEnds.length > 0) {
+    const ends = new Set(parsedText.itemClauseEnds);
+    for (const token of utterance.relation("Token").listItems()) {
+      const sourceId = token.get("sourceNormalizationId");
+      const start =
+        typeof sourceId === "string" ? utterance.getItem(sourceId)?.get("sourceStart") : undefined;
+      if (typeof start === "number" && ends.has(start)) itemEndTokens.add(token.id);
+    }
+  }
+  createStructure(utterance, transcribed, segments, spec, resources.inventory, itemEndTokens);
+  onStage?.("structure");
 
   const requestedRate = options.rate ?? 1;
   if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
@@ -700,26 +1168,189 @@ function buildTextToKlattTrackDetailed(
   // No ceiling and no floor: the requested rate is the rate. Duration floors
   // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
   // are the only limit on compression, and they are cited per phone.
-  const rate = referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
-  const speakerPolicy = { speaker: resolvedSpeaker };
+  // A rate command that stands before any spoken text gives the text's rate
+  // in words per minute (src/text-parser/frontend.ts).
+  const commandRate = parsedText?.initial.rate;
+  const relativeRate =
+    commandRate !== undefined && rateUnit !== undefined
+      ? commandRate / rateUnit
+      : referenceRate && referenceRate > 0
+        ? requestedRate / referenceRate
+        : requestedRate;
+  // A frontend whose rules take the speaking rate in words per minute
+  // (policy.rate.words_per_minute) gets the rate as the policy value
+  // policy.timing.speaking_rate_wpm and nothing else: its own rules say what a
+  // rate does, so the generic effects below (uniform duration scaling, F0
+  // range, transition time, undershoot) see a rate of 1.
+  const wordsPerMinute = speakingRateWordsPerMinute(
+    recordOrEmpty(policyRecord(spec).rate).words_per_minute,
+    relativeRate,
+    frontendId,
+    options.diagnostics,
+    provenance,
+  );
+  const rate = wordsPerMinute === undefined ? relativeRate : 1;
+  const commandPauses = parsedText?.initial.pauseAddedMs;
+  const speakerPolicy = {
+    speaker: resolvedSpeaker,
+    ...(voiceRuleFields ? { voice: voiceRuleFields } : {}),
+    ...(wordsPerMinute === undefined && !commandPauses
+      ? {}
+      : {
+          timing: {
+            ...(wordsPerMinute === undefined ? {} : { speaking_rate_wpm: wordsPerMinute }),
+            // What pause commands before any spoken text add to the comma's
+            // and the period's pause (src/text-parser/frontend.ts); the
+            // frontend's rules say what that does.
+            ...(commandPauses
+              ? {
+                  pause_added_ms: {
+                    comma: commandPauses.comma ?? 0,
+                    period: commandPauses.period ?? 0,
+                  },
+                }
+              : {}),
+          },
+        }),
+  };
+  // TEXT SCOPES. The frontend's text stage says where inside the text the way
+  // it is spoken changes, and what the state is from each such place on
+  // (src/text-scopes.ts; for a frontend with the DECtalk text parser,
+  // src/text-parser/command-scopes.ts). Each is made a parameter scope
+  // (declarative-frontend/hrg/parameter-scope.ts): an overlay on the policy
+  // the rules read. The words, syllables and segments that were written from
+  // that place on are put in the scope, in one transaction a scope, whose
+  // decision says what the text stage said and depends on its decisions.
+  type CommandScope = TextScope & { speaker: typeof resolvedSpeaker };
+  const commandScopes: CommandScope[] =
+    parsedText && registry && selectedVoice
+      ? parsedText
+          .scopes(
+            {
+              voice: selectedVoice,
+              definition: parsedText.initial.definition ?? [],
+              wordsPerMinute,
+              pauses: commandPauses
+                ? { comma: commandPauses.comma ?? 0, period: commandPauses.period ?? 0 }
+                : undefined,
+            },
+            {
+              voices: registry.voices,
+              resolveVoice: (name, definition) =>
+                resolveVoice(registry, name, speakerProfile, definition),
+              ...(rateUnit === undefined
+                ? {}
+                : {
+                    wordsPerMinute: (asked: number) =>
+                      speakingRateWordsPerMinute(
+                        recordOrEmpty(policyRecord(spec).rate).words_per_minute,
+                        asked / rateUnit,
+                        frontendId,
+                        options.diagnostics,
+                        provenance,
+                      ),
+                  }),
+              warn: (message, data, code) => options.diagnostics?.warn(message, data, code),
+            },
+          )
+          .map((scope) => ({
+            ...scope,
+            speaker: resolveSpeakerProfile({
+              baseF0,
+              pitchScale: options.pitchScale,
+              speakerOverride,
+              voiceProfile: scope.voice.override,
+              profileSpec: speakerProfile,
+            }),
+          }))
+      : [];
+  if (commandScopes.length > 0) {
+    // Where each token was written, from the text item it was made of.
+    const writtenAt = new Map<string, number>();
+    for (const token of utterance.relation("Token").listItems()) {
+      const sourceId = token.get("sourceNormalizationId");
+      const start =
+        typeof sourceId === "string" ? utterance.getItem(sourceId)?.get("sourceStart") : undefined;
+      if (typeof start === "number") writtenAt.set(token.id, start);
+    }
+    const structure = utterance.getRelation("SylStructure");
+    const members = new Map<CommandScope, Set<Item>>();
+    for (const segment of utterance.relation("Segment").listItems()) {
+      // A token spoken as several words names them `<token>:<n>`.
+      const start = writtenAt.get(String(segment.get("sourceTokenId")).split(":")[0] as string);
+      if (start === undefined) continue;
+      const scope = commandScopes.findLast((candidate) => candidate.offset <= start);
+      if (!scope) continue;
+      const items = members.get(scope) ?? new Set<Item>();
+      members.set(scope, items);
+      items.add(segment);
+      for (let node = structure?.node(segment)?.parent; node; node = node.parent) {
+        items.add(node.item);
+      }
+    }
+    for (const [scope, items] of members) {
+      const binding = utterance.beginTransaction({
+        ruleId: `parameter_scope:${scope.name}`,
+        phase: "frontend",
+        tag: "parameter_scope",
+        reason:
+          `From offset ${scope.offset.toString()} of the parser's text ${scope.summary}` +
+          `; ${items.size.toString()} Items written from there on are in the parameter scope ${scope.name}`,
+        citations: scope.citations,
+        stage: "frontend",
+      });
+      for (const decisionId of scope.decisionIds) binding.dependOn(decisionId);
+      for (const item of items) binding.set(item, PARAMETER_SCOPE_FEATURE, scope.name);
+      binding.commit();
+    }
+  }
+  const scopeOptions =
+    commandScopes.length > 0
+      ? {
+          parameterScopes: Object.fromEntries(
+            commandScopes.map((scope) => [
+              scope.name,
+              {
+                policy: {
+                  speaker: scope.speaker,
+                  ...(Object.keys(scope.voice.ruleFields).length > 0
+                    ? { voice: scope.voice.ruleFields }
+                    : {}),
+                  ...(scope.wordsPerMinute === undefined && !scope.pauses
+                    ? {}
+                    : {
+                        timing: {
+                          ...(scope.wordsPerMinute === undefined
+                            ? {}
+                            : { speaking_rate_wpm: scope.wordsPerMinute }),
+                          ...(scope.pauses ? { pause_added_ms: scope.pauses } : {}),
+                        },
+                      }),
+                },
+              },
+            ]),
+          ),
+        }
+      : {};
   const graphInventory = {
     spec: resources.inventory,
     decisionId: inventoryDecision.id,
     onInvalidParameter: (fallback: InventoryParameterFallback) =>
       invalidInventoryParameters.push(fallback),
   };
-  const captureTooling = options.captureTooling === true;
   let evaluationOwner = ruleEvaluationOwners.get(spec);
   if (!evaluationOwner) {
     evaluationOwner = new GraphRuleEvaluationOwner();
     ruleEvaluationOwners.set(spec, evaluationOwner);
   }
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["normalize", "postlexical", "structural"],
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   if (options.directionTrack) {
     const parsed = parseDirectionInput(
@@ -739,11 +1370,13 @@ function buildTextToKlattTrackDetailed(
 
   // Authored stress must be visible to accent assignment and onset propagation.
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["annotation"],
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
 
   const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
@@ -764,6 +1397,7 @@ function buildTextToKlattTrackDetailed(
   const stopReleaseFloorMs = lowering.timeline.duration_floors.stop_release_ms.value;
   const defaultDurationFloorMs = lowering.timeline.duration_floors.default_ms.value;
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["duration"],
     parameters: mergedPolicy(spec, {
@@ -777,8 +1411,10 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["formant"],
     parameters: mergedPolicy(spec, {
@@ -787,16 +1423,29 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
   const f0Range = rate ** -f0Exponent;
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
-    phases: ["prosody", "finalize"],
+    // Then every phase the rulepack declares after `finalize`: rules that need
+    // final durations and times, such as frame programs.
+    phases: [
+      "prosody",
+      "finalize",
+      ...spec.phases.filter((phase) => phase.after.includes("finalize")).map((phase) => phase.name),
+    ],
     parameters: mergedPolicy(spec, {
       ...speakerPolicy,
       f0: {
         base_hz: source.effectiveBaseF0Hz,
+        // The speaker's pitch span. A speaker profile that declares no
+        // f0_range_hz leaves the frontend's own policy.f0.range_hz.
+        ...(Number.isFinite(resolvedSpeaker.f0_range_hz)
+          ? { range_hz: resolvedSpeaker.f0_range_hz }
+          : {}),
         continuation_rise_hz: (readPolicyNumber(f0Policy.continuation_rise_hz) ?? 8) * f0Range,
         continuation_minor_rise_hz:
           (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,
@@ -804,6 +1453,7 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
 
   const referenceVoice = registry ? resolveVoice(registry, registry.default, speakerProfile) : null;
@@ -821,6 +1471,15 @@ function buildTextToKlattTrackDetailed(
   speakerStamp.dependOn(speakerDecision.id).dependOn(sourceDecision.id);
   for (const item of utterance.relation("Segment").listItems()) {
     if (item.get("active") === false) continue;
+    // A Segment in a command's parameter scope has that scope's voice.
+    const scope =
+      commandScopes.length > 0 && item.has(PARAMETER_SCOPE_FEATURE)
+        ? commandScopes.find(
+            (candidate) => candidate.name === speakerStamp.read(item, PARAMETER_SCOPE_FEATURE),
+          )
+        : undefined;
+    const itemVoice = scope?.voice ?? selectedVoice;
+    const itemSpeaker = scope?.speaker ?? resolvedSpeaker;
     // Project the resolved source/speaker policy via the declarative projection
     // table, using the formant frequencies declared by the active inventory.
     const projectedFields = new Map<string, number>();
@@ -840,18 +1499,18 @@ function buildTextToKlattTrackDetailed(
         spectral_tilt_offset_db: source.baseline.spectral_tilt_offset_db,
       },
       source.voiceQualityOverrides,
-      resolvedSpeaker.formant_scale,
+      itemSpeaker.formant_scale,
       speakerFormantKeys,
     );
-    if (selectedVoice && registry) {
+    if (itemVoice && registry) {
       for (const field of registry.speakerFrameParams) {
-        const value = selectedVoice.params[field];
+        const value = itemVoice.params[field];
         if (typeof value === "number" && Number.isFinite(value))
           speakerStamp.set(item, field, value);
       }
       if (referenceVoice) {
         for (const mapping of registry.speakerGainOffsets) {
-          const selected = selectedVoice.params[mapping.gain];
+          const selected = itemVoice.params[mapping.gain];
           const reference = referenceVoice.params[mapping.gain];
           const current = item.get(mapping.param);
           if (
@@ -866,22 +1525,66 @@ function buildTextToKlattTrackDetailed(
     }
   }
   speakerStamp.commit();
+  onStage?.("speaker projection");
 
-  let speakerParams: Record<string, unknown> | undefined;
-  if (isLayeredF0Model(spec.f0_model)) {
-    speakerParams = {};
+  // What the F0 model reads of a speaker: the policy's speaker numbers, the
+  // voice's own, and the resolved base F0.
+  const speakerParamsOf = (
+    voice: ResolvedVoice | null,
+    speaker: typeof resolvedSpeaker,
+  ): Record<string, unknown> | undefined => {
+    if (!isLayeredF0Model(spec.f0_model)) return undefined;
+    const params: Record<string, unknown> = {};
     const configured = recordOrEmpty(policyRecord(spec).speaker);
     for (const [key, value] of Object.entries(configured)) {
       const number = readPolicyNumber(value);
-      if (number !== undefined) speakerParams[key] = number;
+      if (number !== undefined) params[key] = number;
     }
-    if (selectedVoice) {
-      Object.assign(speakerParams, selectedVoice.params);
+    if (voice) {
+      Object.assign(params, voice.params);
       // Preserve the declared voice as a reference distinct from the requested profile.
-      speakerParams.voice = selectedVoice.params;
+      params.voice = voice.params;
     }
-    speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
-  }
+    params.base_f0_hz = speaker.base_f0_hz;
+    return params;
+  };
+  const speakerParams = speakerParamsOf(selectedVoice, resolvedSpeaker);
+  // For lowering, by parameter scope: the voice an F0 clause of the scope is
+  // rendered with, and the count of speaker definitions sent, which the
+  // frames of the scope carry as `speaker_epoch` (the synthesizer loads the
+  // definition again when that number changes; DECtalk sends a definition
+  // at a voice command and at a change of one of its entries).
+  // The first definition is sent before the first frame: the count starts
+  // at 1. With it go the fields the frontend names as sent with a
+  // definition (speakers.definition_frame_params), of the voice in force.
+  const definitionFrameParams = (
+    voice: ResolvedVoice | null,
+    definitionsSent: number,
+  ): Record<string, number> => ({
+    speaker_epoch: 1 + definitionsSent,
+    ...Object.fromEntries(
+      (registry?.definitionFrameParams ?? []).flatMap((name) => {
+        const value = voice?.ruleFields[name];
+        return typeof value === "number" ? [[name, value]] : [];
+      }),
+    ),
+  });
+  const loweringScopes =
+    commandScopes.length > 0
+      ? {
+          scopes: Object.fromEntries([
+            ["", { frameParams: definitionFrameParams(selectedVoice, 0) }],
+            ...commandScopes.map((scope) => [
+              scope.name,
+              {
+                speakerParams: speakerParamsOf(scope.voice, scope.speaker),
+                speakerSex: scope.voice.sex,
+                frameParams: definitionFrameParams(scope.voice, scope.definitionsSent),
+              },
+            ]),
+          ]),
+        }
+      : {};
 
   const silence = materializePhonemeTarget(resources.inventory.silence_symbol, {
     inventorySpec: resources.inventory,
@@ -893,7 +1596,7 @@ function buildTextToKlattTrackDetailed(
     type: "silence_resource_selected",
     subject: `inventory:${frontendId}:${resources.inventory.silence_symbol}`,
     reason: "Selected declared inventory silence target for lowering edges",
-    citations: [resources.inventoryPath],
+    citations: [...resources.inventoryDocuments],
     parents: [inventoryDecision.id],
   });
   const scaledTransition = transitionMs * rate ** -transitionExponent;
@@ -906,8 +1609,10 @@ function buildTextToKlattTrackDetailed(
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
     f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
+    frameValueFeatures: frameValueFeatures(spec.frame_programs),
     speakerParams,
     speakerSex: selectedVoice?.sex,
+    ...loweringScopes,
     silence: {
       symbol: resources.inventory.silence_symbol,
       initialParams: silence.params,
@@ -915,6 +1620,7 @@ function buildTextToKlattTrackDetailed(
       decisionId: silenceDecision.id,
     },
   });
+  onStage?.("lowering");
   return { track: lowered.frames, utterance, resolvedSpeaker, speakerParams };
 }
 

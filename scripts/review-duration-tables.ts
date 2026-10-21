@@ -56,7 +56,13 @@ if (mode === "capture" || mode === "golden") {
             frontendId,
             phrase,
             rate,
-            segments: textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { frontendId, rate })
+            segments: textToKlattTrackDetailed(
+              phrase,
+              // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+              frontendId === "qlatt-beauty" ? undefined : corpus.baseF0,
+              30,
+              { frontendId, rate },
+            )
               .utterance.segments.listItems()
               .filter((item) => item.get("active") !== false)
               .map((item) => ({

@@ -1,6 +1,10 @@
 // test/harness/experiment.js — Experiment manifest loading and config management
 
 import { assertFrontendVocabulary } from "../../src/experiments/frontend-vocabulary.ts";
+import {
+  loadSemanticsDocument,
+  loadSemanticsDocumentOrNull,
+} from "../../src/semantics/load-semantics.ts";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../../src/yaml-loader.ts";
 import { state } from "./state.js";
 
@@ -58,6 +62,22 @@ export async function loadExperimentManifest() {
   }
 }
 
+/**
+ * Load the frontend manifest, which says which experiment each frontend is
+ * paired with by default (src/experiments/frontend-pairing.ts). Without it the
+ * pairing falls back to the same-id rule.
+ */
+export async function loadFrontendManifest() {
+  try {
+    const res = await fetch("./rules/frontends/manifest.json");
+    if (!res.ok) throw new Error("Failed to fetch frontend manifest");
+    state.frontendManifest = await res.json();
+  } catch (err) {
+    console.error("[QLATT] Failed to load frontend manifest:", err);
+    state.frontendManifest = null;
+  }
+}
+
 export function onExperimentChange() {
   const selected = getSelectedExperiment();
   if (selected !== state.currentExperimentId) {
@@ -94,6 +114,9 @@ function mergeRegistry(parent, child) {
  * - params: shallow merge, child wins
  * - constants: deep merge, child wins
  * - realize: shallow merge, child wins
+ *
+ * Both documents are loaded through src/semantics/load-semantics.ts, so their
+ * `realize_each` templates are already expanded into `realize`.
  */
 function mergeSemantics(parent, child) {
   if (!child) return parent;
@@ -143,7 +166,7 @@ export async function loadNewRuntimeConfig() {
     // Load child configs (some may be absent for inheriting experiments)
     const [childGraph, childSemantics, childRegistry] = await Promise.all([
       loadYamlDocumentOrNull(`${basePath}/graph.yaml`),
-      loadYamlDocumentOrNull(`${basePath}/semantics.yaml`),
+      loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
       loadYamlDocumentOrNull(`${basePath}/registry.yaml`),
     ]);
 
@@ -152,7 +175,7 @@ export async function loadNewRuntimeConfig() {
       const parentBase = `./experiments/${manifest.extends}`;
       const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
         loadYamlDocument(`${parentBase}/graph.yaml`),
-        loadYamlDocument(`${parentBase}/semantics.yaml`),
+        loadSemanticsDocument(`${parentBase}/semantics.yaml`),
         loadYamlDocument(`${parentBase}/registry.yaml`),
       ]);
 

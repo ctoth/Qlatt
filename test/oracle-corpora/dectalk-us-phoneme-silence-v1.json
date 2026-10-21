@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-phoneme-silence-v1",
+  "description": "Texts with the silence symbol inside a bracket of DECtalk's phoneme mode: inside a word and at its start and end, after and before a word boundary, with a duration written on it and without, two in a row, before a stop, in a bracket of its own before and between ordinary words. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ps-01", "text": "[:phoneme arpabet speak on] The [m'uw_n] rose.", "group": "inside" },
+    { "id": "ps-02", "text": "[:phoneme arpabet speak on] The [m'uw_<300>n] rose.", "group": "inside" },
+    { "id": "ps-03", "text": "[:phoneme arpabet speak on] The [m'uw _ n] rose.", "group": "boundary" },
+    { "id": "ps-04", "text": "[:phoneme arpabet speak on] The [m'uwn_<200>] rose.", "group": "end" },
+    { "id": "ps-05", "text": "[:phoneme arpabet speak on] The [_m'uwn] rose.", "group": "start" },
+    { "id": "ps-06", "text": "[:phoneme arpabet speak on] The [_<250>m'uwn] rose.", "group": "start" },
+    { "id": "ps-07", "text": "[:phoneme arpabet speak on][_<400>] The moon rose.", "group": "alone" },
+    { "id": "ps-08", "text": "[:phoneme arpabet speak on] The moon rose [_<300>] slowly.", "group": "alone" },
+    { "id": "ps-09", "text": "[:phoneme arpabet speak on] The [s_<150>t'aar] rose.", "group": "inside" },
+    { "id": "ps-10", "text": "[:phoneme arpabet speak on] The [m'uw_<100>_<100>n] rose.", "group": "inside" },
+    { "id": "ps-11", "text": "[:phoneme arpabet speak on] We saw the [r'ihv_<250>rr] today.", "group": "inside" },
+    { "id": "ps-12", "text": "[:phoneme arpabet speak on][m'uwn _<200> r'owz].", "group": "boundary" }
+  ]
+}

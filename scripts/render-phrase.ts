@@ -19,6 +19,9 @@ const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 const phrase = args.get("phrase") ?? "hello world";
 const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
 const frontendId = args.get("frontend-id") ?? "qlatt-english";
+// A voice of the frontend's registry, as the page's voice selection gives it
+// (test/harness/runtime.js). Absent: the frontend's default voice.
+const speaker = args.get("speaker");
 const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
 const engine = args.get("engine") ?? "runtime";
 const rate = Number(args.get("rate") ?? 1);
@@ -73,6 +76,7 @@ function buildRequest(): RenderRequest {
     phrase,
     baseF0,
     frontendId,
+    ...(speaker ? { speaker } : {}),
     experimentId,
     engine,
     rate,

@@ -655,7 +655,12 @@ apply:
     tag: release
 ```
 
-`define:` is evaluated once per rule firing, top-to-bottom. Each binding is visible to later bindings and all expression fields (`constraint`, `apply`, `splice.insert`, `insert_point`) in that same rule firing.
+A binding is evaluated on demand: when an expression of the match (`constraint`, `apply`, `splice.insert`, `insert_point`, or another binding) first reads it, and at most once per match. A binding nothing reads is not evaluated. So:
+
+- Every binding is visible to every expression field of the rule and to every other binding, whatever the order they are written in. A binding that reads itself, directly or through others, finds no value and the match fails with `Unknown variable`.
+- The decision a firing rule commits has as parents what the rule read: the reads of its `where`, of the expressions it evaluated, and of the bindings those read. The reads a binding would have made are not parents when nothing read the binding. A `define:` block shared by many rules (a YAML anchor) therefore gives each rule only the parents of the bindings it uses.
+- A binding that would fail (a missing parameter, an absent field) fails the match only when it is read, and a binding that records something of its own (`vocabulary()` and `number_phonemes()` add a decision, `target()` may report a diagnostic) records it only when it is read.
+- A binding named like a value the context already gives (`current`, `phrase`, a pattern capture) replaces it for the whole match. No bundled rule does this, and none should.
 
 ### 2.8a Named Predicates (Structural Reuse, No Expansion Pass)
 
@@ -1549,7 +1554,7 @@ interface AssocSpec {
 
 **Effect target defaulting:** If `target` is omitted, it defaults to `'current'`. For pattern rules, `target` may reference any capture name (e.g., `'v'`, `'stop'`).
 
-**Define binding scope (normative):** `define` is rule-level. Bindings are evaluated once per rule firing, top-to-bottom, and are available to subsequent bindings plus all expression fields in the same firing (`constraint`, `apply`, `splice.insert`, `insert_point`).
+**Define binding scope (normative):** `define` is rule-level. A binding is evaluated when an expression of the match first reads it, at most once per match, and is available to the other bindings and to all expression fields of the same match (`constraint`, `apply`, `splice.insert`, `insert_point`). A binding nothing reads is not evaluated and contributes no parents to the rule's decision (section 2.8).
 
 ### 6.0a Numeric Literal Policy (Normative)
 

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-ordinals-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ordinal-42nd-street", "text": "Turn left at 42nd Street.", "group": "ordinal", "tags": ["messy-sweep"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-100th-day", "text": "It was the 100th day of school.", "group": "ordinal", "tags": ["messy-sweep"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-4th-5th-11th", "text": "The 4th, 5th, and 11th rows are full.", "group": "ordinal", "tags": ["messy-sweep"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-1st", "text": "Say 1st now.", "group": "ordinal", "tags": ["st"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-2nd", "text": "Say 2nd now.", "group": "ordinal", "tags": ["nd"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-3rd", "text": "Say 3rd now.", "group": "ordinal", "tags": ["rd"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-11th", "text": "Say 11th now.", "group": "ordinal", "tags": ["th", "teen"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-12th", "text": "Say 12th now.", "group": "ordinal", "tags": ["th", "teen"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-21st", "text": "Say 21st now.", "group": "ordinal", "tags": ["st"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-30th", "text": "Say 30th now.", "group": "ordinal", "tags": ["th", "tens"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-101st", "text": "Say 101st now.", "group": "ordinal", "tags": ["st", "hundred"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-upper", "text": "Say 42ND now.", "group": "ordinal", "tags": ["nd", "case"], "expectedFocus": ["trace"] },
+    { "id": "ordinal-final", "text": "He came 3rd.", "group": "ordinal", "tags": ["rd", "text-final"], "expectedFocus": ["trace"] }
+  ]
+}

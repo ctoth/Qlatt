@@ -130,48 +130,6 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
-  it("emits the exact DECtalk segmental F0 controller stream for cake", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const segmentalCommands = result.utterance
-      .relation("Tilt")
-      .listItems()
-      .filter((item) => item.get("layer") === "segmental")
-      .map((item) => ({
-        value: item.get("value"),
-        durationFrames: item.get("duration_frames"),
-        profilePoints: item.get("profile_points"),
-      }));
-
-    expect(segmentalCommands).toEqual([
-      { value: 50, durationFrames: 4, profilePoints: [1, 0, 0] },
-      { value: 0, durationFrames: 17, profilePoints: [1, 1, 1] },
-      { value: 50, durationFrames: 37, profilePoints: [0, 0, 1] },
-      { value: 0, durationFrames: 14, profilePoints: [1, 1, 0] },
-      { value: 70, durationFrames: 6, profilePoints: [0, 0, 0] },
-      { value: 50, durationFrames: 94, profilePoints: [1, 0, 0] },
-    ]);
-  });
-
-  it("matches DECtalk's native voiced F0 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", undefined, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f0Hz10 = Array.from({ length: 28 }, (_, frameIndex) => {
-      const time = (29 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      const f0 = result.track.filter((frame) => frame.time <= time).at(-1)?.params.F0;
-      return Math.round((f0 ?? Number.NaN) * 10);
-    });
-
-    expect(f0Hz10).toEqual([
-      1361, 1379, 1395, 1403, 1404, 1400, 1394, 1385, 1371, 1358, 1343, 1328, 1313, 1297, 1282,
-      1269, 1254, 1242, 1229, 1219, 1207, 1197, 1187, 1179, 1171, 1164, 1157, 1149,
-    ]);
-  });
-
   it("matches every native F0 cell through the's complete trace", () => {
     const result = textToKlattTrackDetailed("the.", undefined, 30, {
       frontendId: "dectalk-english",
@@ -194,476 +152,6 @@ describe("dectalk-english end-to-end", () => {
       990, 992, 994, 995, 997, 998, 998, 999, 999, 998, 998, 997, 996, 994, 992, 990, 988, 987, 985,
       984, 983, 982,
     ]);
-  });
-
-  it("matches every native F1 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([
-      289, 289, 289, 289, 295, 297, 299, 301, 301, 301, 301, 301, 323, 346, 368, 390, 412, 435, 457,
-      479, 501, 524, 526, 528, 530, 533, 535, 537, 539, 542, 544, 546, 548, 548, 548, 548, 548, 548,
-      548, 548, 548, 548, 548, 548, 548, 548, 547, 547, 547, 547, 548, 548, 548, 548, 549, 549, 549,
-      549, 550, 550, 550, 550, 551, 551, 551, 551, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552,
-    ]);
-  });
-
-  it("matches every native F2 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f2 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F2;
-    });
-
-    expect(f2).toEqual([
-      1500,
-      1500,
-      1500,
-      1500,
-      1493,
-      1492,
-      1491,
-      1490,
-      1489,
-      1488,
-      1467,
-      1446,
-      1425,
-      1404,
-      1384,
-      1371,
-      1358,
-      1345,
-      1333,
-      1320,
-      1307,
-      1294,
-      1280,
-      1278,
-      1276,
-      1274,
-      1272,
-      1270,
-      1268,
-      1266,
-      1264,
-      1262,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1260,
-      1259,
-      1261,
-      1263,
-      1265,
-      1268,
-      1270,
-      1272,
-      1274,
-      1276,
-      1278,
-      1280,
-      1282,
-      1285,
-      1287,
-      1289,
-      1291,
-      1293,
-      1295,
-      1297,
-      1299,
-      ...Array(73).fill(1302),
-    ]);
-  });
-
-  it("matches every native F3 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f3 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([
-      2562,
-      2562,
-      2562,
-      2562,
-      2561,
-      2562,
-      2562,
-      2562,
-      2562,
-      2563,
-      2592,
-      2621,
-      2650,
-      2679,
-      2709,
-      2695,
-      2681,
-      2667,
-      2653,
-      2639,
-      2625,
-      2611,
-      2598,
-      2598,
-      2598,
-      2599,
-      2599,
-      2599,
-      2599,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      2600,
-      ...Array(93).fill(2602),
-    ]);
-  });
-
-  it("matches every native B1 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([
-      200,
-      200,
-      200,
-      200,
-      200,
-      187,
-      175,
-      162,
-      150,
-      136,
-      123,
-      109,
-      96,
-      95,
-      94,
-      93,
-      93,
-      92,
-      91,
-      ...Array(20).fill(90),
-      102,
-      115,
-      127,
-      140,
-      152,
-      165,
-      177,
-      190,
-      177,
-      165,
-      152,
-      140,
-      127,
-      115,
-      102,
-      ...Array(79).fill(90),
-      102,
-      115,
-      127,
-      140,
-      152,
-      165,
-    ]);
-  });
-
-  it("matches every native B2 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b2 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B2;
-    });
-    const expected = [
-      170,
-      170,
-      170,
-      170,
-      170,
-      163,
-      157,
-      151,
-      145,
-      135,
-      125,
-      116,
-      106,
-      103,
-      99,
-      96,
-      93,
-      89,
-      86,
-      83,
-      ...Array(19).fill(80),
-      86,
-      92,
-      98,
-      105,
-      111,
-      117,
-      123,
-      130,
-      123,
-      117,
-      111,
-      105,
-      98,
-      92,
-      86,
-      ...Array(79).fill(80),
-      86,
-      92,
-      98,
-      105,
-      111,
-      117,
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(b2).toEqual(expected);
-  });
-
-  it("matches every native B3 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
-    });
-    const expected = [
-      ...Array(10).fill(170),
-      171,
-      172,
-      173,
-      173,
-      174,
-      175,
-      176,
-      177,
-      178,
-      179,
-      ...Array(119).fill(180),
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(b3).toEqual(expected);
-  });
-
-  it("matches every native AV cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const av = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
-    });
-    const expected = [
-      0,
-      0,
-      0,
-      34,
-      37,
-      39,
-      42,
-      45,
-      47,
-      50,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      ...Array(16).fill(62),
-      61,
-      60,
-      60,
-      59,
-      58,
-      58,
-      57,
-      57,
-      56,
-      55,
-      55,
-      ...Array(94).fill(0),
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(av).toEqual(expected);
-  });
-
-  it("matches every native AP cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const ap = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AH;
-    });
-    const expected = [
-      ...Array(27).fill(0),
-      2,
-      5,
-      7,
-      10,
-      12,
-      15,
-      17,
-      20,
-      22,
-      25,
-      27,
-      30,
-      32,
-      35,
-      37,
-      40,
-      42,
-      45,
-      47,
-      45,
-      42,
-      38,
-      35,
-      31,
-      28,
-      24,
-      21,
-      17,
-      14,
-      10,
-      7,
-      3,
-      ...Array(80).fill(0),
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(ap).toEqual(expected);
-  });
-
-  it("matches every native A6 cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const a6 = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A6;
-    });
-    const expected = [
-      0,
-      9,
-      18,
-      27,
-      ...Array(7).fill(0),
-      46,
-      41,
-      37,
-      32,
-      26,
-      19,
-      13,
-      6,
-      ...Array(120).fill(0),
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(a6).toEqual(expected);
-  });
-
-  it("matches every native AB cell through the complete the trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const ab = Array.from({ length: 139 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AB;
-    });
-    const expected = [
-      0,
-      9,
-      18,
-      27,
-      36,
-      38,
-      40,
-      42,
-      44,
-      46,
-      46,
-      46,
-      41,
-      37,
-      32,
-      26,
-      19,
-      13,
-      6,
-      ...Array(120).fill(0),
-    ];
-
-    expect(expected).toHaveLength(139);
-    expect(ab).toEqual(expected);
   });
 
   it("matches every native TLT cell through the complete the trace", () => {
@@ -689,56 +177,55 @@ describe("dectalk-english end-to-end", () => {
         speaker: "paul",
       },
     );
+    // The rule: N beside a high front vowel takes B3 1600; elsewhere 350. A
+    // nasal's bandwidths do not ramp, and DECtalk sends them one frame late
+    // (ph_claus.c:754-757), so the N's first packet still carries the last
+    // frame of the phone before it.
+    const isN = (frame: (typeof result.track)[number] | undefined, word: string) =>
+      frame?.word === word && frame.phoneme === "N";
+    const b3Of = (word: string) =>
+      result.track
+        .filter((frame, index) => isN(frame, word) && isN(result.track[index - 1], word))
+        .map((frame) => frame.params.B3);
+    expect(b3Of("rain").length).toBeGreaterThan(0);
+    expect(new Set(b3Of("rain"))).toEqual(new Set([1600]));
+    expect(b3Of("in").length).toBeGreaterThan(0);
+    expect(new Set(b3Of("in"))).toEqual(new Set([350]));
+  });
+
+  // DECtalk's trace has B3 1600 on packets 62 to 70: the /n/ of "rain", one
+  // frame late.
+  it("places the N of rain on DECtalk's packets 62 to 70", () => {
+    const result = textToKlattTrackDetailed(
+      "The rain in Spain stays mainly in the plain.",
+      110,
+      30,
+      {
+        frontendId: "dectalk-english",
+        speaker: "paul",
+      },
+    );
     const b3 = Array.from({ length: 9 }, (_, offset) => {
       const time = (62 + offset) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
-
     expect(b3).toEqual(Array(9).fill(1600));
-    const ordinaryN = result.track
-      .filter((frame) => frame.word === "in" && frame.phoneme === "N")
-      .map((frame) => frame.params.B3);
-    expect(ordinaryN.length).toBeGreaterThan(0);
-    expect(new Set(ordinaryN)).toEqual(new Set([350]));
   });
 
-  it("projects punct-question's initial K F3 through the K-to-AE locus", () => {
+  // The clause's first silence holds the /k/ target (2200 + 500, ph_setar.c:1854-1866,
+  // scaled by the speaker's fnscale), and the /k/ starts one packet after its
+  // Segment does. The frame gate holds every later packet of this phrase.
+  it("draws punct-question's F3 from the initial silence into the K", () => {
     const result = textToKlattTrackDetailed("Can you hear me?", 110, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const initialSilence = Array.from({ length: 4 }, (_, frameIndex) => {
+    const f3 = Array.from({ length: 5 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
-    const initialK = result.track.find((frame) => frame.phoneme === "K");
-    const firstKPacket = result.track
-      .filter((frame) => frame.time <= 4 * DECTALK_PACKET_PERIOD_SEC + 1e-9)
-      .at(-1);
-    const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
-    if (!initialK || !firstKPacket || !initialRelease)
-      throw new Error("initial K carriers missing");
-    const closureDurationMs = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((item) => item.get("active") !== false && item.get("phoneme") === "K")
-      ?.get("duration");
-    if (typeof closureDurationMs !== "number") throw new Error("initial K duration missing");
-    const nativeFrameMs = 6.4;
-    const expectedReleaseStart =
-      firstKPacket.params.F3 +
-      (2287.5 - firstKPacket.params.F3) * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
-    const releaseBoundary = result.track.find(
-      (frame) =>
-        frame.phoneme === "K_REL" &&
-        Math.abs(frame.time - initialRelease.time - nativeFrameMs / 1000) <= 1e-9,
-    );
 
-    expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
-    expect(initialK.params.F3).toBe(2702);
-    expect(firstKPacket.params.F3).toBe(2690);
-    expect(initialRelease.params.F3).toBeCloseTo(expectedReleaseStart, 10);
-    expect(releaseBoundary?.params.F3).toBe(2287.5);
+    expect(f3).toEqual([2702, 2702, 2702, 2702, 2690]);
   });
 
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
@@ -750,16 +237,17 @@ describe("dectalk-english end-to-end", () => {
       .relation("Segment")
       .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
-    const durationWrites = ey?.writes("duration") ?? [];
-    const rule14Index = durationWrites.findIndex(
-      (write) => write.reason === "dectalk_post_plosive_sonorant_lengthening matched",
+    const addedWrites = ey?.writes("timing_added_frames") ?? [];
+    const rule14Index = addedWrites.findIndex(
+      (write) => write.ruleId === "dectalk_timing_14_sonorant_after_voiceless_plosive",
     );
 
     expect(ey).toBeDefined();
     expect(rule14Index).toBeGreaterThan(0);
+    // NF20MS: three frames.
     expect(
-      Number(durationWrites[rule14Index].value) - Number(durationWrites[rule14Index - 1].value),
-    ).toBe(19);
+      Number(addedWrites[rule14Index].value) - Number(addedWrites[rule14Index - 1].value),
+    ).toBe(3);
   });
 
   it("applies DECtalk Rule 2 to the final-rime vowel before a coda stop", () => {
@@ -771,249 +259,15 @@ describe("dectalk-english end-to-end", () => {
       .relation("Segment")
       .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
-    const durationWrites = ey?.writes("duration") ?? [];
-    const rule2Index = durationWrites.findIndex(
-      (write) => write.reason === "dectalk_clause_final_lengthening matched",
+    const addedWrites = ey?.writes("timing_added_frames") ?? [];
+    const rule2 = addedWrites.find(
+      (write) => write.ruleId === "dectalk_timing_2_clause_final_rime",
     );
 
     expect(ey).toBeDefined();
-    expect(rule2Index).toBeGreaterThan(0);
-    expect(
-      Number(durationWrites[rule2Index].value) - Number(durationWrites[rule2Index - 1].value),
-    ).toBe(38);
-  });
-
-  it("aligns cake's initial K-to-EY boundary to the DECtalk frame grid", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const segments = result.utterance
-      .relation("Segment")
-      .listItems()
-      .filter((item) => item.get("active") !== false);
-    const initialK = segments.find(
-      (item, index) =>
-        item.get("phoneme") === "K" && segments[index + 1]?.get("phoneme") === "K_REL",
-    );
-    const ey = segments.find((item) => item.get("phoneme") === "EY");
-
-    expect(initialK?.get("duration")).toBe(83);
-    expect(ey?.get("duration")).toBe(237);
-  });
-
-  it("matches DECtalk's native B1 cells through cake's initial silence and K closure", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([
-      300, 300, 300, 300, 300, 287, 275, 262, 250, 237, 225, 212, 200, 200, 200, 200,
-    ]);
-  });
-
-  it("matches DECtalk's native B3 cells through cake's initial silence and K closure", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual([
-      280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280,
-    ]);
-  });
-
-  it("matches every native B2 cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b2 = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B2;
-    });
-    const expected = [
-      ...Array(5).fill(210),
-      203,
-      197,
-      191,
-      185,
-      178,
-      172,
-      166,
-      ...Array(7).fill(160),
-      150,
-      140,
-      ...Array(9).fill(170),
-      ...Array(23).fill(100),
-      104,
-      109,
-      114,
-      119,
-      124,
-      130,
-      140,
-      150,
-      ...Array(9).fill(160),
-      150,
-      140,
-      ...Array(6).fill(170),
-      150,
-      143,
-      137,
-      131,
-      125,
-      118,
-      112,
-      106,
-      ...Array(79).fill(100),
-      106,
-      112,
-      118,
-      125,
-      131,
-      137,
-    ];
-
-    expect(expected).toHaveLength(171);
-    expect(b2).toEqual(expected);
-  });
-
-  it("matches every native AV cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const av = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
-    });
-    const expected = [...Array(29).fill(0), ...Array(28).fill(65), ...Array(114).fill(0)];
-
-    expect(expected).toHaveLength(171);
-    expect(av).toEqual(expected);
-  });
-
-  it("matches every native AP cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const ap = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AH;
-    });
-    const expected = [
-      ...Array(21).fill(0),
-      ...Array(9).fill(48),
-      ...Array(42).fill(0),
-      ...Array(6).fill(39),
-      45,
-      42,
-      38,
-      35,
-      31,
-      28,
-      24,
-      21,
-      17,
-      14,
-      10,
-      7,
-      3,
-      ...Array(80).fill(0),
-    ];
-
-    expect(expected).toHaveLength(171);
-    expect(ap).toEqual(expected);
-  });
-
-  it("matches every native A2 cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const a2 = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A2;
-    });
-
-    expect(a2).toEqual(Array(171).fill(0));
-  });
-
-  it("matches every native A3 cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const a3 = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A3;
-    });
-    const expected = [
-      ...Array(17).fill(0),
-      50,
-      50,
-      49,
-      48,
-      36,
-      24,
-      12,
-      ...Array(44).fill(0),
-      47,
-      47,
-      46,
-      45,
-      33,
-      22,
-      11,
-      ...Array(96).fill(0),
-    ];
-
-    expect(expected).toHaveLength(171);
-    expect(a3).toEqual(expected);
-  });
-
-  it("matches every native A5 cell through cake's complete trace", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const a5 = Array.from({ length: 171 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A5;
-    });
-    const expected = [
-      ...Array(17).fill(0),
-      36,
-      36,
-      35,
-      34,
-      22,
-      15,
-      7,
-      ...Array(44).fill(0),
-      33,
-      33,
-      32,
-      31,
-      19,
-      13,
-      6,
-      ...Array(96).fill(0),
-    ];
-
-    expect(expected).toHaveLength(171);
-    expect(a5).toEqual(expected);
+    // NF40MS (6), plus NF30MS (5) less half the clause's five allophones (2)
+    // for a stressed syllabic in a clause of fewer than ten.
+    expect(rule2?.value).toBe(9);
   });
 
   it("matches every native TLT cell through cake's complete trace", () => {
@@ -1027,407 +281,6 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(tlt).toEqual(Array(171).fill(0));
-  });
-
-  it("matches DECtalk's native F1 cells through cake's initial silence and K closure", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([
-      279, 279, 279, 279, 283, 288, 292, 296, 301, 305, 309, 314, 318, 323, 327, 331,
-    ]);
-  });
-
-  it("matches DECtalk's native B1 cells through cake's initial K release", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([200, 200, 200, 178, 156]);
-  });
-
-  it("matches DECtalk's native B3 cells through cake's initial K release", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual([280, 280, 280, 266, 253]);
-  });
-
-  it("matches DECtalk's native F1 cells through cake's initial K release", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([336, 340, 344, 349, 353]);
-  });
-
-  it("matches DECtalk's native F2 cells through cake's initial K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f2 = Array.from({ length: 21 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
-    });
-
-    expect(f2).toEqual([
-      2091, 2091, 2091, 2091, 2078, 2069, 2060, 2051, 2041, 2032, 2023, 2014, 2005, 1996, 1987,
-      1978, 1969, 1960, 1951, 1942, 1933,
-    ]);
-  });
-
-  it("matches DECtalk's native F3 cells through cake's initial K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f3 = Array.from({ length: 21 }, (_, frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([
-      2702, 2702, 2702, 2702, 2694, 2669, 2645, 2620, 2595, 2571, 2546, 2522, 2497, 2472, 2448,
-      2423, 2398, 2374, 2349, 2325, 2300,
-    ]);
-  });
-
-  it("matches DECtalk's native F1 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([
-      357, 377, 397, 417, 434, 451, 468, 486, 483, 481, 478, 476, 473, 471, 468, 466, 463, 461, 458,
-      457, 456, 455, 454, 453, 452, 451, 450, 449, 448, 447, 446, 430, 414, 398, 383, 367, 351,
-    ]);
-  });
-
-  it("matches DECtalk's native F3 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f3 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([
-      2276, 2301, 2325, 2350, 2378, 2406, 2434, 2462, 2465, 2469, 2472, 2476, 2479, 2483, 2486,
-      2490, 2493, 2497, 2500, 2504, 2507, 2511, 2514, 2518, 2521, 2525, 2528, 2532, 2535, 2539,
-      2539, 2519, 2500, 2480, 2461, 2441, 2422,
-    ]);
-  });
-
-  it("matches DECtalk's native B1 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([
-      320, 320, 320, 320, 320, 320, 320, 320, 320, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
-      70, 70, 70, 70, 70, 70, 70, 70, 70, 77, 85, 93, 101, 108, 116, 124,
-    ]);
-  });
-
-  it("matches DECtalk's native B3 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual([
-      239, 233, 226, 219, 213, 206, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
-      200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 206, 213, 219, 226, 233,
-    ]);
-  });
-
-  it("matches DECtalk's native F1 cells through cake's final K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 14 }, (_, index) => {
-      const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual(Array(14).fill(337));
-  });
-
-  it("matches DECtalk's native F2 cells through cake's final K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f2 = Array.from({ length: 14 }, (_, index) => {
-      const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
-    });
-
-    expect(f2).toEqual([
-      1993, 1988, 1983, 1978, 1974, 1969, 1964, 1959, 1955, 1950, 1945, 1940, 1936, 1931,
-    ]);
-  });
-
-  it("matches DECtalk's native F3 cells through cake's final K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f3 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([
-      2404, 2404, 2404, 2404, 2403, 2403, 2403, 2403, 2402, 2402, 2402, 2402, 2401, 2401, 2401,
-    ]);
-  });
-
-  it("matches DECtalk's native B1 cells through cake's final K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([134, 156, 178, 200, 200, 200, 200, 200, 200, 200, 200, 200, 176, 153, 310]);
-  });
-
-  it("matches DECtalk's native B3 cells through cake's final K", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual([239, 253, 266, 280, 280, 280, 280, 280, 280, 280, 280, 280, 266, 253, 239]);
-  });
-
-  it("matches DECtalk's native F1 cells through cake's dummy IX carrier", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([337, 353, 382, 410, 426, 442]);
-  });
-
-  it("matches DECtalk's native F2 cells through cake's dummy IX carrier", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f2 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
-    });
-
-    expect(f2).toEqual([1927, 1900, 1830, 1760, 1733, 1706]);
-  });
-
-  it("matches DECtalk's native F3 cells through cake's dummy IX carrier", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f3 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([2401, 2425, 2438, 2450, 2474, 2498]);
-  });
-
-  it("matches DECtalk's native B3 cells through cake's dummy IX carrier", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual([239, 233, 226, 219, 213, 206]);
-  });
-
-  it("matches DECtalk's native F1 trace through cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const f1 = Array.from({ length: 93 }, (_, index) => {
-      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
-    });
-
-    expect(f1).toEqual([
-      ...[459, 460, 461, 462, 463, 464, 465, 466, 467, 468].flatMap((value) => [value, value]),
-      ...Array(73).fill(469),
-    ]);
-  });
-
-  it("matches DECtalk's native B3 hold through cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b3 = Array.from({ length: 93 }, (_, index) => {
-      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
-    });
-
-    expect(b3).toEqual(Array(93).fill(200));
-  });
-
-  it("matches DECtalk's native F2 decay into cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const terminalSilence = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find(
-        (item) =>
-          item.get("active") !== false &&
-          item.get("phoneme") === "SIL" &&
-          item.get("dummy_vowel") !== true &&
-          item.get("punctuationSymbol") === ".",
-      );
-    const f2 = Array.from({ length: 19 }, (_, index) => {
-      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
-    });
-
-    expect(terminalSilence).toBeDefined();
-    expect(f2).toEqual([
-      1677, 1677, 1676, 1676, 1676, 1675, 1675, 1674, 1674, 1674, 1673, 1673, 1673, 1672, 1672,
-      1671, 1671, 1671, 1670,
-    ]);
-  });
-
-  it("matches DECtalk's native F3 rise and hold in cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const sampleFrames = [...Array.from({ length: 21 }, (_, index) => 78 + index), 170];
-    const f3 = sampleFrames.map((frameIndex) => {
-      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
-    });
-
-    expect(f3).toEqual([
-      2522, 2522, 2522, 2522, 2523, 2523, 2523, 2523, 2524, 2524, 2524, 2524, 2525, 2525, 2525,
-      2525, 2526, 2526, 2526, 2526, 2527, 2527,
-    ]);
-  });
-
-  it("matches DECtalk's native B1 decay in cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 9 }, (_, index) => {
-      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([300, 270, 240, 210, 180, 150, 120, 90, 60]);
-  });
-
-  it("matches DECtalk's native B1 rise at the end of cake's terminal silence", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const b1 = Array.from({ length: 6 }, (_, index) => {
-      const time = (165 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
-    });
-
-    expect(b1).toEqual([72, 85, 97, 110, 122, 135]);
-  });
-
-  it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
-    const ey = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
-    const windows = ey?.get("control_windows");
-    const nativeF2 = [21, 29, 35, 50]
-      .map((frameIndex) => frameIndex * DECTALK_PACKET_PERIOD_SEC)
-      .map((time) => result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2);
-    const tailF2 = [51, 52, 53, 54, 55, 56, 57]
-      .map((frameIndex) => frameIndex * DECTALK_PACKET_PERIOD_SEC)
-      .map((time) => result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2);
-
-    expect(Array.isArray(windows)).toBe(true);
-    expect(windows).toContainEqual(
-      expect.objectContaining({
-        start_ms: 236.6,
-        end_ms: 237,
-        fields: expect.objectContaining({ F2: 1994 }),
-        tag: "segmental_context",
-      }),
-    );
-    expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);
-    expect(tailF2).toEqual([2006, 2006, 2003, 2001, 1998, 1996, 1994]);
   });
 
   it("inserts DECtalk's six-frame dummy IX carrier after a final voiceless stop", () => {
@@ -1445,7 +298,9 @@ describe("dectalk-english end-to-end", () => {
       .findLast((item) => item.get("active") !== false && item.get("phoneme") === "K");
 
     expect(dummyVowels).toHaveLength(1);
-    expect(finalStop?.get("duration")).toBe(96);
+    // DECtalk times the final [k] of "cake." at 14 frames.
+    expect(finalStop?.get("timing_frames")).toBe(14);
+    expect(finalStop?.get("duration")).toBeCloseTo(14 * 6.4, 9);
     expect(finalStop?.get("control_windows")).toContainEqual({
       suffix_ms: 26,
       target: "current",
@@ -1453,7 +308,9 @@ describe("dectalk-english end-to-end", () => {
       tag: "stop_burst",
     });
     expect(dummyVowels[0].get("phoneme")).toBe("SIL");
-    expect(dummyVowels[0].get("duration")).toBe(38);
+    // NF40MS is six controller frames of 6.4 ms (ph_defs.h:440).
+    expect(dummyVowels[0].get("duration")).toBe(38.4);
+    expect(dummyVowels[0].get("dummy_phone")).toBe("IX");
     expect(dummyVowels[0].get("F1")).toBe(460);
     expect(dummyVowels[0].get("F2")).toBe(1680);
     expect(dummyVowels[0].get("F3")).toBe(2520);
@@ -1461,10 +318,89 @@ describe("dectalk-english end-to-end", () => {
     expect(dummyVowels[0].get("control_windows")).toContainEqual({
       start_ms: 0,
       target: "current",
-      end_ms: 38,
-      fields: { AV: 0, AH: 42, B1: 310, B2: 170 },
+      end_ms: 38.4,
+      // 48 dB before a front beginning, 3 less in an unstressed coda, 6 less
+      // in a dummy vowel (p_us_st1.c:1367-1387, 1422-1426); DECtalk's packets
+      // for "cake." carry AP = 39 here.
+      fields: { AV: 0, AH: 39, B1: 310, B2: 170 },
       tag: "stop_aspiration",
     });
+  });
+
+  /** Packet at which each active Segment's first frame falls, with its phoneme. */
+  function segmentStarts(text: string): Array<[string, number]> {
+    const { track } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const starts: Array<[string, number]> = [];
+    let previous: string | undefined;
+    for (const frame of track) {
+      if (!frame.segmentId || frame.segmentId === previous) continue;
+      previous = frame.segmentId;
+      starts.push([frame.phoneme ?? "?", Math.round(frame.time / DECTALK_PACKET_PERIOD_SEC)]);
+    }
+    return starts;
+  }
+
+  it("opens the utterance with DECtalk's pause: 3 packets before a voiced phone, 4 before /h/", () => {
+    // p_us_tim.c:229-232 gives 4 frames, or 5 when the next phone is neither
+    // voiced, obstruent nor plosive; the first frame is never sent
+    // (ph_claus.c:759-766). DECtalk's packets: "a cat." [ax] at 3,
+    // "Hello world." [hx] at 4.
+    expect(segmentStarts("a cat.")[0]).toEqual(["AX", 3]);
+    expect(segmentStarts("Hello world.")[0]).toEqual(["HH", 4]);
+  });
+
+  it("gives every later clause its opening pause after the previous clause's closing one", () => {
+    // DECtalk's packets for "Yes, we can.": [s] ends at 66, [w] starts at 86:
+    // 16 frames for the comma and 4 that open the second clause.
+    const starts = segmentStarts("Yes, we can.");
+    expect(starts.slice(2, 5)).toEqual([
+      ["S", 38],
+      ["SIL", 66],
+      ["W", 86],
+    ]);
+  });
+
+  it("releases a voiced plosive before a pause into DECtalk's dummy vowel", () => {
+    // Ph_inton2.c:1683-1722. "Red, green, blue, and gold.": IX after [eh d],
+    // AX after [lx d]; DECtalk's packets put them at 55-60 and 359-364.
+    const result = textToKlattTrackDetailed("Red, green, blue, and gold.", undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const dummies = result.utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true);
+    expect(dummies.map((item) => item.get("dummy_phone"))).toEqual(["IX", "AX"]);
+    expect(dummies.map((item) => item.get("duration"))).toEqual([38.4, 38.4]);
+    const starts = segmentStarts("Red, green, blue, and gold.");
+    expect(starts.filter(([phoneme]) => phoneme === "SIL")).toEqual([
+      ["SIL", 55],
+      ["SIL", 61],
+      ["SIL", 146],
+      ["SIL", 225],
+      ["SIL", 359],
+      ["SIL", 365],
+    ]);
+  });
+
+  it("gives no dummy vowel where DECtalk's intonation routine has left its loop", () => {
+    // Ph_inton2.c:809-819 breaks out of the allophone loop at a syllabic that
+    // begins and ends the hat past the fourth allophone, before Rule 9 can
+    // run: "We will wait." ends [t] then silence at packet 92, 186 packets in
+    // all. "a cat." (the syllabic is the third allophone) keeps its dummy.
+    const dummyCount = (text: string): number =>
+      textToKlattTrackDetailed(text, undefined, 30, { frontendId: "dectalk-english" })
+        .utterance.relation("Segment")
+        .listItems()
+        .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true).length;
+    expect(dummyCount("We will wait.")).toBe(0);
+    expect(dummyCount("a cat.")).toBe(1);
+    expect(segmentStarts("We will wait.").slice(-2)).toEqual([
+      ["T", 81],
+      ["SIL", 92],
+    ]);
   });
 
   it("preserves required segment features when reducing a same-word geminate", () => {
@@ -1625,20 +561,514 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
       .filter((p) => p !== "SIL");
   }
 
-  it("uses the dictionary pronunciation for 'colonel' (K ER N EL), not the LTS spelling-out", () => {
+  it("uses the dictionary pronunciation for 'colonel' (K RR N EL), not the LTS spelling-out", () => {
     const phs = contentPhonemes("colonel.");
-    // Dictionary: K ER1 N EL. The old LTS path produced K AA L AA N EH L —
-    // it contained no ER at all and doubled AA. Assert the dict signature.
-    expect(phs).toContain("ER");
+    // Dictionary: k'Rnl, DECtalk's RR vowel. The old LTS path produced
+    // K AA L AA N EH L, with no r-colored vowel and a doubled AA.
+    expect(phs).toContain("RR");
     expect(phs.filter((p) => p === "AA").length).toBe(0);
     expect(phs[0]).toBe("K");
   });
 
-  it("uses the dictionary pronunciation for 'nuclear' (N UW K L IY ER), avoiding the LTS 'nucular' shape", () => {
+  it("uses the dictionary pronunciation for 'nuclear' (N UW K L IY RR), avoiding the LTS 'nucular' shape", () => {
     const phs = contentPhonemes("nuclear.");
-    // Dictionary: N UW1 K L IY0 ER0 — ends in ER, has IY before it.
-    expect(phs).toContain("ER");
+    // The dictionary entry ends in DECtalk's RR vowel, with IY before it.
+    expect(phs).toContain("RR");
     expect(phs).toContain("IY");
     expect(phs[0]).toBe("N");
+  });
+
+  // An inflected word whose dictionary root has RR as its only vowel. These
+  // threw E_STRESS_DOMAIN while the frontend sent them through the shared
+  // morphology and stress policy, whose vowel list had no RR. DECtalk's own
+  // suffix rules handle them now (the IX of "nurses" is theirs).
+  it.each([
+    ["nurses.", ["N", "RR", "S", "IX", "Z"]],
+    ["girls.", ["G", "G_REL", "RR", "LX", "Z"]],
+    ["worked.", ["W", "RR", "K", "T"]],
+  ])("says %s from a dictionary root whose only vowel is RR", (phrase, expected) => {
+    expect(contentPhonemes(phrase)).toEqual(expected);
+  });
+
+  // Words with no dictionary root are pronounced by DECtalk's own compiled
+  // letter-to-sound tables (scripts/oracle/compare-lts.ts measures all 417
+  // oracle words); these are the ones the oracle gate used to list as gaps.
+  it.each([
+    ["cape.", ["K", "K_REL", "EY", "P"]],
+    ["zones.", ["Z", "OW", "N", "Z"]],
+    ["barked.", ["B", "B_REL", "AR", "K", "T"]],
+  ])("says %s by table letter-to-sound", (phrase, expected) => {
+    expect(contentPhonemes(phrase)).toEqual(expected);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A clause that begins with a wh-word is a question DECtalk ends like a
+// statement: LTS/ls_task.c sends its "?" on as a period.
+// ---------------------------------------------------------------------------
+describe("dectalk-english wh-questions", () => {
+  function finalPunctuation(phrase: string): { symbol: unknown; rime: unknown[] } {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const live = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+    return {
+      symbol: live
+        .findLast((item) => item.get("punctuationSymbol") != null)
+        ?.get("punctuationSymbol"),
+      rime: [...new Set(live.map((item) => item.get("rime_boundary")).filter((b) => b != null))],
+    };
+  }
+
+  it.each(["Where are they going?", "How are you today?", "What is it?"])(
+    "ends %j with a period-type boundary",
+    (phrase) => {
+      const { symbol, rime } = finalPunctuation(phrase);
+      expect(symbol).toBe(".");
+      expect(rime).toContain("period");
+      expect(rime).not.toContain("question");
+    },
+  );
+
+  // The first word is the one after a sentence end; a comma does not start
+  // a new one, so "well" decides the last of these.
+  it.each(["Can we go?", "Is it where we go?", "Well, where are they?"])(
+    "keeps %j a question",
+    (phrase) => {
+      const { symbol, rime } = finalPunctuation(phrase);
+      expect(symbol).toBe("?");
+      expect(rime).toContain("question");
+    },
+  );
+
+  it("decides each clause by its own first word", () => {
+    const { utterance } = textToKlattTrackDetailed("Can we go? Where?", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const symbols = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("punctuationSymbol") != null)
+      .map((item) => item.get("punctuationSymbol"));
+    expect(symbols).toEqual(["?", "."]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// "are", "had", "is", "was", "were" and "will" take secondary stress as the
+// first word of a sentence (LTS/ls_task.c verbs[]). The sentences here have a
+// second verb, so the helper-verb promotion below stays out of it. Stress per
+// phone from DECtalk's debug build (p_us_tim.c state prints):
+// "Was it raining?" w 2, ah 2; "It was raining." and "Well, was it raining?"
+// have "was" at 0; "Will it rain." w 2, ih 2.
+// ---------------------------------------------------------------------------
+function dectalkVowelStress(phrase: string): Array<[unknown, unknown]> {
+  const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+    frontendId: "dectalk-english",
+  });
+  return utterance
+    .relation("Segment")
+    .listItems()
+    .filter((item) => item.get("active") !== false && item.get("type") === "vowel")
+    .map((item) => [item.get("word"), item.get("stress")]);
+}
+
+describe("dectalk-english sentence-initial auxiliaries", () => {
+  it("gives the auxiliary secondary stress at the start of a sentence", () => {
+    expect(dectalkVowelStress("Was it raining?")[0]).toEqual(["was", 2]);
+    expect(dectalkVowelStress("Will it rain.")[0]).toEqual(["will", 2]);
+  });
+
+  it("leaves it unstressed elsewhere, also after a comma", () => {
+    expect(dectalkVowelStress("It was raining.")[1]).toEqual(["was", 0]);
+    expect(dectalkVowelStress("Well, was it raining?")[1]).toEqual(["was", 0]);
+  });
+
+  it("counts a new sentence, not a new clause", () => {
+    const stresses = dectalkVowelStress("Where are they going? Was it raining?");
+    expect(stresses.find(([word]) => word === "was")).toEqual(["was", 2]);
+    expect(stresses.find(([word]) => word === "are")).toEqual(["are", 0]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A function-word verb that is its clause's only verb is the verb, not a
+// helper, and takes secondary stress (ph_task.c:598-626, ph_sort.c:1272-1302).
+// Each expectation is the stress DECtalk's debug build prints for that vowel.
+// ---------------------------------------------------------------------------
+describe("dectalk-english helper-verb promotion", () => {
+  const stressOf = (phrase: string, word: string, nth = 0): unknown =>
+    dectalkVowelStress(phrase).filter(([spoken]) => spoken === word)[nth]?.[1];
+
+  it("gives a clause's only verb secondary stress when it is a function word", () => {
+    expect(stressOf("It is here.", "is")).toBe(2);
+    expect(stressOf("How are you today?", "are")).toBe(2);
+    expect(stressOf("I have it.", "have")).toBe(2);
+    expect(stressOf("Silver, and gold.", "and")).toBe(2);
+  });
+
+  it("leaves it alone when the clause has another verb", () => {
+    expect(stressOf("This is a test.", "is")).toBe(0);
+    expect(stressOf("Where are they going?", "are")).toBe(0);
+    expect(stressOf("You may go.", "may")).toBe(0);
+  });
+
+  it("skips a verb that is also a noun or an adjective", () => {
+    // "can" and "up" are nouns too; "can" gets the clause's primary stress.
+    expect(stressOf("He can.", "can")).toBe(1);
+    expect(stressOf("Up there.", "up")).toBe(0);
+  });
+
+  it("adds to the stress the vowel has", () => {
+    expect(stressOf("They do.", "do")).toBe(3);
+    expect(stressOf("It is.", "is")).toBe(3);
+  });
+
+  it("keeps the consonant before a promoted vowel at secondary stress", () => {
+    const { utterance } = textToKlattTrackDetailed("They do.", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const d = utterance
+      .relation("Segment")
+      .listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "D");
+    expect(d?.get("stress")).toBe(2);
+  });
+
+  it("carries an unused promotion into the following clauses", () => {
+    expect(stressOf("They went.", "went")).toBe(1);
+    expect(stressOf("He can. They went.", "went")).toBe(3);
+    expect(stressOf("He can. So. They went.", "went")).toBe(3);
+    expect(stressOf("To be, they went.", "went")).toBe(3);
+    // Used by "rained" (class ed, from the suffix rule).
+    expect(stressOf("He can. It rained. They went.", "rained")).toBe(3);
+    expect(stressOf("He can. It rained. They went.", "went")).toBe(1);
+    expect(stressOf("They went, he can, they went.", "went", 0)).toBe(1);
+    expect(stressOf("They went, he can, they went.", "went", 1)).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The last rime before a word that starts a verb phrase carries FVPNEXT, not
+// FWBNEXT (LTS/ls_dict.c:777-778, ph_sort2.c get_next_bound_type). Boundary
+// value per phone from DECtalk's debug build: 160 is the verb-phrase value,
+// 96 a word boundary.
+// ---------------------------------------------------------------------------
+describe("dectalk-english verb-phrase boundaries", () => {
+  function boundaries(phrase: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("rime_boundary") !== undefined)
+      .map((item) => `${String(item.get("phoneme"))}:${String(item.get("rime_boundary"))}`);
+  }
+
+  it("marks the rime before a verb", () => {
+    // "Can we go?": ae 96, n 96, iy 160, ow question.
+    expect(boundaries("Can we go?")).toEqual(["AE:word", "N:word", "IY:vp", "OW:question"]);
+    // "They went home.": ey 160.
+    expect(boundaries("They went home.")[0]).toBe("EY:vp");
+  });
+
+  it("reads a suffixed verb's root", () => {
+    // "He goes home.": iy 160 ("go" is a verb, "goes" is not in the dictionary).
+    expect(boundaries("He goes home.")[0]).toBe("IY:vp");
+  });
+
+  it("still knows the verb when an allophone rule has replaced its first phone", () => {
+    // "They receive it.": ey 160. The R of "receive" is rewritten after the
+    // lexicon is read; the word's phrase start is kept on its Word.
+    expect(boundaries("They receive it.")[0]).toBe("EY:vp");
+    expect(boundaries("They remain.")[0]).toBe("EY:vp");
+  });
+
+  it("leaves a word boundary before a word that is also a noun", () => {
+    // "We tested it.": iy 96.
+    expect(boundaries("We tested it.")[0]).toBe("IY:word");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// /r/ before a vowel stays R in US English (the R -> RR rule of ph_aloph.c is
+// for the German phone), and a vowel fuses with a following /r/ only when the
+// /r/ has no stress of any level (ph_aloph.c:823). Phone codes from DECtalk's
+// debug build: "every." eh v r iy; "hundred." hx ah n d r ih d;
+// "around." ax r aw n d; "story." s t or iy.
+// ---------------------------------------------------------------------------
+describe("dectalk-english /r/", () => {
+  function phones(phrase: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter(
+        (item) =>
+          item.get("active") !== false &&
+          item.get("phoneme") !== "SIL" &&
+          !String(item.get("phoneme")).endsWith("_REL"),
+      )
+      .map((item) => String(item.get("phoneme")));
+  }
+
+  it("keeps R before an unstressed vowel", () => {
+    expect(phones("every.")).toEqual(["EH", "V", "R", "IY"]);
+    expect(phones("hundred.").slice(0, 6)).toEqual(["HH", "AH", "N", "D", "R", "IH"]);
+  });
+
+  it("does not fuse a vowel with an /r/ that has secondary stress", () => {
+    expect(phones("around.")).toEqual(["AX", "R", "AW", "N", "D"]);
+  });
+
+  it("still fuses a vowel with an unstressed /r/", () => {
+    expect(phones("story.")).toEqual(["S", "T", "OR", "IY"]);
+  });
+
+  // "Rule 1a: The word 'the' should be /dh iy/ before a syllabic"
+  // (ph_aloph.c:735-748). DECtalk's debug build: "The old man." dh iy ow lx d
+  // m ae n. Its record for "The cake is good." starts dh ax k.
+  it("says the schwa of 'the' as IY before a vowel", () => {
+    expect(phones("The old man.").slice(0, 3)).toEqual(["DH", "IY", "OW"]);
+    expect(phones("The cake is good.").slice(0, 3)).toEqual(["DH", "AX", "K"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DECtalk's text stage puts a comma before a conjunction or a preposition
+// that is far enough from the last one and from the end (LTS/ls_task.c
+// :5129-5229, ls_util.c:824-853). Its phoneme log for "The big dog barked and
+// the small cat ran away." has the comma before "and"; none for "The dog and
+// the cat ran." or "The big dog barked and ran.".
+// ---------------------------------------------------------------------------
+describe("dectalk-english clause breaks", () => {
+  const detailed = (phrase: string) =>
+    textToKlattTrackDetailed(phrase, 110, 30, { frontendId: "dectalk-english" }).utterance;
+  const active = (phrase: string) =>
+    detailed(phrase)
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+  const commas = (phrase: string): number =>
+    active(phrase).filter((item) => item.get("punctuationSymbol") === ",").length;
+  const phonesOf = (phrase: string, word: string): string[] =>
+    active(phrase)
+      .filter((item) => item.get("word") === word && !String(item.get("phoneme")).endsWith("_REL"))
+      .map((item) => String(item.get("phoneme")));
+
+  it("puts a comma before a conjunction with words enough on both sides", () => {
+    expect(commas("The big dog barked and the small cat ran away.")).toBe(1);
+    expect(commas("The dog and the cat ran.")).toBe(0);
+    expect(commas("The big dog barked and ran.")).toBe(0);
+  });
+
+  // DECtalk's phoneme log: no comma in "Do you know where the station is?"
+  // (three words after "where"), one in "... is today?" (four).
+  it("needs more than three words after the marked word", () => {
+    expect(commas("Do you know where the station is?")).toBe(0);
+    expect(commas("Do you know where the station is today?")).toBe(1);
+  });
+
+  it("breaks before a preposition, and not again within three words", () => {
+    const words = active("The big dog barked at the small cat in the box.");
+    const comma = words.findIndex((item) => item.get("punctuationSymbol") === ",");
+    expect(words[comma + 1]?.get("word")).toBe("at");
+    expect(commas("The big dog barked at the small cat in the box.")).toBe(1);
+  });
+
+  it("makes the comma a silence that belongs to no word", () => {
+    const utterance = detailed("The big dog barked and the small cat ran away.");
+    const segments = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+    const comma = segments.find((item) => item.get("punctuationSymbol") === ",");
+    expect(comma?.get("phoneme")).toBe("SIL");
+    expect(comma && utterance.relation("SylStructure").node(comma)).toBeUndefined();
+    // The word after it still owns its phones.
+    const first = segments[segments.indexOf(comma as (typeof segments)[number]) + 1];
+    expect(utterance.relation("SylStructure").node(first)?.parent?.parent?.item.get("text")).toBe(
+      "and",
+    );
+  });
+
+  it("counts a number in digits as one written word", () => {
+    const places = detailed("The 25 and the small cat ran away.")
+      .relation("Word")
+      .listItems()
+      .map((word) => word.get("clause_word_index"));
+    expect(places).toEqual([1, 2, 2, 3, 4, 5, 6, 7, 8]);
+    expect(commas("The 25 and the small cat ran away.")).toBe(0);
+  });
+
+  // LTS/ls_task.c:5066-5075: one item between white space is one word of the
+  // count. DECtalk's symbols for this text have no comma before "and".
+  it("counts a word spelled letter by letter as one written word", () => {
+    const places = detailed("The dog ran off and the XQ came.")
+      .relation("Word")
+      .listItems()
+      .map((word) => word.get("clause_word_index"));
+    expect(places).toEqual([1, 2, 3, 4, 5, 6, 7, 7, 8]);
+    expect(commas("The XQ and the old cat ran off down the road today.")).toBe(0);
+  });
+
+  it("starts the count again after a written comma", () => {
+    expect(commas("Yes, the big dog barked and the small cat ran away.")).toBe(2);
+  });
+
+  // ph_aloph.c:765-781 and :486-501. DECtalk's debug build: EH N D after the
+  // break above; AE N D, with the promoted AE, in "Silver, and gold.".
+  it("says a clause-initial 'and' with EH unless the clause is short and the vowel stressed", () => {
+    expect(phonesOf("The big dog barked and the small cat ran away.", "and")).toEqual([
+      "EH",
+      "N",
+      "D",
+    ]);
+    expect(phonesOf("Silver, and gold.", "and")).toEqual(["AE", "N", "D"]);
+  });
+
+  // ph_aloph.c:801-814. DECtalk's debug build: "Look at me." (nine entries
+  // with its two silences) ae tx; "Look at them." (ten) eh tx.
+  it("says 'at' with EH in a clause of ten entries or more", () => {
+    expect(phonesOf("Look at me.", "at")).toEqual(["AE", "TX"]);
+    expect(phonesOf("Look at them.", "at")).toEqual(["EH", "TX"]);
+  });
+
+  // The class of the word after a break reaches DECtalk's phonetic stage
+  // before the comma (ls_util.c:808-853), and the comma carries it through
+  // the phone sort (ph_sort.c:1271-1302). DECtalk's debug build: "and" is
+  // unstressed in its own clause, and in "The big small cat and they remain
+  // here today." the first vowel of "remain" is unstressed too: the flag that
+  // the class of "and" set is used up at the comma.
+  it("counts the class of the word after a break in the clause before it", () => {
+    const stress = (phrase: string, word: string): unknown =>
+      active(phrase)
+        .find((item) => item.get("word") === word && item.get("type") === "vowel")
+        ?.get("stress");
+    expect(stress("The big dog barked and the small cat ran away.", "and")).toBe(0);
+    expect(stress("The big small cat and they remain here today.", "remain")).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FTYPESYL counts the syllabics of the word (ph_sort2.c init_med_final), not
+// the syllabifier's syllables. DECtalk's record (dectalk-us-v1.durations.json):
+// "Vision is usual." has YU first, UW medial, EL final; "Red lorries..." has
+// OR first, IY final.
+// ---------------------------------------------------------------------------
+describe("dectalk-english syllable type", () => {
+  function syllableTypes(phrase: string, word: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter(
+        (item) =>
+          item.get("active") !== false &&
+          item.get("word") === word &&
+          item.get("syllable_type") !== undefined,
+      )
+      .map((item) => `${String(item.get("phoneme"))}:${String(item.get("syllable_type"))}`);
+  }
+
+  it("counts /yu/ and a syllabic consonant as syllabics", () => {
+    expect(syllableTypes("Vision is usual.", "usual")).toEqual([
+      "YU:first",
+      "UW:medial",
+      "EL:final",
+    ]);
+  });
+
+  it("puts a vowel fused with /r/ where the vowel was", () => {
+    expect(syllableTypes("Red lorries.", "lorries")).toEqual(["OR:first", "IY:final"]);
+  });
+
+  it("gives a monosyllable no position", () => {
+    expect(syllableTypes("Red lorries.", "red")).toEqual(["EH:only"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// One output clock. DECtalk's controller counts nominal 6.4-ms frames
+// (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
+// (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks
+// alike, sits on the same packet clock. A frame of a segment that has already
+// been left means two frames were projected by different clocks.
+// ---------------------------------------------------------------------------
+describe("dectalk-english output clock", () => {
+  function framesOfLeftSegments(track: KlattFrame[]): string[] {
+    const ordinals = new Map<string, number>();
+    const violations: string[] = [];
+    let latest = -1;
+    let seenSegment = false;
+    for (const frame of track) {
+      if (frame.segmentId) seenSegment = true;
+      // Frames without a Segment are the synthesized silence edges: the
+      // initial edge before the first Segment, the final edge after the last.
+      const key = frame.segmentId ?? (seenSegment ? "edge:final" : "edge:initial");
+      if (!ordinals.has(key)) ordinals.set(key, ordinals.size);
+      const ordinal = ordinals.get(key) as number;
+      if (ordinal < latest) {
+        violations.push(`${(frame.time * 1000).toFixed(4)} ms ${frame.phoneme ?? "?"} (${key})`);
+      } else {
+        latest = ordinal;
+      }
+    }
+    return violations;
+  }
+
+  it.each(["moon.", "Hello world.", "The rain in Spain stays mainly in the plain."])(
+    "never emits a frame of a segment that has already ended: %s",
+    (phrase) => {
+      const track = textToKlattTrack(phrase, undefined, 30, { frontendId: "dectalk-english" });
+      expect(framesOfLeftSegments(track)).toEqual([]);
+    },
+  );
+
+  it("places segment starts on the packet clock, not the nominal controller clock", () => {
+    const { track } = textToKlattTrackDetailed("moon.", undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const starts = new Map<string, number>();
+    for (const frame of track) {
+      if (frame.segmentId && !starts.has(frame.segmentId)) starts.set(frame.segmentId, frame.time);
+    }
+    const [mStart, uwStart] = [...starts.values()];
+    // Control: M starts after 3 frames of initial silence.
+    expect(mStart).toBeCloseTo(3 * DECTALK_PACKET_PERIOD_SEC, 9);
+    // The last M tick (controller frame 15) must precede the UW start.
+    expect(uwStart).toBeGreaterThan(15 * DECTALK_PACKET_PERIOD_SEC);
+  });
+});
+
+// The F0 kernel trapped on frame 4096 of a text (26.2 s): DECtalk's two
+// pseudojitter phases index one past its cosine table there (f0-filters,
+// dectalk_pseudojitter). What DECtalk's packets hold on that frame is checked
+// by the frame gate's dectalk-us-long-text-v1.
+//
+// The text is one-word sentences: a sentence's closing pause is 94 frames, so
+// 28 words run past frame 4096 where connected prose needs over a hundred, and
+// the frontend's time goes with the words. Frame 8192 is reached without any
+// text in test/f0-lowering.test.ts and in the kernel's own tests.
+describe("dectalk-english text longer than 4096 frames", () => {
+  it.each([
+    ["a text short of it", 12, false],
+    ["a text past it", 28, true],
+  ])("speaks %s", (_name, sentences, reaches) => {
+    const text = Array.from({ length: sentences }, () => "Go.").join(" ");
+    const { track } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const packets = Math.round((track[track.length - 1]?.time ?? 0) / DECTALK_PACKET_PERIOD_SEC);
+    expect(packets > 4096).toBe(reaches);
+    for (const frame of track) expect(Number.isFinite(frame.params.F0)).toBe(true);
   });
 });

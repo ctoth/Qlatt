@@ -70,6 +70,7 @@ function spec(
         scalars: {
           [field]: {
             unit: "ms",
+            quantum: 1,
             resolution: "klatt",
             floor_field: options.floorField ?? "durationFloor",
             ...(options.fallback === false

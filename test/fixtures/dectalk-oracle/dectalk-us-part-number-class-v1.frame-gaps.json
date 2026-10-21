@@ -1,0 +1,11 @@
+{
+  "pc-path": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-path-plain-words": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-hyphen": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-first-run-noun": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-first-run-noun-hyphen": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "pc-first-run-spelled": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-first-run-digits": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-plain-word-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pc-no-path-control": ["B1","AV","AP","A2","A6","AB"]
+}

@@ -79,52 +79,605 @@ rules:
     citations:
       - DECtalk 4.63 ph_syl.c ph_syllab (word-position from syllable index + count)
 
-  dectalk_single_word_fallback_primary_stress:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.type == 'vowel' && word_count() == 1"
-    define:
-      prev_primary_or_boundary: >-
-        look_back_where(current, 100,
-          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
-      next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
-      prior_vowel_in_word: >-
-        find_within_word(current,
-          "current.type == 'vowel'",
-          "behind")
-      no_primary_in_clause: >-
-        (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
-        && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
-    constraint: "no_primary_in_clause && prior_vowel_in_word == null && !word_has_metrical_stress()"
-    apply:
-      - field: stress
-        op: set
-        value: 1
-        tag: fallback_primary_stress
-    citations:
-      - "DECtalk 4.63 ph_sort2.c find_syll_to_stress (no primary stress: stress first vowel of last word)"
-
-  dectalk_onset_y_stress:
+  # ---------------------------------------------------------------------------
+  # FTYPESYL: where a syllabic stands among the syllabics of its word.
+  #
+  # DECtalk's structure word does not take this from its syllabifier. For each
+  # syllabic, init_med_final (ph_sort2.c:60-110, called at ph_sort.c:1358)
+  # looks for another syllabic earlier in the word and for one later, before
+  # the next word boundary or stronger:
+  #   one earlier, none later  -> final
+  #   one earlier, one later   -> medial
+  #   none earlier, one later  -> first
+  #   neither                  -> monosyllable (no feature)
+  # So "usual" (YU ZH UW EL) is first, medial, final although /yu/ is not a
+  # nucleus in the syllabifier's table, and the fused vowel of "lorries" is
+  # first.
+  # ---------------------------------------------------------------------------
+  dectalk_syllable_type:
     kind: scalar
     select:
       relation: Segment
       where: >-
-        current.phoneme == 'Y'
-        && has(current.word) && current.word != ''
-        && has(current.syllable_role) && current.syllable_role == 'onset'
-        && has(current.syllable_index)
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
     define:
-      stressed_nucleus: >-
+      earlier: >-
         find_within_word(current,
-          "current.type == 'vowel' && has(current.stress) && current.stress != 0 && has(current.syllable_index) && current.syllable_index == source.syllable_index",
-          "both")
-    constraint: "stressed_nucleus != null"
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "behind")
+      later: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "ahead")
+      # "to", "and" and "for" come in as SPECIALWORD, PPSTART, phones. After
+      # a word boundary the forward scan stops at that boundary. With none
+      # before them (the word before is phonemic text; phrase state 'alone')
+      # the scan meets SPECIALWORD first and tests it as a phone: its code is
+      # 120 (INCLUDE/l_com_ph.h:65), past the feature table's 101 words, and
+      # the program's data there has the syllabic bit
+      # (timing.syllabic_indices_past_table holds 120). So the last syllabic
+      # of the phonemic text has "a syllabic after it" before the phrase
+      # start ends the scan. Measured on say.exe: the AA of "dot" in "...and
+      # then it rained." has the first-syllable bit (structure word 521) and
+      # Rule 5's shortening (prcnt 60); in "Dot and then" it has neither.
+      next_word_start: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
+      # The same when the phrase start has become a word boundary (the word
+      # ends its clause): the SPECIALWORD symbol is still the first thing
+      # after the phonemic text. say.exe on "[uw] and.": the UW has the
+      # first-syllable bit (structure word 618) and Rule 5's shortening.
+      special_reads_syllabic: >-
+        later == null && next_word_start != null && next_word_start.phoneme != 'SIL'
+        && dectalk_phrase_unbounded(next_word_start)
+        && 120 in params.policy.timing.syllabic_indices_past_table
+      later_in_scan: "later != null || special_reads_syllabic"
+    apply:
+      - field: syllable_type
+        op: set
+        dispatch:
+          - when: "earlier != null && later_in_scan"
+            value: "'medial'"
+          - when: "earlier != null"
+            value: "'final'"
+          - when: later_in_scan
+            value: "'first'"
+          - default: "'only'"
+        tag: syllabification
+    citations:
+      - "DECtalk 4.63 ph_sort2.c:60-110 init_med_final (FTYPESYL from the syllabics before and after in the word)"
+      - "DECtalk 4.63 INCLUDE/l_com_ph.h:65 (SPECIALWORD is 120), PH/ph_aloph.c:146 and PH/ph_romi.c:214-222 (phone_feature indexes us_featb by the symbol's code), LTS/l_us_con.c:1187-1195 (for, and, to are entered with SPECIALWORD and PPSTART)"
+      - "DECtalk 4.63 ph_sort.c:1358 (called for each syllabic)"
+
+  # ---------------------------------------------------------------------------
+  # FBOUNDARY: the type of the next boundary, on the phones of a final rime.
+  #
+  # get_next_bound_type (ph_sort2.c:203-222) scans forward from a phone to the
+  # next boundary symbol and gives the phone that boundary's type from
+  # bounftab (ph_romi.c:174-205), unless it meets a syllabic first. So only
+  # the last syllabic before a boundary and the consonants after it carry one.
+  # phsort() calls it for every phone once the clause has had a syllabic
+  # (in_rhyme, ph_sort.c:1356,1395).
+  #
+  # Boundaries modelled here: a morpheme boundary or a compound's joint the
+  # lexicon marks inside a word (FMBNEXT), a following word (FWBNEXT), a
+  # following word that starts a verb phrase (FVPNEXT), the word boundary
+  # together with a prepositional-phrase start and a compound's joint together
+  # with a verb-phrase start (both the comma value) and the clause-final
+  # punctuation (FCBNEXT comma, FPERNEXT period, FQUENEXT question mark,
+  # FEXCLNEXT exclamation mark).
+  # Not modelled: syllable boundaries.
+  # ---------------------------------------------------------------------------
+  dectalk_rime_boundary:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    define:
+      # in_rhyme: the clause has had a syllabic at or before this phone.
+      prior_syllabic_or_clause_start: >-
+        look_back_where(current, 100,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
+      in_rhyme: >-
+        current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']
+        || (prior_syllabic_or_clause_start != null && prior_syllabic_or_clause_start.phoneme != 'SIL')
+      # Where the forward scan stops: a punctuation silence, the first phone of
+      # another word, or a syllabic of this word. (The dummy vowel after a
+      # final stop is a silence of the same word; the scan passes over it.)
+      boundary_item: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
+      syllabic_first: >-
+        boundary_item != null && boundary_item.phoneme != 'SIL'
+        && dectalk_same_word(boundary_item, current)
+      mark: >-
+        boundary_item != null && boundary_item.phoneme == 'SIL'
+        ? boundary_item.punctuationSymbol : ''
+      # A morpheme boundary inside the word ("nine|teen") is a boundary symbol
+      # too: the scan stops at it when no syllabic comes first. The phone
+      # before the boundary carries the mark.
+      marked_ahead: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
+      before_morpheme: >-
+        isTrue(current, 'morpheme_boundary_after')
+        || (marked_ahead != null && marked_ahead.phoneme != 'SIL'
+            && dectalk_same_word(marked_ahead, current)
+            && !(marked_ahead.type == 'vowel' || marked_ahead.phoneme in ['EL', 'EM', 'EN'])
+            && isTrue(marked_ahead, 'morpheme_boundary_after'))
+      # The next word starts a prepositional phrase with no word boundary
+      # before it (the word before is phonemic text; dectalk_pp_start_state
+      # 'alone'). The forward scan gives no phone a value there: measured on
+      # say.exe, in "...and then it rained." the AA of "dot" has no boundary.
+      # The scan gives up when it meets a syllabic before a boundary
+      # (ph_sort2.c:217-220), and the SPECIALWORD symbol ahead of the phrase
+      # start reads as one (dectalk_syllable_type). Only the last phone has a
+      # value, which the phrase start's own symbol adds.
+      # The same when the phone sort has turned that phrase start into a word
+      # boundary (the word ends its clause, state 'word'): the SPECIALWORD
+      # symbol still stands first, and the last phone has the word
+      # boundary's value. say.exe on "[uwt] and.": UW 0, T 96; on
+      # "[uwtn] and.": T 0, N 96.
+      alone_ahead: >-
+        boundary_item != null && boundary_item.phoneme != 'SIL'
+        && !dectalk_same_word(boundary_item, current)
+        && dectalk_phrase_unbounded(boundary_item)
+      last_before_alone: >-
+        alone_ahead && dectalk_next(current) != null
+        && dectalk_next(current).id == boundary_item.id
+      # A word's last phone before the clause has had a syllabic (a word of
+      # consonants alone that starts the clause, as phonemic text can give:
+      # "[dh ax]" is DH, a word boundary, AX). The scan is not run for it,
+      # but the boundary symbol itself adds its value to the phone before it
+      # (ph_sort.c:1462-1495), as it does to every word's last phone.
+      # Measured on say.exe: in "[dh ax r'ihvrr r'aen d'awn]." the blade
+      # opens from the DH's first frame, which is ph_draw.c:3528's branch for
+      # a phone with a word boundary or a stronger one.
+      word_end_before_rhyme: >-
+        !in_rhyme && boundary_item != null && boundary_item.phoneme != 'SIL'
+        && !dectalk_same_word(boundary_item, current)
+        && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
+    constraint: >-
+      ((in_rhyme && (before_morpheme || !syllabic_first)) || word_end_before_rhyme)
+      && (!alone_ahead || last_before_alone)
+    apply:
+      - field: rime_boundary
+        op: set
+        dispatch:
+          # The last phone before a phrase start that has no word boundary
+          # before it: the phrase start's value alone, FPPNEXT, or FVPNEXT at
+          # the rate where the phone sort raises every such start
+          # (timing.phrase_start_raised_at_wpm). DECtalk's duration routine
+          # prints bou=128 for the T of "dot" in "...and then it rained.",
+          # and 160 at 140 words per minute.
+          - when: "last_before_alone && dectalk_phrase_state(boundary_item) == 'alone'"
+            value: >-
+              params.policy.timing.speaking_rate_wpm <= params.policy.timing.phrase_start_raised_at_wpm
+              ? 'vp' : 'pp'
+          # The last phone of a hyphenated word's part, when the next part
+          # starts a verb phrase ("re-enter"): the scan gives it the hyphen's
+          # morpheme value and the VPSTART symbol adds its own to the same
+          # phone, and the two together are the comma value (0100 | 0240 =
+          # 0340). DECtalk's duration routine prints bou=224 for that phone.
+          - when: >-
+              isTrue(current, 'morpheme_boundary_after')
+              && boundary_item != null && boundary_item.phoneme != 'SIL'
+              && !dectalk_same_word(boundary_item, current)
+              && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
+              && dectalk_phrase_start(boundary_item) == 'vp'
+            value: "'comma'"
+          # A hyphen written at a word's end ("well- known"): the word's last
+          # phone has the hyphen's morpheme value and the word boundary's,
+          # which together are the word boundary's (0100 | 0140 = 0140), or
+          # the comma value before a kept prepositional-phrase start. Before a
+          # punctuation mark nothing is added (the COMMA and PERIOD symbols
+          # give the phone no feature, ph_sort.c:1512-1527), and the phone
+          # keeps the morpheme value: the rule below.
+          - when: >-
+              isTrue(current, 'morpheme_boundary_after')
+              && boundary_item != null && boundary_item.phoneme != 'SIL'
+              && !dectalk_same_word(boundary_item, current)
+              && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
+            value: "isTrue(current, 'phrase_start_follows') ? 'comma' : 'word'"
+          # The same phone before a period: the PERIOD symbol does add its
+          # value to the phone before it (ph_sort.c:1529-1531), and with the
+          # hyphen's that is the exclamation's (0100 | 0400 = 0500). "It is
+          # red-. Then green." has the period's full pause.
+          - when: >-
+              isTrue(current, 'morpheme_boundary_after') && mark == '.'
+              && (dectalk_next(current) == null || dectalk_next(current).phoneme == 'SIL')
+            value: "'exclaim'"
+          - when: before_morpheme
+            value: "'morpheme'"
+          # The last phone before "to", "and" or "for" has the word boundary
+          # and the phrase start's boundary together, which is the comma value
+          # (dectalk_phrase_start_follows).
+          - when: "isTrue(current, 'phrase_start_follows')"
+            value: "'comma'"
+          # A word that starts a verb phrase is entered with VPSTART in place
+          # of the word boundary (LTS/ls_dict.c:777-778).
+          - when: >-
+              boundary_item != null && boundary_item.phoneme != 'SIL'
+              && dectalk_phrase_start(boundary_item) == 'vp'
+            value: "'vp'"
+          - when: "boundary_item != null && boundary_item.phoneme != 'SIL'"
+            value: "'word'"
+          - when: "mark == '?'"
+            value: "'question'"
+          - when: "mark == '!'"
+            value: "'exclaim'"
+          - when: "mark in [',', ';', ':']"
+            value: "'comma'"
+          - default: "'period'"
+        tag: rime_boundary
+    citations:
+      - "DECtalk 4.63 ph_sort2.c:203-222 get_next_bound_type"
+      - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
+      - "DECtalk 4.63 ph_sort.c:1462-1473 (WBOUND adds FWBNEXT to the phone before it, whether or not the clause has had a syllabic)"
+      - "DECtalk 4.63 ph_sort.c:1491-1495 (VPSTART adds FVPNEXT to the phone before it), 2026-2043 (add_feature ORs the value in)"
+      - "DECtalk 4.63 ph_sort.c:1487-1490 (PPSTART adds FPPNEXT to the phone before it), 1171-1177 (at 140 words per minute or slower a PPSTART becomes a VPSTART)"
+      - "DECtalk 4.63 LTS/ls_dict.c:777-778 (VPSTART before a dictionary entry of class verb, or verb and character)"
+
+  # ---------------------------------------------------------------------------
+  # HAT PATTERN: where the pitch rises onto the "hat" and where it falls off
+  # (FHAT_BEGINS, FHAT_ENDS; ph_aloph.c:1396-1525 and :597-606).
+  #
+  # DECtalk walks the clause once with four pieces of state, all reset at the
+  # start of a clause: whether the pitch is on top of the hat, a lock set by an
+  # emphasized syllable, the number of stresses since the last fall, and a
+  # pending delayed fall with its countdown. Each syllabic is processed after
+  # the one before it, so this rule runs over the syllabics in order and keeps
+  # that state on each one (hat_top, hat_locked, hat_stresses, hat_delay) for
+  # the next to read.
+  #
+  # For a syllabic:
+  #   1. A pending delayed fall counts down; it lands here when the count
+  #      reaches 0, or reaches 1 with fewer than 4 phones left (:597-606).
+  #   2. If the syllabic has any stress and the lock is off:
+  #      a. the pitch rises here if it is not on top;
+  #      b. emphasis sets the lock and falls at once;
+  #      c. with no primary stress left before the clause ends (or a delayed
+  #         fall pending), a declarative clause falls here, unless more than 6
+  #         phones and at least 2 syllabics remain, in which case the fall is
+  #         delayed and counts those syllabics down;
+  #      d. with two or more stresses since the last fall, none left before
+  #         the next verb phrase and more than one left in the clause, it
+  #         falls here.
+  #
+  # "Phones left" is DECtalk's nphonetot - n: the phones after this one, the
+  # clause's final silence, and one more.
+  #
+  # In 2c, whatever the clause type: a syllabic that stands before a verb
+  # phrase calls promote_last_2 (:1470-1474), which gives primary stress to
+  # the last secondary-stressed syllabic of the first stretch after it that
+  # has one, a stretch ending at the clause's end or at a phrase start that
+  # carries the comma value. "He went to bed." has primary stress on "went"
+  # (its vowel is 18 frames); "They went to bed." does not (15), "they" being
+  # unstressed. "Boys for men asked for it when he had it then." has it on
+  # "then": "asked", up to "for", has no secondary stress, and the scan goes
+  # on (test/oracle-corpora/dectalk-us-promotion-v1.json).
+  # ---------------------------------------------------------------------------
+  # Counts the hat pattern needs of what lies ahead in the clause, kept as a
+  # clause total and a running count so that no syllabic scans to the clause's
+  # end: the clause's first Segment counts the clause, every later one takes
+  # the total from the Segment before it and adds itself to the running count.
+  #   input phones  one for a phone, one more for a vowel that absorbed its
+  #                 /r/, one more for the survivor of a deleted geminate
+  #                 (nphonetot counts the phones as they came in);
+  #   syllabics     vowels and syllabic consonants.
+  dectalk_clause_phone_counts:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "!(current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null)"
+    define:
+      first: "prev == null || (prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null)"
+      own_phones: >-
+        (!(current.type in ['stop_release', 'stop_aspiration']) && current.phoneme != 'SIL' ? 1.0 : 0.0)
+        + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
+        + (isTrue(current, 'after_deleted_geminate') ? 1.0 : 0.0)
+      own_syllabic: "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'] ? 1.0 : 0.0"
+      phones_total: >-
+        !first ? get(prev, 'input_phones_total', 0.0)
+        : own_phones + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_fused_vowel')
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_geminate_survivor')
+      syllabics_total: >-
+        !first ? get(prev, 'syllabics_total', 0.0)
+        : own_syllabic + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')
+    apply:
+      - field: input_phones_total
+        op: set
+        value: phones_total
+        tag: boundary
+      - field: input_phones_through
+        op: set
+        value: "(first ? 0.0 : get(prev, 'input_phones_through', 0.0)) + own_phones"
+        tag: boundary
+      - field: syllabics_total
+        op: set
+        value: syllabics_total
+        tag: boundary
+      - field: syllabics_through
+        op: set
+        value: "(first ? 0.0 : get(prev, 'syllabics_through', 0.0)) + own_syllabic"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:600, 1481 (the hat pattern's tests on nphonetot - n)"
+  # ---------------------------------------------------------------------------
+  # A pitch written on a phoneme in phonemic text ("[uw<400,140>]").
+  #
+  # interp_user_f0 (ph_sort.c:1657-1728) reads the clause's phonemes in order
+  # and sets f0mode at each one that has a pitch: a number up to 37 (taken
+  # modulo 1000) makes the clause one of sung notes unless it already has
+  # targets in hertz; any other makes it one of targets unless it is already
+  # sung, and in a sung clause such a number is dropped. (A note's number in
+  # a clause of targets is carried: set_user_target still reads it as a
+  # note.) The mode so far is a running value, each allophone taking the one
+  # before it; the clause's mode is the last one's
+  # (dectalk_clause_pitch_mode).
+  #
+  # Not ported: a pitch on a stress or hat symbol (the stress-impulse and hat
+  # sizes, f0mode HAT_F0_SIZES_SPECIFIED, 1661-1689), and that a dropped
+  # number takes its phoneme's written duration with it (1711-1712).
+  # ---------------------------------------------------------------------------
+  dectalk_pitch_mode:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_clause_allophone }
+    define:
+      before: dectalk_prev(current)
+      first: "before == null || (before.phoneme == 'SIL' && !isTrue(before, 'written_silence'))"
+      mode_in: "first ? 'none' : get(before, 'pitch_mode', 'none')"
+      number: "get(current, 'written_pitch', 0.0)"
+      is_note: >-
+        number != 0.0
+        && number % params.policy.f0.user_pitch.number_modulus <= params.policy.f0.user_pitch.note_maximum
+      dropped: "mode_in == 'singing' && !is_note"
+    apply:
+      - field: pitch_mode
+        op: set
+        value: >-
+          number == 0.0 ? mode_in
+          : (is_note && mode_in != 'targets' ? 'singing'
+          : (mode_in != 'singing' ? 'targets' : mode_in))
+        tag: written_pitch
+      - field: pitch_command
+        op: set
+        # A vowel that took the helper-verb promotion ahead of a word's text
+        # has lost its number, after the mode was read from it
+        # (dectalk_helper_verb_promotion_ahead_of_word).
+        value: "number != 0.0 && !dropped && !isTrue(current, 'class_start_promoted') ? number : 0.0"
+        tag: written_pitch
+    citations:
+      - "DECtalk 4.63 PH/ph_sort.c:1256-1264, 1283-1302 (the pitch is read for the mode, then lost when an S2 is inserted at its vowel)"
+      - "DECtalk 4.63 PH/ph_sort.c:1657-1728 interp_user_f0 (a pitch on a phoneme sets f0mode: SINGING up to 37, else PHONE_TARGETS_SPECIFIED; the two do not mix)"
+      - "DECtalk 4.63 PH/ph_sort.c:1969-1984 make_phone (the pitch stays with its phoneme)"
+  # With a pitch written on a phoneme the clause has no hat pattern: the
+  # block that places it runs only for f0mode NORMAL (ph_aloph.c:1409).
+  dectalk_hat_pattern:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+        && dectalk_clause_pitch_mode(current) == 'none'
+    define:
+      # The syllabic processed before this one, or the silence that starts the clause.
+      before: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || get(candidate, "hat_top", null) != null')
+      fresh: "before == null || before.phoneme == 'SIL'"
+      top_in: "fresh ? false : get(before, 'hat_top', false)"
+      locked_in: "fresh ? false : get(before, 'hat_locked', false)"
+      stresses_in: "fresh ? 0.0 : get(before, 'hat_stresses', 0.0)"
+      delay_in: "fresh ? -1.0 : get(before, 'hat_delay', -1.0)"
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      declarative: "clause_end != null && clause_end.punctuationSymbol == '.'"
+      # nphonetot - n counts the phones as they came in: a vowel that has
+      # since absorbed its /r/ (this one or a later one) was two phones, and
+      # so was a geminate that has lost its first half.
+      # What lies ahead is the clause's total less what has gone by
+      # (dectalk_clause_phone_counts).
+      phones_left: >-
+        2.0 + get(current, 'input_phones_total', 0.0) - get(current, 'input_phones_through', 0.0)
+        + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
+      syllabics_after: >-
+        get(current, 'syllabics_total', 0.0) - get(current, 'syllabics_through', 0.0)
+      # remaining_stresses_til(FCBNEXT): up to the clause's end or a phrase
+      # start that carries the comma value.
+      # promote_last_2 (ph_aloph.c:1470-1474, 1689-1722). When the walk
+      # reaches its "last stress" test at a syllabic that stands before a verb
+      # phrase, it scans on from there. A stretch ends at a boundary of the
+      # comma value or more (the clause's end, or a phrase start that carries
+      # it). At the first stretch end with a secondary-stressed syllabic
+      # behind it, the last such syllabic gets primary stress, at once (the
+      # walk then sees it so) and the scan is over; a stretch with none is
+      # passed, to the clause's end if need be.
+      #
+      # Each call is a scan, and the calls happen in the walk's order, so the
+      # scans that reach a stretch take its secondary stresses from the last
+      # one backwards, one each. Two running values say what a syllabic needs:
+      #   promotion_scans  the scans open after it: those that reached its
+      #                    stretch or began in it, its own included;
+      #   promotion_taken  the promotions in its stretch so far.
+      # A syllabic that starts a stretch has the scans the stretch before
+      # left open. It is promoted when more scans are open before it than
+      # secondary stresses lie between it and its stretch's end.
+      stretch_mark: "look_back_pred(current, 1000, 'is_hat_state_or_stretch_start')"
+      starts_stretch: >-
+        dectalk_word_start(current)
+        && (dectalk_phrase_state(current) == 'pp'
+            || (dectalk_phrase_start(current) == 'vp' && behind(current, 1) != null
+                && isTrue(behind(current, 1), 'morpheme_boundary_after')))
+      same_stretch: >-
+        !fresh && !starts_stretch && stretch_mark != null
+        && get(stretch_mark, 'hat_top', null) != null
+      scans_in: >-
+        fresh ? 0.0
+        : (same_stretch ? get(before, 'promotion_scans', 0.0)
+           : max(0.0, get(before, 'promotion_scans', 0.0) - get(before, 'promotion_taken', 0.0)))
+      taken_in: "same_stretch ? get(before, 'promotion_taken', 0.0) : 0.0"
+      secondaries_ahead: "count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_secondary_syllabic')"
+      secondaries_in_phrase: >-
+        dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
+        : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_secondary_syllabic')
+      promoted: "get(current, 'stress', 0) == 2 && scans_in > secondaries_ahead"
+      # The syllabics ahead in this stretch that have been promoted but not
+      # yet rewritten: its last ones, one for each open scan.
+      promoted_ahead: "min(scans_in, secondaries_ahead)"
+      primaries_in_clause: >-
+        count_ahead_pred(current, 1000, 'is_stress_count_clause_stop', 'is_primary_syllabic')
+        + promoted_ahead
+      # Of those, the ones before the next phrase boundary: the secondary
+      # stresses of this phrase less the ones no scan has taken.
+      primaries_in_phrase: >-
+        dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
+        : count_ahead_pred(current, 1000, 'is_stress_count_phrase_stop', 'is_primary_syllabic')
+          + max(0.0, secondaries_in_phrase - (secondaries_ahead - promoted_ahead))
+      stress_now: "promoted ? 1 : get(current, 'stress', 0)"
+      stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"
+      # A phone the dictionary exempts from allophone rules (FBLOCK) jumps over
+      # all of this in DECtalk (ph_aloph.c:563-567 to the label at :1528): no
+      # countdown, no rise, no fall; the state passes through it unchanged.
+      blocked: "isTrue(current, 'rules_blocked')"
+      # 1. The delayed fall.
+      countdown: "delay_in >= 0.0 ? delay_in - 1.0 : -1.0"
+      delayed_fall: >-
+        !blocked && delay_in >= 0.0
+        && (countdown == 0.0 || (countdown == 1.0 && phones_left < 4.0))
+      top_1: "delayed_fall ? false : top_in"
+      stresses_1: "delayed_fall ? 0.0 : stresses_in"
+      delay_1: "blocked ? delay_in : (delay_in >= 0.0 && !delayed_fall ? countdown : -1.0)"
+      # 2. The stressed syllabic.
+      active: "stressed && !locked_in && !blocked"
+      rises: "active && !top_1"
+      stresses_2: "active ? stresses_1 + 1.0 : stresses_1"
+      emphasis_fall: "active && stress_now == 3"
+      last_stress: "active && (primaries_in_clause == 0.0 || delay_1 >= 0.0)"
+      # promote_last_2 is called here, whatever lies ahead (ph_aloph.c:1470-1474).
+      calls_promotion: "last_stress && dectalk_boundary(current) == params.policy.timing.boundary.vp"
+      delays: "last_stress && declarative && phones_left > 6.0 && syllabics_after >= 2.0"
+      last_fall: "last_stress && declarative && !delays"
+      stresses_3: "emphasis_fall || last_fall ? 0.0 : stresses_2"
+      phrase_fall: >-
+        active && stresses_3 > 1.0 && primaries_in_phrase == 0.0 && primaries_in_clause > 1.0
+      falls: "delayed_fall || emphasis_fall || last_fall || phrase_fall"
+      top_out: "active ? !(emphasis_fall || last_fall || phrase_fall) : top_1"
     apply:
       - field: stress
         op: set
-        value: stressed_nucleus.stress
-        tag: consonant_stress
+        value: stress_now
+        tag: stress
+      - field: hat_promotes
+        op: set
+        value: calls_promotion
+        tag: stress
+      - field: promotion_scans
+        op: set
+        value: "scans_in + (calls_promotion ? 1.0 : 0.0)"
+        tag: stress
+      - field: promotion_taken
+        op: set
+        value: "taken_in + (promoted ? 1.0 : 0.0)"
+        tag: stress
+      - field: hat_begins
+        op: set
+        value: rises
+        tag: hat_pattern
+      - field: hat_ends
+        op: set
+        value: falls
+        tag: hat_pattern
+      - field: hat_top
+        op: set
+        value: top_out
+        tag: hat_pattern
+      - field: hat_locked
+        op: set
+        value: "locked_in || emphasis_fall"
+        tag: hat_pattern
+      - field: hat_stresses
+        op: set
+        value: "phrase_fall ? 0.0 : stresses_3"
+        tag: hat_pattern
+      - field: hat_delay
+        op: set
+        value: >-
+          active ? (last_stress && declarative ? (delays ? syllabics_after : -1.0) : delay_1)
+          : delay_1
+        tag: hat_pattern
     citations:
-      - "DECtalk 4.63 p_us_sr1.c:73-162 get_stress_of_conson (stress legal consonant cluster before stressed vowel)"
-      - "DECtalk 4.63 p_us_sr1.c:179-228 us_phcluster (legal pre-vocalic onset clusters)"
+      - "DECtalk 4.63 ph_aloph.c:1396-1525 (hat rise on the first stress, fall on emphasis, on the last stress of a declarative clause, and between two phrases of two stresses)"
+      - "DECtalk 4.63 ph_aloph.c:597-606 (the delayed fall)"
+      - "DECtalk 4.63 ph_aloph.c:1646-1668 remaining_stresses_til"
+      - "DECtalk 4.63 ph_aloph.c:1463-1474, 1689-1722 (promote_last_2: at a syllabic before a verb phrase, the last FSTRESS_2 syllabic before the first boundary of FCBNEXT or more that has one behind it becomes FSTRESS_1)"
+      - "DECtalk 4.63 ph_defs.h:151-154 (DECLARATIVE is a clause that ends with a period)"
+      - "DECtalk 4.63 ph_aloph.c:563-567 (a phone with FBLOCK skips to :1528, past the hat pattern)"
+
+  # ---------------------------------------------------------------------------
+  # Where DECtalk's intonation routine stops (Ph_inton2.c:809-819).
+  #
+  # phinton() walks the clause's allophones once. At a syllabic on which the
+  # hat both begins and ends, past the clause's fourth allophone, it runs
+  #     if (pDph_t->had_hatend & (nphon > 4)) { ...; break; }
+  # and that `break` leaves the walk itself: no allophone from this syllabic on
+  # gets an F0 command, the baseline's clock (tcumdur) stops counting, and
+  # Rule 9 at the foot of the loop (1683-1722) never releases the clause's
+  # final plosive into a dummy vowel. "We will wait." and "This is a test."
+  # end in [t] with no dummy vowel for this reason; "a cat." has one.
+  #
+  # nphon counts allophones from the clause-initial silence at 0.
+  # ---------------------------------------------------------------------------
+  dectalk_intonation_stops:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+    define:
+      hat_begins_and_ends: "isTrue(current, 'hat_begins') && isTrue(current, 'hat_ends')"
+      # nphon, counted only for a syllabic where the hat begins and ends.
+      position: >-
+        hat_begins_and_ends
+        ? 1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone') : 0.0
+    apply:
+      - field: intonation_stops
+        op: set
+        value: >-
+          hat_begins_and_ends && position > params.policy.f0.intonation_stop_after_allophone
+        tag: hat_pattern
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (break out of the allophone loop when the hat begins and ends on one syllabic and nphon > 4)"
+
+  # Rule 9 is not reached once the walk has stopped: take back the dummy vowel
+  # the structural rules gave the clause's final plosive.
+  dectalk_drop_dummy_vowel_after_intonation_stop:
+    kind: structural
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null
+        && prev != null && prev.phoneme == 'SIL' && isTrue(prev, 'dummy_vowel')
+    define:
+      dummy: prev
+      stopped_at: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
+    constraint: "stopped_at != null && stopped_at.phoneme != 'SIL'"
+    splice:
+      type: replace_range
+      range_left: dummy.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (the loop is left before Rule 9)"
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 (dummy vowel, at the foot of the loop)"
+

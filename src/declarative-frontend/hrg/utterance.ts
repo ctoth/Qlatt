@@ -17,6 +17,7 @@ import {
   type ProvenanceStage,
 } from "../../provenance";
 import { Item } from "./item";
+import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { Relation } from "./relation";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import { HrgTransaction } from "./transaction";
@@ -97,6 +98,8 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
     for (const [feature, featureSchema] of Object.entries(itemSchema.features)) {
       features[feature] = cloneFeatureSchema(featureSchema);
     }
+    // An Item of any type may be in a parameter scope (parameter-scope.ts).
+    features[PARAMETER_SCOPE_FEATURE] ??= { kind: "string" };
     itemTypes[itemType] = Object.freeze({ features: Object.freeze(features) });
   }
 

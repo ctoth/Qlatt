@@ -14,7 +14,8 @@ describe("original normalization corpus", () => {
         tn_recognition_policy: {
           years: frontend === "dectalk-english" ? "yes" : "no",
           fractions: frontend === "dectalk-english" ? "yes" : "no",
-          hundreds: frontend === "dectalk-english" ? "hundredand" : "hundred",
+          hundreds: "hundred",
+          bare_numbers: frontend === "dectalk-english" ? "digits" : "words",
           fraction_exception: "100",
         },
       },

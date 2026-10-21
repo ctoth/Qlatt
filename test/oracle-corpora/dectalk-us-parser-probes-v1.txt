@@ -1,0 +1,86 @@
+# dectalk-us-parser-probes-v1: one or two texts per heading of DECtalk's
+# command text parser rules (CMD/par_rule2.par), to see which rules act on
+# plain US English text. One text per line; "#" lines and blank lines are
+# ignored. scripts/oracle/export-text-parser-fixture.ts records, for each,
+# the text as the parser hands it to the letter-to-sound stage.
+# Written before any of it was traced.
+
+# phone numbers
+Call 1-800-555-1212 now.
+Call 800-555-1212 now.
+Call 1 800 555 1212 now.
+Call (800)555-1212 now.
+Call (800) 555 1212 now.
+Call 18005551212 now.
+Call 8005551212 now.
+Call 555-1212 now.
+Call 5551212 now.
+Call 555 1212.
+
+# state and zip
+Boston, MA 02134
+He lives in Austin, TX 78701.
+
+# Dr. and St.
+Dr. Smith is here.
+He lives on Elm Dr. now.
+St. John is here.
+Turn on Main St. now.
+Meet me at 42 St. today.
+
+# dates
+It was 5/10/96 then.
+It was 5-10-96 then.
+It was 12/25/2004 then.
+It was May 3, 1996 then.
+It was May. 3, 1996 then.
+It was Jan. 5 then.
+It was 3 May 1996 then.
+
+# fractions and number-letter mixes
+Add 1 1/2 cups.
+Add 3/4 cup.
+The vt100 is old.
+Use v4.2 now.
+It is 4.2bw here.
+The price/performance is good.
+It runs OS/2 here.
+Send 3/matt now.
+The part is bw-x01 here.
+It was 34.45-45 there.
+
+# file names and internet
+Open readme.txt now.
+Run setup.exe now.
+Go to http://www.example.com now.
+Go to www.example.com now.
+Write to joe@example.com now.
+
+# cards and long digit strings
+Card 1234 5678 9012 3456 expired.
+Card 1234-5678-9012-3456 expired.
+
+# times and am/pm
+It is 3:23pm now.
+It is 3:23 pm now.
+It is 9:00 a.m. now.
+It is 9:00 A.M. now.
+
+# initials and symbols
+The U.S.A. is large.
+He said hi :-) today.
+
+# punctuation
+Wait... what?
+What?! No!!
+He said (quietly) that it was late.
+It was --- strange.
+It was a "test" today.
+He is 6' tall.
+A 3x5 card.
+Rock & roll.
+It is 50% off.
+It is #1 here.
+Mix 2+2 now.
+It is -5 degrees.
+It is +5 degrees.

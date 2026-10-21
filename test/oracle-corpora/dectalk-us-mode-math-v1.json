@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-math-v1",
+  "description": "Texts spoken in DECtalk's math mode: the signs of its math table standing alone between numbers and letters, and written against them; a percent sign, a decimal with no leading digit, numbers with an exponent; a text with no sign in it; ranges, a telephone number and dates, which the text stage reads in their own way outside the mode; money; the mode turned off again, set, turned on and off inside a text, and on together with the spelling mode. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "mm-01", "text": "[:mode math on] Take 3 - 2 and 4 * 5.", "group": "signs" },
+    { "id": "mm-02", "text": "[:mode math on] It is 2 + 2 = 4.", "group": "signs" },
+    { "id": "mm-03", "text": "[:mode math on] Now 2 ^ 3 > 7 and 1 < 2.", "group": "signs" },
+    { "id": "mm-04", "text": "[:mode math on] Share 9 / 3 with them.", "group": "signs" },
+    { "id": "mm-05", "text": "[:mode math on] Try 3-2, then 4/5.", "group": "joined" },
+    { "id": "mm-06", "text": "[:mode math on] So a-b, x+y, and 6*7.", "group": "joined" },
+    { "id": "mm-07", "text": "[:mode math on] Half is 50 % or .5 of it.", "group": "numbers" },
+    { "id": "mm-08", "text": "[:mode math on] Use 1.5e3 and 2e-4.", "group": "numbers" },
+    { "id": "mm-09", "text": "[:mode math on] The boat came in at noon.", "group": "numbers" },
+    { "id": "mm-10", "text": "[:mode math on] From 1990-1998, call 555-1212.", "group": "text-forms" },
+    { "id": "mm-11", "text": "[:mode math on] On 3/8/2001 and 12-25-99.", "group": "text-forms" },
+    { "id": "mm-12", "text": "[:mode math on] It cost $3.50 - $1.25.", "group": "text-forms" },
+    { "id": "mm-13", "text": "[:mode math on][:mode math off] Take 3 - 2 and 4 * 5.", "group": "command" },
+    { "id": "mm-14", "text": "[:mode math set] Take 3 - 2.", "group": "command" },
+    { "id": "mm-15", "text": "Take 3 - 2. [:mode math on] Take 3 - 2. [:mode math off] Take 3 - 2.", "group": "command" },
+    { "id": "mm-16", "text": "The sum [:mode math on] 4 * 5 = 20 [:mode math off] is done.", "group": "command" },
+    { "id": "mm-17", "text": "[:mode math on][:mode spell on] 3 - 2.", "group": "command" },
+    { "id": "mm-18", "text": "[:mode spell on][:mode math on] a+b = 7.", "group": "command" }
+  ]
+}

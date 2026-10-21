@@ -42,6 +42,25 @@ maps:
     unlisted: "[^\\w\\s'\uE000]"
     whitespace: '\s+'
 functions:
+  # Two digits as phonemic text, from the frontend's number phone lists:
+  # "05" zero five, "15" fifteen, "30" thirty, "31" thirty one.
+  tn_phonemic_two_digits:
+    params: [first, second]
+    body: >-
+      first == '0'
+        ? vocabulary('tn_number_phonemes', 'units.0') + maps.tn_phonemic_text.word_boundary
+          + vocabulary('tn_number_phonemes', 'units.' + second)
+        : first == '1'
+          ? vocabulary('tn_number_phonemes', 'teens.' + second)
+          : vocabulary('tn_number_phonemes', 'tens.' + first)
+            + (second == '0' ? '' : maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'units.' + second))
+    citations: ['DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits: pzero and the unit after a 0, pteens[] after a 1, ptens[] and the unit otherwise)']
+  # A capture that did not take part in the match, as the empty text.
+  tn_text_or_empty:
+    params: [value]
+    body: "value == null ? '' : value"
+    citations: ['Issue #142: source-backed normalization contract']
   tn_clean_text:
     params: [text]
     body: >-
@@ -49,7 +68,8 @@ functions:
         lower(text), maps.tn_lexical_policy.apostrophe_quotes, "'", 'g'),
         maps.tn_lexical_policy.double_quotes, '"', 'g'),
         maps.tn_lexical_policy.ellipsis, '...', 'g'),
-        maps.tn_lexical_policy.lexical_apostrophe, '\uE000', 'g'),
+        get(maps.tn_recognition_policy, 'lexical_apostrophe',
+          maps.tn_lexical_policy.lexical_apostrophe), '\uE000', 'g'),
         "'", ' ', 'g'),
         '\uE000', "'", 'g')
     citations: ['Issue #16: lexical apostrophe and punctuation contract']
@@ -76,17 +96,561 @@ rules:
       output: "tn_words(split(lower(current.text), '.').filter(letter, letter != '').join(' '))"
     citations:
       - "Allen, Hunnicutt & Klatt 1987; initialisms"
+  # An initial is spelled, and its period reaches the phonetics twice: once
+  # from the spelling routine and once from the routine that reads the next
+  # word. The second period is a clause of its own with no phone in it.
+  # Both are marks the rule sends (kind 'sent_mark'): the initial rule reads
+  # the written period itself, so no routine reads it as a delimiter, and
+  # what a delimiter does besides ending the clause does not happen.
+  tn_initial:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'initial' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request, terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'request', 'kind': 'words', 'payload': {'text': lower(current.payload.letter)}},
+         {'type': 'terminal', 'text': '.', 'kind': 'sent_mark'},
+         {'type': 'terminal', 'text': '.', 'kind': 'sent_mark'}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2612-2623 (the initial: rbphone = PERIOD, the word is spelled)"
+      - "DECtalk 4.63 LTS/ls_task.c:2612-2617 (the rule reads the period item itself: ls_util_read_item), 1144-1236 (ls_task_do_right_punct, the delimiter routine, never has it)"
+      - "DECtalk 4.63 LTS/ls_task.c:1516-1519 (the spelling routine sends the PERIOD), 1547-1549 (the next-word routine sends it again)"
+  # An abbreviation the frontend's dictionary holds with its period: one
+  # terminal, the word with the period, which the dictionary then speaks. The
+  # period is not a sentence end, but the text's end still is one: measured on
+  # DECtalk 4.63 say.exe, "We live at 12 Oak Ave." ends in "avenue" and the
+  # period symbol, and "Ask Mr. Then go." is one clause. A unit's
+  # abbreviation after a number is the same token, read by the lexicon from
+  # its table of units.
+  tn_dictionary_abbreviation:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind in ['dictionary_abbreviation', 'number_abbreviation'] && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal, request]
+      tag: normalization_lexical
+      output: >-
+        get(current.payload, 'final', '') == '.'
+          ? [{'type': 'terminal', 'text': lower(current.payload.word) + '.'},
+             {'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]
+          : [{'type': 'terminal', 'text': lower(current.payload.word) + '.'}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2040-2160 (the abbreviation hit sends the dictionary entry's phones and eats the period)"
+  # A word of capitals and periods: each letter a terminal written as the
+  # letter and a period, the form the frontend's orthography rule speaks as
+  # the letter's name. The text's end is still a sentence end.
+  tn_dotted_capitals:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'dotted_capitals' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal, request]
+      tag: normalization_lexical
+      output: >-
+        split(lower(current.payload.letters), '.').map(letter, {'type': 'terminal', 'text': letter + '.'})
+          + (get(current.payload, 'final', '') == '.'
+              ? [{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]
+              : [])
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2840-2890 (each letter through the spelling routine, a word boundary between, the last period eaten)"
+  # A word of capitals that is spelled: each letter a spelled-letter terminal.
+  tn_spelled_capitals:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spelled_capitals' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "regexSplit(lower(current.payload.word), '').map(letter, {'type': 'terminal', 'text': letter + '.'})"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2512-2545 (ls_task_spell_vs_speak: the word goes to the spelling routine), LTS/ls_spel.c ls_spel_spell"
+  # A hyphenated word or a dictionary word with a slash: one terminal, as
+  # written, which the frontend's lexicon reads.
+  tn_whole_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'whole_word' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': lower(current.payload.word)}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4208-4435 (a hyphenated word is read part by part by ls_task_process_word), 2040-2160 (a word the dictionary has as written is spoken from it)"
+  # A word with a mark written on it ahead of the clause's own mark: one
+  # terminal, the word with that mark, and the clause's mark after it. A
+  # period there is left off the word: it is not spoken.
+  tn_marked_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'marked_word' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal, request]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'text': lower(current.payload.word) + (current.payload.inner == '.' ? '' : current.payload.inner)},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.last}}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4118-4150 (the word with the mark on it goes to the spelling routine; the last mark ends the clause)"
+  # A hyphen standing alone: one terminal, the hyphen, which the frontend's
+  # dictionary speaks.
+  tn_lone_dash:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'lone_dash' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': '-'}]"
+    citations:
+      - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entry \"-\"), LTS/ls_task.c:2040-2160 (the word is looked up as written)"
+  # A symbol standing alone that the frontend's dictionary holds: one
+  # terminal, declared a word, so that a mark among them ("?", "!", ",") is
+  # spoken by its name and does not end a clause.
+  tn_symbol_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'symbol_word' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.word, 'kind': 'word'}]"
+    citations:
+      - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped)"
+  # A period standing alone that is a word (tn_lone_period_source): one
+  # terminal, declared a word, which the frontend's dictionary names.
+  tn_lone_period:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'lone_period' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': '.', 'kind': 'word'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1420-1437 (a mark that begins a word is kept as the word), 697 and 746 (the dictionary is searched for the word as written), dapi/src/dic/dtalk_us.dic (the entry \".\")"
+  # A closing parenthesis stripped from a word, with a mark standing alone
+  # after it (tn_stripped_parenthesis_mark_source): the comma the
+  # parenthesis forces, then the mark as a clause end.
+  tn_stripped_parenthesis_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'stripped_parenthesis_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'request', 'kind': 'words', 'payload': {'text': ','}},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.mark}}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2303-2319 (the stripped parenthesis sets the comma), 1547-1558 (the comma is sent, the white space is skipped, and the next character is read as the word's delimiter)"
+  # A period that stays in its word and is not spoken
+  # (tn_period_before_mark_source): nothing.
+  tn_silent_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'silent_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1451-1463 and LTS/ls_util.c:887-900 (the period is kept in the word when a comma, a colon or a semicolon follows it; only that mark is left as the delimiter)"
+  # A comma, colon or semicolon stripped from its word with the apostrophe
+  # after it (tn_mark_stripped_with_quote_source): the mark, sent by the
+  # word's own routine and not read as a delimiter.
+  tn_stripped_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'stripped_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.mark, 'kind': 'sent_mark'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2303-2340 (the mark is stripped with the apostrophe and sets the comma), 1547-1549 (the next-word routine sends it)"
+  # A parenthesis, angle bracket or curly brace stripped from a word's edge
+  # (tn_opening_mark_source, tn_closing_mark_source): the comma it forces,
+  # sent by the word's own routine and not read as a delimiter.
+  tn_forced_comma:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'forced_comma' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2244-2275 and 2303-2319 (a stripped mark that forces a break sets the comma before or after the word), 1547-1549 (the next-word routine sends it)"
   tn_bare_number_request:
     kind: structural
     select:
       relation: Normalization
       where: "current.kind in ['cardinal', 'ordinal'] && current.outputType == 'source'"
+    # A frontend whose lexicon speaks digits itself keeps a bare cardinal as
+    # one terminal (tn_recognition_policy.bare_numbers: digits), so the number
+    # is not confused with the same words typed out. The same for a number
+    # with an ordinal ending ("42nd"), kept as written, under the policy
+    # tn_recognition_policy.ordinal_numbers: source.
+    expand_text:
+      allowed_types: [request, terminal]
+      tag: normalization_lexical
+      output: >-
+        maps.tn_recognition_policy.bare_numbers == 'digits' && current.kind == 'cardinal'
+          ? [{'type': 'terminal', 'text': current.payload.value}]
+          : current.kind == 'ordinal' && get(maps.tn_recognition_policy, 'ordinal_numbers', 'words') == 'source'
+            ? [{'type': 'terminal', 'text': lower(current.text)}]
+          : tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')
+    citations:
+      - "Issue #144: explicit bare-number convention"
+      - "DECtalk 4.63 LTS/ls_task.c:3776-3806 (an all-digit word is spoken by the number routines, not looked up)"
+  # A number-like word recognised whole (tn_number_token_source) stays one
+  # terminal, as written: the frontend's lexicon reads it.
+  tn_number_token:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'number_token' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.token}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3181-3513, 3622-3652, 3747-3825 (money, times and numbers are read from the word as written, by the number routines)"
+  # A clock time (tn_clock_time_source) written out as one word of phonemic
+  # text, as DECtalk's time routine speaks it: the hour, a verb-phrase start,
+  # the minutes unless they are "00", and the seconds after another
+  # verb-phrase start. The phone lists are the frontend's generated map
+  # tn_number_phonemes; ")" is the verb-phrase start and a space the word
+  # boundary in the frontend's phonemic text (maps.tn_phonemic_text). The
+  # word boundary at the end is the one letter-to-sound sends after a word
+  # it has read.
+  tn_clock_time:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'clock_time' && current.outputType == 'source'"
+    define:
+      hour: "current.payload.hour"
+      s1: "get(current.payload, 's1', '')"
+      hourText: >-
+        size(hour) == 1
+          ? vocabulary('tn_number_phonemes', 'units.' + hour)
+          : tn_phonemic_two_digits(substring(hour, 0, 1), substring(hour, 1, 2))
+      minuteText: >-
+        current.payload.m1 == '0' && current.payload.m2 == '0'
+          ? ''
+          : tn_phonemic_two_digits(current.payload.m1, current.payload.m2)
+      secondText: >-
+        s1 == null || s1 == ''
+          ? ''
+          : maps.tn_phonemic_text.verb_phrase + tn_phonemic_two_digits(s1, current.payload.s2)
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + hourText + maps.tn_phonemic_text.verb_phrase
+            + minuteText + secondText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:1182-1209 (ls_proc_do_time: the hour from punits[] or by ls_proc_do_2_digits, VPSTART, the minutes unless 00, VPSTART and the seconds)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits)"
+      - "DECtalk 4.63 LTS/ls_task.c:3622-3625 (the word boundary is sent after the time)"
+  # A date word (tn_date_text_source: "23-Aug", "23-Aug-84", "2-Apr-2001")
+  # written out as one word of phonemic text, as DECtalk's date routine
+  # speaks it: the month, the day as an ordinal, and after a pause the year.
+  #   23-Aug        August twenty third
+  #   01-Jan        January first (a two-digit day loses its leading zero)
+  #   23-Aug-84     August twenty third, eighty four
+  #   23-Aug-1984   August twenty third, nineteen eighty four
+  #   2-Apr-2001    April second, twenty oh one ("oh" and the digit one word)
+  #   1-Jan-2000    January first, two thousand
+  # The day is not checked against the month. The month's phones and "oh"
+  # are the frontend's generated map tn_number_phonemes; the day and a
+  # four-digit year are whole numbers, read by number_phonemes().
+  # While the europe mode is on (maps.tn_text_mode_spans.europe) the day is
+  # spoken first, between the words "the" and "of" from the same map:
+  #   5-sep-1998    the fifth of September, nineteen ninety eight
+  # Measured on say.exe (test/oracle-corpora/dectalk-us-mode-europe-v1.json).
+  tn_date_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'date_text' && current.outputType == 'source'"
+    define:
+      day: "current.payload.day"
+      year: "get(current.payload, 'year', '')"
+      dayFirst: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      monthText: >-
+        vocabulary('tn_number_phonemes',
+          'months.' + vocabulary('tn_month_numbers', lower(current.payload.month)))
+      dayText: >-
+        number_phonemes(size(day) == 2 && substring(day, 0, 1) == '0' ? substring(day, 1, 2) : day,
+          'ordinal')
+      yearText: >-
+        year == null || year == ''
+          ? ''
+          : maps.tn_phonemic_text.pause + (
+              size(year) == 2
+                ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                : substring(year, 1, 3) == '00' && substring(year, 3, 4) != '0'
+                  ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                    + maps.tn_phonemic_text.word_boundary
+                    + vocabulary('tn_number_phonemes', 'oh')
+                    + vocabulary('tn_number_phonemes', 'units.' + substring(year, 3, 4))
+                  : number_phonemes(year, 'four_digits'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open
+            + (dayFirst
+                ? vocabulary('tn_number_phonemes', 'the') + maps.tn_phonemic_text.word_boundary
+                  + dayText + maps.tn_phonemic_text.word_boundary
+                  + vocabulary('tn_number_phonemes', 'of') + maps.tn_phonemic_text.word_boundary
+                  + monthText
+                : monthText + maps.tn_phonemic_text.word_boundary + dayText)
+            + yearText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:815-961 (ls_proc_do_date: the month from pmonths[], the day by ls_proc_do_number with its ordinal flag, COMMA, the year)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:907-918 (in the europe mode: pthe[], the day, pof[], the month, a word boundary between each)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:924-927 (a two-digit day loses its leading zero), 944-954 (a 200X year: two digits, \"oh\" and the unit with no word boundary between), 367-398 (ls_proc_do_4_digits)"
+  # A number with a plural ending (tn_plural_number_source: "60s", "1990's")
+  # written out as one word of phonemic text: the number, as a year in its
+  # two halves when it is one (four digits, the first not 0, the middle two
+  # not "00"), and the ending its last phone picks: one after a sibilant,
+  # one after another voiceless consonant, one otherwise. The endings and the
+  # two sets of phones are in the frontend's generated map tn_number_phonemes
+  # (plural.*), in the characters of its phonemic text.
+  tn_plural_number:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'plural_number' && current.outputType == 'source'"
+    # A period between the digits is the europe mode's mark between groups
+    # (tn_europe_plural_number_source), read as the comma is.
+    define:
+      digits: "regexReplace(current.payload.digits, '\\\\.', ',', 'g')"
+      numberText: >-
+        number_phonemes(digits,
+          matches(digits, '^[1-9][0-9]{3}$') && substring(digits, 1, 3) != '00' ? 'year' : 'cardinal')
+      last: "substring(numberText, size(numberText) - 1)"
+      ending: >-
+        contains(vocabulary('tn_number_phonemes', 'plural.sibilants'), last)
+          ? vocabulary('tn_number_phonemes', 'plural.afterSibilant')
+          : contains(vocabulary('tn_number_phonemes', 'plural.voicelessConsonants'), last)
+            ? vocabulary('tn_number_phonemes', 'plural.afterVoiceless')
+            : vocabulary('tn_number_phonemes', 'plural.otherwise')
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + numberText + ending
+            + maps.tn_phonemic_text.word_boundary + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3936-3962 and 4031-4046 (the number, as a year by ls_util_is_year, and ls_util_pluralize)"
+      - "DECtalk 4.63 LTS/ls_util.c:1442-1466 (ls_util_pluralize: the ending by the last phone)"
+      - "DECtalk 4.63 LTS/ls_util.c:598-622 (ls_util_is_year)"
+  # A dollar amount (tn_money_text_source) written out as one word of
+  # phonemic text, as DECtalk's text task speaks it:
+  #   $3      three dollars            $1      one dollar
+  #   $3.00   three dollars
+  #   $3.24   three dollars and twenty four cents
+  #   $3.01   three dollars and one cent
+  #   $.50    fifty cents
+  #   $3.240  three point two four zero dollars
+  # A fraction of any length but two makes the amount a decimal number of
+  # dollars; one of two digits is cents, read without one leading zero.
+  # "dollar" is singular after the whole number one alone, "cent" after one.
+  # The words and the two plural endings are in the frontend's generated map
+  # tn_number_phonemes; a whole number is read by number_phonemes().
+  tn_money_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'money_text' && current.outputType == 'source'"
+    # A period in the whole part is the europe mode's mark between groups
+    # (tn_europe_money_text_source), read as the comma is.
+    define:
+      integer: "regexReplace(tn_text_or_empty(get(current.payload, 'integer', '')), '\\\\.', ',', 'g')"
+      fraction: >-
+        tn_text_or_empty(get(current.payload, 'fraction', ''))
+        + tn_text_or_empty(get(current.payload, 'bare', ''))
+      dollar: "vocabulary('tn_number_phonemes', 'dollar')"
+      dollarsText: >-
+        integer == ''
+          ? ''
+          : number_phonemes(integer, 'cardinal') + dollar
+            + (regexReplace(integer, ',', '', 'g') == '1'
+                ? '' : vocabulary('tn_number_phonemes', 'plural.otherwise'))
+      cents: "size(fraction) == 2 && substring(fraction, 0, 1) == '0' ? substring(fraction, 1, 2) : fraction"
+      amountText: >-
+        fraction != '' && size(fraction) != 2
+          ? (integer == '' ? '' : number_phonemes(integer, 'cardinal')
+              + maps.tn_phonemic_text.word_boundary)
+            + vocabulary('tn_number_phonemes', 'point')
+            + regexSplit(fraction, '').map(digit,
+                maps.tn_phonemic_text.word_boundary
+                + vocabulary('tn_number_phonemes', 'units.' + digit)).join('')
+            + dollar + vocabulary('tn_number_phonemes', 'plural.otherwise')
+          : fraction == '' || (fraction == '00' && integer != '')
+            ? dollarsText
+            : dollarsText + (integer == '' ? '' : vocabulary('tn_number_phonemes', 'and'))
+              + number_phonemes(cents, 'cardinal') + maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'cent')
+              + (cents == '1' ? '' : vocabulary('tn_number_phonemes', 'plural.afterVoiceless'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + amountText
+            + maps.tn_phonemic_text.word_boundary + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3312-3513 (the amount: dollars, \"and\", cents; a fraction that is not two digits read as a decimal number of dollars :3464-3513; one leading zero of the cents passed over :3410-3412)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:497-749 (ls_proc_do_number and its return value, which picks \"dollar\" or \"dollars\": :605-606)"
+  # A word in the spelling mode (tn_spell_mode_word_source), written out as
+  # one word of phonemic text: each character's name, a word boundary between
+  # two names. A digit's name is the number lists' unit, any other
+  # character's the typing table's (the generated map tn_character_names),
+  # the case folded first; a character with no name there is not spoken.
+  # White space after the word is a comma's pause: a mark the rule sends
+  # (kind 'sent_mark'), which was not read as the word's delimiter and so
+  # does not start the form-class index again as a written comma does.
+  # The written word stands first in the text, between the two marks for it:
+  # the letters have the word's form class. DECtalk has looked every word of
+  # the sentence up before the first is spelled, and the class goes out ahead
+  # of the word's first phone. Measured on say.exe: in "It is out." the
+  # letter I of "is" has the stress the phonetic stage gives a clause's only
+  # verb (S2 ahead of the letter's own S1), and so has the D of "Don't".
+  tn_spell_mode_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_word' && current.outputType == 'source'"
+    # While the math mode is on as well (maps.tn_text_mode_spans.math), a
+    # character the math table names is spoken by that name: the spelling
+    # routine tries that table first. Measured on say.exe
+    # (test/oracle-corpora/dectalk-us-mode-math-v1.json): with both modes on
+    # "3 - 2." is TH R IY, M AY N IX S, T UW.
+    define:
+      mathNames: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'math', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+          ? get(maps, 'tn_math_names', {}) : {}
+      names: >-
+        split(lower(current.payload.word), '').map(char,
+          char in mathNames
+            ? mathNames[char]
+            : matches(char, '^[0-9]$')
+              ? vocabulary('tn_number_phonemes', 'units.' + char)
+              : get(maps.tn_character_names, char, '')).filter(name, name != '')
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        (size(names) == 0 ? [] : [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + maps.tn_phonemic_text.class_word_open
+            + current.payload.word + maps.tn_phonemic_text.class_word_close
+            + names.join(maps.tn_phonemic_text.word_boundary)
+            + maps.tn_phonemic_text.close}])
+        + (tn_text_or_empty(get(current.payload, 'gap', null)) == '' ? []
+            : [{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}])
+    citations:
+      - "DECtalk 4.63 LTS/ls_spel.c:100-190 (ls_spel_spell: each character's case folded, a digit from punits[], any other character from the typing table, WBOUND between two characters; :117 the math table is tried first for each character)"
+      - "DECtalk 4.63 INCLUDE/usa_type.tab (the typing table), LTS/l_us_con.c punits[]"
+      - "DECtalk 4.63 LTS/ls_task.c:5109-5113 (every word of the sentence is looked up first, its class kept in fc_struct[]), LTS/ls_util.c:808-818 (a word's class is sent ahead of its first phone)"
+      - "DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)"
+  # An auxiliary that begins a sentence in the spelling mode
+  # (tn_spell_mode_first_verb_source): the word itself, and the comma's pause
+  # for the white space after it.
+  tn_spell_mode_first_verb:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_first_verb' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'text': lower(current.payload.word)}]
+        + (tn_text_or_empty(get(current.payload, 'gap', null)) == '' ? []
+            : [{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}])
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4672-4728 (ls_task_lookup_first_verbs speaks the word and it is finished: the spelling test is not reached)"
+      - "DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)"
+  # The question mark of a question-word sentence in the spelling mode
+  # (tn_spell_mode_wh_mark_source): a period.
+  tn_spell_mode_wh_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_wh_mark' && current.outputType == 'source'"
     expand_text:
       allowed_types: [request]
       tag: normalization_lexical
-      output: "tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')"
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]"
     citations:
-      - "Issue #144: explicit bare-number convention"
+      - "DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after a sentence that began with a word of whdic is sent as PERIOD)"
+  # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
+  # phoneme the parser names is the one a written comma gives.
+  tn_parser_pause:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'parser_pause' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': ','}}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1266-1279 (a written comma sends the COMMA phoneme); CMD/cm_text.c:1139 (phonemic text is sent as its phonemes)"
+  # Other phonemic text of the text parser (tn_parser_phones_source) stays one
+  # terminal with its marks: the frontend's lexicon reads the phonemes.
+  tn_parser_phones:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'parser_phones' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.text}]"
+    citations:
+      - "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent as its phonemes, with no dictionary lookup)"
+  # A clause end that has words to end (tn_parser_clause_end_source) ends them
+  # as a period does.
+  tn_parser_clause_end:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'parser_clause_end' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]"
+    citations:
+      - "DECtalk 4.63 PH/ph_task.c:665-676 (pending symbols are ended with PERIOD when a control item arrives)"
   tn_unmatched_words:
     kind: structural
     select:
@@ -105,4 +669,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_abbreviation, tn_initialism, tn_bare_number_request, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_stripped_mark, tn_forced_comma, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_spell_mode_word, tn_spell_mode_first_verb, tn_spell_mode_wh_mark, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

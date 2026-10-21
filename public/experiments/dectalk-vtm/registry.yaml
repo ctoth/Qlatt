@@ -1,0 +1,88 @@
+# DECtalk 4.63 synthesizer primitive registry
+#
+# One primitive: DECtalk's VTM thread (hlsyn, the vtmiont overrides and the
+# integer vocal tract model), ported in crates/dectalk-vtm. Its definition is
+# the doc comment of crates/dectalk-vtm/src/backend.rs.
+#
+# Parameters are DECtalk's packet words under DECtalk's names. Index, meaning
+# and scale of each word are in scripts/oracle/dectalk-debug/ph-contract.md,
+# read from the DECtalk 4.63 source; the citations below are to that source
+# tree (dapi/src). Every value is the 16-bit word itself, an integer.
+
+bacon: "0.1"
+
+primitives:
+  dectalk-vtm:
+    description: "DECtalk 4.63 VTM thread: PH packet words and a speaker definition in, audio out. One frame per 71/11025 s while `run` is high; 11025 Hz samples are DECtalk's exactly, then resampled to the context rate (crates/dectalk-vtm/src/backend.rs, resample.rs). No inputs. Latency: 2 samples at 11025 Hz, 2 + ceil(16 * rate / 11025) samples otherwise."
+    worklet: "dectalk-vtm-processor.js"
+    wasm: "dectalk-vtm.wasm"
+    params:
+      # Frame clock (not DECtalk words; crates/dectalk-vtm/src/backend.rs).
+      run:
+        type: float
+        default: 0
+        description: "Frame clock gate. Going high starts a run from DECtalk's start-up state at that sample; read low at a frame instant, it ends the run."
+      speaker_epoch:
+        type: float
+        default: 0
+        description: "Speaker definition serial. The definition is loaded at the first frame of a run and at every frame where this differs from the value last loaded (DECtalk reloads on every speaker packet, VTM/vtmiont.c:1616-1645)."
+
+      # Per frame, outside the packet (ph-contract.md, 'Other state').
+      lang_curr:
+        type: int
+        default: 0
+        description: "pKsd_t->lang_curr (INCLUDE/kernel.h:423-425): 0 English, 1 French, 2 German. Selects variants of the OUT_A2 overrides (VTM/vtmiont.c:858, 942, 965)."
+      vol_att:
+        type: int
+        default: 100
+        description: "pKsd_t->vol_att, output volume 0..140; 100 is unity (int_volume_table, VTM/vtm3.c:264-427)."
+
+      # Voice packet words (OUT_*, PH/ph_defs.h:559-604).
+      OUT_F1: { type: int, default: 0, unit: Hz, description: "Word 1: first formant (input to hlsyn)." }
+      OUT_A2: { type: int, default: 0, description: "Word 2: frication gain control code (1000, 1100, 1200, 1300, 2000, 2100, 3000, 3100, 3200, 3300, 4000), not a level (VTM/vtmiont.c:797-1178)." }
+      OUT_T0: { type: int, default: 0, unit: "Hz x 10", description: "Word 9: F0 in tenths of a hertz, despite the name (VTM/vtmiont.c:680)." }
+      OUT_F2: { type: int, default: 0, unit: Hz, description: "Word 11: second formant." }
+      OUT_F3: { type: int, default: 0, unit: Hz, description: "Word 12: third formant." }
+      OUT_B2: { type: int, default: 0, unit: Hz, description: "Word 15: second formant bandwidth." }
+      OUT_B3: { type: int, default: 0, unit: Hz, description: "Word 16: third formant bandwidth." }
+      OUT_PH: { type: int, default: 0, description: "Word 17: phoneme code, (font << 8) | code; low byte 0 is silence (VTM/vtm3.c:1673)." }
+      OUT_F4: { type: int, default: 0, unit: Hz, description: "Word 22: fourth formant." }
+      OUT_AG: { type: int, default: 0, unit: "mm2 x 100", description: "Word 25: glottal area." }
+      OUT_AL: { type: int, default: 0, unit: "mm2 x 10", description: "Word 26: lip area." }
+      OUT_AN: { type: int, default: 0, unit: "mm2 x 10", description: "Word 27: nasal (velopharyngeal) area." }
+      OUT_ABLADE: { type: int, default: 0, unit: "mm2 x 10", description: "Word 28: tongue blade area." }
+      OUT_PS: { type: int, default: 0, unit: "cm H2O x 100", description: "Word 29: subglottal pressure." }
+      OUT_CNK: { type: int, default: 0, unit: "mm2 x 100", description: "Word 30: posterior glottal chink area." }
+      OUT_DC: { type: int, default: 0, unit: "%", description: "Word 31: change of vocal fold compliance, signed." }
+      OUT_UE: { type: int, default: 0, unit: "cm3/s", description: "Word 32: volume flow from active expansion of the vocal tract, signed." }
+      OUT_BRST: { type: int, default: 0, description: "Word 35: burst, 1 or 2 injects an impulse on the frame's first sample (VTM/vtm3.c:864-868)." }
+      OUT_ATB: { type: int, default: 0, unit: "mm2 x 10", description: "Word 36: tongue body area." }
+      OUT_PLACE: { type: int, default: 0, description: "Word 37: place code for dorsal frication, signed: 40, 42, 45 or 80 (hlsyn/hlframe.c:282-321)." }
+
+      # Per speaker, outside the packet (ph-contract.md, 'hlsyn's speaker values').
+      last_voice: { type: int, default: 0, description: "pKsd_t->last_voice: 0 Paul, 1 Betty, 2 Harry, 3 Frank, 4 Dennis, 5 Kit, 6 Ursula, 7 Rita, 8 Wendy, 9 Chris (PH/hlsynapi.h:456-468)." }
+      NOM_Open_Quo: { type: int, default: 0, unit: "%", description: "Becomes hlsyn's modal open quotient OQm (PH/ph_vset.c:591, 672)." }
+      Tiltm: { type: int, default: 0, unit: dB, description: "Becomes hlsyn's modal spectral tilt TLm (PH/ph_vset.c:605, 689)." }
+
+      # Speaker definition packet words (struct SPD_CHIP, PH/ph_defs.h:693-720).
+      SPD_R4CB: { type: int, default: 0, unit: Hz, description: "Word 0: cascade F4." }
+      SPD_R4CC: { type: int, default: 0, unit: Hz, description: "Word 1: cascade B4." }
+      SPD_R5CB: { type: int, default: 0, unit: Hz, description: "Word 2: cascade F5 (6000 switches it off)." }
+      SPD_R5CC: { type: int, default: 0, unit: Hz, description: "Word 3: cascade B5." }
+      SPD_R4PB: { type: int, default: 0, unit: Hz, description: "Word 4: parallel F4." }
+      SPD_R5PB: { type: int, default: 0, unit: Hz, description: "Word 5: parallel F5." }
+      SPD_T0JIT: { type: int, default: 0, description: "Word 6: alternating period jitter, Q12 fraction of the period." }
+      SPD_R5CA: { type: int, default: 0, unit: dB, description: "Word 7: cascade F5 gain, index into amptable (0..87)." }
+      SPD_R4CA: { type: int, default: 0, unit: dB, description: "Word 8: cascade F4 gain." }
+      SPD_R3CA: { type: int, default: 0, unit: dB, description: "Word 9: cascade F3 gain." }
+      SPD_R2CA: { type: int, default: 0, unit: dB, description: "Word 10: cascade F2 gain." }
+      SPD_R1CA: { type: int, default: 0, unit: dB, description: "Word 11: cascade F1 gain." }
+      SPD_NOPEN1: { type: int, default: 0, description: "Word 12: open phase, Q15 fraction of the period." }
+      SPD_NOPEN2: { type: int, default: 0, description: "Word 13: open phase offset in quarter samples." }
+      SPD_ATURB: { type: int, default: 0, unit: dB, description: "Word 14: breathiness; 0 is off." }
+      SPD_AFGAIN: { type: int, default: 0, unit: dB, description: "Word 16: frication gain." }
+      SPD_AZGAIN: { type: int, default: 0, unit: dB, description: "Word 18: voicing gain." }
+      SPD_APGAIN: { type: int, default: 0, unit: dB, description: "Word 19: aspiration gain." }
+      SPD_SEX: { type: int, default: 0, description: "Word 23: nonzero is male; picks hlsyn's male or female constants (VTM/vtmiont.c:1643-1644)." }
+    inputs: 0
+    outputs: 1

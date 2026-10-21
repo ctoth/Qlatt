@@ -3,4 +3,6 @@ maps:
     years: 'no'
     fractions: 'no'
     hundreds: hundred
+    # A bare number is written out in words by the text rules.
+    bare_numbers: words
     fraction_exception: '100'

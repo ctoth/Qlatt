@@ -1,0 +1,12 @@
+{
+  "promotion-none": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-first-stretch": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "promotion-past-one-stretch": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-past-one-stretch-had": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-past-one-stretch-and": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-same-stretch-many": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-two-calls": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-two-calls-then": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-second-call-finds-none": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "promotion-no-call": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

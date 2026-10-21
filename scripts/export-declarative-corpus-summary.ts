@@ -7,7 +7,9 @@ const outPath = "test/golden/declarative-corpus-summary.json";
 
 const corpus = JSON.parse(readFileSync(corpusPath, "utf8"));
 const phrases = Array.isArray(corpus?.phrases) ? corpus.phrases : [];
-const baseF0 = Number(corpus?.baseF0 ?? 110);
+// Absent from the corpus: no base pitch is requested, and the frontend's voice
+// keeps its own. The summary's baseF0 is then null.
+const baseF0: number | undefined = corpus?.baseF0 === undefined ? undefined : Number(corpus.baseF0);
 
 if (phrases.length === 0) {
   throw new Error(`No phrases found in ${corpusPath}`);
@@ -29,7 +31,7 @@ writeFileSync(
   JSON.stringify(
     {
       corpus: corpus?.name ?? "unknown-corpus",
-      baseF0,
+      baseF0: baseF0 ?? null,
       summaries,
     },
     null,

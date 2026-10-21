@@ -81,23 +81,38 @@ describe("stress_spectral_tilt (Sluijter & van Heuven 1996)", () => {
   });
 });
 
-describe("dectalk_question_glide_reset (DECtalk 4.63 ph_inton1.c Rules 7-8)", () => {
-  it("cancels the question rise on the question_glide layer at the '?' boundary", () => {
+// This block used to pin dectalk_question_glide_reset: a held glide for the
+// question rise and a cancelling command at the '?' silence, cited to
+// ph_inton1.c Rules 7-8. That file holds phinton_classic, which nothing
+// calls. The live routine (Ph_inton2.c:1238-1263) issues the question
+// gestures as two IMPULSE commands, which end by themselves, and F0 is
+// rendered afresh for every clause, so there is nothing to cancel. The rule
+// is gone; this pins what replaced it.
+describe("question gestures (DECtalk 4.63 Ph_inton2.c:1238-1263 Rule 4)", () => {
+  it("issues the dip and the rise as two impulses on the stress layer, and no glide", () => {
+    const dip = policyNumber("dectalk-english", ["f0", "question_gesture_dip_hz"]);
     const rise = policyNumber("dectalk-english", ["f0", "question_gesture_rise_hz"]);
     const { utterance } = textToKlattTrackDetailed("Are you home? Yes.", 110, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const glide = utterance
-      .relation("Tilt")
-      .listItems()
-      .filter((item) => item.get("layer") === "question_glide");
-    const rises = glide.filter((item) => Number(item.get("value")) > 0);
-    const resets = glide.filter((item) => item.get("tag") === "f0_boundary_reset");
-    expect(rises.map((item) => item.get("value"))).toEqual([rise]);
-    expect(resets.map((item) => item.get("value"))).toEqual([-rise]);
-    expect(resets[0].latestWrite("value")?.ruleId ?? resets[0].get("ruleId")).toBeDefined();
-    const sum = glide.reduce((total, item) => total + Number(item.get("value")), 0);
-    expect(sum).toBe(0);
+    const commands = utterance.relation("Tilt").listItems();
+    expect(commands.filter((item) => item.get("layer") === "question_glide")).toEqual([]);
+    const gestures = commands.filter((item) =>
+      ["f0_question_dip", "f0_question_rise"].includes(String(item.get("tag"))),
+    );
+    // "Are you home?" has three words: the full rise, length 20.
+    expect(
+      gestures.map((item) => [
+        item.get("tag"),
+        item.get("layer"),
+        item.get("value"),
+        item.get("duration_frames"),
+      ]),
+    ).toEqual([
+      ["f0_question_dip", "stress", dip, 15],
+      ["f0_question_rise", "stress", rise, 20],
+    ]);
+    for (const item of gestures) expect(item.latestWrite("value")?.ruleId).toBeDefined();
   });
 });

@@ -1,34 +1,90 @@
 version: v13-cel
 inventory_path: /rules/frontends/dectalk-english/inventory.yaml
-lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
-# Engineering choice: explicitly retain the shared English morphology rules.
+# DECtalk's own compiled letter-to-sound tables, run by the table interpreter
+# (src/g2p/table-lts*.ts); built by scripts/build-dectalk-lts-table.ts.
+lts_path: /rules/frontends/dectalk-english/lts-table.json
+# The loader requires both paths, but neither file is used to pronounce a word
+# here: with a compiled table the order is dictionary, the table's suffix
+# stripping against the dictionary, then the table's rules, and stress comes
+# from the dictionary root or the table's passes (src/g2p/index.ts, the
+# `if (table)` branch of pronounce, which returns before the shared clitic,
+# morphology and stress-policy steps).
 morphology_path: /rules/frontends/qlatt-english/morphology.yaml
-# Engineering choice: shared English lexical policy for generated phones; dictionary stress wins.
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 # DECtalk is dictionary-first with LTS fallback (DECtalk 4.63 ls_task.c:697:
 # main dictionary search precedes the LTS rule engine; rules run only on miss).
 # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
 # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
 dictionary_path: /dectalk-dictionary.json
+# DECtalk's command text parser: the rules that rewrite text (phone numbers,
+# dates, some abbreviations, punctuation) before letter-to-sound reads it.
+# The table is DECtalk 4.63's compiled CMD/par_rule2.h with the character
+# tables of CMD/cm_char.c and CMD/par_char.c, decoded by
+# scripts/build-dectalk-text-parser.ts; src/text-parser runs it.
+text_parser:
+  table_path: /rules/frontends/dectalk-english/text-parser-table.json
+  # 1 << PAR_LANG_CODE for US English (CMD/cm_text.c:885).
+  language: 1
+  # The punctuation rules run in the mode 1 << PUNCT_some, DECtalk's default
+  # (CMD/cm_text.c:846, CMD/cm_util.c:125).
+  punctuation: { section: 1, mode: 2 }
+  # The main rules run in MODE_CITATION, 0x0100 (CMD/cm_text.c:989,
+  # INCLUDE/esc.h:131).
+  main: { section: 2, mode: 256 }
+  # What DECtalk's say program sends after the text: eight spaces, and the
+  # clause end a forced speak appends (samples/SAY/say.c:249,
+  # API/ttsapi.c:4559).
+  ending: "        \v"
+  # An in-text command ends the clause it stands in when its routine sends an
+  # item down the text pipe or syncs (the table's commandTable flags, read
+  # from CMD/cm_copt.c). These three are the measured exceptions, on say.exe
+  # with "The ship came [:X] in at dawn." (299 packets when the clause goes
+  # on, 440 when it is ended): "index mark 1" and "pronounce name" send an
+  # item and the clause goes on (letter-to-sound keeps an index item in a
+  # list, LTS/ls_task.c:420-440); "say clause" goes on too (the routine
+  # syncs for its letter modes only, CMD/cm_copt.c:766-820; "say word" does
+  # end it, by what that mode itself does, which is not ported).
+  commands_without_clause_end: [index, pronounce, say]
 # DECtalk uses its own source contour so shared qlatt-english LF policy
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
 source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
-# Included text rules select DECtalk bare-year/fraction recognition and the
-# explicit hundredand convention through normalization-policy.yaml.
-# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
+# Included text rules select DECtalk bare-year/fraction recognition through
+# normalization-policy.yaml, and leave a bare number or year as digits: the
+# lexicon speaks those from DECtalk's number phone lists (src/g2p/table-number.ts).
+# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:297-785.
+#
+# These shared phases read the text parser's output, not the text as typed.
+# Measured over the 616 texts of the first parser fixtures
+# (scripts/oracle/normalization-rules-fired.ts), after the parser:
+#   - still at work: normalization_lexical (words, the parser's marks,
+#     dictionary abbreviations, initials, bare numbers and years, number-like
+#     words kept whole), normalization_number_requests and
+#     normalization_number_groups (ordinals, fractions),
+#     normalization_terminal_words;
+#   - never reached on those texts: the recognition rules that feed
+#     normalization_currency, normalization_time, normalization_date and
+#     normalization_decimal_fraction, because a dollar amount, a clock time,
+#     a decimal and the parser's date word are each kept whole for the
+#     lexicon first. The phases stay listed: a text those rules still catch
+#     has not been ruled out, only not been seen.
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml
+  - dictionary-abbreviations.yaml
+  - number-phonemes.yaml
   - pipeline.yaml
+  - phases/orthography.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml
   - phases/annotation.yaml
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+  - phases/articulation.yaml
+  - phases/formant-drawing.yaml
 # Declarative voice registry. Each entry names a voice YAML under `dir`; a
 # caller selects one by name via the textToKlattTrack `speaker` option (a
 # string voice name). The selected voice's parameters populate the speaker
@@ -39,6 +95,46 @@ include:
 speakers:
   dir: /rules/frontends/dectalk-english/speakers
   default: paul
+  # The names and limits of a speaker definition's entries, by SPD_ index
+  # (INCLUDE/cmd.h:159-205, PH/ph_vdefi.c limit[]). Each voice file carries
+  # its definition; a text changes entries of the selected voice's with
+  # "[:dv <word> <number>]" (PH/ph_vset.c:175-232 setparam), and the fields
+  # that come from the definition are then derived again
+  # (src/dectalk-speaker-definition.ts, PH/ph_vset.c setspdef).
+  definition_path: /rules/frontends/dectalk-english/speaker-definition.json
+  # The rule fields that are words of the speaker definition packet and the
+  # values read with it (setspdef, PH/ph_vset.c:522-880; changeSpeakerValues,
+  # VTM/vtmiont.c:1641-1645). In a text whose voice or definition changes
+  # inside it, each frame carries these for the voice in force when the frame
+  # is sent, with the count of definitions sent so far (`speaker_epoch`):
+  # DECtalk sends the definition when the command is carried out, between
+  # two clauses, while a frame's own words are sent one frame late
+  # (PH/ph_claus.c:754-757). Measured on say.exe's packets: in "The ship came
+  # in. [:nb] We went down to see it." the definition changes one packet
+  # before the packet words of the second clause's first frame.
+  definition_frame_params:
+    - SPD_R4CB
+    - SPD_R4CC
+    - SPD_R5CB
+    - SPD_R5CC
+    - SPD_R4PB
+    - SPD_R5PB
+    - SPD_T0JIT
+    - SPD_R5CA
+    - SPD_R4CA
+    - SPD_R3CA
+    - SPD_R2CA
+    - SPD_R1CA
+    - SPD_NOPEN1
+    - SPD_NOPEN2
+    - SPD_ATURB
+    - SPD_AFGAIN
+    - SPD_AZGAIN
+    - SPD_APGAIN
+    - SPD_SEX
+    - last_voice
+    - NOM_Open_Quo
+    - Tiltm
   # Declarative speaker-field -> frame-param bindings. Each name in this list is
   # BOTH the voice-YAML field and the same-named per-frame Klatt param; the
   # selected voice's value is stamped (absolute set) onto every frame's params,
@@ -107,6 +203,172 @@ speakers:
     - { gain: G3, param: A3 }
     - { gain: G2, param: A4 }
     - { gain: G1, param: A5 }
+  # Voice-file fields the rules read as params.policy.voice.<field>
+  # (src/dectalk-voice.ts). Every voice below must give each of them.
+  rule_fields:
+    # SPD_SEX of the voice's definition; setspdef() copies it to malfem
+    # (ph_vset.c:537), which picks the male or female target, diphthong and
+    # locus tables.
+    sex:
+      values: [male, female]
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:537; ph_setar.c:1684-1697; ph_sttr2.c:162-169"
+    # The formant scale setspdef() derives from the voice's head size.
+    fnscale:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:615-616, 712-713; ph_draw.c:733-736"
+    # size_hat_rise, the hat pattern's rise in tenths of a hertz: HR * 10, and
+    # (HR - 10) * 10 in Frank's block.
+    hat_rise_hz10:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:597, 680; Ph_inton2.c:820"
+    # scale_str_rise, SR: a stress impulse is its table value times this over 32.
+    scale_str_rise:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:598, 681; Ph_inton2.c:992-1005"
+    # The speaker definition DECtalk sends its synthesizer when the voice is
+    # selected: the words of the speaker definition packet setspdef() builds
+    # (struct SPD_CHIP, PH/ph_defs.h:693-720) and the three values the VTM
+    # thread reads beside it. The articulation frame program emits them on
+    # every frame for the dectalk-vtm node, whose parameters have these names
+    # (public/experiments/dectalk-vtm/registry.yaml;
+    # scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"). Each voice
+    # file's values are setspdef()'s for the voice's tuned definition
+    # (scripts/oracle/import-dectalk-voices.ts), and equal the packet the
+    # stock say.exe sent for that voice (test/dectalk-speaker-packets.test.ts).
+    SPD_R4CB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:714-730 (r4cb, cascade F4); VTM/vtm3.c:2054-2061"]
+    SPD_R4CC:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:725-730 (r4cc, cascade B4); VTM/vtm3.c:2055"]
+    SPD_R5CB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:732-760 (r5cb, cascade F5); VTM/vtm3.c:2067-2075"]
+    SPD_R5CC:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:755-760 (r5cc, cascade B5); VTM/vtm3.c:2068"]
+    SPD_R4PB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:761 (r4pb, parallel F4); VTM/vtm3.c:2081-2084"]
+    SPD_R5PB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:762 (r5pb, parallel F5); VTM/vtm3.c:2090-2098"]
+    SPD_T0JIT:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:763 (t0jit, period jitter); VTM/vtm3.c:2125-2142"]
+    SPD_R5CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:765 (r5ca, cascade F5 gain); VTM/vtm3.c:2149"]
+    SPD_R4CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:766 (r4ca, cascade F4 gain); VTM/vtm3.c:2151"]
+    SPD_R3CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:767 (r3ca, cascade F3 gain); VTM/vtm3.c:2153"]
+    SPD_R2CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:772 (r2ca, cascade F2 gain); VTM/vtm3.c:2155"]
+    SPD_R1CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:775 (r1ca, cascade F1 gain); VTM/vtm3.c:2157"]
+    SPD_NOPEN1:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:783 (nopen1, open phase); VTM/vtm3.c:2165"]
+    SPD_NOPEN2:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:784 (nopen2, open phase offset); VTM/vtm3.c:2166"]
+    SPD_ATURB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:786 (aturb, breathiness); VTM/vtm3.c:2172-2176"]
+    SPD_AFGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:816 (afgain, frication gain); VTM/vtm3.c:2194"]
+    SPD_AZGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:810 (azgain, voicing gain); VTM/vtm3.c:2211"]
+    SPD_APGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:818 (apgain, aspiration gain); VTM/vtm3.c:2218"]
+    SPD_SEX:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_defs.h:693-720 (sex, word 23); VTM/vtmiont.c:1643-1644"]
+    last_voice:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:1645, 2899-3430 changeSpeakerValues; PH/hlsynapi.h:456-468"]
+    NOM_Open_Quo:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:591, 672 (NOM_Open_Quo); VTM/vtmiont.c:2899-3430 (OQm)"]
+    Tiltm:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:605, 689 (Tiltm); VTM/vtmiont.c:2899-3430 (TLm)"]
+    # What changeSpeakerValues() stores per voice for PH's articulation code
+    # (VTM/vtmiont.c:2899-3426, one `case` a voice; each voice file names its
+    # case's lines). They are constants of the function, not entries of the
+    # voice definition. scripts/oracle/import-dectalk-voices.ts reads them from
+    # the lines the build compiles.
+    stress_step:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (STRESS_STEP); PH/ph_draw.c:1516-1537"]
+    unstress_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (UNSTRESS_PRESSURE); PH/ph_draw.c:1536"]
+    stress_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (STRESS_PRESSURE); PH/ph_draw.c:1520"]
+    sub_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Sub_Pressure); PH/ph_draw.c:1474, 2802"]
+    fricative_opening:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Fricative_Opening); PH/ph_draw.c:288, 770-833, 1063-1116, 1828, 2043, 2854-2883, 3132-3394"]
+    glottal_stop_area:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Glot_Stop_Area); PH/ph_draw.c:1606"]
+    vot_speed:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (VOT_speed); PH/ph_draw.c:546-572"]
+    # Frank's case (vtmiont.c:3223-3249) assigns no EndOfPhrase_Spread, so
+    # DECtalk keeps whatever the voice before Frank left there and Frank's
+    # voice file has no such field. A rule reads it as
+    # get(params.policy.voice, 'end_of_phrase_spread', <its cited default>).
+    end_of_phrase_spread:
+      kind: number
+      optional: true
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (EndOfPhrase_Spread); PH/ph_draw.c:3646"]
+    # The definition's own F4, sent unscaled as the F4 word.
+    spd_F4:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_draw.c:4189 (parstochip[OUT_F4] = curspdef[SPD_F4]); INCLUDE/cmd.h:159-205"
+    # NOM_VOIC_GLOT_AREA, NOM_VOICED_OBSTRUENT, NOM_Open_Glottis and
+    # NOM_Area_Chink: the glottal area of a voiced sound, of a voiced
+    # obstruent and of an open glottis, and the posterior chink. The source
+    # comments the entry at SPD_CHINK "open quotient" and the one before it
+    # "chink area"; the index decides.
+    AGO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:587, 668 (NOM_VOIC_GLOT_AREA = curspdef[SPD_AGO])"
+    AGVO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:588, 669 (NOM_VOICED_OBSTRUENT = curspdef[SPD_AGVO])"
+    AGUO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:589, 670 (NOM_Open_Glottis = curspdef[SPD_AGUO])"
+    CHINK:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:590, 671 (NOM_Area_Chink = curspdef[SPD_CHINK])"
+  # Chris (speakers/chris.yaml) is not offered: DECtalk 4.63's US build
+  # defines us_chris (PH/P_us_vdf1.h:751) but its voice table has no entry for
+  # it (PH/ph_main.c:511-520), so DECtalk never builds a speaker definition
+  # packet for it and there is none to give the synthesizer.
   voices:
     - paul
     - harry
@@ -117,15 +379,16 @@ speakers:
     - wendy
     - rita
     - kit
-    - chris
 f0_model:
   type: layered_additive
   # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.
   # Citation: DECtalk 4.63 ph_claus.c ("For each 6.4 msec frame of current clause")
   frame_period_sec: 0.0064
   # The VTM emits each completed control cell as one 71-sample packet at
-  # 11,025 Hz. Keep this packet clock separate from the nominal controller
-  # clock so long clauses do not advance to the next cell before DECtalk does.
+  # 11,025 Hz (71 / 11025 s). Rules count time in nominal controller frames;
+  # lowering stretches every output time, segment starts and F0 ticks alike,
+  # by output_frame_period_sec / frame_period_sec so the whole clause sits on
+  # the packet clock.
   # Citation: DECtalk 4.63 VTM/vtmiont.c delaypars packet loop.
   output_frame_period_sec: 0.006439909297052154
   citations:
@@ -172,6 +435,67 @@ f0_model:
     # filter_seg_commands() in signed Q14 arithmetic.
     segmental:
       type: dectalk_segmental
+      # The glottal-stop gesture. A command's fourth flag puts one at its
+      # allophone's end (set_tglst, Ph_drwt02.c:4040-4128; the conditions are
+      # the segmental rules' in prosody.yaml). Within 7 frames of it F0 is
+      # lowered by 550 less 70 a frame (2266-2275: dtglst * 70 - 550 while
+      # dtglst <= 7; the same at 3753-3762 in the female routine). A gesture
+      # is taken up at an allophone's frame 8, or its last frame (4124).
+      glottal_gesture:
+        depth: 550
+        slope: 70
+        reach_frames: 7
+        latch_frame: 8
+    # A command here adds its value to the voice's range (f0_scale_factor) for
+    # the clause: the female routine's exclamation, Ph_drwt02.c:3805-3808.
+    range:
+      type: range
+    # A command here replaces the voice's F0 floor (f0_minimum) for the
+    # clause: what DECtalk's text stage does to f0minimum around a clause
+    # break it inserts (LTS/ls_util.c:829-837; the rule is
+    # dectalk_break_f0_floor in prosody.yaml).
+    floor:
+      type: floor
+    # F0 a user wrote on phonemes: DECtalk's f0mode SINGING and
+    # PHONE_TARGETS_SPECIFIED (Ph_drwt02.c:199-213). A clause with a command
+    # here is drawn from this layer alone: a straight line to each target
+    # (set_user_target, 3953-4026; linear_interp, 4249-4290) and the glottal
+    # gesture, with no baseline, hat, impulse or segmental term, no flutter
+    # and no speaker scaling (2258-2330). A command's value is its target in
+    # Hz * 10; its first flag says the target is a note to sing (the rule is
+    # dectalk_user_pitch_command in prosody.yaml).
+    user_target:
+      type: dectalk_user_target
+      # 2325-2328: a sung clause's F0 is frac4mul(f0prime, 4190), "change
+      # from middle C = 256 Hz to A = 440 Hz".
+      note_scale: 4190
+      # 4279-4287: a vibrato on a sung note, timecosvib += 165 a frame and
+      # getcosine[timecosvib >> 6] >> 3 added.
+      vibrato:
+        phase_step: 165
+        shift: 3
+      # 3981: delnote = (newnote - f0) >> 2, "so transition happens over 16
+      # frames".
+      note_transition_shift: 2
+  # DECtalk has two copies of pht0draw(), chosen by the voice's sex
+  # (Ph_drwt02.c:771 male, 2445 female). Compared as compiled, the female copy
+  # differs from the male one in this block as follows:
+  by_sex:
+    female:
+      filter:
+        # The command filter runs one bit down: its state starts at
+        # (f0basestart << 3) >> 1 (3182-3183), its input is f0in >> 1 (3702)
+        # and its output is f0 << 1 (3710).
+        scale_shift: 1
+      layers:
+        stress:
+          # tarimp is still raised by delimp after each frame (3685-3691), but
+          # the `tarimp -= delimp` the male copy does before the frame
+          # (2070-2073) is absent (3563-3568).
+          decay: step_plus_rise
+      speaker_scale:
+        # f0prime = f0minimum + frac4mul(f0prime - 2100, f0scalefac) (3812).
+        pivot: 2100
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula:
@@ -201,7 +525,732 @@ f0_model:
     max_hz: 500
 parameters:
   policy:
+    # Data for the phone structure word DECtalk builds before its allophone and
+    # duration rules (ph_sort.c phsort()).
+    structure:
+      # us_phcluster(first, second): legal two-consonant onsets. `s_onset` marks
+      # the clusters that may also take a leading /s/ (CLUSTER_TRYS). Keys are
+      # this port's phone names (LL is spelled L here).
+      onset_clusters:
+        P: { L: s_onset, R: s_onset }
+        B: { L: cluster, R: cluster }
+        F: { R: s_onset, L: cluster }
+        T: { R: s_onset, W: cluster }
+        D: { R: cluster, W: cluster }
+        TH: { R: cluster, W: cluster }
+        K: { R: s_onset, L: s_onset, W: s_onset }
+        G: { R: cluster, L: cluster, W: cluster }
+        S: { W: cluster, L: cluster, P: cluster, T: cluster, K: cluster, M: cluster, N: cluster, F: cluster }
+        SH: { W: cluster, L: cluster, P: cluster, T: cluster, R: cluster, M: cluster, N: cluster }
+      # whdic: a clause that begins with one of these is a wh-question, and
+      # DECtalk sends its question mark on as a period.
+      wh_words: [what, when, where, why, who, how, which, whose, whom]
+      # verbs[]: these take secondary stress as the first word of a sentence.
+      sentence_initial_auxiliaries: [are, had, is, was, were, will]
+      citations:
+        - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (CLUSTER and CLUSTER_TRYS onset pairs)"
+        - "DECtalk 4.63 LTS/l_us_con.c:1215-1226 whdic"
+        - "DECtalk 4.63 LTS/ls_task.c:4636-4645 verbs[]"
+    # Data for the area and pressure rules of phases/articulation.yaml
+    # (PH/ph_draw.c, HLSYN section).
+    articulation:
+      # l_all_ph.h US_<name>: the allophone codes, in the order of
+      # timing.phonemes above. A packet's PH word is the code with the
+      # language's font in the high byte: US English is font 1 (the oracle's
+      # packets carry 256 for silence and 305 for K, code 49).
+      phone_font: 256
+      phone_code: { SIL: 0, IY: 1, IH: 2, EY: 3, EH: 4, AE: 5, AA: 6, AY: 7, AW: 8, AH: 9, AO: 10, OW: 11, OY: 12, UH: 13, UW: 14, RR: 15, YU: 16, AX: 17, IX: 18, IR: 19, ER: 20, AR: 21, OR: 22, UR: 23, W: 24, Y: 25, R: 26, LL: 27, HX: 28, RX: 29, LX: 30, M: 31, N: 32, NX: 33, EL: 34, DZ: 35, EN: 36, F: 37, V: 38, TH: 39, DH: 40, S: 41, Z: 42, SH: 43, ZH: 44, P: 45, B: 46, T: 47, D: 48, K: 49, G: 50, DX: 51, TX: 52, Q: 53, CH: 54, JH: 55, DF: 56, TZ: 57, CZ: 58 }
+      # p_us_rom.h:982 us_place, one list per bit (ph_defs.h:339-346): FLABIAL
+      # labial, FDENTAL dental, FPALATL palatal, FALVEL alveolar, FVELAR velar,
+      # FGLOTTAL glottal, F2BACKI f2backi, F2BACKF f2backf. TX carries FALVEL
+      # and FGLOTTAL. ph_defs.h:150 BLADEAFFECTED is dental, palatal or alveolar.
+      place:
+        labial: [M, F, V, P, B]
+        dental: [DZ, TH, DH]
+        palatal: [SH, ZH, CH, JH, TZ]
+        alveolar: [N, EN, S, Z, T, D, TX]
+        velar: [NX, K, G]
+        glottal: [TX, Q, CZ]
+        f2backi: [YU, Y]
+        f2backf: [IY, EY, Y]
+      # p_us_st1.c:1362-1441, Special Rule 2 in the HLSYN build: frames of
+      # aspiration in the sonorant after a voiceless plosive. NF60MS before a
+      # stressed phone, NF7MS before an unstressed one; 5 more in a sonorant
+      # consonant or RR; NF15MS in an /s/ cluster; NF20MS more in any other
+      # non-syllabic; at most half (>> 1) of a primary-stressed syllabic
+      # (ph_defs.h:435-443: NF7MS 1, NF15MS 2, NF20MS 3, NF60MS 9).
+      vot:
+        stressed: 9
+        unstressed: 1
+        sonorant_consonant_bonus: 5
+        s_cluster: 2
+        nonsyllabic_bonus: 3
+        syllabic_divisor: 2
+      # ph_draw.c:3818: the final fall ends half a dummy vowel early
+      # (`allodurs[...] >> 1`).
+      pressure:
+        dummy_vowel_divisor: 2
+      # ph_draw.c:4071: from this speaking rate up, in words a minute, the
+      # glottal area moves at speed 1 on every frame.
+      glottis_fast_rate_wpm: 350
+      # engineering estimate: how many Segments to scan back from a dummy
+      # vowel for its plosive. A stop is at most a closure, a release and an
+      # aspiration Segment, so 8 is ample; the same bound as pipeline.yaml's
+      # allophone helpers.
+      unit_scan_items: 8
+      # p_us_rom.h:722 us_burdr, the burst's length in ms (DZ 13, P 7, B 7,
+      # T 7, D 13, K 26, G 26, CH 71, JH 45, every other phone 0), in frames
+      # as mstofr gives them: (ms * 10) >> 6 (ph_task.c:1380-1387).
+      burst_frames: { DZ: 2, P: 1, B: 1, T: 1, D: 2, K: 4, G: 4, CH: 11, JH: 7 }
+      # ph_draw.c:241-244 area_rel[18], the areas a release steps through. Its
+      # first entry is overwritten with the voice's NOM_Fricative_Opening at
+      # 288, so the rules read that for step 0 and never this list's 100.
+      area_release: [100, 500, 800, 900, 900, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+      # Special Rule 1 and ph_draw.c:740-886: a burst loses a frame before an
+      # obstruent or in a phone shorter than NF50MS; an affricate's closure is
+      # at most NF60MS and at least 2 frames; the closure flag is raised
+      # bplos_build_time (ph_draw.c:156) frames before the closure ends at the
+      # lips and one more at the blade; a constriction left by another
+      # articulator is held for `coarticulation` frames (ph_draw.c:338-340).
+      closure:
+        short_phone_frames: 8
+        affricate_max_frames: 9
+        affricate_min_frames: 2
+        build_frames: 7
+        coarticulation_frames: 4
+      # ph_draw.c:219-224: the velum's area by nasal_step, and the DC and UE
+      # words by the size of dcstep.
+      nasalization: [0, 30, 60, 100, 130, 160, 190, 320, 450, 570, 675, 780, 885]
+      dc_values: [0, 30, 40, 80, 90, 95, 95, 100, 100, 105, 105]
+      ue_values: [0, 40, 60, 80, 90, 100, 120, 120, 125, 125, 130]
+      # p_us_rom.h:852 us_begtyp: the phones whose beginning type is 3
+      # (rounded back). Type 1 is timing.front_onset_phones.
+      rounded_onset_phones: [AO, OW, OY, UH, UW, RR, OR, UR, RX]
+      # ph_draw.c:538-590: when the glottis closes through that aspiration.
+      # A slow drop starts at frame 3 if the aspiration is longer than 5
+      # frames; the closing proper starts 5 frames before its end and ends 2
+      # before; a voice whose VOT_speed is over 2 closes at speed 2 when the
+      # aspiration is at least 5 frames.
+      aspiration:
+        slow_drop_frame: 3
+        slow_drop_longer_than: 5
+        close_before_end: 5
+        last_before_end: 2
+        fast_voice_speed_over: 2
+        fast_voice_at_least: 5
+        fast_voice_speed: 2
+      # The voice's F4, its glottal areas (NOM_VOIC_GLOT_AREA,
+      # NOM_VOICED_OBSTRUENT, NOM_Open_Glottis, NOM_Area_Chink) and what
+      # changeSpeakerValues() assigns for it are voice rule fields:
+      # params.policy.voice.spd_F4, AGO, AGVO, AGUO, CHINK, stress_step,
+      # stress_pressure, sub_pressure, fricative_opening, glottal_stop_area,
+      # vot_speed, end_of_phrase_spread (speakers.rule_fields above).
+      voice:
+        # NOM_UNVOICED_SON, the same in every voice (ph_vset.c:592, 675).
+        unvoiced_sonorant: 1800
+        # EndOfPhrase_Spread for a voice whose case assigns none, which is
+        # Frank (VTM/vtmiont.c:3223-3249): DECtalk keeps the value of the
+        # voice before him. 30 is Paul's (vtmiont.c:2998), the voice a
+        # process starts with, and what the packets of the Frank corpus show
+        # (its AG is exact with 30 in clauses of three words or more). After
+        # another voice in the same process DECtalk's Frank would differ.
+        end_of_phrase_spread_default: 30
+    # Data for DECtalk's duration rules (p_us_tim.c), transcribed by hand from
+    # its ROM and headers. scripts/oracle/check-dectalk-timing-policy.ts checks
+    # phonemes, inherent_ms, minimum_ms, features and syllabic_codes against the
+    # DECtalk source tree.
+    timing:
+      # l_all_ph.h US_<name>: allophone names in code order. Code 0 is silence.
+      phonemes: [SIL, IY, IH, EY, EH, AE, AA, AY, AW, AH, AO, OW, OY, UH, UW, RR, YU, AX, IX, IR, ER, AR, OR, UR, W, Y, R, LL, HX, RX, LX, M, N, NX, EL, DZ, EN, F, V, TH, DH, S, Z, SH, ZH, P, B, T, D, K, G, DX, TX, Q, CH, JH, DF, TZ, CZ]
+      # This port's phone names that differ from DECtalk's.
+      port_names: { HH: HX, NG: NX, L: LL, GS: Q }
+      # p_us_rom.h us_inhdr: inherent duration, ms.
+      inherent_ms: { SIL: 305, IY: 170, IH: 130, EY: 200, EH: 120, AE: 230, AA: 240, AY: 235, AW: 260, AH: 160, AO: 240, OW: 220, OY: 220, UH: 170, UW: 195, RR: 180, YU: 230, AX: 160, IX: 160, IR: 230, ER: 250, AR: 250, OR: 250, UR: 230, W: 60, Y: 75, R: 75, LL: 70, HX: 80, RX: 120, LX: 100, M: 80, N: 80, NX: 120, EL: 160, DZ: 60, EN: 150, F: 100, V: 100, TH: 85, DH: 60, S: 125, Z: 120, SH: 125, ZH: 120, P: 95, B: 80, T: 85, D: 80, K: 99, G: 70, DX: 30, TX: 70, Q: 100, CH: 160, JH: 100, DF: 30, TZ: 100, CZ: 120 }
+      # p_us_rom.h us_mindur: minimum duration, ms.
+      minimum_ms: { SIL: 7, IY: 80, IH: 80, EY: 140, EH: 80, AE: 80, AA: 90, AY: 110, AW: 110, AH: 70, AO: 100, OW: 90, OY: 110, UH: 60, UW: 70, RR: 90, YU: 100, AX: 60, IX: 60, IR: 120, ER: 120, AR: 120, OR: 120, UR: 120, W: 15, Y: 30, R: 30, LL: 40, HX: 60, RX: 70, LX: 70, M: 60, N: 50, NX: 80, EL: 110, DZ: 35, EN: 100, F: 60, V: 70, TH: 50, DH: 35, S: 65, Z: 70, SH: 60, ZH: 70, P: 70, B: 50, T: 50, D: 40, K: 55, G: 30, DX: 30, TX: 50, Q: 70, CH: 100, JH: 75, DF: 20, TZ: 60, CZ: 60 }
+      # p_us_rom.h us_featb, one name per bit (ph_defs.h:315-333): FSYLL
+      # syllabic, FVOICD voiced, FVOWEL vowel, FSON1 son1, FSONOR sonorant,
+      # FOBST obstruent, FPLOSV plosive, FNASAL nasal, FCONSON consonant,
+      # FSONCON sonorant_consonant, FSON2 son2, FBURST burst, FSTOP stop.
+      # W carries FOBST in the ROM; that is DECtalk's value, not a slip here.
+      features:
+        SIL: [sonorant]
+        IY: [syllabic, voiced, vowel, son1, sonorant]
+        IH: [syllabic, voiced, vowel, son1, sonorant]
+        EY: [syllabic, voiced, vowel, son1, sonorant]
+        EH: [syllabic, voiced, vowel, son1, sonorant]
+        AE: [syllabic, voiced, vowel, son1, sonorant]
+        AA: [syllabic, voiced, vowel, son1, sonorant]
+        AY: [syllabic, voiced, vowel, son1, sonorant]
+        AW: [syllabic, voiced, vowel, son1, sonorant]
+        AH: [syllabic, voiced, vowel, son1, sonorant]
+        AO: [syllabic, voiced, vowel, son1, sonorant]
+        OW: [syllabic, voiced, vowel, son1, sonorant]
+        OY: [syllabic, voiced, vowel, son1, sonorant]
+        UH: [syllabic, voiced, vowel, son1, sonorant]
+        UW: [syllabic, voiced, vowel, son1, sonorant]
+        RR: [syllabic, voiced, vowel, son1, sonorant]
+        YU: [syllabic, voiced, vowel, son1, sonorant, son2]
+        AX: [syllabic, voiced, vowel, son1, sonorant]
+        IX: [syllabic, voiced, vowel, son1, sonorant]
+        IR: [syllabic, voiced, vowel, son1, sonorant]
+        ER: [syllabic, voiced, vowel, son1, sonorant]
+        AR: [syllabic, voiced, vowel, son1, sonorant]
+        OR: [syllabic, voiced, vowel, son1, sonorant]
+        UR: [syllabic, voiced, vowel, son1, sonorant]
+        W: [voiced, son1, sonorant, obstruent, consonant, sonorant_consonant, son2]
+        Y: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        R: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        LL: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        HX: [sonorant, consonant]
+        RX: [voiced, son1, sonorant, consonant, sonorant_consonant]
+        LX: [voiced, son1, sonorant, consonant, sonorant_consonant]
+        M: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        N: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        NX: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        EL: [syllabic, voiced, son1, sonorant]
+        DZ: [voiced, obstruent, plosive, consonant, burst, stop]
+        EN: [syllabic, voiced, son1, sonorant, nasal, son2, stop]
+        F: [obstruent, consonant]
+        V: [voiced, obstruent, consonant]
+        TH: [obstruent, consonant]
+        DH: [voiced, obstruent, consonant]
+        S: [obstruent, consonant]
+        Z: [voiced, obstruent, consonant]
+        SH: [obstruent, consonant]
+        ZH: [voiced, obstruent, consonant]
+        P: [obstruent, plosive, consonant, burst, stop]
+        B: [voiced, obstruent, plosive, consonant, burst, stop]
+        T: [obstruent, plosive, consonant, burst, stop]
+        D: [voiced, obstruent, plosive, consonant, burst, stop]
+        K: [obstruent, plosive, consonant, burst, stop]
+        G: [voiced, obstruent, plosive, consonant, burst, stop]
+        DX: [voiced, obstruent, consonant, stop]
+        TX: [voiced, obstruent, plosive, consonant, burst, stop]
+        Q: []
+        CH: [obstruent, consonant, burst, stop]
+        JH: [voiced, obstruent, consonant, burst, stop]
+        DF: [voiced, obstruent, consonant, stop]
+        TZ: [obstruent, consonant]
+        CZ: [obstruent, consonant]
+      # The allophone codes whose feature word has FSYLL, read off `phonemes`
+      # and `features` above: IY..UR (1-23), EL (34) and EN (36). Rule 9 tests
+      # a clause position against this set (p_us_tim.c:539).
+      syllabic_codes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 36]
+      # Rule 9's index is a clause position, and us_featb has 101 words
+      # (PH/p_us_rom.h:1047-1150; the words of codes 59 to 100 are 0). From
+      # index 101 to 255 the test reads the program's data after the table:
+      # these are the indices whose word there has the FSYLL bit. The source
+      # does not fix what stands there; it is read from the built say.exe by
+      # scripts/oracle/dectalk-debug/featb-past-table.ts, and is the same in
+      # the stock build and the instrumented ones.
+      # scripts/oracle/check-dectalk-timing-policy.ts checks it against the
+      # executable.
+      syllabic_indices_past_table: [118, 119, 120, 121, 189, 190, 191, 192, 193, 195, 196, 198, 199, 200, 201, 202, 203, 204, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 218, 222, 239, 249, 250, 251, 252, 253, 254, 255]
+      # ph_defs.h:249-262 FBOUNDARY values, keyed by this port's rime_boundary.
+      boundary: { syllable: 32, morpheme: 64, word: 96, pp: 128, vp: 160, relative: 192, comma: 224, period: 256, question: 288, exclaim: 320 }
+      # ph_defs.h:435-452 NFxxMS: a duration in whole frames.
+      frames: { ms15: 2, ms20: 3, ms25: 4, ms30: 5, ms40: 6, ms45: 7, ms50: 8, ms60: 9, ms64: 10, ms70: 11, ms130: 20 }
+      # ph_defs.h:465-506 NxxPRCNT: fractions of 16384. N90PRCNT has the
+      # N85PRCNT value in the header (ph_defs.h:488); it is kept.
+      fraction: { one: 16384, half: 8192, p10: 1638, p25: 4096, p35: 5734, p60: 9831, p70: 11469, p80: 13108, p85: 13927, p90: 13927, p120: 19661, p150: 24576 }
+      # DECtalk's sprate: the speaking rate in words per minute, 180 unless
+      # the caller asks for another (rate.words_per_minute below sets it from
+      # the API's rate). Read by the rate functions of pipeline.yaml
+      # (dectalk_sprat0, dectalk_sprat1, dectalk_sprat2), by Rule 3
+      # (p_us_tim.c:319) and by the slow-rate phrase rule (ph_sort.c:1171).
+      speaking_rate_wpm: 180
+      # Below this rate every clause is cited, whatever its length
+      # (ph_aloph.c:500-501: Cite_It = TRUE when sprate < 100).
+      citation_below_wpm: 100
+      # At this rate or slower the phone sort turns every prepositional-phrase
+      # start it has kept into a verb-phrase start (ph_sort.c:1171-1177:
+      # sprate <= 140).
+      phrase_start_raised_at_wpm: 140
+      # init_timing's constants (ph_timng.c:238-302), by the names used there.
+      # sprat0 is the rate, with the part above `linear_above` halved and a
+      # floor of `sprat0_minimum` (SLOWTALK, ph_timng.c:262-267). sprat1 and
+      # sprat2 are fractions of 16384: (offset - sprat0) / divisor.
+      rate_scaling:
+        neutral: 180
+        linear_above: 250
+        sprat0_minimum: 75
+        sprat1_fast: { offset: 400, divisor: 220 }
+        sprat1_slow: { offset: 300, divisor: 120 }
+        sprat2_fast: { offset: 460, divisor: 280 }
+        # p_us_tim.c:266-268: a pause is never shorter than this, in frames.
+        pause_minimum_frames: 2
+      # Rule 1 pause lengths in frames before the rate is applied (nfcomma and
+      # nfperiod, ph_claus.c:225-240): 16 after a comma, 94 after a period,
+      # question mark or exclamation mark. p_us_tim.c:263-268 scales each by
+      # sprat1, which is 1 at 180 words per minute.
+      # Every clause also opens with a pause: 4 frames before a phone that is
+      # voiced, an obstruent or a plosive, 5 before any other (in US English
+      # /h/ and the glottal stop), p_us_tim.c:229-232.
+      pause_frames: { comma: 16, period: 94, clause_initial: 4, clause_initial_other: 5 }
+      # compause and perpause: what the commands [:comma N] and [:period N]
+      # add to nfcomma and nfperiod, in ms, each held between its limits and
+      # turned into frames (PH/ph_task.c:717-722: mstofr(deadstop(N, -280,
+      # 30000)) and mstofr(deadstop(N, -420, 30000)); p_us_tim.c:241-252).
+      # 0 until a command that stands before any spoken text says otherwise
+      # (ph_task.c:320-321).
+      pause_added_ms: { comma: 0, period: 0 }
+      pause_added_limits_ms: { comma: [-280, 30000], period: [-420, 30000] }
+      # p_us_rom.h us_begtyp: the phones whose beginning type is 1 (front).
+      # Ph_inton2.c:1701-1706 releases a plosive into IX after one of these.
+      front_onset_phones: [IY, IH, EY, EH, AE, YU, IX, IR, ER, Y, TZ]
+      # send_pars() writes no packet on its first call (ph_claus.c:759-766), so
+      # the utterance's first controller frame is never heard.
+      unemitted_initial_frames: 1
+      # p_us_tim.c:468 caps HX at 11 frames; 871-877 floors RR at 13.
+      hx_max_frames: 11
+      rr_minimum_frames: 13
+      # ph_sort.c:192-215 durdic, the US rows: durations in ms given to the
+      # first phones of a word that begins with the phones of the key (a
+      # prefix; "'EH N" covers "end", "enter", "anything"). The apostrophe
+      # stands before the vowel with primary stress, where the table has S1.
+      # p0..p3 are the word's first four phones; 0 gives none. The row for
+      # LL 'AA T also has 60 on the stress symbol itself, which no phone
+      # receives.
+      duration_dictionary:
+        "M 'IH D": { p0: 0, p1: 85, p2: 0, p3: 0 }
+        "LL 'AA T": { p0: 0, p1: 160, p2: 0, p3: 0 }
+        "S 'IH T": { p0: 0, p1: 65, p2: 0, p3: 0 }
+        "'EH N": { p0: 80, p1: 70, p2: 0, p3: 0 }
+        "'AE D": { p0: 110, p1: 0, p2: 0, p3: 0 }
+        "W 'AO N": { p0: 0, p1: 130, p2: 0, p3: 0 }
+        "W 'AH N S": { p0: 0, p1: 80, p2: 0, p3: 0 }
+        "N 'EH V": { p0: 0, p1: 90, p2: 0, p3: 0 }
+        "'IY V EN": { p0: 142, p1: 0, p2: 0, p3: 0 }
+        "P R 'AA D": { p0: 0, p1: 0, p2: 140, p3: 0 }
+      # One synthesis frame as the frontend's clock counts it (frame_period_sec).
+      frame_ms: 6.4
+      citations:
+        - "DECtalk 4.63 p_us_rom.h us_inhdr, us_mindur, us_featb"
+        - "DECtalk 4.63 l_all_ph.h US_<name> allophone codes"
+        - "DECtalk 4.63 ph_defs.h:249-262, 315-333, 435-452, 465-506"
+    # Data for phases/formant-drawing.yaml: F1, F2, F3, B2 and B3 as phsettar()
+    # and phdraw() compute them (PH/ph_setar.c, PH/ph_draw.c).
+    formant_drawing:
+      # ph_romi.c:147-159 divtab: 16384 / n, so that mlsh1(x, divtab[n]) divides
+      # by n without a division.
+      divtab: [16384, 16384, 8192, 5461, 4096, 3276, 2730, 2340, 2048, 1820, 1638, 1489, 1365, 1260, 1170, 1092, 1024, 964, 910, 862, 819, 780, 745, 712, 682, 655, 630, 607, 585, 565, 546, 528, 512, 496, 482, 468, 455, 443, 431, 420, 409, 399, 390, 381, 372, 364, 356, 349, 341, 334]
+      # ph_romi.c:162-168 parini: the value of a parameter no phone gives a
+      # target for.
+      parini: { F1: 600, F2: 1600, F3: 2600, B2: 150, B3: 250 }
+      # ph_setar.c:421, 559-567, 629: how far a formant target moves toward
+      # its neighbours, as fractions of 16384 (ph_defs.h:466-469 N10PRCNT,
+      # N15PRCNT, N25PRCNT): 10% in a stressed phone, 15% in an unstressed one
+      # and 25% for its F2; the next phone's beginning moves 10% toward this
+      # phone's end.
+      coarticulation: { stressed: 1638, unstressed: 2457, unstressed_f2: 4096, next: 1638 }
+      # The speaker's formant scale is a voice rule field,
+      # params.policy.voice.fnscale (speakers.rule_fields above).
+      # The ROM tables below:
+      # begtyp, endtyp: us_begtyp, us_endtyp (1 front, 2 back unrounded,
+      #   3 back rounded, 4 obstruent, 5 rounded sonorant consonant).
+      # tables.male, tables.female: what gettar() and setloc() read for a
+      #   speaker of that sex (params.policy.voice.sex):
+      #   target: -1 is no target, a value under -1 a diphthong.
+      #   diphthong: the values of the lines and, in ms, the times at which
+      #     each but the last is reached.
+      #   locus: per obstruent and sonorant type, [locus Hz, percent of the
+      #     way to the sonorant's target, ms].
+      # BEGIN p_us_rom.h tables (scripts/oracle/export-dectalk-formant-tables.ts --write)
+      # Generated from DECtalk 4.63 dapi/src/PH/p_us_rom.h by
+      # scripts/oracle/export-dectalk-formant-tables.ts --write. Do not edit:
+      # change the script and run it again.
+      # p_us_rom.h:852-912 us_begtyp
+      begtyp:
+        SIL: 4
+        IY: 1
+        IH: 1
+        EY: 1
+        EH: 1
+        AE: 1
+        AA: 2
+        AY: 2
+        AW: 2
+        AH: 2
+        AO: 3
+        OW: 3
+        OY: 3
+        UH: 3
+        UW: 3
+        RR: 3
+        YU: 1
+        AX: 2
+        IX: 1
+        IR: 1
+        ER: 1
+        AR: 2
+        OR: 3
+        UR: 3
+        W: 5
+        Y: 1
+        R: 5
+        LL: 5
+        HX: 4
+        RX: 3
+        LX: 5
+        M: 4
+        N: 4
+        NX: 4
+        EL: 5
+        DZ: 4
+        EN: 4
+        F: 4
+        V: 4
+        TH: 4
+        DH: 4
+        S: 4
+        Z: 4
+        SH: 4
+        ZH: 4
+        P: 4
+        B: 4
+        T: 4
+        D: 4
+        K: 4
+        G: 4
+        DX: 4
+        TX: 4
+        Q: 4
+        CH: 4
+        JH: 4
+        DF: 4
+        TZ: 1
+        CZ: 4
+      # p_us_rom.h:917-977 us_endtyp
+      endtyp:
+        SIL: 4
+        IY: 1
+        IH: 1
+        EY: 1
+        EH: 1
+        AE: 1
+        AA: 2
+        AY: 1
+        AW: 3
+        AH: 2
+        AO: 3
+        OW: 3
+        OY: 1
+        UH: 3
+        UW: 5
+        RR: 3
+        YU: 3
+        AX: 2
+        IX: 1
+        IR: 3
+        ER: 3
+        AR: 3
+        OR: 3
+        UR: 3
+        W: 5
+        Y: 1
+        R: 5
+        LL: 5
+        HX: 4
+        RX: 3
+        LX: 5
+        M: 4
+        N: 4
+        NX: 4
+        EL: 5
+        DZ: 4
+        EN: 4
+        F: 4
+        V: 4
+        TH: 4
+        DH: 4
+        S: 4
+        Z: 4
+        SH: 4
+        ZH: 4
+        P: 4
+        B: 4
+        T: 4
+        D: 4
+        K: 4
+        G: 4
+        DX: 4
+        TX: 4
+        Q: 4
+        CH: 4
+        JH: 4
+        DF: 4
+        TZ: 1
+        CZ: 4
+      tables:
+        male:
+          # p_us_rom.h:1154-1568 us_maltar
+          target:
+            SIL: {F1: -1, F2: -1, F3: -1, B1: -1, B2: -1, B3: -1}
+            IY: {F1: -2, F2: -144, F3: -286, B1: 60, B2: 100, B3: 160}
+            IH: {F1: -6, F2: -148, F3: -290, B1: 60, B2: 100, B3: 190}
+            EY: {F1: -10, F2: -152, F3: -294, B1: 70, B2: 100, B3: 200}
+            EH: {F1: -16, F2: -160, F3: -300, B1: 60, B2: 150, B3: 220}
+            AE: {F1: -22, F2: -166, F3: -306, B1: -428, B2: -440, B3: 290}
+            AA: {F1: -28, F2: -172, F3: -312, B1: 120, B2: 150, B3: 250}
+            AY: {F1: -34, F2: -178, F3: -318, B1: 130, B2: 100, B3: 230}
+            AW: {F1: -42, F2: -184, F3: -326, B1: -434, B2: 75, B3: 150}
+            AH: {F1: -48, F2: -190, F3: -332, B1: 90, B2: 70, B3: 180}
+            AO: {F1: -54, F2: -196, F3: -338, B1: 160, B2: 170, B3: 140}
+            OW: {F1: -60, F2: -202, F3: -344, B1: 90, B2: 70, B3: 180}
+            OY: {F1: -66, F2: -208, F3: -350, B1: 200, B2: -446, B3: 170}
+            UH: {F1: -74, F2: -216, F3: -358, B1: 80, B2: 83, B3: 160}
+            UW: {F1: -80, F2: -222, F3: -364, B1: 90, B2: 90, B3: 140}
+            RR: {F1: -84, F2: -226, F3: -368, B1: 90, B2: 110, B3: 250}
+            YU: {F1: -90, F2: -232, F3: -374, B1: 70, B2: -452, B3: -458}
+            AX: {F1: -96, F2: -238, F3: -380, B1: 90, B2: 80, B3: 180}
+            IX: {F1: -102, F2: -244, F3: -386, B1: 60, B2: 100, B3: 200}
+            IR: {F1: -108, F2: -250, F3: -392, B1: 80, B2: 120, B3: 200}
+            ER: {F1: -114, F2: -256, F3: -398, B1: 80, B2: 110, B3: 200}
+            AR: {F1: -120, F2: -262, F3: -404, B1: 140, B2: 90, B3: 150}
+            OR: {F1: -126, F2: -268, F3: -410, B1: 100, B2: 80, B3: 140}
+            UR: {F1: -132, F2: -274, F3: -416, B1: 90, B2: 90, B3: 180}
+            W: {F1: 295, F2: 810, F3: 2177, B1: 90, B2: 110, B3: 150}
+            Y: {F1: 280, F2: 2070, F3: 2570, B1: 50, B2: 200, B3: 300}
+            R: {F1: 350, F2: 1050, F3: 1400, B1: 70, B2: 120, B3: 150}
+            LL: {F1: 400, F2: 800, F3: 2800, B1: 70, B2: 160, B3: 180}
+            HX: {F1: -1, F2: -1, F3: -1, B1: 300, B2: 200, B3: 220}
+            RX: {F1: 470, F2: 1270, F3: 1540, B1: 80, B2: 120, B3: 150}
+            LX: {F1: 425, F2: 800, F3: 2800, B1: 140, B2: 222, B3: 233}
+            M: {F1: 300, F2: 1340, F3: 2500, B1: 130, B2: 340, B3: 250}
+            N: {F1: 320, F2: 1650, F3: 2600, B1: 90, B2: 200, B3: 350}
+            NX: {F1: 280, F2: 2100, F3: 2600, B1: 130, B2: 400, B3: 500}
+            EL: {F1: 350, F2: 800, F3: 2850, B1: 90, B2: 90, B3: 200}
+            DZ: {F1: 300, F2: 1400, F3: 2600, B1: 90, B2: 110, B3: 200}
+            EN: {F1: 280, F2: 1544, F3: 2400, B1: 90, B2: 120, B3: 160}
+            F: {F1: 340, F2: 1100, F3: 2080, B1: 200, B2: 120, B3: 150}
+            V: {F1: 325, F2: 1100, F3: 2144, B1: 100, B2: 120, B3: 120}
+            TH: {F1: 360, F2: 1500, F3: 2700, B1: 200, B2: 90, B3: 150}
+            DH: {F1: 290, F2: 1500, F3: 2560, B1: 100, B2: 120, B3: 170}
+            S: {F1: 320, F2: 1520, F3: 2550, B1: 200, B2: 180, B3: 300}
+            Z: {F1: 325, F2: 1520, F3: 2200, B1: 100, B2: 140, B3: 300}
+            SH: {F1: 300, F2: 1600, F3: 2550, B1: 200, B2: 240, B3: 300}
+            ZH: {F1: 280, F2: 1900, F3: 2550, B1: 100, B2: 160, B3: 300}
+            P: {F1: 350, F2: 1051, F3: 2150, B1: 200, B2: 180, B3: 180}
+            B: {F1: 220, F2: 691, F3: 2177, B1: 90, B2: 80, B3: 130}
+            T: {F1: 350, F2: 1700, F3: 2600, B1: 200, B2: 150, B3: 240}
+            D: {F1: 300, F2: 1650, F3: 2600, B1: 90, B2: 100, B3: 240}
+            K: {F1: 280, F2: 1790, F3: 2200, B1: 200, B2: 160, B3: 280}
+            G: {F1: 250, F2: 1800, F3: 2500, B1: 90, B2: 120, B3: 180}
+            DX: {F1: 350, F2: 1913, F3: 2305, B1: 90, B2: 100, B3: 150}
+            TX: {F1: 280, F2: 1600, F3: 2600, B1: 110, B2: 100, B3: 170}
+            Q: {F1: -1, F2: -1, F3: -1, B1: -1, B2: -1, B3: -1}
+            CH: {F1: -138, F2: -280, F3: -422, B1: 200, B2: 280, B3: 250}
+            JH: {F1: 280, F2: 1730, F3: 2700, B1: 70, B2: 170, B3: 250}
+            DF: {F1: 350, F2: 1913, F3: 2350, B1: 90, B2: 100, B3: 170}
+            TZ: {F1: -1, F2: -1, F3: -1, B1: -1, B2: -1, B3: -1}
+            CZ: {F1: 300, F2: 1400, F3: 2400, B1: 90, B2: 120, B3: 150}
+          # p_us_rom.h:1992-2457 us_maldip
+          diphthong:
+            IY: {F1: {values: [340, 330], times: [40]}, F2: {values: [2100, 2140], times: [40]}, F3: {values: [2880, 2920], times: [40]}}
+            IH: {F1: {values: [460, 480], times: [60]}, F2: {values: [1780, 1650], times: [60]}, F3: {values: [2520, 2520], times: [60]}}
+            EY: {F1: {values: [520, 480, 460], times: [10, 100]}, F2: {values: [1670, 1850, 2000, 2000], times: [10, 80, 160]}, F3: {values: [2420, 2522, 2522], times: [10, 160]}}
+            EH: {F1: {values: [560, 590, 590], times: [60, 110]}, F2: {values: [1670, 1480, 1480], times: [80, 140]}, F3: {values: [2500, 2530, 2530], times: [90, 140]}}
+            AE: {F1: {values: [680, 730, 730], times: [130, 210]}, F2: {values: [1600, 1600, 1440], times: [40, 120]}, F3: {values: [2430, 2470, 2470], times: [130, 210]}, B1: {values: [130, 120, 120], times: [130, 210]}, B2: {values: [90, 90, 90], times: [130, 210]}}
+            AA: {F1: {values: [780, 780, 780], times: [40, 200]}, F2: {values: [1200, 1200, 1200], times: [40, 200]}, F3: {values: [2670, 2670, 2670], times: [40, 200]}}
+            AY: {F1: {values: [730, 770, 530, 530], times: [70, 130, 210]}, F2: {values: [1200, 1750, 1750], times: [90, 210]}, F3: {values: [2680, 2350, 2450, 2450], times: [120, 170, 210]}}
+            AW: {F1: {values: [710, 550, 550], times: [110, 230]}, F2: {values: [1200, 820, 820], times: [110, 225]}, F3: {values: [2650, 2550, 2550], times: [120, 230]}, B1: {values: [120, 100, 100], times: [130, 240]}}
+            AH: {F1: {values: [620, 620, 620], times: [40, 100]}, F2: {values: [1170, 1170, 1170], times: [40, 100]}, F3: {values: [2600, 2600, 2600], times: [40, 100]}}
+            AO: {F1: {values: [640, 700, 700], times: [120, 220]}, F2: {values: [929, 1100, 1125], times: [120, 220]}, F3: {values: [2640, 2640, 2640], times: [40, 100]}}
+            OW: {F1: {values: [540, 490, 490], times: [40, 170]}, F2: {values: [1020, 790, 790], times: [40, 170]}, F3: {values: [2440, 2320, 2320], times: [30, 170]}}
+            OY: {F1: {values: [540, 580, 470, 470], times: [10, 90, 220]}, F2: {values: [900, 920, 1860, 1860], times: [50, 90, 220]}, F3: {values: [2500, 2250, 2400, 2400], times: [140, 200, 250]}, B2: {values: [110, 100, 220], times: [100, 210]}}
+            UH: {F1: {values: [480, 530, 530], times: [70, 130]}, F2: {values: [1100, 1070, 1070], times: [70, 130]}, F3: {values: [2420, 2500, 2500], times: [70, 130]}}
+            UW: {F1: {values: [370, 340], times: [40]}, F2: {values: [1060, 840], times: [40]}, F3: {values: [2300, 2300], times: [40]}}
+            RR: {F1: {values: [450, 390, 390], times: [30, 170]}, F2: {values: [1320, 1320, 1320], times: [30, 170]}, F3: {values: [1540, 1540, 1540], times: [30, 170]}}
+            YU: {F1: {values: [270, 360, 360], times: [45, 150]}, F2: {values: [2000, 1050, 1000], times: [45, 150]}, F3: {values: [2600, 2250, 2200], times: [45, 95]}, B2: {values: [150, 70, 70], times: [45, 150]}, B3: {values: [250, 130, 130], times: [45, 100]}}
+            AX: {F1: {values: [550, 550, 550], times: [30, 90]}, F2: {values: [1260, 1260, 1260], times: [30, 90]}, F3: {values: [2600, 2600, 2600], times: [30, 90]}}
+            IX: {F1: {values: [460, 460, 460], times: [30, 90]}, F2: {values: [1680, 1680, 1680], times: [30, 90]}, F3: {values: [2520, 2520, 2520], times: [30, 90]}}
+            IR: {F1: {values: [350, 420, 420], times: [100, 170]}, F2: {values: [1850, 1540, 1510], times: [100, 170]}, F3: {values: [2800, 1830, 1800], times: [70, 160]}}
+            ER: {F1: {values: [490, 490, 490], times: [40, 230]}, F2: {values: [1650, 1500, 1500], times: [110, 190]}, F3: {values: [2500, 1790, 1750], times: [100, 190]}}
+            AR: {F1: {values: [660, 570, 570], times: [100, 180]}, F2: {values: [1210, 1280, 1280], times: [100, 180]}, F3: {values: [2450, 1720, 1680], times: [90, 180]}}
+            OR: {F1: {values: [510, 490, 490], times: [90, 180]}, F2: {values: [870, 1200, 1200], times: [100, 190]}, F3: {values: [2300, 1530, 1500], times: [90, 180]}}
+            UR: {F1: {values: [420, 440, 440], times: [80, 170]}, F2: {values: [860, 1170, 1200], times: [80, 170]}, F3: {values: [2100, 1600, 1560], times: [80, 180]}}
+            CH: {F1: {values: [350, 325, 355], times: [10, 70]}, F2: {values: [1750, 1650, 1650], times: [10, 70]}, F3: {values: [2700, 2550, 2550], times: [10, 70]}}
+          # p_us_rom.h:4449-5361 us_maleloc through p_us_rom.h:4207-4444 us_plocu
+          locus:
+            M: {'1': {F1: [280, 30, 30], F2: [1200, 10, 25], F3: [2000, 30, 40]}, '2': {F1: [450, 20, 30], F2: [1, 88, 40], F3: [2000, 80, 25]}, '3': {F1: [450, 20, 30], F2: [970, 10, 40], F3: [1550, 80, 25]}}
+            N: {'1': {F1: [450, 20, 35], F2: [1350, 75, 35], F3: [2600, 40, 45]}, '2': {F1: [450, 20, 30], F2: [1520, 25, 75], F3: [2600, 0, 60]}, '3': {F1: [450, 20, 30], F2: [1500, 30, 80], F3: [2420, 0, 95]}}
+            NX: {'1': {F1: [280, 25, 40], F2: [2100, 15, 60], F3: [3000, 105, 60]}, '2': {F1: [280, 25, 40], F2: [1800, 20, 70], F3: [2150, 20, 70]}, '3': {F1: [280, 25, 40], F2: [1700, 42, 70], F3: [1920, 25, 70]}}
+            DZ: {'1': {F1: [340, 10, 45], F2: [1350, 20, 50], F3: [2700, 0, 50]}, '2': {F1: [350, 10, 50], F2: [1300, 12, 55], F3: [2720, 11, 55]}, '3': {F1: [350, 10, 50], F2: [1300, 12, 55], F3: [2720, 11, 55]}}
+            EN: {'1': {F1: [280, 20, 35], F2: [1550, 75, 35], F3: [2400, 40, 45]}, '2': {F1: [280, 20, 30], F2: [1420, 25, 75], F3: [2400, 30, 60]}, '3': {F1: [280, 20, 30], F2: [1550, 25, 95], F3: [2420, 30, 95]}}
+            F: {'1': {F1: [300, 63, 30], F2: [1, 92, 35], F3: [2080, 35, 30]}, '2': {F1: [320, 60, 30], F2: [1, 91, 35], F3: [2100, 65, 40]}, '3': {F1: [320, 60, 30], F2: [1, 91, 35], F3: [2100, 65, 40]}}
+            V: {'1': {F1: [300, 50, 30], F2: [1, 92, 35], F3: [2080, 35, 40]}, '2': {F1: [300, 50, 30], F2: [1, 91, 40], F3: [2100, 65, 40]}, '3': {F1: [325, 50, 30], F2: [1, 91, 40], F3: [2100, 65, 40]}}
+            TH: {'1': {F1: [360, 10, 45], F2: [1500, 20, 35], F3: [2700, 0, 50]}, '2': {F1: [360, 10, 50], F2: [1300, 12, 55], F3: [2700, 11, 55]}, '3': {F1: [360, 10, 50], F2: [1300, 12, 55], F3: [2700, 11, 55]}}
+            DH: {'1': {F1: [400, 10, 45], F2: [1500, 20, 35], F3: [2700, 0, 50]}, '2': {F1: [350, 10, 50], F2: [1400, 12, 55], F3: [2720, 11, 55]}, '3': {F1: [400, 10, 50], F2: [1300, 12, 55], F3: [2720, 11, 55]}}
+            S: {'1': {F1: [310, 40, 40], F2: [1440, 40, 50], F3: [2550, 0, 70]}, '2': {F1: [310, 40, 40], F2: [1440, 40, 50], F3: [2530, 0, 70]}, '3': {F1: [310, 40, 40], F2: [1320, 15, 60], F3: [2460, 0, 65]}}
+            Z: {'1': {F1: [310, 40, 40], F2: [1440, 35, 50], F3: [2550, 0, 70]}, '2': {F1: [310, 40, 40], F2: [1440, 35, 60], F3: [2630, 0, 70]}, '3': {F1: [310, 40, 40], F2: [1520, 15, 60], F3: [2460, 0, 65]}}
+            SH: {'1': {F1: [285, 32, 55], F2: [1630, 30, 70], F3: [2640, 51, 70]}, '2': {F1: [285, 32, 55], F2: [1600, 27, 70], F3: [2270, 0, 85]}, '3': {F1: [340, 32, 55], F2: [1630, 27, 90], F3: [2100, 20, 110]}}
+            ZH: {'1': {F1: [285, 32, 55], F2: [1830, 30, 70], F3: [2640, 51, 70]}, '2': {F1: [285, 32, 55], F2: [1800, 27, 70], F3: [2270, 0, 85]}, '3': {F1: [340, 32, 55], F2: [1830, 27, 90], F3: [2100, 20, 110]}}
+            P: {'1': {F1: [350, 55, 20], F2: [950, 56, 50], F3: [2200, 25, 50]}, '2': {F1: [350, 45, 25], F2: [920, 46, 50], F3: [1900, 40, 50]}, '3': {F1: [320, 45, 25], F2: [920, 46, 50], F3: [1900, 40, 50]}}
+            B: {'1': {F1: [330, 55, 20], F2: [900, 56, 30], F3: [2200, 25, 45]}, '2': {F1: [330, 45, 25], F2: [920, 46, 30], F3: [2250, 40, 50]}, '3': {F1: [330, 45, 25], F2: [720, 36, 50], F3: [1800, 40, 40]}}
+            T: {'1': {F1: [320, 43, 35], F2: [1700, 66, 35], F3: [2650, 30, 45]}, '2': {F1: [320, 43, 50], F2: [1700, 10, 75], F3: [2600, 10, 50]}, '3': {F1: [320, 43, 40], F2: [1700, 5, 95], F3: [2300, 0, 95]}}
+            D: {'1': {F1: [250, 43, 35], F2: [1800, 66, 35], F3: [2650, 30, 45]}, '2': {F1: [250, 43, 50], F2: [1700, 40, 75], F3: [2600, 0, 50]}, '3': {F1: [250, 43, 40], F2: [1700, 40, 95], F3: [2601, 30, 85]}}
+            K: {'1': {F1: [280, 33, 45], F2: [1990, 20, 55], F3: [3000, 125, 50]}, '2': {F1: [280, 33, 50], F2: [1800, 16, 50], F3: [2000, 20, 90]}, '3': {F1: [280, 33, 40], F2: [1400, 60, 75], F3: [2050, 15, 80]}}
+            G: {'1': {F1: [250, 33, 45], F2: [2100, 20, 50], F3: [2100, 50, 45]}, '2': {F1: [250, 33, 50], F2: [1800, 16, 60], F3: [2100, 0, 90]}, '3': {F1: [250, 45, 40], F2: [1600, 42, 65], F3: [1920, 15, 80]}}
+            DX: {'1': {F1: [350, 45, 35], F2: [1740, 96, 35], F3: [2350, 60, 45]}, '2': {F1: [350, 40, 40], F2: [1640, 40, 35], F3: [2150, 61, 50]}, '3': {F1: [350, 43, 40], F2: [1340, 40, 75], F3: [2090, 42, 100]}}
+            TX: {'1': {F1: [320, 43, 35], F2: [1800, 66, 35], F3: [2650, 30, 45]}, '2': {F1: [320, 43, 50], F2: [1700, 40, 75], F3: [2600, 0, 50]}, '3': {F1: [320, 43, 40], F2: [1700, 40, 95], F3: [2300, 0, 95]}}
+            CH: {'1': {F1: [320, 54, 55], F2: [1750, 25, 70], F3: [2750, 19, 70]}, '2': {F1: [320, 54, 55], F2: [1680, 10, 40], F3: [2450, 10, 70]}, '3': {F1: [320, 54, 55], F2: [1480, 20, 60], F3: [1820, 20, 60]}}
+            JH: {'1': {F1: [240, 32, 55], F2: [1750, 25, 70], F3: [2750, 19, 70]}, '2': {F1: [245, 32, 55], F2: [1680, 5, 120], F3: [2450, 10, 70]}, '3': {F1: [245, 32, 55], F2: [1680, 10, 90], F3: [1970, 10, 100]}}
+            DF: {'1': {F1: [320, 50, 30], F2: [1740, 96, 35], F3: [2390, 60, 45]}, '2': {F1: [300, 50, 30], F2: [1340, 40, 35], F3: [2090, 61, 50]}, '3': {F1: [300, 50, 30], F2: [1340, 40, 75], F3: [2090, 42, 100]}}
+            TZ: {'1': {F1: [501, 50, 70], F2: [1500, 20, 150], F3: [2600, 50, 50]}, '2': {F1: [290, 70, 35], F2: [1500, 20, 80], F3: [2600, 50, 30]}, '3': {F1: [501, 50, 40], F2: [1600, 20, 90], F3: [2600, 50, 40]}}
+            CZ: {'1': {F1: [300, 70, 20], F2: [1610, 70, 30], F3: [2160, 50, 60]}, '2': {F1: [300, 70, 30], F2: [1711, 70, 30], F3: [2150, 50, 60]}, '3': {F1: [300, 70, 30], F2: [1610, 70, 36], F3: [2160, 50, 60]}}
+        female:
+          # p_us_rom.h:1573-1987 us_femtar
+          target:
+            SIL: {F1: -1, F2: -1, F3: -1, B1: -1, B2: -1, B3: -1}
+            IY: {F1: -2, F2: -140, F3: -276, B1: 80, B2: 220, B3: 270}
+            IH: {F1: -6, F2: -144, F3: -280, B1: 75, B2: 190, B3: 220}
+            EY: {F1: -10, F2: -148, F3: -284, B1: 90, B2: 160, B3: 150}
+            EH: {F1: -16, F2: -154, F3: -290, B1: 90, B2: 160, B3: 270}
+            AE: {F1: -22, F2: -160, F3: -296, B1: -414, B2: 240, B3: 300}
+            AA: {F1: -28, F2: -166, F3: -302, B1: 90, B2: 150, B3: 160}
+            AY: {F1: -34, F2: -172, F3: -308, B1: -420, B2: 190, B3: 270}
+            AW: {F1: -42, F2: -178, F3: -316, B1: -426, B2: -432, B3: -448}
+            AH: {F1: -48, F2: -184, F3: -322, B1: 110, B2: 150, B3: 210}
+            AO: {F1: -54, F2: -190, F3: -328, B1: 160, B2: 330, B3: 240}
+            OW: {F1: -60, F2: -196, F3: -334, B1: 110, B2: 110, B3: 180}
+            OY: {F1: -66, F2: -202, F3: -340, B1: 100, B2: -436, B3: 180}
+            UH: {F1: -74, F2: -210, F3: -348, B1: 90, B2: 100, B3: 170}
+            UW: {F1: -80, F2: -216, F3: -354, B1: 90, B2: 100, B3: 180}
+            RR: {F1: -86, F2: -222, F3: -360, B1: 90, B2: 250, B3: 120}
+            YU: {F1: -92, F2: -228, F3: -366, B1: 80, B2: -442, B3: -452}
+            AX: {F1: -98, F2: -234, F3: -372, B1: 140, B2: 140, B3: 200}
+            IX: {F1: -104, F2: -240, F3: -378, B1: 80, B2: 180, B3: 240}
+            IR: {F1: -110, F2: -246, F3: -384, B1: 80, B2: 220, B3: 200}
+            ER: {F1: -116, F2: -252, F3: -390, B1: 120, B2: 190, B3: 210}
+            AR: {F1: -122, F2: -258, F3: -396, B1: 130, B2: 200, B3: 160}
+            OR: {F1: -128, F2: -264, F3: -402, B1: 90, B2: 170, B3: 130}
+            UR: {F1: -134, F2: -270, F3: -408, B1: 80, B2: 130, B3: 140}
+            W: {F1: 350, F2: 800, F3: 2630, B1: 80, B2: 80, B3: 110}
+            Y: {F1: 320, F2: 2490, F3: 3400, B1: 170, B2: 180, B3: 200}
+            R: {F1: 350, F2: 1033, F3: 1700, B1: 90, B2: 150, B3: 130}
+            LL: {F1: 360, F2: 1350, F3: 2900, B1: 90, B2: 110, B3: 120}
+            HX: {F1: -1, F2: -1, F3: -1, B1: 500, B2: -1, B3: -1}
+            RX: {F1: 490, F2: 1600, F3: 1950, B1: 90, B2: 200, B3: 150}
+            LX: {F1: 580, F2: 940, F3: 3050, B1: 90, B2: 110, B3: 130}
+            M: {F1: 300, F2: 1340, F3: 2190, B1: 120, B2: 150, B3: 250}
+            N: {F1: 280, F2: 1500, F3: 2320, B1: 120, B2: 160, B3: 250}
+            NX: {F1: 280, F2: 2056, F3: 3100, B1: 120, B2: 600, B3: 550}
+            EL: {F1: 480, F2: 990, F3: 3320, B1: 90, B2: 120, B3: 200}
+            DZ: {F1: 220, F2: 1860, F3: 3020, B1: 120, B2: 90, B3: 120}
+            EN: {F1: 450, F2: 1530, F3: 2920, B1: 110, B2: 200, B3: 160}
+            F: {F1: 360, F2: 1150, F3: 2460, B1: 200, B2: 140, B3: 150}
+            V: {F1: 300, F2: 1150, F3: 2460, B1: 140, B2: 120, B3: 120}
+            TH: {F1: 340, F2: 1530, F3: 2940, B1: 200, B2: 220, B3: 300}
+            DH: {F1: 320, F2: 1500, F3: 2940, B1: 120, B2: 210, B3: 270}
+            S: {F1: 340, F2: 1640, F3: 2930, B1: 200, B2: 200, B3: 200}
+            Z: {F1: 300, F2: 1640, F3: 3000, B1: 140, B2: 170, B3: 200}
+            SH: {F1: 320, F2: 1980, F3: 2930, B1: 200, B2: 240, B3: 300}
+            ZH: {F1: 300, F2: 1980, F3: 2940, B1: 120, B2: 160, B3: 300}
+            P: {F1: 370, F2: 1150, F3: 2470, B1: 200, B2: 180, B3: 180}
+            B: {F1: 250, F2: 1150, F3: 2470, B1: 100, B2: 110, B3: 150}
+            T: {F1: 370, F2: 1860, F3: 3020, B1: 200, B2: 150, B3: 250}
+            D: {F1: 220, F2: 2040, F3: 2900, B1: 110, B2: 140, B3: 170}
+            K: {F1: 280, F2: 2190, F3: 2710, B1: 200, B2: 160, B3: 280}
+            G: {F1: 250, F2: 2190, F3: 2710, B1: 100, B2: 100, B3: 150}
+            DX: {F1: 350, F2: -1, F3: -1, B1: 100, B2: 100, B3: 130}
+            TX: {F1: 250, F2: 1860, F3: 3000, B1: 90, B2: 100, B3: 130}
+            Q: {F1: -1, F2: -1, F3: -1, B1: 100, B2: -1, B3: -1}
+            CH: {F1: 370, F2: 2100, F3: 3150, B1: 200, B2: 230, B3: 350}
+            JH: {F1: 280, F2: 2100, F3: 3150, B1: 120, B2: 170, B3: 350}
+            DF: {F1: 350, F2: -1, F3: -1, B1: 100, B2: 100, B3: 130}
+            TZ: {F1: 410, F2: 1650, F3: 2700, B1: 90, B2: 120, B3: 150}
+            CZ: {F1: 370, F2: 1600, F3: 2400, B1: 90, B2: 120, B3: 150}
+          # p_us_rom.h:2462-2921 us_femdip
+          diphthong:
+            IY: {F1: {values: [350, 340], times: [10]}, F2: {values: [2600, 2700], times: [10]}, F3: {values: [3000, 3000], times: [10]}}
+            IH: {F1: {values: [530, 570], times: [60]}, F2: {values: [2250, 2100], times: [60]}, F3: {values: [2930, 2870], times: [60]}}
+            EY: {F1: {values: [590, 500, 490], times: [30, 170]}, F2: {values: [2350, 2650, 2650], times: [30, 170]}, F3: {values: [2980, 3000, 3000], times: [20, 170]}}
+            EH: {F1: {values: [650, 680, 680], times: [90, 140]}, F2: {values: [2100, 2000, 2000], times: [80, 140]}, F3: {values: [2950, 3000, 3000], times: [90, 140]}}
+            AE: {F1: {values: [780, 860, 860], times: [50, 190]}, F2: {values: [2000, 1900, 1900], times: [110, 190]}, F3: {values: [2950, 3000, 3000], times: [110, 190]}, B1: {values: [140, 170, 170], times: [50, 140]}}
+            AA: {F1: {values: [810, 810, 810], times: [40, 200]}, F2: {values: [1350, 1350, 1350], times: [40, 200]}, F3: {values: [2950, 2950, 2950], times: [40, 200]}}
+            AY: {F1: {values: [860, 880, 850, 630], times: [40, 120, 190]}, F2: {values: [1400, 2200, 2200], times: [80, 190]}, F3: {values: [2850, 2700, 2900, 2900], times: [120, 160, 200]}, B1: {values: [180, 150, 150], times: [120, 220]}}
+            AW: {F1: {values: [830, 900, 600], times: [20, 70]}, F2: {values: [1550, 1060, 1040], times: [70, 200]}, F3: {values: [2696, 2817, 2886], times: [10, 80]}, B1: {values: [130, 150, 100], times: [30, 130]}, B2: {values: [150, 120], times: [10]}, B3: {values: [160, 170], times: [10]}}
+            AH: {F1: {values: [720, 720, 720], times: [40, 120]}, F2: {values: [1400, 1400, 1400], times: [40, 120]}, F3: {values: [2950, 2950, 2950], times: [40, 100]}}
+            AO: {F1: {values: [730, 770, 770], times: [120, 220]}, F2: {values: [1160, 1260, 1260], times: [120, 220]}, F3: {values: [2920, 2920, 2920], times: [40, 200]}}
+            OW: {F1: {values: [610, 480, 470], times: [40, 170]}, F2: {values: [1120, 780, 780], times: [40, 170]}, F3: {values: [2830, 2780, 2780], times: [40, 170]}}
+            OY: {F1: {values: [590, 740, 540, 520], times: [50, 145, 220]}, F2: {values: [1090, 1090, 2220, 2270], times: [40, 110, 220]}, F3: {values: [3030, 2800, 2970, 2970], times: [140, 200, 270]}, B2: {values: [100, 180, 180], times: [100, 220]}}
+            UH: {F1: {values: [600, 700, 700], times: [50, 130]}, F2: {values: [1350, 1350, 1350], times: [50, 130]}, F3: {values: [3050, 3050, 3050], times: [50, 130]}}
+            UW: {F1: {values: [430, 400, 400], times: [40, 180]}, F2: {values: [1370, 1160, 1120], times: [40, 180]}, F3: {values: [2800, 2700, 2700], times: [40, 180]}}
+            RR: {F1: {values: [600, 550, 550], times: [30, 170]}, F2: {values: [1580, 1600, 1600], times: [30, 170]}, F3: {values: [2160, 2080, 2080], times: [30, 170]}}
+            YU: {F1: {values: [350, 410, 410], times: [70, 155]}, F2: {values: [2550, 1520, 1400], times: [80, 155]}, F3: {values: [3100, 2800, 2800], times: [75, 130]}, B2: {values: [150, 100, 100], times: [80, 150]}, B3: {values: [290, 150, 130], times: [70, 130]}}
+            AX: {F1: {values: [720, 750, 750], times: [30, 90]}, F2: {values: [1780, 1780, 1780], times: [30, 90]}, F3: {values: [3060, 3060, 3060], times: [30, 90]}}
+            IX: {F1: {values: [530, 530, 530], times: [30, 90]}, F2: {values: [2470, 2440, 2440], times: [30, 90]}, F3: {values: [3200, 3200, 3200], times: [30, 90]}}
+            IR: {F1: {values: [360, 540, 540], times: [100, 170]}, F2: {values: [2700, 1800, 1740], times: [100, 170]}, F3: {values: [3200, 2310, 2310], times: [70, 170]}}
+            ER: {F1: {values: [700, 630, 630], times: [40, 230]}, F2: {values: [2450, 1720, 1700], times: [110, 190]}, F3: {values: [3020, 2250, 2250], times: [100, 190]}}
+            AR: {F1: {values: [750, 700, 700], times: [100, 180]}, F2: {values: [1270, 1600, 1600], times: [100, 180]}, F3: {values: [2600, 2000, 2000], times: [90, 180]}}
+            OR: {F1: {values: [640, 600, 600], times: [90, 180]}, F2: {values: [1250, 1800, 1800], times: [100, 190]}, F3: {values: [2720, 2150, 2150], times: [90, 190]}}
+            UR: {F1: {values: [420, 520, 520], times: [80, 170]}, F2: {values: [1350, 1550, 1550], times: [80, 170]}, F3: {values: [2660, 2100, 2100], times: [70, 180]}}
+          # p_us_rom.h:5366-6278 us_femloc through p_us_rom.h:4207-4444 us_plocu
+          locus:
+            M: {'1': {F1: [300, 30, 30], F2: [1380, 10, 35], F3: [2100, 30, 20]}, '2': {F1: [480, 30, 35], F2: [1, 88, 40], F3: [2100, 48, 30]}, '3': {F1: [300, 20, 30], F2: [1, 88, 40], F3: [1750, 80, 30]}}
+            N: {'1': {F1: [480, 30, 60], F2: [2130, 39, 35], F3: [3250, 50, 45]}, '2': {F1: [250, 60, 45], F2: [2050, 0, 75], F3: [3200, 0, 30]}, '3': {F1: [480, 30, 60], F2: [2020, 0, 50], F3: [2400, 20, 50]}}
+            NX: {'1': {F1: [280, 20, 40], F2: [2760, 10, 70], F3: [2900, 114, 60]}, '2': {F1: [280, 20, 40], F2: [1530, 20, 70], F3: [2620, 20, 70]}, '3': {F1: [280, 20, 40], F2: [1650, 42, 70], F3: [2500, 25, 70]}}
+            DZ: {'1': {F1: [340, 30, 45], F2: [1300, 35, 60], F3: [3180, 35, 60]}, '2': {F1: [400, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}, '3': {F1: [400, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}}
+            EN: {'1': {F1: [450, 24, 35], F2: [2300, 75, 35], F3: [3200, 35, 45]}, '2': {F1: [450, 22, 30], F2: [2200, 65, 75], F3: [3140, 30, 60]}, '3': {F1: [450, 24, 30], F2: [2160, 65, 80], F3: [2590, 30, 80]}}
+            F: {'1': {F1: [350, 65, 30], F2: [1, 87, 40], F3: [2600, 35, 30]}, '2': {F1: [350, 75, 30], F2: [1, 85, 30], F3: [2000, 65, 40]}, '3': {F1: [350, 75, 30], F2: [1, 85, 30], F3: [2000, 65, 40]}}
+            V: {'1': {F1: [330, 65, 30], F2: [1, 85, 40], F3: [2600, 35, 40]}, '2': {F1: [330, 75, 30], F2: [1, 84, 30], F3: [2000, 65, 40]}, '3': {F1: [330, 75, 30], F2: [1, 84, 30], F3: [2000, 65, 40]}}
+            TH: {'1': {F1: [360, 30, 45], F2: [1300, 40, 70], F3: [3180, 35, 70]}, '2': {F1: [440, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}, '3': {F1: [440, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}}
+            DH: {'1': {F1: [340, 30, 45], F2: [1300, 35, 60], F3: [3180, 35, 60]}, '2': {F1: [400, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}, '3': {F1: [400, 30, 50], F2: [1800, 42, 70], F3: [3060, 11, 70]}}
+            S: {'1': {F1: [330, 40, 40], F2: [2000, 30, 50], F3: [2980, 0, 70]}, '2': {F1: [390, 40, 40], F2: [1800, 40, 50], F3: [3070, 0, 70]}, '3': {F1: [390, 40, 40], F2: [1900, 15, 60], F3: [2880, 0, 65]}}
+            Z: {'1': {F1: [320, 40, 40], F2: [2000, 30, 50], F3: [2980, 0, 70]}, '2': {F1: [320, 35, 40], F2: [1800, 40, 50], F3: [3070, 0, 70]}, '3': {F1: [320, 40, 40], F2: [1900, 15, 60], F3: [2880, 0, 65]}}
+            SH: {'1': {F1: [360, 32, 55], F2: [2000, 30, 70], F3: [2940, 51, 70]}, '2': {F1: [360, 32, 55], F2: [1850, 7, 70], F3: [2700, 0, 85]}, '3': {F1: [400, 32, 55], F2: [1840, 7, 90], F3: [2700, 20, 110]}}
+            ZH: {'1': {F1: [320, 26, 55], F2: [2000, 30, 70], F3: [2940, 51, 70]}, '2': {F1: [320, 26, 55], F2: [1850, 7, 70], F3: [2700, 0, 85]}, '3': {F1: [320, 30, 55], F2: [1840, 7, 90], F3: [2700, 20, 110]}}
+            P: {'1': {F1: [260, 50, 30], F2: [1570, 47, 25], F3: [1660, 73, 35]}, '2': {F1: [260, 50, 35], F2: [1240, 8, 30], F3: [1900, 65, 40]}, '3': {F1: [260, 45, 70], F2: [1240, 8, 30], F3: [1900, 65, 40]}}
+            B: {'1': {F1: [360, 40, 20], F2: [1350, 60, 25], F3: [2690, 55, 35]}, '2': {F1: [360, 50, 20], F2: [1130, 50, 30], F3: [2530, 48, 40]}, '3': {F1: [360, 50, 20], F2: [1130, 50, 30], F3: [2530, 48, 40]}}
+            T: {'1': {F1: [470, 33, 35], F2: [2160, 60, 35], F3: [3150, 30, 45]}, '2': {F1: [470, 33, 45], F2: [2050, 0, 80], F3: [2990, 0, 50]}, '3': {F1: [470, 33, 40], F2: [1900, 0, 70], F3: [2900, 20, 70]}}
+            D: {'1': {F1: [270, 33, 35], F2: [2150, 66, 35], F3: [2800, 30, 45]}, '2': {F1: [270, 33, 45], F2: [2050, 40, 80], F3: [2790, 0, 50]}, '3': {F1: [270, 33, 40], F2: [1900, 40, 80], F3: [2700, 20, 80]}}
+            K: {'1': {F1: [250, 33, 40], F2: [2200, 18, 40], F3: [2400, 10, 50]}, '2': {F1: [250, 33, 45], F2: [1800, 10, 70], F3: [2100, 15, 70]}, '3': {F1: [250, 46, 35], F2: [1710, 71, 65], F3: [2300, 0, 80]}}
+            G: {'1': {F1: [300, 33, 45], F2: [2200, 13, 70], F3: [2500, 50, 45]}, '2': {F1: [340, 43, 50], F2: [1900, 10, 80], F3: [2370, 10, 80]}, '3': {F1: [370, 45, 40], F2: [1710, 71, 65], F3: [2300, 15, 80]}}
+            DX: {'1': {F1: [350, 50, 30], F2: [1900, 50, 30], F3: [2100, 50, 30]}, '2': {F1: [350, 50, 30], F2: [1800, 50, 40], F3: [2100, 50, 30]}, '3': {F1: [350, 50, 30], F2: [1800, 50, 40], F3: [2100, 50, 30]}}
+            TX: {'1': {F1: [470, 33, 35], F2: [2150, 60, 35], F3: [3150, 30, 45]}, '2': {F1: [470, 33, 45], F2: [2050, 0, 80], F3: [2990, 0, 50]}, '3': {F1: [470, 33, 40], F2: [1900, 0, 70], F3: [2900, 20, 70]}}
+            CH: {'1': {F1: [400, 34, 55], F2: [2100, 25, 70], F3: [3300, 19, 70]}, '2': {F1: [420, 40, 55], F2: [1900, 10, 70], F3: [3200, 10, 70]}, '3': {F1: [420, 34, 55], F2: [2050, 10, 90], F3: [3100, 10, 100]}}
+            JH: {'1': {F1: [370, 32, 55], F2: [2000, 25, 70], F3: [3300, 19, 70]}, '2': {F1: [380, 40, 55], F2: [1900, 10, 70], F3: [3200, 10, 70]}, '3': {F1: [380, 32, 55], F2: [2050, 10, 90], F3: [3100, 10, 100]}}
+            DF: {'1': {F1: [350, 50, 30], F2: [1800, 50, 30], F3: [2400, 50, 30]}, '2': {F1: [350, 50, 30], F2: [1900, 50, 30], F3: [2100, 50, 30]}, '3': {F1: [350, 50, 30], F2: [1800, 50, 30], F3: [2100, 50, 30]}}
+            TZ: {'1': {F1: [501, 50, 70], F2: [1600, 20, 150], F3: [2160, 50, 60]}, '2': {F1: [330, 70, 35], F2: [1610, 20, 80], F3: [2160, 50, 60]}, '3': {F1: [501, 50, 40], F2: [1600, 20, 90], F3: [2260, 50, 60]}}
+            CZ: {'1': {F1: [330, 70, 20], F2: [1710, 70, 30], F3: [2260, 50, 60]}, '2': {F1: [330, 70, 30], F2: [1710, 70, 30], F3: [2260, 50, 60]}, '3': {F1: [330, 70, 30], F2: [1710, 70, 30], F3: [2260, 50, 60]}}
+      # END p_us_rom.h tables
+      citations:
+        - "DECtalk 4.63 PH/p_us_rom.h us_begtyp, us_endtyp, us_maltar, us_maldip, us_plocu, us_maleloc"
+        - "DECtalk 4.63 PH/ph_romi.c:147-168 divtab, parini"
+        - "DECtalk 4.63 PH/ph_setar.c:421, 559-567, 629; ph_defs.h:466-469"
+        - "DECtalk 4.63 PH/ph_vset.c:712; P_us_vdf1.h us_paul"
     rate:
+      # What the API's rate means for this frontend: DECtalk's speaking rate in
+      # words per minute, written to timing.speaking_rate_wpm. With this
+      # declared the rules are the only thing a rate changes; the three
+      # generic effects below are given a rate of 1 (src/tts-frontend.ts).
+      words_per_minute:
+        unit:
+          value: 180
+          citations:
+            - "DECtalk 4.63 PH/phinit.c:119 and PH/ph_task.c:318 (sprate = 180, the rate when none is asked for)"
+        minimum:
+          value: 50
+          citations:
+            - "DECtalk 4.63 CMD/cm_defs.h:62-66 MIN_SPEAKING_RATE 50 (ACCESS32, dectalkf.h:162-165); CMD/cm_copt.c:2346-2352"
+            - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK, dectalkf.h:172-174: sprate = deadstop(rate, 50, 550))"
+        maximum:
+          value: 550
+          citations:
+            - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK: sprate = deadstop(rate, 50, 550))"
+        # Rates whose rate-dependent rules are all in this rulepack. Not ported:
+        # 350 and above, ph_draw.c:4069-4072 (the glottal area's speed is
+        # forced to 1).
+        # Below 100 the citation rules are in (timing.citation_below_wpm).
+        # What else the source tests there changes nothing this frontend
+        # produces: the voicing amplitude targets of p_us_st1.c:169-171 and
+        # 184-190 are not read by the HLSYN build, and a glottal stop
+        # (p_us_tim.c:906-908) is never put into the phone string by the US
+        # English rules. p_us_st1.c:1429 (above 300) is compiled only with
+        # FASTTYPING_MODE, which this build does not define.
+        ported_minimum: 50
+        ported_maximum: 349
       undershoot_coefficient:
         value: 0.3
         citations:
@@ -217,11 +1266,10 @@ parameters:
           - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
       rate_scale: 1.0
-      # Qlatt's frontend API already passes a normalized rate multiplier
-      # (textToKlattTrack options.rate), not DECtalk's raw WPM control value.
-      # Keep the reference at 1.0 so UI sliders and script callers behave as
-      # documented; DECtalk WPM mapping belongs in an adapter layer instead.
-      # Engineering boundary: multiplier normalization happens before frontend rules.
+      # The frontend API's rate (textToKlattTrack options.rate) is a multiplier
+      # of the neutral rate. With the reference at 1.0 it is taken as given;
+      # rate.words_per_minute above turns it into DECtalk's words per minute,
+      # and rate_scale stays 1 for this frontend.
       rate_reference: 1.0
       # Duration floors consumed by the duration_floor_* rules. The canonical
       # magnitudes live in output.lowering.timeline.duration_floors (also read by
@@ -250,9 +1298,12 @@ parameters:
       # amplitudes by 3 dB and aspiration by 6 dB.
       dummy_vowel_burst_reduction_db: 3
       dummy_vowel_aspiration_reduction_db: 6
-      # DECtalk 4.63 ph_inton1.c Rule 9 inserts SCHWA2/IX for NF40MS
-      # after a burst plosive before silence; ph_defs.h defines NF40MS=6 frames.
-      dummy_vowel_duration_ms: 38
+      # DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 inserts a schwa for NF40MS
+      # after a burst plosive before silence; ph_defs.h:440 defines NF40MS as
+      # 6 frames of 6.4 ms.
+      dummy_vowel_duration_ms: 38.4
+      # DECtalk 4.63 p_us_st1.c:172-176: a dummy vowel's AV target is 12 dB lower.
+      dummy_vowel_voicing_reduction_db: 12
       # DECtalk 4.63 p_us_st1.c us_gettar() assigns TL=10 to FDUMMY_VOWEL.
       dummy_vowel_tilt_db: 10
       # DECtalk 4.63 p_us_st1.c: open-glottis interval widens B1/B2 by +250/+70 Hz.
@@ -334,10 +1385,6 @@ parameters:
       # as the equivalent fraction of the compressible duration range.
       short_phrase_prcnt_bonus: 30
       prcnt_denominator: 128
-      # DECtalk 4.63 -lt trace for "cake" changes PH2 from K to EY at
-      # 128.0 ms; Qlatt's integer-ms segment ledger reaches that boundary at
-      # 123.2 ms. Transfer the unit-rounded 5 ms from EY to the initial K.
-      cake_initial_k_ey_boundary_transfer_ms: 5
       # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
       # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
       # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not
@@ -372,113 +1419,185 @@ parameters:
         - 980
         - 952
         - 863
-      # Citation-mode hat rise (internal Hz*10 units).
-      # Paul: HR=12, general ph_vset.c path -> size_hat_rise = HR*10 = 120.
-      # Ph_inton2.c adds 70 when the stressed nucleus is in the first syllable.
-      hat_rise_hz: 120
+      # The hat rise itself, size_hat_rise, is the voice rule field
+      # hat_rise_hz10. Ph_inton2.c adds 70 when the stressed nucleus is in the
+      # first syllable.
       hat_first_syllable_bonus_hz: 70
-      # Retained for the classic reading-mode/reset paths below.
-      short_phrase_hat_word_limit: 3
-      short_phrase_hat_divisor: 4
-      # Final fall below baseline at declarative sentence end (internal Hz*10).
-      # Source: ph_inton1.c F0_FINAL_FALL = 180.
-      final_fall_hz: 180
-      # DECtalk frac4mul divisor used when speaker assertiveness scales f0fall.
-      assertiveness_divisor: 4096
-      # DECtalk 4.63 ph_inton1.c Rule 3:
-      # hat fall starts dur - 180 ms from the stressed vowel onset, with a
-      # minimum onset delay of 25 ms.
-      hat_fall_early_offset_ms: 180
-      hat_fall_min_delay_ms: 25
-      # DECtalk 4.63 ph_inton1.c Rule 3:
-      # if sonorants follow the nucleus, delay the fall by 90 ms instead.
-      hat_fall_following_sonorant_delay_ms: 90
-      # The citation-mode command clock begins at -6 frames, then applies the
-      # first-syllable hat's -2-frame delay: -8 native 6.4 ms frames total.
-      # The immediately following final-stress command clamps to that timestamp.
-      hat_rise_same_vowel_early_offset_ms: 51.2
-      stress_final_early_offset_ms: 51.2
-      # Non-final clause boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_NON_FINAL_FALL = 150.
-      non_final_fall_hz: 150
-      # Comma boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_COMMA_FALL = 120.
-      comma_fall_hz: 120
-      # Question boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_QSYLL_FALL = 80.
-      question_fall_hz: 80
-      # Boundary GESTURE impulse pairs (internal Hz*10), emitted on the final
-      # stressed vowel into the `boundary` impulse layer.  These are the
-      # explicit F0 gestures DECtalk adds on top of the hat-fall for questions
-      # and commas (ph_inton1.c make_f0_command IMPULSE pairs).
-      #
-      # Yes/no question terminal rise: a small dip then a large rise at the end
-      # of the clause-final stressed vowel.  The +451 rise dominates the reduced
-      # question fall (question_fall_hz=80), producing a terminal RISE.
-      # Source: ph_inton1.c:219-220 (F0_QGesture1=-151, F0_QGesture2=+451),
-      #         :1351-1352 (emitted on the final stressed vowel for FQUENEXT).
+      # Ph_inton2.c:830: the 70 is added when `nphon <= 2`.
+      hat_first_syllable_through_allophone: 2
+      # Ph_inton2.c:822-828: 15 more when `nphon > 10`.
+      hat_late_after_allophone: 10
+      hat_late_bonus_hz: 15
+      # Ph_inton2.c:854-861: the rise is 2 frames early when gesture_ref <= 2.
+      hat_rise_early_through_allophone: 2
+      hat_rise_early_frames: 2
+      # Ph_inton2.c:860: otherwise allodurs[gesture_ref] >> 1.
+      hat_rise_delay_divisor: 2
+      # Ph_inton2.c:961: a stress impulse starts allodurs[nphon] >> 2 into the vowel.
+      stress_delay_divisor: 4
+      # Ph_inton2.c:955-958: targf0 >>= 2 in a clause that ends in "?".
+      stress_question_divisor: 4
+      # Ph_inton2.c:1005-1012: muldv(scale_str_rise, targf0, 32); under
+      # emphasis a scale_str_rise below 16 is taken as 16.
+      stress_scale_divisor: 32
+      stress_emphasis_scale_minimum: 16
+      # ph_defs.h FEMPHASIS: stress level 3.
+      stress_emphasis_level: 3
+      # Ph_inton2.c:488: phinton starts its command clock at cumdur = -6.
+      command_clock_lead_frames: 6
+      # F0 written on a phoneme in phonemic text ("[uw<400,140>]").
+      user_pitch:
+        # ph_sort.c:1694-1703 and Ph_drwt02.c:3972-3976: the number is taken
+        # modulo 1000, and up to 37 it is a note to sing, above that a
+        # target in Hz.
+        number_modulus: 1000
+        note_maximum: 37
+        # PH/ph_romi.c:95-134 notetab[]: the notes C2 (1) to C5 (37), Hz * 10
+        # with middle C at 256 Hz.
+        note_table: [640, 678, 718, 761, 806, 854, 905, 959, 1016, 1076, 1140, 1208,
+                     1280, 1356, 1437, 1522, 1613, 1709, 1810, 1918, 2032, 2152, 2280,
+                     2416, 2560, 2712, 2874, 3044, 3226, 3418, 3620, 3836, 4064, 4304,
+                     4560, 4832, 5120]
+        # Ph_drwt02.c:243-244 LOWEST_F0 and HIGHEST_F0, Hz * 10: a target in
+        # Hz is held between them (3984-3992).
+        target_lowest: 500
+        target_highest: 5121
+      # The stress impulse's two terms, by stresses so far in the clause and
+      # by stress level (none, primary, secondary, emphasis), for each sex
+      # (Ph_inton2.c:936-946 chooses by malfem). Ph_inton2.c:313, 323-324:
+      # us_f0_mphrase_position and us_f0_mstress_level; 328-329, 333:
+      # us_f0_fphrase_position and us_f0_fstress_level.
+      stress_phrase_position:
+        male: [160, 80, 60, 40, 30, 20, 20, 5]
+        female: [180, 80, 70, 60, 50, 40, 34, 30]
+      stress_level:
+        male: [1, 81, 61, 261]
+        female: [1, 80, 70, 161]
+      # Ph_inton2.c:585, 1059-1062: MAX_NRISES; the count goes back to 1 there.
+      stress_max_rises: 7
+      # Ph_inton2.c:960-973: the clause's last stress, or a syllabic before a
+      # period, starts NF20MS (3 frames) early and is 50 lower, never below 30.
+      stress_final_early_frames: 3
+      stress_final_reduction_hz: 50
+      stress_final_floor_hz: 30
+      # Ph_inton2.c:976-979: emphasis starts NF7MS (1 frame) into the vowel.
+      stress_emphasis_delay_frames: 1
+      # Ph_inton2.c:815: phinton() leaves its allophone loop at a syllabic that
+      # begins and ends the hat when `nphon > 4`.
+      intonation_stop_after_allophone: 4
+      # Ph_drwt02.c:1660-1663, 1686-1689: a period clause of more than 3 words
+      # and an exclamation of more than 2 take the long declarative baseline.
+      baseline_long_declarative_words: 3
+      baseline_long_exclamation_words: 2
+      # Ph_drwt02.c:3240: in the female routine a comma clause of more than 4
+      # words takes the declarative baseline.
+      baseline_long_comma_words: 4
+      # Ph_drwt02.c:3805-3808: the female routine scales an exclamation by
+      # f0scalefac + 500.
+      exclamation_range_added: 500
+      # LTS/ls_util.c:829-837: around a clause break it inserts, the text
+      # stage saves "compause", sets it to -12, has the clause before the
+      # break spoken, and puts the saved value back. The field it reaches
+      # under that name is the phonetic stage's f0minimum (the two stages see
+      # pDph_t three shorts apart; read from an instrumented build). So that
+      # clause is spoken with an F0 floor of -12, unless it is the first of
+      # the run and loads the voice at its start.
+      break_floor: -12
+      # Switch for that: false leaves the voice's own floor in such a clause.
+      # A running DECtalk does this at every inserted break after its first
+      # clause.
+      break_floor_applies: true
+      # What the text stage saves and puts back when no clause has been
+      # spoken yet: f0minimum before the voice is loaded. DECtalk's packets
+      # are recorded one phrase to a process, so this is what every clause
+      # after such a break is spoken with.
+      unloaded_floor: 0
+      # Switch for that. This is the fresh-process behaviour of say.exe: it
+      # arises only when the utterance's first clause is the first the process
+      # speaks. A long-running DECtalk differs (the saved value is then the
+      # voice's floor); set false to speak as one.
+      unloaded_floor_applies: true
+      # Ph_inton2.c:580-581: the US question gestures, internal Hz*10.
       question_gesture_dip_hz: -151
       question_gesture_rise_hz: 451
-      # Comma continuation rise: an upward IMPULSE pair at a comma boundary, so
-      # F0 continues/rises rather than falling fully (signals "more to come").
-      # Source: ph_inton1.c:221-222 (F0_CGesture1=+171, F0_CGesture2=+250),
-      #         :1367-1368 (emitted on the final stressed vowel for FCBNEXT comma).
-      comma_gesture1_hz: 171
-      comma_gesture2_hz: 250
-      # Gesture IMPULSE length in native DECtalk control frames.
-      # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
-      boundary_gesture_duration_frames: 24
-      # Citation-mode Ph_inton2.c emits the US hat rise as a STEP with length 15.
+      # Ph_inton2.c:1253-1262: the dip is 5 frames early in a one-word clause
+      # and 6 otherwise, length 15. The rise of a one-word clause is 100 lower,
+      # at the syllabic's end, length 24; otherwise it is at a quarter of the
+      # syllabic less 4 frames, length 20.
+      question_dip_early_frames_one_word: 5
+      question_dip_early_frames: 6
+      question_dip_frames: 15
+      question_rise_one_word_reduction_hz: 100
+      question_rise_frames_one_word: 24
+      question_rise_back_frames: 4
+      question_rise_frames: 20
+      # Ph_inton2.c:899: the US hat rise is a STEP whose descriptor length is 15.
       hat_rise_glide_frames: 15
-      # Question terminal-rise GLIDE span in native DECtalk control frames. The
-      # +451 yes/no rise is rendered as a GLIDE that climbs to the target over
-      # the final vowel rather than a transient impulse, so the contour rises
-      # smoothly into the question boundary and HOLDS the elevated F0.
-      # Source: ph_inton1.c:1635 (make_f0_command GLIDE, F0_QGesture2, span =
-      # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
-      # final vowel). # engineering span estimate (final-vowel-length proxy)
-      question_rise_glide_frames: 24
-      # Citation-mode US stress magnitudes (internal Hz*10 units).
-      # Source: Ph_inton2.c us_f0_mstress_level[] and
-      # us_f0_mphrase_position[].
-      stress_level_primary_hz: 81
-      stress_level_secondary_hz: 61
-      stress_level_emphasis_hz: 261
-      # First primary stress: 81 + 160; phrase-final reduction: -50.
-      # The single-word reduction in Ph_inton2.c is commented out.
-      stress_single_word_final_primary_hz: 191
-      stress_phrase_position_hz: 160
       # Stress impulse duration in native DECtalk control frames.
-      # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
+      # Source: Ph_inton2.c:1056 make_f0_command(IMPULSE, 2, targf0, delayf0, 20, ...).
       stress_impulse_duration_frames: 20
       segmental:
-        # Active US male allophone targets, internal Hz*10.
-        # Source: Ph_drwt02.c us_f0msegtars[] (SI=50, EY=50, K=0, IX=70).
-        initial_silence_target: 50
-        ey_target: 50
-        k_target: 0
-        ix_target: 70
-        # Exact p_us_tim.c controller output for the active K-EY-K word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `cake.`.
-        initial_silence_frames: 4
-        initial_k_frames: 17
-        ey_frames: 37
-        final_k_frames: 14
-        dummy_ix_frames: 6
-        terminal_silence_frames: 94
-        # Exact p_us_tim.c controller output for the active DH-AX word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `the.`.
-        dh_target: 0
-        ax_target: 30
-        the_initial_silence_frames: 4
-        the_dh_frames: 10
-        the_ax_frames: 32
-        the_terminal_silence_frames: 94
+        # us_f0msegtars[] and us_f0fsegtars[]: incremental segmental F0 target
+        # per phone, internal Hz*10, for the phones whose entry is not 0. A
+        # phone not listed here has target 0. Keys are this port's phone names
+        # (SI is SIL). The tables are read by position, so the female one is
+        # given as its numbers fall: 500 for S, SH, B, T and K, none for P.
+        targets:
+          male:
+            SIL: 50
+            IY: 140
+            IH: 80
+            EY: 50
+            EH: 30
+            AH: 20
+            OW: 30
+            OY: 60
+            UH: 80
+            UW: 140
+            RR: 50
+            YU: 140
+            AX: 30
+            IX: 70
+            IR: 110
+            W: 100
+            Y: 140
+            Z: -200
+          female:
+            SIL: 50
+            IY: 190
+            IH: 120
+            EY: 60
+            EH: 40
+            AH: 40
+            OW: 60
+            OY: 80
+            UH: 190
+            UW: 190
+            RR: 80
+            YU: 150
+            AX: 60
+            IX: 80
+            IR: 120
+            ER: 80
+            OR: 50
+            UR: 120
+            W: 80
+            Y: 80
+            # DECtalk's HX.
+            HH: 90
+            S: 500
+            Z: -20
+            SH: 500
+            B: 500
+            T: 500
+            K: 500
+        # The controller counts durations in these frames. The clause-initial
+        # pause's frames are timing.pause_frames.clause_initial(_other).
+        frame_ms: 6.4
         citations:
-          - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
-          - "DECtalk 4.63 p_us_tim.c controller durations"
-          - "DECtalk 4.63 -lt oracle trace for cake."
-          - "DECtalk 4.63 -lt oracle trace for the."
+          - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars"
+          - "DECtalk 4.63 Ph_drwt02.c:686-705 us_f0fsegtars"
+          - "DECtalk 4.63 ph_claus.c (6.4 ms controller frames)"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"
@@ -521,13 +1640,6 @@ parameters:
     formant:
       coarticulation_weight: 0.3
       transition_time_ms: 30
-      # DECtalk 4.63 p_us_st1.c:132-140: N/EN/NX B3 becomes 1600 Hz
-      # when the preceding phone has F2BACKF or the following phone has
-      # F2BACKI. ph_defs.h:345-346 and the source us_place table identify
-      # these exact directional phoneme sets.
-      nasal_high_front_b3_hz: 1600
-      nasal_b3_preceding_f2backf: [EY, IY, Y]
-      nasal_b3_following_f2backi: [Y, YU]
       # DECtalk 4.63 p_us_st1.c Special Rule 2:
       # PAP.pspesh = 52 for onset of a voiced non-obstruent from silence or
       # a voiceless open-vocal-tract fricative (/f, th, s, sh/), with a
@@ -551,632 +1663,6 @@ parameters:
       # frication tail. Qlatt models this as a 30 ms suffix window at the
       # 100 Hz frame cadence used by the runtime. # engineering approximation
       weak_interdental_fricative_tail_ms: 30
-      # DECtalk 4.63 us_special_coartic() (p_us_st1.c:314-410): per-vowel F2/F3
-      # TARGET offsets for diphthongized vowels in specific neighbour contexts.
-      # DATA consumed by the special_coartic scalar rules in phases/formant.yaml.
-      # The diphpos-dependent sub-cases (AY/OY before LX -250/-350; unstressed
-      # YU 2nd-half +400) are DEFERRED: diphpos (diphthong-half index) is not
-      # exposed to scalar rules in this engine (diphthongs are trajectory
-      # waypoints). The diphpos-independent cases are implemented here.
-      # DECtalk oracle trace for "boat" shows OW before alveolar T reaches the
-      # stop locus before the stop frame; implemented as a narrow trajectory
-      # override window in structural.yaml.
-      ow_alveolar_stop_locus_window_ms:
-        value: 45
-        citations:
-          - "DECtalk 4.63 ph_sttr2.c setloc (obstruent locus transition span)"
-          - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T late F2 locus window)"
-      ow_alveolar_stop_f2_locus_hz:
-        value: 1650
-        citations:
-          - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
-          - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
-      the_dh_f1_hz:
-        value: 289
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F1 at frames 0-3)"
-      the_dh_f2_hz:
-        value: 1500
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F2 at frames 0-3)"
-      the_dh_f3_hz:
-        value: 2562
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F3 at frames 0-3)"
-      the_dh_b1_hz:
-        value: 200
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B1 at frames 0-4)"
-      the_dh_b2_hz:
-        value: 170
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B2 at frames 0-4)"
-      the_dh_b3_hz:
-        value: 170
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B3 at frames 0-9)"
-      the_dh_av_db:
-        value: 34
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH AV onset at frame 3)"
-      the_dh_a6_db:
-        value: 27
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH A6 transition at frame 3)"
-      the_dh_ab_db:
-        value: 27
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH AB transition at frame 3)"
-      the_tl_db:
-        value: 0
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native TLT is zero through DH and AX)"
-      the_dh_formant_trace_windows:
-        value:
-          - { start_ms: -12.8, end_ms: -6.4, fields: { A6: 9, AB: 9 }, tag: segmental_context }
-          - { start_ms: -6.4, end_ms: 0.0, fields: { A6: 18, AB: 18 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561, B1: 200, B2: 170, B3: 170, AV: 37, AB: 36 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562, B1: 187, B2: 163, B3: 170, AV: 39, AB: 38 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562, B1: 175, B2: 157, B3: 170, AV: 42, AB: 40 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490, F3: 2562, B1: 162, B2: 151, B3: 170, AV: 45, AB: 42 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489, F3: 2562, B1: 150, B2: 145, B3: 170, AV: 47, AB: 44 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488, F3: 2563, B1: 136, B2: 135, B3: 170, AV: 50, AB: 46 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592, B1: 123, B2: 125, B3: 171, AV: 54, AB: 46 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621, B1: 109, B2: 116, B3: 172, AV: 55, AB: 46 }, tag: segmental_context }
-          - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650, B1: 96, B2: 106, B3: 173, AV: 56, AB: 41 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { A6: 27, AB: 27 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 51.2, fields: { A6: 0 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { A6: 46 }, tag: segmental_context }
-          - { start_ms: 57.6, fields: { A6: 41 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3/B1/B2/B3/AV/A6/AB values at frames 1-12)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      the_ax_f1_hz:
-        value: 346
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F1 at frame 13)"
-      the_ax_f2_hz:
-        value: 1404
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F2 at frame 13)"
-      the_ax_f3_hz:
-        value: 2679
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F3 at frame 13)"
-      the_ax_b1_hz:
-        value: 95
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B1 at frame 13)"
-      the_ax_b2_hz:
-        value: 103
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B2 at frame 13)"
-      the_ax_b3_hz:
-        value: 173
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B3 at frame 13)"
-      the_ax_av_db:
-        value: 57
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX AV at frame 13)"
-      the_ax_a6_db:
-        value: 37
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX A6 at frame 13)"
-      the_ax_ab_db:
-        value: 37
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX AB at frame 13)"
-      the_ax_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679, B1: 95, B2: 103, B3: 173, AV: 57 }, tag: segmental_context }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384, F3: 2709, B1: 94, B2: 99, B3: 174, AV: 58 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371, F3: 2695, B1: 93, B2: 96, B3: 175, AV: 59 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358, F3: 2681, B1: 93, B2: 93, B3: 176, AV: 60 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345, F3: 2667, B1: 92, B2: 89, B3: 177, AV: 61 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333, F3: 2653, B1: 91, B2: 86, B3: 178, AV: 62 }, tag: segmental_context }
-          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320, F3: 2639, B1: 90, B2: 83, B3: 179, AV: 62 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307, F3: 2625, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294, F3: 2611, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 121.8, fields: { F1: 548, F2: 1260, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { AH: 2 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { AH: 5 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { AH: 7 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { AH: 10 }, tag: segmental_context }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { AH: 12 }, tag: segmental_context }
-          - { start_ms: 121.8, end_ms: 128.2, fields: { AH: 15 }, tag: segmental_context }
-          - { start_ms: 128.2, end_ms: 134.6, fields: { AH: 17 }, tag: segmental_context }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AH: 20 }, tag: segmental_context }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AH: 22 }, tag: segmental_context }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AH: 25 }, tag: segmental_context }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AH: 27 }, tag: segmental_context }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AH: 30 }, tag: segmental_context }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { AH: 32 }, tag: segmental_context }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { AH: 35 }, tag: segmental_context }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { AH: 37 }, tag: segmental_context }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { AH: 40 }, tag: segmental_context }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { AH: 42 }, tag: segmental_context }
-          - { start_ms: 198.4, fields: { AH: 45 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.0, fields: { A6: 37, AB: 37 }, tag: segmental_context }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { A6: 32, AB: 32 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { A6: 26, AB: 26 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { A6: 19, AB: 19 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { A6: 13, AB: 13 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { A6: 6, AB: 6 }, tag: segmental_context }
-          - { start_ms: 38.0, fields: { A6: 0, AB: 0 }, tag: segmental_context }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AV: 61 }, tag: segmental_context }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AV: 60 }, tag: segmental_context }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AV: 60 }, tag: segmental_context }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AV: 59 }, tag: segmental_context }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AV: 58 }, tag: segmental_context }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { B1: 102, B2: 86, AV: 58 }, tag: segmental_context }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { B1: 115, B2: 92, AV: 57 }, tag: segmental_context }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { B1: 127, B2: 98, AV: 57 }, tag: segmental_context }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { B1: 140, B2: 105, AV: 56 }, tag: segmental_context }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { B1: 152, B2: 111, AV: 55 }, tag: segmental_context }
-          - { start_ms: 198.4, fields: { B1: 165, B2: 117, AV: 55 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6/AB values at frames 13-45)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      the_terminal_silence_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260, F3: 2600, B1: 177, B2: 123, B3: 180, AH: 47 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259, F3: 2602, B1: 190, B2: 130, B3: 180, AH: 45 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261, F3: 2602, B1: 177, B2: 123, B3: 180, AH: 42 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263, F3: 2602, B1: 165, B2: 117, B3: 180, AH: 38 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265, F3: 2602, B1: 152, B2: 111, B3: 180, AH: 35 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268, F3: 2602, B1: 140, B2: 105, B3: 180, AH: 31 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270, F3: 2602, B1: 127, B2: 98, B3: 180, AH: 28 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272, F3: 2602, B1: 115, B2: 92, B3: 180, AH: 24 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274, F3: 2602, B1: 102, B2: 86, B3: 180, AH: 21 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 17 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 14 }, tag: segmental_context }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 10 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 7 }, tag: segmental_context }
-          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 3 }, tag: segmental_context }
-          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 0 }, tag: segmental_context }
-          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 134.4, fields: { F1: 552, F2: 1302, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 102, B2: 86, B3: 180 }, tag: segmental_context }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 115, B2: 92, B3: 180 }, tag: segmental_context }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 127, B2: 98, B3: 180 }, tag: segmental_context }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 140, B2: 105, B3: 180 }, tag: segmental_context }
-          - { start_ms: 588.8, end_ms: 595.2, fields: { B1: 152, B2: 111, B3: 180 }, tag: segmental_context }
-          - { start_ms: 595.2, fields: { B1: 165, B2: 117, B3: 180 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP-to-AH values from frame 44 onward)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_initial_k_f1_hz:
-        value: 279
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F1 frames 0-3)"
-      cake_initial_k_f2_hz:
-        value: 2091
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F2 frames 0-3)"
-      cake_initial_k_b1_hz:
-        value: 300
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B1 at frames 0-4)"
-      cake_initial_k_b2_hz:
-        value: 210
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B2 at frames 0-4)"
-      cake_initial_k_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 83.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 296 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 305 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 309 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 314 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 318 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F1: 323 }, tag: segmental_context }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F1: 327 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F1: 331 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F2: 2051 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F2: 2041 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F2: 2032 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F2: 2023 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F2: 2014 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F2: 2005 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F2: 1996 }, tag: segmental_context }
-          # Engineering compensation: 19.2 + 70.4 is represented just after
-          # the native 89.6 ms sample boundary in JavaScript.
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F2: 1987 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F2: 1978 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F3: 2694 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F3: 2669 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F3: 2645 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F3: 2620 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F3: 2595 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F3: 2571 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F3: 2546 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F3: 2522 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F3: 2497 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F3: 2472 }, tag: segmental_context }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F3: 2448 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F3: 2423 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 300, B2: 210 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 287, B2: 203 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 275, B2: 197 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 262, B2: 191 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 250, B2: 185 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 237, B2: 178 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 225, B2: 172 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { B1: 212, B2: 166 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/B3/TLT values at frames 0-15)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_initial_k_release_f1_hz:
-        value: 336
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F1 at frame 16)"
-      cake_initial_k_release_f2_hz:
-        value: 1969
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F2 at frame 16)"
-      cake_initial_k_release_b1_hz:
-        value: 200
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release B1 at frame 16)"
-      cake_initial_k_release_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0, TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F1: 336, A3: 0, A5: 0 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F1: 340, A3: 50, A5: 36 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F1: 344, A3: 50, A5: 36 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F1: 349, A3: 49, A5: 35 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F1: 353, A3: 48, A5: 34 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B1: 178, B2: 150 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B1: 156, B2: 140 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B3: 280 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B3: 253 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5/TLT values at frames 16-20)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      initial_k_f3_hz:
-        value: 2690
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'Can you hear me?' (first K packet F3=2690)"
-          - "DECtalk 4.63 ph_setar.c gettar() (US_K F3 adjustment and unstressed formant coarticulation)"
-      initial_k_silence_formant_windows:
-        value:
-          - { start_ms: -19.2, end_ms: 6.4, fields: { F3: 2702 }, tag: coarticulation }
-        citations:
-          - "DECtalk 4.63 oracle -lt traces for 'cake.' and 'Can you hear me?' (four initial GEN_SIL packets hold F3=2702)"
-          - "DECtalk 4.63 ph_defs.h: one native controller frame is nominally 6.4ms"
-          - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary)"
-      cake_initial_k_release_f3_hz:
-        value: 2398
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F3 at frame 16)"
-      cake_final_k_f2_hz:
-        value: 1993
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
-      cake_final_k_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 96.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1978 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1974 }, tag: segmental_context }
-          - { start_ms: 38.0, end_ms: 44.4, fields: { F2: 1969 }, tag: segmental_context }
-          - { start_ms: 44.4, end_ms: 50.8, fields: { F2: 1964 }, tag: segmental_context }
-          - { start_ms: 50.8, end_ms: 57.2, fields: { F2: 1959 }, tag: segmental_context }
-          - { start_ms: 57.2, end_ms: 63.6, fields: { F2: 1955 }, tag: segmental_context }
-          - { start_ms: 63.6, end_ms: 70.0, fields: { F2: 1950 }, tag: segmental_context }
-          - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945, A3: 47, A5: 33 }, tag: segmental_context }
-          - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940, A3: 47, A5: 33 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936, A3: 46, A5: 32 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { F2: 1931, A3: 45, A5: 31 }, tag: segmental_context }
-          # Engineering compensation: 365.2 + 95.6 is represented just after
-          # the native 460.8 ms sample boundary in JavaScript.
-          - { start_ms: 95.599, end_ms: 96.0, fields: { F2: 1927, AH: 39, A3: 33, A5: 19 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 31.6, fields: { F3: 2404 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 57.2, fields: { F3: 2403 }, tag: segmental_context }
-          - { start_ms: 57.2, end_ms: 82.8, fields: { F3: 2402 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 96.0, fields: { F3: 2401 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B1: 134, B2: 130 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B1: 156, B2: 140 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B1: 178, B2: 150 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B1: 176, B2: 150 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B1: 153, B2: 140 }, tag: segmental_context }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B1: 310, B2: 170 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B3: 239 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B3: 253 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B3: 280 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: segmental_context }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B2/B3/AP/A3/A5/TLT values at frames 58-72)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_dummy_ix_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 38.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B2: 170, B3: 233, AH: 39, A3: 22, A5: 13 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B2: 170, B3: 226, AH: 39, A3: 11, A5: 6 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B2: 170, B3: 219, AH: 39 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B2: 170, B3: 213, AH: 39 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B2: 170, B3: 206, AH: 39 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_terminal_silence_f2_hz:
-        value: 1670
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2 hold from frame 96)"
-      cake_terminal_silence_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { AH: 45 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { AH: 42 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { AH: 38 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { AH: 35 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { AH: 31 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { AH: 28 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { AH: 24 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { AH: 21 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { AH: 17 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { AH: 14 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { AH: 10 }, tag: segmental_context }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { AH: 7 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { AH: 3 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F1: 459 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 25.6, fields: { F1: 460 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 38.4, fields: { F1: 461 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 51.2, fields: { F1: 462 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 64.0, fields: { F1: 463 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 76.8, fields: { F1: 464 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 89.6, fields: { F1: 465 }, tag: segmental_context }
-          - { start_ms: 89.6, end_ms: 102.4, fields: { F1: 466 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 115.2, fields: { F1: 467 }, tag: segmental_context }
-          - { start_ms: 115.2, end_ms: 127.6, fields: { F1: 468 }, tag: segmental_context }
-          - { start_ms: 127.6, fields: { F1: 469 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 64.0, fields: { F2: 1674 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 83.2, fields: { F2: 1673 }, tag: segmental_context }
-          - { start_ms: 83.2, end_ms: 96.0, fields: { F2: 1672 }, tag: segmental_context }
-          - { start_ms: 96.0, end_ms: 115.2, fields: { F2: 1671 }, tag: segmental_context }
-          - { start_ms: 115.2, fields: { F2: 1670 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 25.6, fields: { F3: 2522 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 51.2, fields: { F3: 2523 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 76.8, fields: { F3: 2524 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 102.4, fields: { F3: 2525 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 127.6, fields: { F3: 2526 }, tag: segmental_context }
-          - { start_ms: 127.6, fields: { F3: 2527 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { B1: 300, B2: 150 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 270, B2: 143 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 240, B2: 137 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 210, B2: 131 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 180, B2: 125 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 150, B2: 118 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120, B2: 112 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90, B2: 106 }, tag: segmental_context }
-          - { start_ms: 51.2, fields: { B1: 60, B2: 100 }, tag: segmental_context }
-          - { start_ms: 556.8, end_ms: 563.2, fields: { B1: 72, B2: 106 }, tag: segmental_context }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 85, B2: 112 }, tag: segmental_context }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 97, B2: 118 }, tag: segmental_context }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 110, B2: 125 }, tag: segmental_context }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 122, B2: 131 }, tag: segmental_context }
-          - { start_ms: 588.8, fields: { B1: 135, B2: 137 }, tag: segmental_context }
-          - { start_ms: 0.0, fields: { B3: 200 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP values from frame 78 onward)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
-      # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
-      # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.
-      # The separate exact tail cells take over at 195 ms (DECtalk frame 51).
-      cake_ey_primary_formant_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 237.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 6.2, end_ms: 63.8, fields: { AH: 48 }, tag: segmental_context }
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F1: 357, F2: 1926, A3: 36, A5: 22 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F1: 377, F2: 1898, A3: 24, A5: 15 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F1: 397, F2: 1871, A3: 12, A5: 7 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F1: 417, F2: 1844 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F1: 434, F2: 1831 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817, AV: 0 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804, AV: 0 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790, AV: 0 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 483, F2: 1777 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 481, F2: 1790 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 478, F2: 1804 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 476, F2: 1818 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 473, F2: 1831 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 471, F2: 1845 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 468, F2: 1858 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F1: 466, F2: 1872 }, tag: segmental_context }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F1: 463, F2: 1881 }, tag: segmental_context }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F1: 461, F2: 1891 }, tag: segmental_context }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F1: 458, F2: 1900 }, tag: segmental_context }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F1: 457, F2: 1910 }, tag: segmental_context }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F1: 456, F2: 1920 }, tag: segmental_context }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F1: 455, F2: 1929 }, tag: segmental_context }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F1: 454, F2: 1939 }, tag: segmental_context }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F1: 453, F2: 1949 }, tag: segmental_context }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F1: 452, F2: 1958 }, tag: segmental_context }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F1: 451, F2: 1968 }, tag: segmental_context }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F1: 450, F2: 1977 }, tag: segmental_context }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F1: 449, F2: 1987 }, tag: segmental_context }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: segmental_context }
-          - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2/AP/A3/A5/TLT values at frames 21-50 and AV onset at frame 29)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_primary_formant_tail_windows:
-        value:
-          - { start_ms: 195.0, end_ms: 198.2, fields: { F2: 2006 }, tag: segmental_context }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { F1: 446, F2: 2006 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F1: 430, F2: 2006 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F1: 414, F2: 2003 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F1: 398, F2: 2001 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F1: 383, F2: 1998 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F1: 367, F2: 1996 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994, AV: 0 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 51-57 and AV offset at frame 57)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_f3_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F3: 2276 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F3: 2301 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F3: 2325 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F3: 2350 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F3: 2378 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F3: 2406 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F3: 2434 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F3: 2462 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F3: 2465 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F3: 2469 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F3: 2472 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F3: 2476 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F3: 2479 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F3: 2483 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F3: 2486 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F3: 2490 }, tag: segmental_context }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F3: 2493 }, tag: segmental_context }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F3: 2497 }, tag: segmental_context }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F3: 2500 }, tag: segmental_context }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F3: 2504 }, tag: segmental_context }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F3: 2507 }, tag: segmental_context }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F3: 2511 }, tag: segmental_context }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F3: 2514 }, tag: segmental_context }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F3: 2518 }, tag: segmental_context }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F3: 2521 }, tag: segmental_context }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F3: 2525 }, tag: segmental_context }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F3: 2528 }, tag: segmental_context }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F3: 2532 }, tag: segmental_context }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F3: 2535 }, tag: segmental_context }
-          - { start_ms: 191.8, end_ms: 204.6, fields: { F3: 2539 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F3: 2519 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F3: 2500 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F3: 2480 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F3: 2461 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F3: 2441 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F3: 2422 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F3 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_b1_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 63.8, fields: { B1: 320, B2: 170 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 198.2, fields: { B1: 70, B2: 100 }, tag: segmental_context }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { B1: 77, B2: 100 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { B1: 85, B2: 100 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B1: 93, B2: 104 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B1: 101, B2: 109 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B1: 108, B2: 114 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B1: 116, B2: 119 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B1: 124, B2: 124 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B1/B2 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
-      cake_ey_b3_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { B3: 239 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { B3: 233 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { B3: 226 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { B3: 219 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { B3: 213 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { B3: 206 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 211.0, fields: { B3: 200 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B3: 206 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B3: 213 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B3: 219 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B3: 226 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B3: 233 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B3 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
-      special_coartic:
-        # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
-        alveolar:
-          value: [D, EN, N, S, T, TX, Z]
-          citations:
-            - "DECtalk 4.63 p_us_rom.h us_place[] (FALVEL bit); ph_defs.h:342"
-        # DECtalk front vowels USP_IY..USP_AE (+IX) (p_us_st1.c:346/365). The
-        # phoneme symbol carries NO stress digit in rules (tts-frontend.ts:452
-        # strips the suffix; stress lives in .stress), so these are bare ARPABET
-        # names; IX/USP_IX has no allophone in this inventory.
-        front_vowels:
-          value: [IY, IH, EY, EH, AE]
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:346 (front-vowel range USP_IY..USP_AE, plus USP_IX)"
-        # F3 of a vowel adjacent to W/R/RX -> -150 Hz (p_us_st1.c:329-339).
-        f3_near_w_r_offset_hz:
-          value: -150
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:336 (F3 target -150 near W/R/RX)"
-        # F2 of a front vowel before LX or after W/LL/LX -> -150 Hz
-        # (p_us_st1.c:344-369).
-        f2_front_near_lateral_offset_hz:
-          value: -150
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:348/367 (front-vowel F2 -150 near LX/W/LL)"
-        # F2 of UW adjacent to an alveolar -> +200 Hz (p_us_st1.c:370-385).
-        f2_uw_near_alveolar_offset_hz:
-          value: 200
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:375/383 (UW/YU F2 +200 adjacent alveolar)"
-        # Unstressed vowels: effect grows by 50% (temp += temp/2; p_us_st1.c:387-389).
-        unstressed_gain:
-          value: 1.5
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:389 (unstressed coartic effect *1.5)"
-        # Phrase-final stressed vowels: effect halved (temp >>= 1; p_us_st1.c:398-401).
-        phrase_final_gain:
-          value: 0.5
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:400 (phrase-final stressed coartic *0.5)"
-        # Maximum |offset| clamp (p_us_st1.c:403-406).
-        max_offset_hz:
-          value: 400
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:403-406 (|temp| <= 400 Hz clamp)"
       citations:
         - "DECtalk 4.63 ph_setar.c"
         - "DECtalk 4.63 p_us_st1.c (source-amplitude special rules)"
@@ -1221,25 +1707,31 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE, BRST, PLACE, SPD_R4CB, SPD_R4CC, SPD_R5CB, SPD_R5CC, SPD_R4PB, SPD_R5PB, SPD_T0JIT, SPD_R5CA, SPD_R4CA, SPD_R3CA, SPD_R2CA, SPD_R1CA, SPD_NOPEN1, SPD_NOPEN2, SPD_ATURB, SPD_AFGAIN, SPD_AZGAIN, SPD_APGAIN, SPD_SEX, last_voice, NOM_Open_Quo, Tiltm]
     timeline:
       initial_silence_ms:
         value: 19.2
         citations:
           - "DECtalk 4.63 -lt oracle trace: clause-initial GEN_SIL before voiced obstruent spans 3 synthesis frames at 6.4ms"
+      # The duration rules compute the opening pause from the first phone
+      # (dectalk_utterance_initial_pause); the value above stands only when no
+      # Segment carries one.
+      initial_silence_key: utterance_initial_silence_ms
       final_silence_ms:
         value: 0
         citations:
           - "DECtalk 4.63 p_us_tim.c: terminal punctuation silence is emitted as GEN_SIL duration"
       duration_floors:
+        # The duration rules already give every allophone DECtalk's frame
+        # count; lowering adds no floor of its own.
         stop_release_ms:
-          value: 7
+          value: 0
           citations:
-            - "DECtalk 4.63 ph_defs.h: NF7MS = 1 synthesis frame; frtoms(1) is approximately 7ms at NSAMP_FRAME=71"
+            - "DECtalk 4.63 p_us_tim.c:895-941 (the duration rules set the final frame count; nothing floors it afterwards)"
         default_ms:
-          value: 30
+          value: 0
           citations:
-            - "DECtalk 4.63 ph_defs.h: NF30MS = 5 synthesis frames; named 30ms floor preserves legacy frontend default"
+            - "DECtalk 4.63 p_us_tim.c:895-941 (the duration rules set the final frame count; nothing floors it afterwards)"
       event_points:
         include_segment_start: true
         include_control_boundaries: true
@@ -1264,36 +1756,18 @@ output:
           value: 0.5
           citations:
             - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
-        keys: [F1, F2, F3, B1, B2, B3]
+        # B1 alone: F1, F2, F3, B2 and B3 are drawn frame by frame in
+        # phases/formant-drawing.yaml and take no blend here.
+        keys: [B1]
         smooth_types: [vowel, nasal, liquid, glide]
-        # DECtalk 4.63 p_us_st1.c:661-665,1035-1039: nasal bandwidths
-        # stay at their selected target instead of taking boundary transitions.
-        step_keys_by_phoneme:
-          N: [B3]
         # DECtalk smooths every parameter at every boundary (p_us_st1.c
         # us_forw/back_smooth_rules; default 50% midpoint, ph_setar.c:784-785,
-        # 903-904). Enable the universal midpoint fallback so obstruent-adjacent
-        # and no-locus boundaries — and B1-B3 at obstruent boundaries — get a
-        # transition instead of stepping abruptly. Only F1-F3/B1-B3 move; burst
-        # amplitudes (AF/AH/PLSTEP) ride control windows and stay crisp. The
-        # ~25 obstruents with locus data still use their locus (more specific);
-        # this only fills the gaps. qlatt-english omits this flag -> unchanged.
+        # 903-904). The universal midpoint fallback gives B1 a transition at
+        # obstruent-adjacent boundaries instead of a step.
         smooth_all_boundaries: true
-      sonorant_f2:
-        key: F2
-        span_ms:
-          value: 45
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 smoothing uses NF45MS)"
-        neighbor_weight:
-          value: 0.75
-          citations:
-            - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 boundary uses a 75/25 neighbor weighting)"
-        current_type: vowel
-        neighbor_types: [nasal, liquid, glide]
-        forward: true
-        backward: true
-      locus_glue_types: [stop_release, stop_aspiration]
+      # Nothing reads `loci` since 2d402ebd: lowering's locus resolver needs a
+      # vowel_category table, which went when phases/formant-drawing.yaml took
+      # over setloc() (it reads parameters.policy.formant_drawing.locus).
       # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
       # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
       # dectalk repo scripts/extract_loci.py, reshaped by
@@ -1644,6 +2118,8 @@ output:
             F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
             F2: { locus_hz: 1830, prcnt: 27, durtran_ms: 90 }
             F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+      # Nothing reads `loci_female` since 2d402ebd, for the same reason; the
+      # frame program draws every voice from Paul's (male) tables for now.
       loci_female:
         B:
           "1":
@@ -1983,86 +2459,10 @@ output:
             F1: { locus_hz: 320, prcnt: 30, durtran_ms: 55 }
             F2: { locus_hz: 1840, prcnt: 7, durtran_ms: 90 }
             F3: { locus_hz: 2700, prcnt: 20, durtran_ms: 110 }
-      # Sonorant vowel-category (sontyx) per phoneme per edge (DATA), from
-      # us_begtyp[] (forward / segment-start edge) and us_endtyp[] (backward /
-      # segment-end edge), clamped per setloc (rounded-soncon->3, low->2).
-      # Citation: DECtalk 4.63 p_us_rom.h us_begtyp/us_endtyp; ph_sttr2.c:95-145.
-      vowel_category:
-        AA: { forward: 2, backward: 2 }
-        AE: { forward: 1, backward: 1 }
-        AH: { forward: 2, backward: 2 }
-        AO: { forward: 3, backward: 3 }
-        AR: { forward: 2, backward: 3 }
-        AW: { forward: 2, backward: 3 }
-        AX: { forward: 2, backward: 2 }
-        AY: { forward: 2, backward: 1 }
-        EH: { forward: 1, backward: 1 }
-        EL: { forward: 3, backward: 3 }
-        ER: { forward: 1, backward: 3 }
-        EY: { forward: 1, backward: 1 }
-        IH: { forward: 1, backward: 1 }
-        IR: { forward: 1, backward: 3 }
-        IX: { forward: 1, backward: 1 }
-        IY: { forward: 1, backward: 1 }
-        LL: { forward: 3, backward: 3 }
-        LX: { forward: 3, backward: 3 }
-        OR: { forward: 3, backward: 3 }
-        OW: { forward: 3, backward: 3 }
-        OY: { forward: 3, backward: 1 }
-        R: { forward: 3, backward: 3 }
-        RR: { forward: 3, backward: 3 }
-        RX: { forward: 3, backward: 3 }
-        TZ: { forward: 1, backward: 1 }
-        UH: { forward: 3, backward: 3 }
-        UR: { forward: 3, backward: 3 }
-        UW: { forward: 3, backward: 3 }
-        W: { forward: 3, backward: 3 }
-        Y: { forward: 1, backward: 1 }
-        YU: { forward: 1, backward: 3 }
-      # setloc prcnt-adjustment DATA (ph_sttr2.c:294-307), extracted from
-      # DECtalk 4.63 PH/p_us_rom.h us_place[] + us_begtyp[] via the dectalk repo
-      # scripts/extract_place_coartic.py, reshaped by
-      # scripts/gen-dectalk-place-coartic-yaml.mjs. Consumed by the generic locus
-      # resolver (resolveLocusBoundary): no per-phoneme literals in code.
-      # obstruent_place[obstruent].palatal_or_dental = us_place & (FPALATL|FDENTAL)
-      # (ph_defs.h:340-341). Adjustment (a) fires only for NON-palatal/dental obstruents.
-      obstruent_place:
-        B: { palatal_or_dental: false }
-        CH: { palatal_or_dental: true }
-        CZ: { palatal_or_dental: false }
-        D: { palatal_or_dental: false }
-        DF: { palatal_or_dental: false }
-        DH: { palatal_or_dental: true }
-        DX: { palatal_or_dental: false }
-        DZ: { palatal_or_dental: true }
-        EN: { palatal_or_dental: false }
-        F: { palatal_or_dental: false }
-        G: { palatal_or_dental: false }
-        JH: { palatal_or_dental: true }
-        K: { palatal_or_dental: false }
-        M: { palatal_or_dental: false }
-        N: { palatal_or_dental: false }
-        NX: { palatal_or_dental: false }
-        P: { palatal_or_dental: false }
-        S: { palatal_or_dental: false }
-        SH: { palatal_or_dental: true }
-        T: { palatal_or_dental: false }
-        TH: { palatal_or_dental: true }
-        TX: { palatal_or_dental: false }
-        TZ: { palatal_or_dental: true }
-        V: { palatal_or_dental: false }
-        Z: { palatal_or_dental: false }
-        ZH: { palatal_or_dental: true }
-      # rounded_sonorant_consonant = sonorants with begtyp==ROUNDED_SONOR_CONS(5)
-      # (ph_defs.h:176). Adjustment (a): prcnt=(prcnt>>1)+50 for F2/F3.
-      rounded_sonorant_consonant: [EL, LL, LX, R, W]
-      # f2_back[vowel] = { forward: us_place & F2BACKI, backward: & F2BACKF }
-      # (ph_defs.h:345-346). Adjustment (b) on F2: prcnt += 25-(prcnt>>2); durtran=(durtran>>1)+2.
-      f2_back:
-        EY: { forward: false, backward: true }
-        IY: { forward: false, backward: true }
-        Y: { forward: true, backward: true }
-        YU: { forward: true, backward: false }
+      # No vowel_category: lowering's locus resolver needs one, so it is off.
+      # phases/formant-drawing.yaml does setloc() itself, from
+      # parameters.policy.formant_drawing.locus. The two locus tables above are
+      # no longer read.
     f0:
       renderer:
         type: layered_additive
@@ -2079,8 +2479,72 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
-  # Standard English letter-name pronunciations for declarative spelling mode.
-  # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
+  # A text made only of phoneme symbols is ordinary text here: "B." is the
+  # letter. DECtalk takes phonemes only inside brackets, and only after
+  # [:phoneme on]: the mode starts off (CMD/Cmd_init.c:87) and the parser
+  # tests it before reading a bracket as phonemes (CMD/cm_pars.c:361).
+  diagnostic_symbol_input: false
+  # The dictionary is searched by the written word: "n" does not find "'n",
+  # "em" does not find "'em". Measured on DECtalk 4.63 say.exe (symbols into
+  # ph_sort): "Plan n is ready." has EH N, "Plan 'n is ready." EN;
+  # "Plan em is ready." has EH M, "Plan 'em is ready." IX M.
+  elided_apostrophe_lookup: false
+  # A word that misses as written is looked up again without the apostrophes
+  # at its ends (LTS/ls_task.c:2161 as written, 2244-2325 strip, 2477-2478
+  # again).
+  #
+  # What this frontend's lexicon is, for the decision record of each word.
+  sources:
+    dictionary:
+      name: DECtalk dictionary
+      citation: "DECtalk 4.63 dapi/src/dic/Dic_us.txt, converted by scripts/build-dectalk-dict.ts (/dectalk-dictionary.json)"
+    morphology:
+      name: DECtalk suffix stripping against the dictionary
+      citation: "DECtalk 4.63 LTS/ls_suff.c (ls_suff_suffix_find, ls_suff_append_pron), as src/g2p/table-suffix.ts"
+    lts-rules:
+      name: DECtalk letter-to-sound rules
+      citation: "DECtalk 4.63 LTS/lsa_rta.c compiled rule tables, run as LTS/l_us_ru1.c runs them (/rules/frontends/dectalk-english/lts-table.json)"
+    spelling:
+      name: DECtalk letter names
+      citation: "DECtalk 4.63 LTS/ls_task.c:2760-2775 (a one-letter word is spelled), INCLUDE/usa_type.tab lower-case rows (the names)"
+    position:
+      name: DECtalk's two forms of the word "a"
+      citation: "DECtalk 4.63 LTS/ls_task.c:2647-2673 ([x] when no punctuation was stripped and none follows, else the spelling entry's ['e]), as wordsByPunctuation in /rules/frontends/dectalk-english/lts-table.json"
+    number-abbreviation:
+      name: DECtalk's unit abbreviations after a number
+      citation: "DECtalk 4.63 LTS/l_us_con.c:366 nabtab[] (singular and plural phones), LTS/ls_task.c:2125-2152 (looked up before the dictionary while a number stands at most two words back), as numberAbbreviations in /rules/frontends/dectalk-english/lts-table.json"
+    hyphenated:
+      name: DECtalk's reading of a hyphenated word by its parts
+      citation: "DECtalk 4.63 LTS/ls_task.c:4208-4435 ls_task_process_word (each part between hyphens looked up, then by rule or spelled; HYPHEN after a first part the dictionary has :4330 and after a part the rules read :4374)"
+    mode-character:
+      name: DECtalk's math table
+      citation: "DECtalk 4.63 LTS/ls_task.c:1949-1957 ls_task_math_mode (a word of one character, while the math mode is on), LTS/ls_math.c:82-104 ls_math_do_math, LTS/l_us_ma1.c math_table[] (the names), as modeCharacterNames in /rules/frontends/dectalk-english/lts-table.json"
+  # The characters that end the stretch of text DECtalk parses at once when a
+  # written word ends in one and a space follows: DECtalk 4.63
+  # LTS/ls_task.c:362-368 (the text is handed on at a space after a
+  # MARK_clause character) with CMD/cm_char.c:93-123 (the characters that
+  # have MARK_clause). An abbreviation's period is one.
+  word_stretch_end_characters: "!',-.:;?"
+  # The same stretch also ends by its length alone: DECtalk 4.63
+  # LTS/ls_task.c:371-372, the gathered text is handed on at white space once
+  # more than 400 characters have been gathered (`temp>400`), and at any
+  # character past 480 (`temp>480`). A clause of some 450 characters with no
+  # mark in it is therefore two stretches, and the clause breaks of the second
+  # are counted from its own first word.
+  word_stretch_length_limits: [400, 480]
+  # The marks DECtalk's parse of a stretch notes on a word: DECtalk 4.63
+  # LTS/ls_task.c:5082-5106, `(` or `"` as the word's first character
+  # (PRO_OPEN_PAREN, PRO_OPEN_QUOTE) and `)` or `"` as its last
+  # (PRO_CLOSE_PAREN, PRO_CLOSE_QUOTE). The command-stage parser has removed
+  # most of them by then; a quotation that ends in a parenthesis and a period
+  # keeps its opening mark and that parenthesis.
+  written_word_marks:
+    open: { "(": open_paren, "\"": open_quote }
+    close: { ")": close_paren, "\"": close_quote }
+  # The names of the letters, for a token the orthography phase marks as a
+  # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
+  # the same phones as letterPhones in lts-table.json (a test holds the two
+  # equal).
   letter_names:
     LETTER_A: [EY1]
     LETTER_B: [B, IY1]
@@ -2098,13 +2562,13 @@ transcription:
     LETTER_N: [EH1, N]
     LETTER_O: [OW1]
     LETTER_P: [P, IY1]
-    LETTER_Q: [K, Y, UW1]
+    LETTER_Q: [K, YU1]
     LETTER_R: [AA1, R]
     LETTER_S: [EH1, S]
     LETTER_T: [T, IY1]
     LETTER_U: [Y, UW1]
     LETTER_V: [V, IY1]
-    LETTER_W: [D, AH1, B, AH0, L, Y, UW0]
+    LETTER_W: [D, AH1, B, EL, Y, UW0]
     LETTER_X: [EH1, K, S]
     LETTER_Y: [W, AY1]
     LETTER_Z: [Z, IY1]

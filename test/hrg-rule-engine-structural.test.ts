@@ -96,6 +96,57 @@ describe("graph-native structural splice execution", () => {
     expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
   });
 
+  it("rejects a copy_from that names a define instead of an Item binding", () => {
+    const utterance = new Utterance(SCHEMA);
+    const fixture = utterance.beginTransaction({
+      ruleId: "fixture",
+      phase: "input",
+      tag: "fixture",
+      ...INPUT,
+    });
+    const stop = fixture.createItem("segment", "stop");
+    const vowel = fixture.createItem("segment", "vowel");
+    for (const [item, phoneme] of [
+      [stop, "T"],
+      [vowel, "AA"],
+    ] as const) {
+      fixture.set(item, "phoneme", phoneme);
+      fixture.set(item, "duration", 50);
+      fixture.set(item, "stress", 0);
+      fixture.set(item, "active", true);
+      fixture.append("Segment", item);
+    }
+    fixture.partitionAnchors([stop, vowel], utterance.axis.start.id, utterance.axis.end.id);
+    fixture.commit();
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], active: [true, false] },
+          scalars: { duration: {}, stress: {} },
+        },
+      },
+      rules: {
+        rewrite: {
+          select: { relation: "Segment", where: "current.phoneme == 'AA'" },
+          // `p` is an expression value; a template can copy only current, next,
+          // prev or a pattern capture.
+          define: { p: "prev" },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: "current.sync_right",
+            insert: [{ copy_from: "p", phoneme: "'AO'" }],
+          },
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "structural", rules: ["rewrite"] }],
+    });
+
+    expect(() => runGraphRuleEngine(utterance, spec)).toThrowError(/E_HRG_SPLICE_COPY_SOURCE/);
+  });
+
   it("derives a pattern range from tracked anchors and materializes a nested segment", () => {
     const utterance = new Utterance(SCHEMA);
     const fixture = utterance.beginTransaction({
@@ -174,6 +225,66 @@ describe("graph-native structural splice execution", () => {
         leftMarkId: utterance.axis.start.id,
         rightMarkId: utterance.axis.end.id,
       }),
+    );
+  });
+
+  it("refuses an Item as the target of an inserted segment, by name", () => {
+    const utterance = new Utterance(SCHEMA);
+    const fixture = utterance.beginTransaction({
+      ruleId: "fixture",
+      phase: "input",
+      tag: "fixture",
+      ...INPUT,
+    });
+    const stop = fixture.createItem("segment", "stop");
+    const vowel = fixture.createItem("segment", "vowel");
+    for (const [item, phoneme] of [
+      [stop, "T"],
+      [vowel, "AA"],
+    ] as const) {
+      fixture.set(item, "phoneme", phoneme);
+      fixture.set(item, "duration", 100);
+      fixture.set(item, "stress", 0);
+      fixture.set(item, "active", true);
+      fixture.append("Segment", item);
+    }
+    fixture.partitionAnchors([stop, vowel], utterance.axis.start.id, utterance.axis.end.id);
+    fixture.commit();
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], active: [true, false] },
+          scalars: { duration: {}, stress: {} },
+        },
+      },
+      patterns: {
+        cv: {
+          relation: "Segment",
+          sequence: [
+            { capture: "c", where: "current.phoneme == 'T'" },
+            { capture: "v", where: "current.phoneme == 'AA'" },
+          ],
+        },
+      },
+      rules: {
+        coalesce: {
+          match: "cv",
+          splice: {
+            type: "replace_range",
+            range_left: "c.sync_left",
+            range_right: "v.sync_right",
+            // A target is a map of fields; an Item is copied with copy_from.
+            insert: [{ segment: { target: "v", fields: { active: "true" } } }],
+          },
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "structural", rules: ["coalesce"] }],
+    });
+
+    expect(() => runGraphRuleEngine(utterance, spec)).toThrow(
+      /E_HRG_VIEW_NOT_A_MAP: rule '[^']*coalesce[^']*' target is an Item/,
     );
   });
 

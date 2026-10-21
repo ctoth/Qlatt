@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-commands-v1",
+  "description": "Texts with DECtalk's in-text commands: a voice change at the start of a text, after a sentence and inside one; rate changes, the two clamps and a rate command with no number; commands DECtalk does not know or cannot read; and commands that end a clause or change nothing. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "cv-01", "text": "[:nb] The ship came in at dawn.", "group": "voice" },
+    { "id": "cv-02", "text": "[:name harry] The ship came in at dawn.", "group": "voice" },
+    { "id": "cv-03", "text": "The ship came in. [:nb] We went down to see it.", "group": "voice" },
+    { "id": "cv-04", "text": "The ship came [:nb] in at dawn.", "group": "voice" },
+    { "id": "cv-05", "text": "[:nh] The ship came in. [:np] We went down to see it.", "group": "voice" },
+    { "id": "cv-06", "text": "The ship came in. [:nk] We went down. [:nu] It was cold.", "group": "voice" },
+    { "id": "cr-01", "text": "[:rate 300] The ship came in at dawn.", "group": "rate" },
+    { "id": "cr-02", "text": "[:ra 120] The ship came in at dawn.", "group": "rate" },
+    { "id": "cr-03", "text": "The ship came in. [:rate 250] We went down to see it.", "group": "rate" },
+    { "id": "cr-04", "text": "The ship came [:rate 400] in at dawn.", "group": "rate" },
+    { "id": "cr-05", "text": "[:rate 20] The ship came in.", "group": "rate" },
+    { "id": "cr-06", "text": "[:rate 900] The ship came in.", "group": "rate" },
+    { "id": "cr-07", "text": "[:rate] The ship came in.", "group": "rate" },
+    { "id": "cr-08", "text": "[:nb][:rate 220] The ship came in. [:np] We went down to see it.", "group": "rate" },
+    { "id": "ce-01", "text": "[:foo 1] The ship came in.", "group": "error" },
+    { "id": "ce-02", "text": "[:rate abc] The ship came in.", "group": "error" },
+    { "id": "ce-03", "text": "[:name 1] The ship came in.", "group": "error" },
+    { "id": "ce-04", "text": "The ship [:nq] came in.", "group": "error" },
+    { "id": "ce-05", "text": "The ship came in. [:zz] We went down.", "group": "error" },
+    { "id": "cn-01", "text": "The ship came [:comma 300] in at dawn.", "group": "clause-end" },
+    { "id": "cn-02", "text": "The ship came [:dv ap 200] in at dawn.", "group": "clause-end" },
+    { "id": "cn-03", "text": "The ship came [:volume set 50] in at dawn.", "group": "clause-end" },
+    { "id": "cb-01", "text": "The ship [:index mark 1] came in.", "group": "no-change" },
+    { "id": "cb-02", "text": "The ship [:pitch 50] came in.", "group": "no-change" },
+    { "id": "cb-03", "text": "The ship [:sync] came in.", "group": "no-change" }
+  ]
+}

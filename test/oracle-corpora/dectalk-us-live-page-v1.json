@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-live-page-v1",
+  "description": "A text of about 33 seconds for the live page's measurement (scripts/oracle/browser-sweep.ts --live): long enough that scheduling its track takes far longer than the page's lead before a run starts. Its WAV is too long for the sweep gate's budget and is kept in test/fixtures/dectalk-live-page.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {"id":"live--long-two-sentences","voiceId":"paul","rate":180,"text":"The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every morning that he had once sailed around the world on a ship that carried tea and spices from the far east to the cold ports of the north. The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every morning that he had once sailed around the world on a ship that carried tea and spices from the far east to the cold ports of the north.","group":"long"}
+  ]
+}

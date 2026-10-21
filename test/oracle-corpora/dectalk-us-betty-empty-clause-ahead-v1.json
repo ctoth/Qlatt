@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-betty-empty-clause-ahead-v1",
+  "description": "The texts of dectalk-us-empty-clause-ahead-v1 that were listed for Betty, a female voice, moved here unchanged from dectalk-us-betty-v1 for the same reason: recorded ahead of the text stage that will speak them.",
+  "defaults": {
+    "voiceId": "betty",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "betty-empty-clause-question", "text": "Who is J.? Ask him.", "group": "clause-type", "tags": ["empty-clause", "question", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-question", "text": "She asked \"Is it (this)?\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "question", "after-comma", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-comma", "text": "He said \"Wait (now),\" then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "comma", "after-comma", "female-baseline"], "expectedFocus": ["trace"] }
+  ]
+}

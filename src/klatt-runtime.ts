@@ -882,6 +882,13 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     node.port.addEventListener("message", (event: MessageEvent) => {
       if (event.data?.type === "source-domain-projection") {
         diagnostics.warn(event.data.message, { node: event.data.node }, "source-domain-projection");
+      } else if (event.data?.type === "diagnostic") {
+        // A worklet's own diagnostic entry: { level, code, message, node, data }.
+        const { level, code, message, node: nodeId, data } = event.data;
+        const entryData = { ...(data ?? {}), node: nodeId };
+        if (level === "error") diagnostics.error(String(message), entryData, String(code));
+        else if (level === "warn") diagnostics.warn(String(message), entryData, String(code));
+        else diagnostics.info(String(message), entryData, String(code));
       }
     });
     node.port.start();

@@ -1,6 +1,8 @@
 # Inventory conventions
 
-Each frontend's `inventory.yaml` owns its acoustic symbol conventions:
+Each frontend's inventory declares its symbol conventions, in `inventory.yaml`
+or in the phonology document that it names (see "Layering an inventory over a
+phonology document" below):
 
 ```yaml
 # Engineering convention: CMU/ARPABET transcription.
@@ -33,6 +35,91 @@ Invalid transcription symbols emit `PHONEME_SYMBOL_REJECTED` diagnostics and
 `phoneme_symbol_rejected` provenance records linked to the pronunciation decision.
 Targets without `dur` use `default_duration_ms`, with a diagnostic and selection
 provenance identifying that default.
+
+## Layering an inventory over a phonology document
+
+Part of an inventory is about the language, not about a voice: which symbols
+there are, how stress is written, and for each phoneme its class (`type`), its
+features (`voiced`, `alveolar`, `back`, ...) and its coarticulation-resistance
+class (`dac`). `docs/frontend-document-model.md` decision 6 gives that column to
+the language and the acoustic columns to the voice. An inventory takes the
+language's column from a shared document by naming it:
+
+```yaml
+# public/rules/frontends/qlatt-beauty/inventory.yaml
+version: v1
+phonology_path: /rules/frontends/qlatt-english/phonology.yaml
+default_duration_ms: 30
+base_params: { ... }
+phoneme_targets:
+  IY1: { F1: 310, F2: 2790, F3: 3310, B1: 60, B2: 90, B3: 180, AV: 63, dur: 207, Rd: 1.55 }
+```
+
+```yaml
+# public/rules/frontends/qlatt-english/phonology.yaml
+version: v1
+silence_symbol: SIL
+nucleus_types: [vowel]
+symbol_grammar: '[A-Z]+'
+stress_markers: {0: '0', 1: '1', 2: '2'}
+phoneme_targets:
+  IY1: { type: vowel, hi: true, front: true, dac: 3 }
+```
+
+The loader (`src/declarative-frontend/inventory.ts`) merges the two before it
+validates anything, so every reader of an inventory (the frontend, rule
+validation of phoneme literals and `normalization_aliases`, the tests) sees one
+`InventorySpec`, the one the two documents would make written as a single file.
+The rules of the merge:
+
+- **A phonology document holds only** `version`, the four convention keys
+  `silence_symbol`, `nucleus_types`, `symbol_grammar`, `stress_markers`, and
+  `phoneme_targets`. Anything else is `E_INVENTORY_PHONOLOGY_SCHEMA`.
+  `default_duration_ms`, `citations`, `base_params`, `normalization_aliases`,
+  `secondary_stress_fallback` and `duration_models` are the inventory's.
+- **Each target gets the inventory's fields and then the phonology document's
+  fields for the same key.** Nothing overrides anything: a field is the
+  language's or the voice's, so a field both documents give one target is
+  `E_INVENTORY_PHONOLOGY_CONFLICT`, whether or not the two values agree. The
+  same holds for a convention key both documents declare. A convention key
+  neither declares fails as it does in a one-document inventory
+  (`E_INVENTORY_SCHEMA`).
+- **The inventory decides which targets exist.** A target the inventory has
+  and the phonology document does not is `E_INVENTORY_PHONOLOGY_TARGET`: a
+  voice cannot realize a phoneme its language does not declare, and a
+  misspelled key would otherwise lose its `type` silently. A phoneme the
+  phonology document declares and the inventory gives no target is not a
+  target of that inventory (a voice may, for example, have no secondary-stress
+  targets and declare `secondary_stress_fallback`).
+- **A `phonology_path` that is not a path, or names a document that cannot be
+  read,** is `E_INVENTORY_PHONOLOGY_PATH`.
+- **An inventory without `phonology_path` is one document,** loaded exactly as
+  before. `dectalk-english` is one.
+
+A field belongs in the phonology document when it names a class of the phoneme
+(category, feature, place, manner, coarticulation resistance, the components of
+a diphthong) and would be the same for every voice of the language. A value in
+Hz, dB or ms is a voice's: `fricative_min_ms` looks like a class and stays with
+the voice because it is a duration. `nasal_place_index` is the code of the
+nasal's place (1, 2, 3 for /m/, /n/, /ng/), not a magnitude, and is in the
+phonology document beside `nasal_place`.
+
+The order of a target's fields is the order in which its features are written
+when a Segment is materialized, and so the order of those provenance records:
+the inventory's fields in the order it lists them, then the phonology
+document's. Moving a field between the two documents can therefore reorder the
+records of the targets that have it without changing any value.
+
+Provenance records that select the inventory or one of its targets cite every
+document the target's fields come from: `FrontendResources.inventoryDocuments`
+is the inventory's path followed by its phonology document's.
+`scripts/dump-inventory-spec.ts` prints the merged inventory of a frontend, and
+`scripts/compare-inventory-fields.ts` counts, field by field, what two
+frontends' inventories share.
+
+In a browser the phonology document is one more resource the synchronous
+loaders read; `public/rules/frontends/<id>/resources.json` lists it beside the
+inventory for a frontend whose inventory is read at speak time.
 
 Rules must use the vocabulary declared by their inventory. Graph queries that
 classify nuclei or navigate silence boundaries require an inventory resource and

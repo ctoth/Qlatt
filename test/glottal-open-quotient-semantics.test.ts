@@ -3,12 +3,13 @@ import { resolve } from "path";
 import { describe, expect, it } from "vitest";
 import { expandFormantBanks } from "../src/formant-bank";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
-import type { EvaluationContext, SemanticsDocument } from "../src/semantics/types";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
+import type { EvaluationContext } from "../src/semantics/types";
 import { parseYamlString } from "../src/yaml-loader";
 
 const semanticsPath = resolve(__dirname, "../public/experiments/klatt80-baseline/semantics.yaml");
 const semanticsRaw = readFileSync(semanticsPath, "utf-8");
-const semantics = parseYamlString<SemanticsDocument>(semanticsRaw, semanticsPath);
+const semantics = parseSemanticsDocument(semanticsRaw, semanticsPath);
 const graphPath = resolve(__dirname, "../public/experiments/klatt80-baseline/graph.yaml");
 const graph = parseYamlString<Parameters<typeof expandFormantBanks>[0]>(
   readFileSync(graphPath, "utf8"),

@@ -25,10 +25,111 @@ import type {
   Stamper,
 } from "./types";
 
-function featureValueError(itemType: string, key: string, path: string, expected: string): never {
-  throw new Error(
-    `E_HRG_FEATURE_VALUE: item type '${itemType}' feature '${key}' at '${path}' must be ${expected}`,
-  );
+/** What {@link fitFeatureValue} answers for a value its schema does not accept. */
+const REJECTED = Symbol("rejected");
+
+/**
+ * Where a value was rejected and what was expected there. `path` is relative
+ * to the feature and grows outward as the rejection is passed up.
+ */
+type Rejection = { path: string; expected: string };
+
+function rejected(rejection: Rejection | null, expected: string): typeof REJECTED {
+  if (rejection) rejection.expected = expected;
+  return REJECTED;
+}
+
+/**
+ * The validated, frozen copy of `value`, or {@link REJECTED}. A union tries
+ * its variants in turn and most values are written through one, so nothing is
+ * thrown here and nothing is said about a value that does not fit unless
+ * `rejection` is given to be filled in.
+ */
+function fitFeatureValue(
+  value: unknown,
+  schema: FeatureSchema,
+  rejection: Rejection | null,
+): FeatureValue | typeof REJECTED {
+  switch (schema.kind) {
+    case "string":
+      if (typeof value !== "string") return rejected(rejection, "a string");
+      if (schema.values && !schema.values.includes(value)) {
+        return rejection ? rejected(rejection, `one of [${schema.values.join(", ")}]`) : REJECTED;
+      }
+      return value;
+    case "number":
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return rejected(rejection, "a finite number");
+      }
+      return value;
+    case "boolean":
+      if (typeof value !== "boolean") return rejected(rejection, "a boolean");
+      return value;
+    case "null":
+      if (value !== null) return rejected(rejection, "null");
+      return null;
+    case "literal":
+      if (value !== schema.value) {
+        return rejection
+          ? rejected(rejection, `the literal ${JSON.stringify(schema.value)}`)
+          : REJECTED;
+      }
+      return schema.value;
+    case "array": {
+      if (!Array.isArray(value)) return rejected(rejection, "an array");
+      const output = new Array<FeatureValue>(value.length);
+      for (let index = 0; index < value.length; index += 1) {
+        // An index the array does not have stays absent in the copy.
+        if (!(index in value)) continue;
+        const fitted = fitFeatureValue(value[index], schema.items, rejection);
+        if (fitted === REJECTED) {
+          if (rejection) rejection.path = `[${index}]${rejection.path}`;
+          return REJECTED;
+        }
+        output[index] = fitted;
+      }
+      return Object.freeze(output);
+    }
+    case "object": {
+      if (!isPlainObject(value)) return rejected(rejection, "an object");
+      const output: Record<string, FeatureValue> = {};
+      for (const [field, fieldSchema] of Object.entries(schema.fields)) {
+        let fitted: FeatureValue | typeof REJECTED;
+        if (Object.hasOwn(value, field)) {
+          fitted = fitFeatureValue(value[field], fieldSchema, rejection);
+        } else {
+          if (schema.optional?.includes(field)) continue;
+          fitted = rejected(rejection, "present");
+        }
+        if (fitted === REJECTED) {
+          if (rejection) rejection.path = `.${field}${rejection.path}`;
+          return REJECTED;
+        }
+        output[field] = fitted;
+      }
+      for (const [field, entry] of Object.entries(value)) {
+        if (Object.hasOwn(schema.fields, field)) continue;
+        const fitted = schema.additional
+          ? fitFeatureValue(entry, schema.additional, rejection)
+          : rejected(rejection, "a declared field");
+        if (fitted === REJECTED) {
+          if (rejection) rejection.path = `.${field}${rejection.path}`;
+          return REJECTED;
+        }
+        output[field] = fitted;
+      }
+      return Object.freeze(output);
+    }
+    case "union": {
+      for (const variant of schema.variants) {
+        const fitted = fitFeatureValue(value, variant, null);
+        if (fitted !== REJECTED) return fitted;
+      }
+      return rejection
+        ? rejected(rejection, `one of the declared union variants (received ${typeof value})`)
+        : REJECTED;
+    }
+  }
 }
 
 function validateFeatureValue(
@@ -36,91 +137,15 @@ function validateFeatureValue(
   key: string,
   value: unknown,
   schema: FeatureSchema,
-  path = key,
 ): FeatureValue {
-  switch (schema.kind) {
-    case "string":
-      if (typeof value !== "string") featureValueError(itemType, key, path, "a string");
-      if (schema.values && !schema.values.includes(value)) {
-        featureValueError(itemType, key, path, `one of [${schema.values.join(", ")}]`);
-      }
-      return value;
-    case "number":
-      if (typeof value !== "number" || !Number.isFinite(value)) {
-        featureValueError(itemType, key, path, "a finite number");
-      }
-      return value;
-    case "boolean":
-      if (typeof value !== "boolean") featureValueError(itemType, key, path, "a boolean");
-      return value;
-    case "null":
-      if (value !== null) featureValueError(itemType, key, path, "null");
-      return null;
-    case "literal":
-      if (value !== schema.value) {
-        featureValueError(itemType, key, path, `the literal ${JSON.stringify(schema.value)}`);
-      }
-      return schema.value;
-    case "array": {
-      if (!Array.isArray(value)) featureValueError(itemType, key, path, "an array");
-      return Object.freeze(
-        value.map((entry, index) =>
-          validateFeatureValue(itemType, key, entry, schema.items, `${path}[${index}]`),
-        ),
-      );
-    }
-    case "object": {
-      if (!isPlainObject(value)) {
-        featureValueError(itemType, key, path, "an object");
-      }
-      const optional = new Set(schema.optional ?? []);
-      const output: Record<string, FeatureValue> = {};
-      for (const [field, fieldSchema] of Object.entries(schema.fields)) {
-        if (!Object.hasOwn(value, field)) {
-          if (optional.has(field)) continue;
-          featureValueError(itemType, key, `${path}.${field}`, "present");
-        }
-        output[field] = validateFeatureValue(
-          itemType,
-          key,
-          value[field],
-          fieldSchema,
-          `${path}.${field}`,
-        );
-      }
-      for (const [field, entry] of Object.entries(value)) {
-        if (Object.hasOwn(schema.fields, field)) continue;
-        if (!schema.additional) {
-          featureValueError(itemType, key, `${path}.${field}`, "a declared field");
-        }
-        output[field] = validateFeatureValue(
-          itemType,
-          key,
-          entry,
-          schema.additional,
-          `${path}.${field}`,
-        );
-      }
-      return Object.freeze(output);
-    }
-    case "union": {
-      for (const variant of schema.variants) {
-        try {
-          return validateFeatureValue(itemType, key, value, variant, path);
-        } catch (error) {
-          if (!(error instanceof Error) || !error.message.startsWith("E_HRG_FEATURE_VALUE:")) {
-            throw error;
-          }
-        }
-      }
-      return featureValueError(
-        itemType,
-        key,
-        path,
-        `one of the declared union variants (received ${typeof value})`,
-      );
-    }
-  }
+  const fitted = fitFeatureValue(value, schema, null);
+  if (fitted !== REJECTED) return fitted;
+  // Walked again, this time to say where it was rejected and why.
+  const rejection: Rejection = { path: "", expected: "" };
+  fitFeatureValue(value, schema, rejection);
+  throw new Error(
+    `E_HRG_FEATURE_VALUE: item type '${itemType}' feature '${key}' at '${key}${rejection.path}' must be ${rejection.expected}`,
+  );
 }
 
 export class Item {

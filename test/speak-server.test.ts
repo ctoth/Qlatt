@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import readline from "node:readline";
 import { describe, expect, it } from "vitest";
-import { speakRenderRequest, wordMarkers } from "../scripts/speak-server";
+import { indexMarkers, speakRenderRequest, wordMarkers } from "../scripts/speak-server";
 
 // Protocol pin for scripts/speak-server.ts, the stdio surface that
 // hosts/nvda and other external hosts drive.
@@ -96,6 +96,32 @@ describe("speak-server request mapping", () => {
 });
 
 describe("speak-server protocol", () => {
+  it("maps UTF-16 offsets to the next owned frame and trailing indexes to PCM end", () => {
+    // The parser fixture preserves Hello's raw3–8 span after an astral character.
+    const spans = [
+      { segmentId: "first", time: 0.1, start: 3, end: 8 },
+      { segmentId: "second", time: 0.2, start: 3, end: 8 },
+      { segmentId: "next", time: 0.4, start: 9, end: 14 },
+    ];
+    const indexes = [
+      { index: 4, offset: 0 },
+      { index: 7, offset: 3 },
+      { index: 8, offset: 8 },
+      { index: 9, offset: 9 },
+      { index: 10, offset: 15 },
+    ];
+    expect(indexMarkers(indexes, spans, 0.02, 1000, 600)).toEqual([
+      { kind: "index", index: 4, sample: 120 },
+      { kind: "index", index: 7, sample: 120 },
+      { kind: "index", index: 8, sample: 420 },
+      { kind: "index", index: 9, sample: 420 },
+      { kind: "index", index: 10, sample: 600 },
+    ]);
+    expect(
+      indexMarkers(indexes, [], 0.02, 1000, 600).every((marker) => marker.sample === 600),
+    ).toBe(true);
+  });
+
   it("maps each occurrence to samples without deduplicating its spelling", () => {
     const occurrences = [
       { time: 0, wordId: "first", word: "hello" },
@@ -134,6 +160,38 @@ describe("speak-server protocol", () => {
       expect(repeatedMarkers.map((marker) => marker.word)).toEqual(["very", "very"]);
       expect(repeatedMarkers[0].sample).toBeLessThan(repeatedMarkers[1].sample);
       expect(repeatedMarkers[1].sample).toBeLessThan(Number(repeated.samples));
+      const [indexed] = await send({
+        id: 9,
+        op: "speak",
+        frontendId: "dectalk-english",
+        text: "Dr. Smith Smith.",
+        indexes: [
+          { index: 1, offset: 0 },
+          { index: 2, offset: 4 },
+          { index: 3, offset: 4 },
+          { index: 4, offset: 10 },
+          { index: 5, offset: 16 },
+        ],
+      });
+      const indexedMarkers = indexed.markers as Array<{
+        kind: string;
+        index?: number;
+        word?: string;
+        sample: number;
+      }>;
+      const reached = indexedMarkers.filter((marker) => marker.kind === "index");
+      expect(reached.map((marker) => marker.index)).toEqual([1, 2, 3, 4, 5]);
+      expect(reached[1].sample).toBe(reached[2].sample);
+      expect(reached[4].sample).toBe(indexed.samples);
+      expect(reached.map((marker) => marker.sample)).toEqual(
+        reached.map((marker) => marker.sample).sort((left, right) => left - right),
+      );
+      const smiths = indexedMarkers.filter(
+        (marker) => marker.kind === "word" && marker.word === "smith",
+      );
+      expect(smiths).toHaveLength(2);
+      expect(reached[1].sample).toBe(smiths[0].sample);
+      expect(reached[3].sample).toBe(smiths[1].sample);
       let peak = 0;
       for (let i = 0; i < pcm.length; i += 2) peak = Math.max(peak, Math.abs(pcm.readInt16LE(i)));
       expect(peak).toBeGreaterThan(1000);

@@ -59,5 +59,9 @@ checkout and streams 16-bit PCM back through nvwave.
   frontend's own voice's base pitch, and the pitch span follows by the same
   ratio (the selected frontend's speaker-profile `pitch_composition`). At
   50 each frontend speaks at its voice's own pitch.
-- `IndexCommand` is honoured at chunk boundaries: the index fires when the
-  audio queued before it has played.
+- `IndexCommand` carries a raw UTF-16 position within the render. The driver
+  raises indexes from playback callbacks at the returned sample positions;
+  equal-sample indexes retain input order, and trailing indexes use PCM end.
+  Indexes no longer split renders. Rate/pitch changes still do; full scoped
+  controls, timed breaks and spelling remain unfinished. This path has unit
+  coverage but has not received the requested second live NVDA session.

@@ -7,13 +7,13 @@
 
 import path from "node:path";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
-import { DECTALK_SAMPLE_RATE, FRAME_SAMPLES, RUN_PARAM } from "../../src/dectalk-vtm-track.ts";
-import { createDiagnostics, type DiagnosticEntry } from "../../src/diagnostics.ts";
-import { loadExperimentConfig } from "../../src/experiments/load-experiment-config.ts";
-import { createKlattInterpreter, type KlattFrame } from "../../src/klatt-interpreter.ts";
-import { createKlattRuntime } from "../../src/klatt-runtime.ts";
-import type { ProvenanceCollector } from "../../src/provenance.ts";
-import { createNodeRuntimeAssetLoader } from "../../src/runtime-assets/node-loader.ts";
+import { DECTALK_SAMPLE_RATE, FRAME_SAMPLES, RUN_PARAM } from "../dectalk-vtm-track.ts";
+import { createDiagnostics, type DiagnosticEntry } from "../diagnostics.ts";
+import { loadExperimentConfig } from "../experiments/load-experiment-config.ts";
+import { createKlattInterpreter, type KlattFrame } from "../klatt-interpreter.ts";
+import { createKlattRuntime } from "../klatt-runtime.ts";
+import type { ProvenanceCollector } from "../provenance.ts";
+import { createNodeRuntimeAssetLoader } from "../runtime-assets/node-loader.ts";
 
 export const DECTALK_VTM_EXPERIMENT = "dectalk-vtm";
 

@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import FFT from "fft.js";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
 import { writeWav } from "../src/rendering/write-wav";
-import { nodeRuntimeBackend } from "./rendering/backends/node-runtime.ts";
 
 // Engineering spectral check: Hann-windowed whole-word power, not a perceptual
 // score or a claim to reproduce the subjects in Recasens 1983.

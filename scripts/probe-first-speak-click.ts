@@ -25,7 +25,7 @@
  */
 
 import { chromium, type Page } from "playwright-core";
-import { resolveChromePath } from "./rendering/browser-session.ts";
+import { resolveChromePath } from "../src/rendering/browser-session.ts";
 
 const argv = process.argv.slice(2);
 const flag = (name: string): string | undefined => {

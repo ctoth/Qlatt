@@ -1,7 +1,7 @@
 import path from "node:path";
-import { loadExperimentConfig } from "../../../src/experiments/load-experiment-config.ts";
-import type { RenderRequest } from "../../../src/rendering/types.ts";
-import { createNodeRuntimeAssetLoader } from "../../../src/runtime-assets/node-loader.ts";
+import { loadExperimentConfig } from "../../experiments/load-experiment-config.ts";
+import { createNodeRuntimeAssetLoader } from "../../runtime-assets/node-loader.ts";
+import type { RenderRequest } from "../types.ts";
 
 type ResourceRequest = Pick<
   RenderRequest,

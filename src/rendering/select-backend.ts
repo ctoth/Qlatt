@@ -1,7 +1,7 @@
-import type { RenderBackend, RenderRequest } from "../../src/rendering/types.ts";
 import { browserRuntimeBackend } from "./backends/browser-runtime.ts";
 import { nodeRuntimeBackend } from "./backends/node-runtime.ts";
 import { trackOnlyBackend } from "./backends/track-only.ts";
+import type { RenderBackend, RenderRequest } from "./types.ts";
 
 const BACKENDS: RenderBackend[] = [trackOnlyBackend, nodeRuntimeBackend, browserRuntimeBackend];
 

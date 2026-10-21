@@ -61,7 +61,7 @@
 import path from "node:path";
 import type { Page } from "playwright-core";
 import { DECTALK_SAMPLE_RATE, FRAME_SAMPLES } from "../../src/dectalk-vtm-track.ts";
-import { openServedBrowser } from "../rendering/browser-session.ts";
+import { openServedBrowser } from "../../src/rendering/browser-session.ts";
 import { readVoiceCorpus } from "./dectalk-voice-compare.ts";
 import { readWavInt16 } from "./dectalk-vtm-fixture.ts";
 import type { OracleCorpusDocument, OracleCorpusEntry } from "./types.ts";

@@ -10,13 +10,13 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { listVtmFixtures, readVtmFixture } from "../scripts/oracle/dectalk-vtm-fixture";
+import { vtmEventsToTrack } from "../src/dectalk-vtm-track";
+import { createProvenanceCollector } from "../src/provenance";
 import {
   dectalkVtmDelaySamples,
   renderDectalkVtmTrack,
   renderToInt16,
-} from "../scripts/rendering/dectalk-vtm-render";
-import { vtmEventsToTrack } from "../src/dectalk-vtm-track";
-import { createProvenanceCollector } from "../src/provenance";
+} from "../src/rendering/dectalk-vtm-render";
 
 const fixtureDir = path.join("crates", "dectalk-vtm", "tests", "fixtures");
 

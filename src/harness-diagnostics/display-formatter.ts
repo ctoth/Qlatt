@@ -6,7 +6,6 @@ import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
 import {
   analyzeTrackGains,
   collectParamRange,
-  findTimingMismatches,
   findVoicingIssues,
   formatMeters,
   formatPlstepEventsRelative,
@@ -186,7 +185,6 @@ function formatSignalFlow(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
   const parallel = summarizeParallel(track);
-  const timing = findTimingMismatches(track, state.telemetryMax);
   const sourcePolicy = state.semantics?.analysis?.source_modes;
   const sourceLines = sourcePolicy?.params.map((parameter) => {
     const slider = state.sliderParams[parameter];
@@ -205,7 +203,6 @@ function formatSignalFlow(state: DisplayState): string[] {
     `SW=1: ${parallel.swOn} frames, ${parallel.swOnSeconds.toFixed(3)}s (${parallel.swOnShare.toFixed(1)}%)`,
     `Parallel-marked events: ${parallel.parallelEvents}; SW=0 frames: ${parallel.swOff}`,
     ...(sourceLines ?? ["(no experiment source-control policy)"]),
-    ...(timing.length > 0 ? timing : ["No branch timing mismatches detected"]),
   ];
 }
 

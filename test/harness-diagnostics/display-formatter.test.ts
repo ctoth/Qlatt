@@ -359,6 +359,7 @@ describe("display-formatter", () => {
     expect(text).toContain("SW=1: 1 frames, 0.100s");
     expect(text).toContain("Track source controls: lfMode=1: 0.200s");
     expect(text).toContain("Track source controls: sourceMode=1: 0.200s");
+    expect(text).not.toContain("No branch timing mismatches detected");
   });
 
   it.each([

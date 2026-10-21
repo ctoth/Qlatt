@@ -577,40 +577,6 @@ export function analyzeTrackGains(
   return { ranges, warnings: [...warnings], parallelScale };
 }
 
-export function findTimingMismatches(track: TrackEvent[], telemetryMax: TelemetryLike): string[] {
-  if (!track || track.length === 0) return [];
-  const mismatches = [];
-  const swRanges = track.map((e, i) => ({
-    startTime: e.time,
-    endTime: track[i + 1]?.time ?? e.time + 0.5,
-    sw: e.params?.SW ?? 0,
-    phoneme: e.phoneme ?? "",
-  }));
-  const findSwAt = (time: number) => {
-    for (let i = swRanges.length - 1; i >= 0; i--)
-      if (time >= swRanges[i].startTime) return swRanges[i];
-    return swRanges[0] ?? { startTime: 0, endTime: 0, sw: 0, phoneme: "" };
-  };
-
-  const cascadeMax = telemetryMax?.get?.("cascade-out");
-  if (isTelemetryDatum(cascadeMax) && cascadeMax.rmsTime != null) {
-    const range = findSwAt(cascadeMax.rmsTime);
-    if (range?.sw === 1 && cascadeMax.rms > 0.001)
-      mismatches.push(
-        `!! cascade-out max @${cascadeMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=1)`,
-      );
-  }
-  const parallelMax = telemetryMax?.get?.("parallel-out");
-  if (isTelemetryDatum(parallelMax) && parallelMax.rmsTime != null) {
-    const range = findSwAt(parallelMax.rmsTime);
-    if (range?.sw === 0 && parallelMax.rms > 0.001)
-      mismatches.push(
-        `!! parallel-out max @${parallelMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=0)`,
-      );
-  }
-  return mismatches;
-}
-
 export function formatTelemetry(
   telemetry: Map<string, unknown> | null | undefined,
   telemetryMax: TelemetryLike,

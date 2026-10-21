@@ -132,7 +132,7 @@ function fitFeatureValue(
   }
 }
 
-function validateFeatureValue(
+export function validateFeatureValue(
   itemType: string,
   key: string,
   value: unknown,

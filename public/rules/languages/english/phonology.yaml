@@ -22,6 +22,34 @@ silence_symbol: SIL
 nucleus_types: [vowel]
 symbol_grammar: '[A-Z]+'
 stress_markers: {0: '0', 1: '1', 2: '2'}
+target_features:
+  type: {kind: string}
+  dac: {kind: number}
+  nasal_place: {kind: string}
+  nasal_place_index: {kind: number}
+  diph: {kind: array, items: {kind: string}}
+  alveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  back: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  bilabial: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  central: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  dental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  front: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  glottal: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  hi: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_back_rounded: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_obstruent: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_stop_base: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  labiodental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  labiovelar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  low: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  mid: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  nasal_segment: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  palatal: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  postalveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  rhotic: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  velar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiced: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiceless: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
 phoneme_targets:
   IY1:
     type: vowel

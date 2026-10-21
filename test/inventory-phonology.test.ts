@@ -23,6 +23,14 @@ const PHONOLOGY_PATH = "/fixture/phonology.yaml";
 
 const phonology = {
   version: "v1",
+  target_features: {
+    type: { kind: "string" },
+    low: { kind: "boolean" },
+    back: { kind: "boolean" },
+    dac: { kind: "number" },
+    voiceless: { kind: "boolean" },
+    alveolar: { kind: "boolean" },
+  },
   silence_symbol: "SIL",
   nucleus_types: ["vowel"],
   symbol_grammar: "[A-Z]+",
@@ -36,6 +44,7 @@ const phonology = {
 
 const voice = {
   version: "v1",
+  target_features: { dur: { kind: "number" } },
   target_feature_exclusions: ["dur", "SW", "type"],
   phonology_path: PHONOLOGY_PATH,
   default_duration_ms: 30,
@@ -58,6 +67,7 @@ const flat = (): Doc => {
   return {
     ...own,
     ...conventions,
+    target_features: { ...voice.target_features, ...phonology.target_features },
     phoneme_targets: Object.fromEntries(
       Object.entries(voice.phoneme_targets).map(([key, target]) => [
         key,
@@ -68,6 +78,74 @@ const flat = (): Doc => {
 };
 
 describe("inventory layered over a phonology document", () => {
+  it("compiles declared nested, optional and nullable column shapes", () => {
+    const shape = {
+      kind: "object",
+      optional: ["bandwidth"],
+      fields: {
+        points: {
+          kind: "array",
+          items: {
+            kind: "object",
+            fields: {
+              value: { kind: "number" },
+              time: { kind: "union", variants: [{ kind: "number" }, { kind: "null" }] },
+            },
+          },
+        },
+        bandwidth: { kind: "number" },
+      },
+    };
+    const source = {
+      ...voice,
+      target_features: { ...voice.target_features, trajectory: shape },
+      phoneme_targets: {
+        ...voice.phoneme_targets,
+        AA1: { ...voice.phoneme_targets.AA1, trajectory: { points: [{ value: 500, time: null }] } },
+      },
+    };
+    const spec = parse(source);
+    expect(spec.target_features.trajectory).toEqual(shape);
+    expect(Object.isFrozen(spec.target_features.trajectory)).toBe(true);
+    expect(spec.phoneme_targets.AA1.trajectory).toEqual({ points: [{ value: 500, time: null }] });
+    source.phoneme_targets.AA1.trajectory.points[0].value = "wide" as unknown as number;
+    expect(() => parse(source)).toThrow(/E_HRG_FEATURE_VALUE.*AA1.trajectory.points\[0\].value/);
+  });
+
+  it("requires column declarations instead of learning a type from a target", () => {
+    expect(() => parse({ ...voice, target_features: undefined })).toThrow(/target_features/);
+    expect(() =>
+      parse({
+        ...voice,
+        phoneme_targets: { ...voice.phoneme_targets, S: { ...voice.phoneme_targets.S, extra: 1 } },
+      }),
+    ).toThrow(/S.extra.*no declared column shape/);
+    expect(() =>
+      parse({
+        ...voice,
+        target_features: { ...voice.target_features, dur: { kind: "mystery" } },
+      }),
+    ).toThrow(/E_HRG_SCHEMA_SHAPE/);
+  });
+
+  it("rejects conflicting declaration ownership and invalid optional fields", () => {
+    expect(() =>
+      parse({
+        ...voice,
+        target_features: { ...voice.target_features, type: { kind: "string" } },
+      }),
+    ).toThrow(/E_INVENTORY_PHONOLOGY_CONFLICT.*target_features.type/);
+    expect(() =>
+      parse({
+        ...voice,
+        target_features: {
+          ...voice.target_features,
+          extra: { kind: "object", fields: {}, optional: ["missing"] },
+        },
+      }),
+    ).toThrow(/E_HRG_SCHEMA_OPTIONAL_FIELD/);
+  });
+
   it("gives each target its own fields and the phonology document's", () => {
     const spec = parse(voice);
     expect(spec.phoneme_targets.AA1).toEqual({
@@ -195,6 +273,20 @@ describe("the inventory loaders read the phonology document", () => {
         /E_INVENTORY_PHONOLOGY_PATH/,
       );
     }));
+
+  it("rejects a declared column mismatch through both acquisition paths", () =>
+    withFiles(
+      {
+        ...phonology,
+        target_features: { ...phonology.target_features, dac: { kind: "string" } },
+      },
+      async (inventoryPath) => {
+        expect(() => loadInventorySpecFromPath(inventoryPath)).toThrow(/E_HRG_FEATURE_VALUE.*AA1.dac/);
+        await expect(preloadInventorySpecFromPath(inventoryPath)).rejects.toThrow(
+          /E_HRG_FEATURE_VALUE.*AA1.dac/,
+        );
+      },
+    ));
 });
 
 describe("the bundled inventories", () => {

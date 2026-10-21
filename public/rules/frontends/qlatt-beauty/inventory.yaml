@@ -12,6 +12,33 @@
 # =============================================================================
 version: v1
 target_feature_exclusions: [dur, SW, type]
+target_features:
+  derived_from: {kind: string}
+  area_function:
+    kind: object
+    optional: [source_sha256, model_settings, tract_length_cm, pharynx_fraction]
+    fields:
+      source: {kind: string}
+      source_sha256: {kind: string}
+      model: {kind: string}
+      speaker:
+        kind: object
+        fields:
+          tract_length_scale: {kind: number}
+          pharynx_scale: {kind: number}
+          mouth_scale: {kind: number}
+      model_settings:
+        kind: object
+        fields:
+          sound_speed_cm_s: {kind: number}
+          attenuation_neper: {kind: number}
+          lip_end_correction: {kind: number}
+          citations: {kind: array, items: {kind: string}}
+      tract_length_cm: {kind: number}
+      pharynx_fraction: {kind: number}
+      citations: {kind: array, items: {kind: string}}
+  dur: {kind: number}
+  fricative_min_ms: {kind: number}
 phonology_path: /rules/languages/english/phonology.yaml
 default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:

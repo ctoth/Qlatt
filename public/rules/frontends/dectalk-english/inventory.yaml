@@ -1,5 +1,86 @@
 version: v1
 target_feature_exclusions: [dur, SW, type]
+target_features:
+  derived_from: {kind: string}
+  area_function:
+    kind: object
+    optional: [source_sha256, model_settings, tract_length_cm, pharynx_fraction]
+    fields:
+      source: {kind: string}
+      source_sha256: {kind: string}
+      model: {kind: string}
+      speaker:
+        kind: object
+        fields:
+          tract_length_scale: {kind: number}
+          pharynx_scale: {kind: number}
+          mouth_scale: {kind: number}
+      model_settings:
+        kind: object
+        fields:
+          sound_speed_cm_s: {kind: number}
+          attenuation_neper: {kind: number}
+          lip_end_correction: {kind: number}
+          citations: {kind: array, items: {kind: string}}
+      tract_length_cm: {kind: number}
+      pharynx_fraction: {kind: number}
+      citations: {kind: array, items: {kind: string}}
+  dur: {kind: number}
+  type: {kind: string}
+  fricative_min_ms: {kind: number}
+  burstDuration: {kind: number}
+  minimumDuration: {kind: number}
+  nasal_place_index: {kind: number}
+  diph: {kind: array, items: {kind: string}}
+  alveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  back: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  bilabial: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  dental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  front: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  glottal: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  hi: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_back_rounded: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_obstruent: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  is_stop_base: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  labiodental: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  low: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  mid: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  postalveolar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  rhotic: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  velar: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiced: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  voiceless: {kind: union, variants: [{kind: boolean}, {kind: "null"}]}
+  trajectory:
+    kind: object
+    optional: [B1, B2, B3]
+    fields:
+      F1: &trajectory_track
+        kind: array
+        items:
+          kind: object
+          fields:
+            value: {kind: number}
+            time: {kind: union, variants: [{kind: number}, {kind: "null"}]}
+      F2: *trajectory_track
+      F3: *trajectory_track
+      B1: *trajectory_track
+      B2: *trajectory_track
+      B3: *trajectory_track
+  stopReleaseProfiles:
+    kind: object
+    fields:
+      front_vowel: &release_profile
+        kind: object
+        fields:
+          A2: {kind: number}
+          A3: {kind: number}
+          A4: {kind: number}
+          A5: {kind: number}
+          A6: {kind: number}
+          AB: {kind: number}
+      back_unrounded_vowel: *release_profile
+      back_rounded_vowel: *release_profile
+      obstruent: *release_profile
 # Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
 silence_symbol: SIL
 nucleus_types: [vowel]

@@ -14,6 +14,9 @@ import type { SpeakerProfileSpec } from "../speaker-profile";
 import type { TextParserConfig } from "../text-parser/frontend";
 import type { TextParserTable } from "../text-parser/interpreter";
 import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
+import { compileFeatureSchema } from "./hrg/feature-schema";
+import { validateFeatureValue } from "./hrg/item";
+import type { FeatureSchema } from "./hrg/types";
 
 export type InventorySpec = {
   silence_symbol: string;
@@ -23,6 +26,7 @@ export type InventorySpec = {
   default_duration_ms: number;
   citations?: readonly string[];
   base_params: Record<string, number>;
+  target_features: Readonly<Record<string, FeatureSchema>>;
   target_feature_exclusions: readonly string[];
   normalization_aliases?: Readonly<Record<string, string>>;
   secondary_stress_fallback?: { target: 0 | 1; citations: string[] };
@@ -241,6 +245,7 @@ const PHONOLOGY_DOCUMENT_KEYS: readonly string[] = [
   "version",
   ...PHONOLOGY_CONVENTION_KEYS,
   "phoneme_targets",
+  "target_features",
 ];
 
 const INVENTORY_PHONOLOGY_PATHS = new WeakMap<InventorySpec, string>();
@@ -312,6 +317,17 @@ function layerOverPhonology(
   }
 
   const { phonology_path: _path, ...merged } = raw;
+  if (!isPlainObject(raw.target_features) || !isPlainObject(phonology.target_features)) {
+    throw new Error("E_INVENTORY_SCHEMA: inventory and phonology require target_features mappings");
+  }
+  for (const field of Object.keys(phonology.target_features)) {
+    if (Object.hasOwn(raw.target_features, field)) {
+      throw new Error(
+        `E_INVENTORY_PHONOLOGY_CONFLICT: target_features.${field} is declared by both documents`,
+      );
+    }
+  }
+  merged.target_features = { ...raw.target_features, ...phonology.target_features };
   for (const key of PHONOLOGY_CONVENTION_KEYS) {
     if (!Object.hasOwn(phonology, key)) continue;
     if (Object.hasOwn(raw, key)) {
@@ -435,6 +451,28 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
     throw new Error("E_INVENTORY_SCHEMA: citations must be non-empty strings");
   }
   applyDurationModels(raw.duration_models, phonemeTargets);
+  const baseParams = normalizeBaseParams(raw.base_params);
+  if (!isPlainObject(raw.target_features)) {
+    throw new Error("E_INVENTORY_SCHEMA: target_features must declare target column shapes");
+  }
+  const targetFeatures = Object.freeze(
+    Object.fromEntries(
+      Object.entries(raw.target_features).map(([name, shape]) => [name, compileFeatureSchema(shape)]),
+    ),
+  );
+  for (const [name, target] of Object.entries(phonemeTargets)) {
+    for (const [field, value] of Object.entries(target)) {
+      const shape =
+        targetFeatures[field] ??
+        (Object.hasOwn(baseParams, field) ? ({ kind: "number" } as const) : undefined);
+      if (!shape) {
+        throw new Error(
+          `E_INVENTORY_SCHEMA: phoneme_targets.${name}.${field} has no declared column shape`,
+        );
+      }
+      validateFeatureValue("inventory", `${name}.${field}`, value, shape);
+    }
+  }
   return {
     silence_symbol: raw.silence_symbol,
     nucleus_types: [...raw.nucleus_types] as string[],
@@ -442,7 +480,8 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
     stress_markers: { ...markers },
     default_duration_ms: raw.default_duration_ms,
     citations: [...citations],
-    base_params: normalizeBaseParams(raw.base_params),
+    base_params: baseParams,
+    target_features: targetFeatures,
     target_feature_exclusions: [...raw.target_feature_exclusions],
     normalization_aliases: normalizeNormalizationAliases(
       raw.normalization_aliases,

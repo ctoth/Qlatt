@@ -973,7 +973,7 @@ Use this checklist when adding a new synthesizer.
 | `src/klatt-interpreter.ts` | Track scheduling, semantics evaluation |
 | `src/semantics/cel-evaluator.ts` | CEL expression parser |
 | `src/semantics/topological-evaluator.ts` | Dependency ordering |
-| `src/builtin-functions.ts` | dbToLinear, proximity, ndbScale |
+| `src/builtin-functions.ts` | dbToLinear, proximity and generic amplitude conversions |
 | `crates/*/src/lib.rs` | WASM primitive implementations |
 | `src/worklets/*-processor.ts` | AudioWorklet processor sources (compiled to `public/worklets/`) |
 

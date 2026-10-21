@@ -1,6 +1,6 @@
 /**
  * One headless browser and one server for any number of offline renders: the
- * page test/render-runtime-offline.html (or test/render-offline.html) in a
+ * page test/render-runtime-offline.html in a
  * real Chrome or Edge, with the worklets, the WASM kernels and the bundle a
  * browser runs. Each render is a fresh OfflineAudioContext and a fresh
  * runtime in that page; it is not the page's own AudioContext, which runs in
@@ -24,7 +24,7 @@ export type BrowserRenderServer = "dev" | "build";
 
 export interface BrowserSessionOptions {
   repoRoot: string;
-  engine: "runtime" | "legacy";
+  engine: "runtime";
   /** Default "dev". */
   server?: BrowserRenderServer;
   /** The server's port on 127.0.0.1. Default: any free port. */
@@ -84,7 +84,6 @@ export interface BrowserSession {
 
 const OFFLINE_PAGES = {
   runtime: "test/render-runtime-offline.html",
-  legacy: "test/render-offline.html",
 } as const;
 
 export function resolveChromePath(): string | null {

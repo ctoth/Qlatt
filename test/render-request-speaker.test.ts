@@ -103,15 +103,17 @@ describe("render request speaker", () => {
     expect(page).toContain("resolvedSpeaker: frontend?.resolvedSpeaker,");
   });
 
-  it("the browser backend refuses a voice for the legacy page, which cannot select one", async () => {
+  it.each([undefined, "betty"])("rejects the retired engine with speaker %s", async (speaker) => {
     await expect(
       browserRuntimeBackend.render({
-        ...request("she.", "betty"),
+        ...request("she.", speaker),
         engine: "legacy",
         allowBrowserRender: true,
         renderHost: "browser",
       }),
-    ).rejects.toThrow(/cannot select a voice/);
+    ).rejects.toThrow(
+      "Unsupported render engine 'legacy': only runtime is supported. Use --engine runtime.",
+    );
   });
 });
 
@@ -229,7 +231,7 @@ describe("render request frontend options", () => {
   );
 
   it.each(["voiceQuality", "directionTrack"] as const)(
-    "rejects %s on the legacy browser driver",
+    "rejects the retired engine even when %s is supplied",
     async (field) => {
       await expect(
         browserRuntimeBackend.render({
@@ -238,7 +240,9 @@ describe("render request frontend options", () => {
           allowBrowserRender: true,
           [field]: performanceRequest[field],
         }),
-      ).rejects.toThrow(/cannot apply voiceQuality or directionTrack/);
+      ).rejects.toThrow(
+        "Unsupported render engine 'legacy': only runtime is supported. Use --engine runtime.",
+      );
     },
   );
 

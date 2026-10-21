@@ -8,6 +8,7 @@
 import { applyParamValue, getAudioParam } from "./audio-param-utils";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import { expandFormantBanks } from "./formant-bank";
+import type { ProvenanceCollector } from "./provenance";
 import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
 import type { RuntimeAssetLoader } from "./runtime-assets/types";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
@@ -322,6 +323,8 @@ function getNodeId(ref: PortRef): string {
 
 // Runtime options
 export interface KlattRuntimeOptions {
+  /** Records successful graph connections, without playback time or signal ancestry. */
+  provenance?: ProvenanceCollector;
   audioContext: AudioContext;
   semantics: SemanticsDocument;
   graph: BaconGraph;
@@ -812,6 +815,17 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
           fromNode.connect(toNode, fromPort, toPort);
           log(`  Connected ${fromId}[${fromPort}] -> ${toId}[${toPort}]`);
         }
+        options.provenance?.add({
+          stage: "runtime",
+          type: "connection_resolved",
+          subject: `connection:${fromId}->${toId}`,
+          reason: `${graph.name ?? "unnamed graph"}: connected ${fromId}[${fromPort}] -> ${
+            toParamName !== undefined ? `${toId}.${toParamName} (AudioParam)` : `${toId}[${toPort}]`
+          }`,
+          citations: [
+            "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+          ],
+        });
       } catch (error) {
         fail(
           "runtime.connection_failed",
@@ -969,7 +983,17 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         );
       }
       log(`Connecting ${nodeId} to destination`);
-      outputNode.connect(audioContext.destination, portIndex(outputRef, "out"));
+      const outputPort = portIndex(outputRef, "out");
+      outputNode.connect(audioContext.destination, outputPort);
+      options.provenance?.add({
+        stage: "runtime",
+        type: "connection_resolved",
+        subject: `connection:${nodeId}->destination`,
+        reason: `${graph.name ?? "unnamed graph"}: connected ${nodeId}[${outputPort}] -> audioContext.destination`,
+        citations: [
+          "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+        ],
+      });
     },
 
     disconnect(): void {

@@ -25,7 +25,7 @@ For PowerShell argument forwarding and the complete explain flag reference, see 
 
 Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`; literal origins and macro-body ancestry are not included.
 
-With `--why`, text also prints compiled `select`, `constraint` and `apply` blocks;
+With `--why`, text also prints the full compiled rule and its referenced pattern;
 JSON exposes them by decision ID in `tooling.ruleExpressions`. These normalized,
-expanded expressions are distinct from authored YAML and do not identify which
+expanded definitions are distinct from authored YAML and do not identify which
 dispatch branch or individual literals contributed to the decision.

@@ -82,7 +82,7 @@ type ExplainPayload = {
     ruleSources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
-      { ruleId: string; select: unknown; constraint: unknown; apply: unknown }
+      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
     >;
     field: FieldExplanation | null;
     whyNot: WhyNotRuleResult | null;
@@ -312,7 +312,7 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
     const expressions = payload.tooling.ruleExpressions[decision.id];
     if (expressions) {
       lines.push(
-        `  compiled rule expressions (whole blocks, not selected branches): ${JSON.stringify(expressions)}`,
+        `  compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
       );
     }
   }
@@ -475,9 +475,8 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
         if (args.whyDecisionId && rule) {
           ruleExpressions[id] = {
             ruleId,
-            select: rule.select ?? null,
-            constraint: rule.constraint ?? null,
-            apply: rule.apply ?? null,
+            rule,
+            pattern: typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
           };
         }
       }

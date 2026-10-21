@@ -21,7 +21,7 @@ interface ExplainPayload {
     ruleSources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
-      { ruleId: string; select: unknown; constraint: unknown; apply: unknown }
+      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
     >;
     replay: { matches: boolean } | null;
   };
@@ -172,24 +172,23 @@ describe("explain phrase cli", () => {
     expect(payload.tooling.ruleExpressions).toEqual({});
   });
 
-  it("links rule decisions to transcribe ancestry in why output", async () => {
-    const explain = await runCli(["--phrase", "hello world", "--format", "json"]);
+  it.each([
+    ["hello world", "duration_floor_from_inventory"],
+    ["Did you see the red car?", "palatalization_dy"],
+  ])("explains %s through compiled %s", async (phrase, expectedRule) => {
+    const explain = await runCli(["--phrase", phrase, "--format", "json"]);
     expect(explain.code).toBe(0);
     const explainPayload = parseExplainPayload(explain.stdout);
     expect(explainPayload.tooling.ruleExpressions).toEqual({});
     const rewrite = explainPayload.decisions.find(
-      (decision) =>
-        decision.stage === "rules" &&
-        decision.type === "feature_overwrite" &&
-        typeof decision.subject === "string" &&
-        decision.subject.startsWith("item:segment_"),
+      (decision) => explainPayload.tooling.ruleSources[decision.id]?.path[1] === expectedRule,
     );
     expect(rewrite).toBeTruthy();
-    if (!rewrite) throw new Error("expected feature overwrite decision");
+    if (!rewrite) throw new Error(`expected committed decision for ${expectedRule}`);
 
     const why = await runCli([
       "--phrase",
-      "hello world",
+      phrase,
       "--format",
       "json",
       "--why",
@@ -207,15 +206,21 @@ describe("explain phrase cli", () => {
     expect(span.path[0]).toBe("rules");
     expect(span.path).toHaveLength(2);
     const ruleId = String(span.path[1]);
-    const compiledRule = loadBundledRulepackSpec().rules[ruleId];
+    const rulepack = loadBundledRulepackSpec();
+    const compiledRule = rulepack.rules[ruleId];
     expect(compiledRule).toBeDefined();
     const expressions = {
       ruleId,
-      select: compiledRule.select ?? null,
-      constraint: compiledRule.constraint ?? null,
-      apply: compiledRule.apply ?? null,
+      rule: compiledRule,
+      pattern: typeof compiledRule.match === "string" ? rulepack.patterns[compiledRule.match] : null,
     };
     expect(whyPayload.tooling.ruleExpressions[rewrite.id]).toEqual(expressions);
+    expect(expressions.rule.define).not.toEqual({});
+    if (expectedRule === "palatalization_dy") {
+      expect(expressions.rule.splice).not.toBeNull();
+      expect(expressions.pattern).toBeDefined();
+      expect(expressions.pattern).not.toBeNull();
+    }
     const declaration = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
       (entry) => entry.value.path.length === 2 && entry.value.path[1] === span.path[1],
     );
@@ -233,13 +238,13 @@ describe("explain phrase cli", () => {
     expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(
       true,
     );
-    const text = await runCli(["--phrase", "hello world", "--why", rewrite.id, "--verbose"]);
+    const text = await runCli(["--phrase", phrase, "--why", rewrite.id, "--verbose"]);
     expect(text.code).toBe(0);
     expect(text.stdout.split("\n").find((line) => line.startsWith(`#${rewrite.seq} `))).toContain(
       ` | rule: ${span.resource}:${span.line}:${span.column}`,
     );
     expect(text.stdout).toContain(
-      `compiled rule expressions (whole blocks, not selected branches): ${JSON.stringify(expressions)}`,
+      `compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
     );
   });
 

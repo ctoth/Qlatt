@@ -64,6 +64,12 @@ prepared backend boundary and owner-based F0 loading. The revised browser
 baseline harness now supplies createBrowserRuntimeAssetLoader to preloadF0Filters;
 its runner only produces frontend tracks and has no backend configuration caller.
 No local CI, browser execution or measurements were run for this integration.
+Completed f0bd shard1 showed the audit still rejected pure definitions: I had
+treated every inert normalized field as null, but normalizeConditionSpec keeps
+an absent constraint undefined. Accept both nullish representations on the same
+explicit inert keys. Shard4's12-text signed-number corpus test exceeded its
+existing30000ms limit; reported the actual timeout without changing the limit.
+The source of that timing result is not established; performance remains open.
 The revised candidate and accepted Claude response are published. Initial shard1
 also exposed manifests missing the new shared include and a newer control-window
 fixture expecting the old direct source ID. Added the actual acquired paths and

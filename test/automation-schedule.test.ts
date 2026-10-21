@@ -49,10 +49,19 @@ describe("host-neutral automation contract", () => {
     ]);
     const decisions = provenance.getDecisions();
     expect(decisions).toHaveLength(4);
+    const selection =
+      "step" in override && override.step
+        ? "realize rule step: true"
+        : "ramp" in override && override.ramp
+          ? "realize rule ramp: true"
+          : `defaultScheduling: ${defaultScheduling ?? "absent (step)"}`;
     expect(decisions[0].reason).toContain(
-      "compiled schedule time 1s: step selected by first-frame anchor",
+      `compiled schedule time 1s: step selected by ${mode === "ramp" ? "first-frame anchor" : selection}`,
     );
-    expect(decisions[2].reason).toContain(`compiled schedule time 1.5s: ${mode} selected by`);
+    expect(decisions[1].reason).toContain("step selected by realize rule step: true");
+    expect(decisions[2].reason).toContain(
+      `compiled schedule time 1.5s: ${mode} selected by ${selection}`,
+    );
     expect(decisions[3].reason).toContain("step selected by realize rule step: true");
     for (const decision of decisions) {
       expect(decision.stage).toBe("interpreter");

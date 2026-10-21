@@ -465,7 +465,7 @@ export function createKlattScheduleCompiler(
           });
           if (options.provenance) {
             const selection =
-              i === 0
+              i === 0 && binding.ramp
                 ? "first-frame anchor"
                 : stepParams.has(binding.name)
                   ? "realize rule step: true"

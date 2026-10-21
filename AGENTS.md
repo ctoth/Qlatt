@@ -115,7 +115,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`); bypasses stage, subject and range filters |
 | `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition duration (default: 30) |
-| `--strict-citations` | Exit code 2 if the selected ancestry or filtered output window contains uncited decisions; does not check excluded decisions |
+| `--strict-citations` | Exit code 2 if any decisions in the full run lack citations, regardless of display filters or selected ancestry; displayed summaries still describe the selected output |
 | `--strict` | Exit code 2 before synthesis if rulepack validation emits warnings |
 | `--phrase <text>` | Explicit phrase; takes precedence over positional phrase words |
 | `--out <file>` | Write output to file instead of stdout |

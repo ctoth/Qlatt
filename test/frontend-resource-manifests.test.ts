@@ -21,6 +21,13 @@ import {
   recordFrontendResources,
 } from "../scripts/build-frontend-resource-manifests";
 import {
+  loadFrontendResources,
+  preloadFrontendResources,
+  preloadFrontendSourceContour,
+} from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import * as paths from "../src/path-utils";
+import {
   clearPrimedSyncResources,
   primeSyncResources,
   recordSyncResources,
@@ -48,6 +55,7 @@ describe("frontend resource manifests", () => {
 
 describe("primed resources", () => {
   afterEach(() => {
+    vi.restoreAllMocks();
     clearPrimedSyncResources();
     takeSynchronousFetches();
     vi.unstubAllGlobals();
@@ -105,6 +113,62 @@ describe("primed resources", () => {
     });
     return { blocking, parallel };
   }
+
+  it.each(frontendIds())("%s: prepares resources without synchronous requests", async (id) => {
+    const prefix = `/async-owner-${id}/rules/`;
+    const replacePaths = (text: string) => text.replaceAll("/rules/", prefix);
+    const spec = JSON.parse(replacePaths(JSON.stringify(loadBundledRulepackSpec(id))));
+    const files: Record<string, string> = {};
+    for (const resource of readManifest(id)) {
+      files[replacePaths(resource)] = replacePaths(
+        fs.readFileSync(path.join("public", resource), "utf8"),
+      );
+    }
+    const { blocking, parallel } = stubBrowser(files);
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    const acquired = await preloadFrontendResources(spec);
+    expect(blocking).toEqual([]);
+    expect(parallel).toContain(acquired.inventoryPath);
+    expect(parallel).toContain(acquired.lts.path);
+    expect(parallel).toContain(acquired.lexicon?.path);
+    const fetched = [...parallel];
+    const sync = loadFrontendResources(spec);
+    expect(sync).toEqual(acquired);
+    expect(sync.inventory).toBe(acquired.inventory);
+    expect(sync.lts.document).toBe(acquired.lts.document);
+    expect(sync.lexicon?.dictionary).toBe(acquired.lexicon?.dictionary);
+    expect(sync.stress).toBe(acquired.stress);
+    expect(sync.vqChannels?.channels).toBe(acquired.vqChannels?.channels);
+    expect(sync.affectPresets?.library).toBe(acquired.affectPresets?.library);
+    if (id === "dectalk-english") {
+      expect(acquired.morphology).toBeUndefined();
+      expect(acquired.stress).toBeUndefined();
+      expect(acquired.affectPresets).toBeUndefined();
+      expect(acquired.vqChannels).toBeUndefined();
+    }
+    expect((await preloadFrontendSourceContour(spec))?.spec).toBe(acquired.sourceContour?.spec);
+    expect(parallel).toEqual(fetched);
+    expect(blocking).toEqual([]);
+  });
+
+  it("keeps nested dependency errors contextual", async () => {
+    const spec = loadBundledRulepackSpec("qlatt-english");
+    const lts = "/async-owner-error/lts.yaml";
+    const morphology = "/async-owner-error/morphology.yaml";
+    const missing = "/async-owner-error/missing-phonotactics.yaml";
+    const { blocking } = stubBrowser({
+      [lts]: "version: fixture\n",
+      [morphology]: `phonotactics_path: ${missing}\n`,
+    });
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    await expect(
+      preloadFrontendResources({
+        ...spec,
+        resources: { ...spec.resources, lts, morphology },
+      }),
+    ).rejects.toThrow(/E_FRONTEND_CONFIG: morphology.phonotactics_path could not load/);
+    expect(blocking).toEqual([]);
+  });
 
   it("without priming, a synchronous load makes a blocking request and says so", () => {
     const { blocking } = stubBrowser({ "/fixture/a.yaml": "a: 1\n" });

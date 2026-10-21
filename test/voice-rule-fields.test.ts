@@ -14,10 +14,12 @@ import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine"
 import {
   loadFrontendVoiceDocument,
   loadVoiceRuleDocuments,
+  preloadFrontendVoiceDocument,
   preloadVoiceRuleDocuments,
 } from "../src/declarative-frontend/inventory";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
+import * as paths from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";
 import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
@@ -145,6 +147,26 @@ function levels(voice: string | null): unknown {
 }
 
 describe("voice rule fields at load", () => {
+  it("prepares an explicitly selected open-registry voice without compile rule fields", async () => {
+    const registry = getVoiceRegistry({ speakers: { dir: "/async-voice", default: "low" } });
+    if (!registry) throw new Error("fixture registry missing");
+    const fetch = vi.fn().mockResolvedValue(new Response("base_f0_hz: 140\n"));
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    vi.stubGlobal("fetch", fetch);
+    try {
+      expect(
+        await preloadVoiceRuleDocuments({ speakers: { dir: registry.dir, default: "low" } }),
+      ).toEqual(new Map());
+      const selected = await preloadFrontendVoiceDocument(registry, " HIGH ");
+      expect(selected.path).toBe("/async-voice/high.yaml");
+      expect(loadFrontendVoiceDocument(registry, "high").document).toBe(selected.document);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("shares owner documents across async compilation and runtime selection", async () => {
     const documents = await preloadVoiceRuleDocuments(TANK_SPEC);
     const registry = getVoiceRegistry(TANK_SPEC);

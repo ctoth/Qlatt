@@ -1,4 +1,8 @@
-import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
+import {
+  type CmuDictionary,
+  loadCmuDictionaryFromPathSync,
+  preloadCmuDictionaryFromPath,
+} from "../cmu-dictionary-loader";
 import {
   type SpeakerDefinitionContext,
   type VoiceDocument,
@@ -800,6 +804,19 @@ export function loadFrontendVoiceDocument(
   return { path, document: FRONTEND_ASSET_CACHE.get(path) };
 }
 
+/** Prepare a selected voice without making a synchronous request. */
+export async function preloadFrontendVoiceDocument(
+  registry: VoiceRegistry,
+  voiceName: string,
+): Promise<VoiceDocument> {
+  const name = voiceNameInRegistry(registry, voiceName);
+  const path = `${registry.dir}/${name}.yaml`;
+  if (!FRONTEND_ASSET_CACHE.has(path)) {
+    FRONTEND_ASSET_CACHE.set(path, await loadYamlDocument(path));
+  }
+  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
+}
+
 /** Raw programmatic specs need only their declared voice rule documents here. */
 export function loadVoiceRuleDocuments(source: unknown): ReadonlyMap<string, VoiceDocument> {
   const registry = voiceRuleRegistry(source);
@@ -928,25 +945,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     });
     stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
   }
-  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
-  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
-    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
-  if (!parseRecognitionConfig(spec))
-    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
-  const punctuationTokens = isPlainObject(spec.transcription)
-    ? spec.transcription.punctuation_tokens
-    : undefined;
-  if (
-    !Array.isArray(punctuationTokens) ||
-    !punctuationTokens.length ||
-    !punctuationTokens.every(
-      (token): token is string => typeof token === "string" && token.length > 0,
-    )
-  ) {
-    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
-  }
+  validateFrontendRuntimeConfig(spec);
   const inventory = loadInventorySpecFromPath(inventoryPath);
-  const phonologyPath = inventoryPhonologyPath(inventory);
   const speakerProfilePath =
     declaredResources.speaker_profile == null
       ? undefined
@@ -987,6 +987,202 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
             rdPolicy: readRdPolicy(document),
           };
         });
+  return assembleFrontendResources(spec, inventory, {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  });
+}
+
+/** Acquire the complete declared runtime resources using only async loaders. */
+export async function preloadFrontendResources(spec: unknown): Promise<FrontendResources> {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const inventoryPath = declaredResources.inventory;
+  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
+    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
+  }
+  const requireAsset = async (
+    value: unknown,
+    name: string,
+    load: (path: string) => Promise<unknown> = loadYamlDocument,
+  ): Promise<string> => {
+    if (typeof value !== "string" || !value.trim()) {
+      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
+    }
+    try {
+      if (!FRONTEND_ASSET_CACHE.has(value)) {
+        FRONTEND_ASSET_CACHE.set(value, await load(value));
+      }
+    } catch (cause) {
+      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
+      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
+    }
+    return value;
+  };
+  const ltsPath = await requireAsset(declaredResources.lts, "lts", async (path) => {
+    const document: unknown = path.endsWith(".json")
+      ? JSON.parse(await loadYamlSource(path))
+      : await loadYamlDocument(path);
+    if (document === null || document === undefined) {
+      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
+    }
+    return document;
+  });
+  const tablePronouncer =
+    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
+  let morphology: MorphologyContext | undefined;
+  if (!tablePronouncer || declaredResources.morphology != null) {
+    const path = await requireAsset(declaredResources.morphology, "morphology");
+    const data = FRONTEND_ASSET_CACHE.get(path);
+    const phonotacticsPath = await requireAsset(
+      isPlainObject(data) ? data.phonotactics_path : undefined,
+      "morphology.phonotactics_path",
+    );
+    morphology = {
+      path,
+      data: data as MorphologyData,
+      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
+    };
+  }
+  let stress: StressContext | undefined;
+  if (!tablePronouncer || declaredResources.stress_policy != null) {
+    const path = await requireAsset(
+      declaredResources.stress_policy,
+      "stress_policy",
+      async (path) => {
+        const raw = await loadYamlDocument(path);
+        const phonotacticsPath = await requireAsset(
+          isPlainObject(raw) ? raw.phonotactics_path : undefined,
+          "stress_policy.phonotactics_path",
+        );
+        const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
+        try {
+          return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+        } catch (cause) {
+          throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
+        }
+      },
+    );
+    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
+  }
+  validateFrontendRuntimeConfig(spec);
+  const inventory = await preloadInventorySpecFromPath(inventoryPath);
+  const speakerProfilePath =
+    declaredResources.speaker_profile == null
+      ? undefined
+      : await requireAsset(declaredResources.speaker_profile, "speaker_profile", async (path) =>
+          parseSpeakerProfileDocument(await loadYamlDocument(path)),
+        );
+  const sourceContourPath =
+    declaredResources.source_contour == null
+      ? undefined
+      : await requireAsset(declaredResources.source_contour, "source_contour", async (path) =>
+          parseSourceContourDocument(await loadYamlDocument(path)),
+        );
+  const textParserConfig = parseTextParserConfig(spec);
+  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
+  const speakerDefinitionPath =
+    speakers.definition_path == null
+      ? undefined
+      : await requireAsset(speakers.definition_path, "speakers.definition_path");
+  if (textParserConfig) await requireAsset(textParserConfig.tablePath, "text_parser.table_path");
+  const lexiconPath =
+    declaredResources.lexicon == null
+      ? undefined
+      : await requireAsset(declaredResources.lexicon, "lexicon", preloadCmuDictionaryFromPath);
+  const affectPresetsPath =
+    declaredResources.affect_presets == null
+      ? undefined
+      : await requireAsset(declaredResources.affect_presets, "affect_presets", async (path) =>
+          parseAffectPresets(await loadYamlDocument(path)),
+        );
+  const vqChannelsPath =
+    declaredResources.vq_channels == null
+      ? undefined
+      : await requireAsset(declaredResources.vq_channels, "vq_channels", async (path) => {
+          const document = await loadYamlDocument(path);
+          return {
+            channels: parseVoiceQualityChannels(document),
+            rdPolicy: readRdPolicy(document),
+          };
+        });
+  return assembleFrontendResources(spec, inventory, {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  });
+}
+
+function validateFrontendRuntimeConfig(spec: Record<string, unknown>): void {
+  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
+  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
+    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
+  if (!parseRecognitionConfig(spec))
+    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
+  const punctuationTokens = isPlainObject(spec.transcription)
+    ? spec.transcription.punctuation_tokens
+    : undefined;
+  if (
+    !Array.isArray(punctuationTokens) ||
+    !punctuationTokens.length ||
+    !punctuationTokens.every(
+      (token): token is string => typeof token === "string" && token.length > 0,
+    )
+  ) {
+    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
+  }
+}
+
+/** Assemble already acquired documents; no loader or fallback is called here. */
+function assembleFrontendResources(
+  spec: Record<string, unknown>,
+  inventory: InventorySpec,
+  {
+    inventoryPath,
+    ltsPath,
+    morphology,
+    stress,
+    speakerProfilePath,
+    sourceContourPath,
+    speakerDefinitionPath,
+    textParserConfig,
+    lexiconPath,
+    affectPresetsPath,
+    vqChannelsPath,
+  }: {
+    inventoryPath: string;
+    ltsPath: string;
+    morphology?: MorphologyContext;
+    stress?: StressContext;
+    speakerProfilePath?: string;
+    sourceContourPath?: string;
+    speakerDefinitionPath?: string;
+    textParserConfig: TextParserConfig | null;
+    lexiconPath?: string;
+    affectPresetsPath?: string;
+    vqChannelsPath?: string;
+  },
+): FrontendResources {
+  const phonologyPath = inventoryPhonologyPath(inventory);
   const vqChannels =
     vqChannelsPath === undefined
       ? undefined

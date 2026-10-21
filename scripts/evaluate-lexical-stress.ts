@@ -28,7 +28,11 @@ export const evaluationWords = {
   long: ["locomotive", "encyclopedia", "aristocratic", "university", "cafeteria"],
 } as const;
 
-const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+const selected = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+if (!selected.stress || !selected.morphology) {
+  throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires stress_policy and morphology");
+}
+const resources = { ...selected, stress: selected.stress, morphology: selected.morphology };
 const ltsRules = resources.lts.document as LtsRulesData;
 const vowels = new Set(resources.stress.phonotactics.vowels);
 const stressPattern = (phones: string[]) =>

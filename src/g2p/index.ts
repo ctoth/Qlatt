@@ -83,8 +83,9 @@ export function pronounce(
   dictLookup: DictLookup,
   options: {
     lts: LtsContext;
-    morphology: MorphologyContext;
-    stress: StressContext;
+    morphology?: MorphologyContext;
+    stress?: StressContext;
+    frontendId?: string;
     /** The word's place among its neighbours; a word alone when absent. */
     context?: ClauseContext;
   },
@@ -1076,6 +1077,11 @@ export function pronounce(
   }
 
   // 2. Apply configured clitics using their shared suffix allomorph rules
+  if (!options.morphology) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "unspecified"}' requires morphology`,
+    );
+  }
   const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphology);
   if (cliticResult) {
     return cliticResult;
@@ -1097,6 +1103,11 @@ export function pronounce(
   }
   // Both generated sources reach the same lexical stage before inventory materialization.
   const stressHint = getStressHintForWord(lowerWord, options.morphology);
+  if (!options.stress) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "unspecified"}' requires stress_policy`,
+    );
+  }
   const lexicalStress = stressPronunciation(generated.phonemes, {
     stress: options.stress,
     wordId: lowerWord,
@@ -1121,8 +1132,9 @@ export function pronounceClause(
   dictLookup: DictLookup,
   options: {
     lts: LtsContext;
-    morphology: MorphologyContext;
-    stress: StressContext;
+    morphology?: MorphologyContext;
+    stress?: StressContext;
+    frontendId?: string;
     /**
      * False when the mark that ends the run is not in the text (a text's end
      * closed as a sentence): the last word then does not stand against

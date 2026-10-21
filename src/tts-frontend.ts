@@ -25,6 +25,7 @@ import {
   loadFrontendVoiceDocument,
   resolveBundledRulepackPath,
   resolveFrontend,
+  rulepackRelationFeatureSchemas,
 } from "./declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
@@ -101,70 +102,6 @@ const NUMBER_OR_NULL: FeatureSchema = {
   kind: "union",
   variants: [{ kind: "number" }, { kind: "null" }],
 };
-const CONTROL_FIELD_SCHEMA: FeatureSchema = {
-  kind: "union",
-  variants: [
-    { kind: "number" },
-    {
-      kind: "object",
-      fields: {
-        op: { kind: "string", values: ["set", "add", "mul", "max", "min", "unset"] },
-        value: { kind: "number" },
-      },
-      optional: ["value"],
-    },
-  ],
-};
-const CONTROL_WINDOW_SCHEMA: FeatureSchema = {
-  kind: "object",
-  fields: {
-    target: { kind: "string", values: ["current", "next", "prev"] },
-    start_ms: { kind: "number" },
-    end_ms: { kind: "number" },
-    start_ratio: { kind: "number" },
-    end_ratio: { kind: "number" },
-    prefix_ms: { kind: "number" },
-    suffix_ms: { kind: "number" },
-    fields: { kind: "object", fields: {}, additional: CONTROL_FIELD_SCHEMA },
-    tag: { kind: "string" },
-  },
-  optional: [
-    "target",
-    "start_ms",
-    "end_ms",
-    "start_ratio",
-    "end_ratio",
-    "prefix_ms",
-    "suffix_ms",
-    "fields",
-    "tag",
-  ],
-};
-
-/**
- * A Segment feature the rulepack declares with a type:
- * `name: { kind: number | string | boolean, nullable?: true, values?: [...] }`.
- * A feature declared as a bare list is a name only and gets no schema here.
- */
-function declaredFeatureSchema(declaration: unknown): FeatureSchema | undefined {
-  if (!isPlainObject(declaration)) return undefined;
-  let schema: FeatureSchema;
-  if (declaration.kind === "number") schema = { kind: "number" };
-  else if (declaration.kind === "boolean") schema = { kind: "boolean" };
-  else if (declaration.kind === "string") {
-    const values = Array.isArray(declaration.values)
-      ? declaration.values.filter((value): value is string => typeof value === "string")
-      : undefined;
-    schema = values && values.length > 0 ? { kind: "string", values } : { kind: "string" };
-  } else {
-    throw new Error(
-      `E_FEATURE_KIND_UNKNOWN: Segment feature kind '${String(declaration.kind)}' is not number, string or boolean`,
-    );
-  }
-  return declaration.nullable === true
-    ? { kind: "union", variants: [schema, { kind: "null" }] }
-    : schema;
-}
 
 function buildUtteranceSchema(
   inventory: InventorySpec,
@@ -214,22 +151,13 @@ function buildUtteranceSchema(
     initialBoundaryTone: STRING_OR_NULL,
     phraseAccent: STRING_OR_NULL,
     boundaryTone: STRING_OR_NULL,
-    control_windows: { kind: "array", items: CONTROL_WINDOW_SCHEMA },
     transition_ms: { kind: "number" },
     nucleus_duration_ms: { kind: "number" },
     dummy_vowel: { kind: "boolean" },
     weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
     glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
   };
-  const segmentRelation = spec.relations.Segment;
-  const declared =
-    isPlainObject(segmentRelation) && isPlainObject(segmentRelation.features)
-      ? segmentRelation.features
-      : {};
-  for (const [key, declaration] of Object.entries(declared)) {
-    const schema = declaredFeatureSchema(declaration);
-    if (schema) segmentFeatures[key] = schema;
-  }
+  Object.assign(segmentFeatures, rulepackRelationFeatureSchemas(spec).Segment);
   for (const key of frameValueFeatures(spec.frame_programs)) {
     segmentFeatures[key] = FRAME_VALUES_SCHEMA;
   }

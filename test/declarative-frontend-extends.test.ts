@@ -356,6 +356,7 @@ describe("direct rule errors through composition", () => {
           const fixtureRelations = {
             Fixture: {
               type: "parallel",
+              features: { malformed: { kind: "array" } },
               scalars: {
                 duration: {
                   floor_field: "missingFloor",
@@ -459,6 +460,7 @@ describe("direct rule errors through composition", () => {
             return block;
           };
           expectLocation("E_MAP_INVALID", "maps.fixture_map.bad", "key");
+          expectLocation("E_FEATURE_SCHEMA", "relations.Fixture.features.malformed", "key");
           expectLocation("E_STRING_SET_INVALID", "string_sets.fixture_set[0]", "value");
           expectLocation("E_TAG_MEANING_INVALID", "tags.fixture_tag", "key");
           for (const path of ["unit", "when", "set[0].value"]) {

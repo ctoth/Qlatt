@@ -393,7 +393,10 @@ function normalizeRule(ruleInput: unknown, observe?: RulePathObserver): PlainObj
   // Expand any `foreach` template directives before field normalization so the
   // engine and validation never see the directive itself. Structure-preserving
   // when no directive is present.
-  const paths: { compiled: readonly (string | number)[]; authored: readonly (string | number)[] }[] = [];
+  const paths: {
+    compiled: readonly (string | number)[];
+    authored: readonly (string | number)[];
+  }[] = [];
   const rule = expandForeachValue(
     ruleInput,
     [],

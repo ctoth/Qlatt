@@ -710,7 +710,10 @@ export function getRulepackValidationDiagnostics(
 
 function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
   const calls = new Map<string, readonly CelMacroDefinition[]>();
-  const paths: { compiled: readonly (string | number)[]; authored: readonly (string | number)[] }[] = [];
+  const paths: {
+    compiled: readonly (string | number)[];
+    authored: readonly (string | number)[];
+  }[] = [];
   const spec = parseDslSpec(
     withVoiceRulePolicy(merged),
     (path, macros) => {
@@ -765,7 +768,9 @@ function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
   for (const { compiled, authored } of paths) {
     const matches = sources.get(JSON.stringify(authored)) ?? [];
     if (matches.length !== 1) continue;
-    compiledSpans.push(Object.freeze({ ...matches[0], compiledPath: Object.freeze([...compiled]) }));
+    compiledSpans.push(
+      Object.freeze({ ...matches[0], compiledPath: Object.freeze([...compiled]) }),
+    );
   }
   RULE_DOCUMENT_SPANS.set(spec, Object.freeze(compiledSpans));
   return spec;

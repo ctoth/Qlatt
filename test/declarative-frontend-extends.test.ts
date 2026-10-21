@@ -743,7 +743,8 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     expect(burst?.value.line).toBe(342);
     expect(burst?.parents?.[0].documentSpan.path).toEqual(["functions", "bilabial", "body"]);
     const trailing = spans.find(
-      (entry) => entry.compiledPath?.join(".") === "rules.place_f2_locus.apply.0.dispatch.8.default",
+      (entry) =>
+        entry.compiledPath?.join(".") === "rules.place_f2_locus.apply.0.dispatch.8.default",
     );
     expect(trailing?.value.path.join(".")).toBe("rules.place_f2_locus.apply.0.dispatch.1.default");
     expect(trailing?.key?.line).toBe(36);

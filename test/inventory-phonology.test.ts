@@ -281,7 +281,9 @@ describe("the inventory loaders read the phonology document", () => {
         target_features: { ...phonology.target_features, dac: { kind: "string" } },
       },
       async (inventoryPath) => {
-        expect(() => loadInventorySpecFromPath(inventoryPath)).toThrow(/E_HRG_FEATURE_VALUE.*AA1.dac/);
+        expect(() => loadInventorySpecFromPath(inventoryPath)).toThrow(
+          /E_HRG_FEATURE_VALUE.*AA1.dac/,
+        );
         await expect(preloadInventorySpecFromPath(inventoryPath)).rejects.toThrow(
           /E_HRG_FEATURE_VALUE.*AA1.dac/,
         );

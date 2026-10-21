@@ -3,7 +3,8 @@ import type { FeatureSchema } from "./types";
 
 /** Compile authored shapes and typed host schemas through the same frozen representation. */
 export function compileFeatureSchema(source: unknown): FeatureSchema {
-  if (!isPlainObject(source)) throw new Error("E_HRG_SCHEMA_SHAPE: expected a feature schema object");
+  if (!isPlainObject(source))
+    throw new Error("E_HRG_SCHEMA_SHAPE: expected a feature schema object");
   const fail = (detail: string): never => {
     throw new Error(`E_HRG_SCHEMA_SHAPE: ${detail}`);
   };
@@ -27,7 +28,10 @@ export function compileFeatureSchema(source: unknown): FeatureSchema {
         fail("literal value must be primitive");
       if (typeof source.value === "number" && !Number.isFinite(source.value))
         fail("literal number must be finite");
-      return Object.freeze({ kind: "literal", value: source.value as string | boolean | number | null });
+      return Object.freeze({
+        kind: "literal",
+        value: source.value as string | boolean | number | null,
+      });
     case "array":
       return Object.freeze({ kind: "array", items: compileFeatureSchema(source.items) });
     case "object": {
@@ -43,7 +47,9 @@ export function compileFeatureSchema(source: unknown): FeatureSchema {
         (!Array.isArray(source.optional) || source.optional.some((v) => typeof v !== "string"))
       )
         fail("optional fields must be strings");
-      const optional = source.optional ? Object.freeze([...(source.optional as string[])]) : undefined;
+      const optional = source.optional
+        ? Object.freeze([...(source.optional as string[])])
+        : undefined;
       if (optional?.some((name) => !Object.hasOwn(fields, name))) {
         throw new Error(
           "E_HRG_SCHEMA_OPTIONAL_FIELD: optional fields must be declared object fields",

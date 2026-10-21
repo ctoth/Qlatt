@@ -24,6 +24,10 @@ that does not occur in shipped target rows. Declared that existing supported sha
 including its optional generated fields, without altering scientific computation
 or the generator's pinned output. Existing inference/exclusion fixtures now declare
 their additional column explicitly. No local tests or CI steps were run.
+Initial hosted quality job119222031200 requested layout changes in the shared
+schema compiler, inventory mapping and one fixture assertion. Applied its exact
+formatting through apply_patch. The independent Claude full-PR review is running
+in conversation69c91365-1ca0-479d-a6db-10f2a15b1fc2.
 
 ## Next step
 Publish for hosted CI and full Claude review, correct actual scoped findings,

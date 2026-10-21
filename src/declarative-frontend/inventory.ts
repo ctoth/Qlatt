@@ -457,7 +457,10 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
   }
   const targetFeatures = Object.freeze(
     Object.fromEntries(
-      Object.entries(raw.target_features).map(([name, shape]) => [name, compileFeatureSchema(shape)]),
+      Object.entries(raw.target_features).map(([name, shape]) => [
+        name,
+        compileFeatureSchema(shape),
+      ]),
     ),
   );
   for (const [name, target] of Object.entries(phonemeTargets)) {

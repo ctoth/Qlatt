@@ -32,11 +32,13 @@ import {
   createTextParser,
   type DictionaryState,
   type PassOptions,
+  type RawTextSpan,
   type TextParserTable,
 } from "./interpreter";
 import { type PhonemeAlphabets, type ReadPhonemes, readPhonemes } from "./phonemes";
 
 export interface ClauseOptions {
+  origins?: readonly RawTextSpan[];
   /** The language bit of the rules to run. */
   language: number;
   /** The rule section and the mode bit of the punctuation pass (:846-885). */
@@ -63,13 +65,24 @@ export interface ClauseOptions {
    * and `]`), how many clauses were finished before it, and the commands
    * read from it (empty when the table has no command table).
    */
-  onCommand?: (command: string, clausesBefore: number, read: readonly ReadCommand[]) => void;
+  onCommand?: (
+    command: string,
+    clausesBefore: number,
+    read: readonly ReadCommand[],
+    origin: RawTextSpan,
+  ) => void;
   /**
    * Called with each bracket of phonemic text taken out while the phoneme
    * mode is on: its text, how many clauses were finished before it, the
    * symbols read from it (phonemes.ts), and whether phonemes are spoken.
    */
-  onPhonemes?: (body: string, clausesBefore: number, read: ReadPhonemes, speak: boolean) => void;
+  onPhonemes?: (
+    body: string,
+    clausesBefore: number,
+    read: ReadPhonemes,
+    speak: boolean,
+    origin: RawTextSpan,
+  ) => void;
   /**
    * The numbers the commands' parameter slots hold when the text starts
    * (commands.ts): a parameter nobody types keeps its slot's number.
@@ -84,6 +97,8 @@ export interface Clause {
    * the whole of the output, as the parser wrote it.
    */
   text: string;
+  origins?: RawTextSpan[];
+  endOrigin?: RawTextSpan;
   /** The clause before this one was handed on in part (roll_text, :1071). */
   rolled: boolean;
   /**
@@ -198,10 +213,13 @@ export function readClauses(
   let modeFlagsOn = 0;
   /** clausebuf: the clause being gathered. */
   let buffer: number[] = [];
+  let bufferOrigins: RawTextSpan[] = [];
   /** Where the last word of the buffer starts (prevword). */
   let lastWord = 0;
   /** The character being read, and the one before it as it was left. */
   let parseChar = 0;
+  let parseOrigin: RawTextSpan = { start: 0, end: 0 };
+  let bracketOrigin = parseOrigin;
   let lastChar = 0;
   let lastQuote = 0;
   let rolled = false;
@@ -209,10 +227,18 @@ export function readClauses(
   let pass = false;
   /** The characters handed on so since the last clause or bracket. */
   let passed: number[] = [];
+  let passedOrigins: RawTextSpan[] = [];
   const flushPassed = (): void => {
     if (passed.length === 0) return;
-    clauses.push({ text: fromBytes(passed), rolled: false, end: null, passed: true });
+    clauses.push({
+      text: fromBytes(passed),
+      origins: passedOrigins,
+      rolled: false,
+      end: null,
+      passed: true,
+    });
     passed = [];
+    passedOrigins = [];
   };
 
   /** cm_text_getclause: take `parseChar` into the clause; finish the clause when it ends. */
@@ -229,6 +255,7 @@ export function readClauses(
     if (pass) {
       if (parseChar === 0 || parseChar === XON || parseChar === COMMAND_FOLLOWS) parseChar = SPACE;
       passed.push(parseChar);
+      passedOrigins.push(parseOrigin);
       return;
     }
     // :403-410: an empty line ends the clause.
@@ -255,6 +282,7 @@ export function readClauses(
       done = 1;
     }
     buffer.push(parseChar);
+    bufferOrigins.push(parseOrigin);
     const count = buffer.length;
     // :499-520: white space after a clause mark ends the clause, unless the
     // mark is a full stop and the word with it is in the dictionary.
@@ -281,34 +309,43 @@ export function readClauses(
     if (done === 0) return;
 
     let output: number[];
+    let outputOrigins: RawTextSpan[];
     /** clausebuf once the passes have run: what the rules read last. */
     let read = buffer;
+    let readOrigins = bufferOrigins;
     let consumed = 0;
     if (count < config.minimumLength && punctuationMode !== config.wholeMode) {
       // :636-641: a short clause goes by the rules.
       output = buffer;
+      outputOrigins = bufferOrigins;
     } else {
       const punctuated = parser.rewrite(buffer, lookups(buffer), {
         language: options.language,
         mode: punctuationMode,
         section: options.punctuationSection,
         onHit: options.onHit,
-      }).output;
+        origins: bufferOrigins,
+      });
       // :922: copied back as a string, so up to its first NUL.
-      const end = punctuated.indexOf(0);
-      read = end < 0 ? punctuated : punctuated.slice(0, end);
+      const end = punctuated.output.indexOf(0);
+      read = end < 0 ? punctuated.output : punctuated.output.slice(0, end);
+      readOrigins = end < 0 ? punctuated.origins : punctuated.origins.slice(0, end);
       const main = parser.rewrite(read, lookups(read), {
         language: options.language,
         mode: options.mainMode | modeFlagsOn,
         section: options.mainSection,
         partial: done === 2,
         onHit: options.onHit,
+        origins: readOrigins,
       });
       output = main.output;
+      outputOrigins = main.origins;
       consumed = main.consumed;
     }
     clauses.push({
       text: fromBytes(output),
+      origins: outputOrigins,
+      endOrigin: { start: parseOrigin.end, end: parseOrigin.end },
       rolled,
       // :1207-1208, as written: the test reads clausebuf at the output's length.
       end:
@@ -320,11 +357,13 @@ export function readClauses(
     if (done === 2) {
       // :1247-1269: what the rules did not read stays for the next clause.
       buffer = read.slice(consumed);
+      bufferOrigins = readOrigins.slice(consumed);
       lastWord -= consumed;
       rolled = true;
     } else {
       // :1272-1284
       buffer = [];
+      bufferOrigins = [];
       lastWord = 0;
       rolled = false;
     }
@@ -341,9 +380,10 @@ export function readClauses(
   let state: "normal" | "bracket" | "command" | "phoneme" = "normal";
   let command: number[] = [];
   let whiteSpaceRun = 0;
-  for (const byte of toBytes(text)) {
+  for (const [position, byte] of toBytes(text).entries()) {
     lastChar = parseChar;
     parseChar = byte;
+    parseOrigin = options.origins?.[position] ?? { start: position, end: position + 1 };
     // cm_pars.c:1333-1343: a long run of white space ends the clause.
     if (isSpace(parseChar) && isSpace(lastChar)) {
       whiteSpaceRun += 1;
@@ -356,8 +396,10 @@ export function readClauses(
     }
     if (state === "normal") {
       // cm_pars.c:1351-1371
-      if (parseChar === LEFT_BRACKET) state = "bracket";
-      else take();
+      if (parseChar === LEFT_BRACKET) {
+        bracketOrigin = parseOrigin;
+        state = "bracket";
+      } else take();
     } else if (state === "bracket") {
       // cm_pars.c:1379-1472
       if (parseChar === COLON) {
@@ -379,16 +421,22 @@ export function readClauses(
         // clause before it is finished as before a command (:1410-1420).
         const held = parseChar;
         parseChar = COMMAND_FOLLOWS;
+        const heldOrigin = parseOrigin;
+        parseOrigin = { start: bracketOrigin.start, end: bracketOrigin.start };
         take();
         parseChar = held;
+        parseOrigin = heldOrigin;
         command = [parseChar];
         state = "phoneme";
       } else {
         // Not a command: the bracket was text, and so is this character.
         const held = parseChar;
         parseChar = LEFT_BRACKET;
+        const heldOrigin = parseOrigin;
+        parseOrigin = bracketOrigin;
         take();
         parseChar = held;
+        parseOrigin = heldOrigin;
         take();
         state = "normal";
       }
@@ -401,6 +449,7 @@ export function readClauses(
           clauses.length,
           readPhonemes(alphabets as PhonemeAlphabets, body, phonemeMode.ascky),
           phonemeMode.speak,
+          { start: bracketOrigin.start, end: parseOrigin.end },
         );
         state = "normal";
       } else {
@@ -422,8 +471,11 @@ export function readClauses(
       if (!marksPlace) {
         const held = parseChar;
         parseChar = COMMAND_FOLLOWS;
+        const heldOrigin = parseOrigin;
+        parseOrigin = { start: bracketOrigin.start, end: bracketOrigin.start };
         take();
         parseChar = held;
+        parseOrigin = heldOrigin;
       }
       // The phoneme command sets how brackets are read from here on
       // (CMD/cm_copt.c:221-280), word by word, up to a word that is no
@@ -478,7 +530,10 @@ export function readClauses(
         else if (action === "on") modeFlagsOn |= flag;
         else modeFlagsOn &= ~flag;
       }
-      options.onCommand?.(body, clauses.length, read);
+      options.onCommand?.(body, clauses.length, read, {
+        start: bracketOrigin.start,
+        end: parseOrigin.end,
+      });
       state = "normal";
     } else {
       command.push(parseChar);
@@ -500,20 +555,44 @@ export function clauseStream(table: TextParserTable, clauses: readonly Clause[])
 
 /** The same characters, clause by clause. */
 export function clauseTexts(table: TextParserTable, clauses: readonly Clause[]): string[] {
+  return clauseOutputs(table, clauses).map((clause) => clause.text);
+}
+
+/** The same clause assembly with the original-request origins kept alongside it. */
+export function clauseOutputs(
+  table: TextParserTable,
+  clauses: readonly Clause[],
+): { text: string; origins: RawTextSpan[] }[] {
   const config = table.clauses;
   const isSpace = (char: string): boolean =>
     (config.marks[char.charCodeAt(0)] & config.spaceMark) !== 0;
   return clauses.map((clause) => {
-    if (clause.passed) return clause.text;
+    const origins =
+      clause.origins ?? [...clause.text].map((_, index) => ({ start: index, end: index + 1 }));
+    if (clause.passed) return { text: clause.text, origins };
     let start = 0;
     while (start < clause.text.length && isSpace(clause.text[start])) start += 1;
     const body = [...clause.text.slice(start)]
       .filter((char) => char.charCodeAt(0) !== config.indexMark)
       .join("");
-    return (
-      (clause.rolled ? " " : "") +
-      body +
-      (clause.end === null ? "" : String.fromCharCode(clause.end))
-    );
+    const bodyOrigins = origins
+      .slice(start)
+      .filter((_, index) => clause.text.charCodeAt(start + index) !== config.indexMark);
+    const first = bodyOrigins[0]?.start ?? origins[0]?.start ?? 0;
+    const end = clause.endOrigin ?? {
+      start: origins.at(-1)?.end ?? first,
+      end: origins.at(-1)?.end ?? first,
+    };
+    return {
+      text:
+        (clause.rolled ? " " : "") +
+        body +
+        (clause.end === null ? "" : String.fromCharCode(clause.end)),
+      origins: [
+        ...(clause.rolled ? [{ start: first, end: first }] : []),
+        ...bodyOrigins,
+        ...(clause.end === null ? [] : [end]),
+      ],
+    };
   });
 }

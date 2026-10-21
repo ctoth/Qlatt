@@ -55,6 +55,7 @@ import {
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
 import { runTextParser } from "./text-parser/frontend";
+import type { RawTextSpan } from "./text-parser/interpreter";
 import type { TextScope } from "./text-scopes";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
@@ -91,6 +92,8 @@ export type TextToKlattTrackDetailedResult = {
   utterance: Utterance;
   resolvedSpeaker: ResolvedSpeakerProfile;
   speakerParams?: Record<string, unknown>;
+  /** Bridge from parsed Source coordinates to the original request; absent without a text parser. */
+  sourceOrigins?: readonly RawTextSpan[];
 };
 
 const ruleEvaluationOwners = new WeakMap<CompiledRulepack, GraphRuleEvaluationOwner>();
@@ -1467,7 +1470,13 @@ function buildTextToKlattTrackDetailed(
     },
   });
   onStage?.("lowering");
-  return { track: lowered.frames, utterance, resolvedSpeaker, speakerParams };
+  return {
+    track: lowered.frames,
+    utterance,
+    resolvedSpeaker,
+    speakerParams,
+    sourceOrigins: parsedText?.origins,
+  };
 }
 
 export function textToKlattTrackDetailed(

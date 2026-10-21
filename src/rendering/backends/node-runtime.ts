@@ -4,6 +4,7 @@ import { createDiagnostics } from "../../diagnostics.ts";
 import { preloadF0Filters } from "../../f0-filters-loader.ts";
 import { createKlattInterpreter } from "../../klatt-interpreter.ts";
 import { createKlattRuntime } from "../../klatt-runtime.ts";
+import { originSpan } from "../../text-parser/interpreter.ts";
 import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
 import { summarizeTrack } from "../track-summary.ts";
 import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
@@ -182,12 +183,27 @@ export function createNodeRuntimeBackend({
           if (request.includeTrack) {
             payload.track = track;
             payload.wordOccurrences = [];
+            payload.sourceSpans = [];
             const seenWords = new Set<string>();
             const words = frontend.utterance.getRelation("Word");
             for (const frame of track) {
               const segment = frame.segmentId
                 ? frontend.utterance.getItem(frame.segmentId)
                 : undefined;
+              const tokenId = segment?.get("sourceTokenId");
+              const token =
+                typeof tokenId === "string" ? frontend.utterance.getItem(tokenId) : undefined;
+              const sourceId = token?.get("sourceNormalizationId");
+              const source =
+                typeof sourceId === "string" ? frontend.utterance.getItem(sourceId) : undefined;
+              const start = source?.get("sourceStart");
+              const end = source?.get("sourceEnd");
+              if (segment && typeof start === "number" && typeof end === "number") {
+                const span = frontend.sourceOrigins
+                  ? originSpan(frontend.sourceOrigins, start, end)
+                  : { start, end };
+                payload.sourceSpans.push({ segmentId: segment.id, time: frame.time, ...span });
+              }
               const word = segment?.node("SylStructure")?.parent?.parent?.item;
               if (!word || !words?.node(word) || seenWords.has(word.id)) continue;
               const text = word.get("text");

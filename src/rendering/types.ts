@@ -59,6 +59,8 @@ export interface RenderPayload
   track?: unknown;
   /** Node runtime projection supplied with includeTrack; not source offsets. */
   wordOccurrences?: WordOccurrence[];
+  /** Owned frames in track order, with original-request UTF-16 coordinates; Node/includeTrack only. */
+  sourceSpans?: { segmentId: string; time: number; start: number; end: number }[];
   samples: number[];
 }
 

@@ -107,6 +107,18 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
   try {
     const [first, other] = await Promise.all([warm.render(a), warm.render(b)]);
     const replay = await warm.render(a);
+    expect(first.sourceSpans?.length).toBeGreaterThan(0);
+    expect(replay.sourceSpans).toEqual(first.sourceSpans);
+    expect(first.sourceSpans?.some((span) => span.start === 0 && span.end === 3)).toBe(true);
+    expect(first.sourceSpans?.some((span) => span.start === 4 && span.end === 6)).toBe(true);
+    for (const span of first.sourceSpans ?? []) {
+      expect(span.end).toBeLessThanOrEqual(a.phrase.length);
+      expect(
+        (first.track as frontendModule.TextToKlattTrackDetailedResult["track"]).some(
+          (frame) => frame.segmentId === span.segmentId && frame.time === span.time,
+        ),
+      ).toBe(true);
+    }
     expect(config).toHaveBeenCalledTimes(1);
     expect(timings).toHaveLength(3);
     for (const stages of timings) {

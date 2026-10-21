@@ -85,7 +85,8 @@ describe("dectalk-vtm experiment renders DECtalk's packets", () => {
     expect(connections[0]).toMatchObject({
       stage: "runtime",
       subject: "connection:vtm->destination",
-      reason: "dectalk-vtm-synth: connected vtm[0] -> audioContext.destination",
+      reason:
+        "dectalk-vtm-synth: connected vtm[0] -> audioContext.destination; source: omitted port defaults to 0",
       citations: [
         "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
       ],

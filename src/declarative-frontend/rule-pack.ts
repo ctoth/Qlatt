@@ -61,7 +61,9 @@ import {
   assertValidSpec,
   type DiagnosticDocumentSpans,
   type DocumentSpanOrigin,
+  type RelationFeatureSchemas,
   type ValidationDiagnostic,
+  validatedRelationFeatureSchemas,
 } from "./validation";
 
 type PlainObject = Record<string, unknown>;
@@ -810,6 +812,10 @@ async function resolveIncludesAsync(
 }
 
 export type CompiledRulepack = Readonly<NormalizedDslSpec>;
+
+export function rulepackRelationFeatureSchemas(spec: CompiledRulepack): RelationFeatureSchemas {
+  return validatedRelationFeatureSchemas(spec);
+}
 
 const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
 const RULEPACK_DIAGNOSTICS = new WeakMap<object, readonly ValidationDiagnostic[]>();

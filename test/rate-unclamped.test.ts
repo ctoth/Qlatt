@@ -24,6 +24,20 @@ const PHRASE = "The quick brown fox jumps over the lazy dog.";
 
 afterEach(() => vi.restoreAllMocks());
 
+// Compile each configured request without freezing the mutable fixture source.
+function configuredFrontend(spec: rulepack.CompiledRulepack) {
+  return vi.spyOn(rulepack, "resolveFrontend").mockImplementation(() => {
+    const source = structuredClone(spec);
+    // This loaded value is regenerated from the declared voice documents.
+    delete (source.parameters.policy as Record<string, unknown>).voice;
+    return {
+      spec: rulepack.compileRuleEngineSpec(source),
+      resources: rulepack.loadFrontendResources(source),
+      voices: {},
+    };
+  });
+}
+
 // Default selection adds provenance, so unrelated downstream decision IDs shift.
 function frameValues(track: KlattFrame[]) {
   return track.map(({ provenance: _provenance, ...frame }) => frame);
@@ -180,11 +194,7 @@ describe("reference rate normalization", () => {
       ).toBe(false);
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
       durationPolicy(spec).rate_reference = { value: 2, citations };
-      vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
-        resources: rulepack.loadFrontendResources(spec),
-        voices: {},
-      });
+      configuredFrontend(spec);
       const lower = vi.spyOn(hrg, "lowerToFrames");
       const normalized = speak(1);
       expect(frameValues(normalized.track)).toEqual(frameValues(control.track));
@@ -273,11 +283,7 @@ describe("frontend rate defaults", () => {
     (frontendId) => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
       ratePolicy(spec).default.value = 1.5;
-      vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
-        resources: rulepack.loadFrontendResources(spec),
-        voices: {},
-      });
+      configuredFrontend(spec);
       const implicit = textToKlattTrackDetailed("hello world", undefined, undefined, {
         frontendId,
       });

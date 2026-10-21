@@ -808,7 +808,32 @@ relations:
       SW: []
       TL: []
       breakIndex: []
-      control_windows: []
+      control_windows:
+        kind: array
+        items:
+          kind: object
+          optional: [target, start_ms, end_ms, start_ratio, end_ratio, prefix_ms, suffix_ms, fields, tag]
+          fields:
+            target: {kind: string, values: [current, next, prev]}
+            start_ms: {kind: number}
+            end_ms: {kind: number}
+            start_ratio: {kind: number}
+            end_ratio: {kind: number}
+            prefix_ms: {kind: number}
+            suffix_ms: {kind: number}
+            fields:
+              kind: object
+              fields: {}
+              additional:
+                kind: union
+                variants:
+                  - {kind: number}
+                  - kind: object
+                    optional: [value]
+                    fields:
+                      op: {kind: string, values: [set, add, mul, max, min, unset]}
+                      value: {kind: number}
+            tag: {kind: string}
       inherentDuration: []
       minimumDuration: []
       stress: []

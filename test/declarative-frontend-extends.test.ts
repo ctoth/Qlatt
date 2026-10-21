@@ -356,6 +356,7 @@ describe("direct rule errors through composition", () => {
           const fixtureRelations = {
             Fixture: {
               type: "parallel",
+              features: { malformed: { kind: "array" } },
               scalars: {
                 duration: {
                   floor_field: "missingFloor",
@@ -459,6 +460,7 @@ describe("direct rule errors through composition", () => {
             return block;
           };
           expectLocation("E_MAP_INVALID", "maps.fixture_map.bad", "key");
+          expectLocation("E_FEATURE_SCHEMA", "relations.Fixture.features.malformed", "key");
           expectLocation("E_STRING_SET_INVALID", "string_sets.fixture_set[0]", "value");
           expectLocation("E_TAG_MEANING_INVALID", "tags.fixture_tag", "key");
           for (const path of ["unit", "when", "set[0].value"]) {
@@ -1109,7 +1111,7 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
         entry.value.path.join(".") === "relations.Segment.scalars.duration.floor_fallback.value",
     );
     expect(baseRelation?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
-    expect(baseRelation?.key?.line).toBe(450);
+    expect(baseRelation?.key?.line).toBe(475);
     for (const path of ["maps.phoneme_aspiration_map.P_CL", "tags.duration_floor"]) {
       expect(spans.find((entry) => entry.value.path.join(".") === path)?.value.resource).toBe(
         "/rules/frontends/qlatt-english/pipeline.yaml",

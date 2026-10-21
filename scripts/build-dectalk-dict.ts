@@ -1,7 +1,7 @@
 /**
  * build-dectalk-dict.ts — Convert the DECtalk 4.63 US pronunciation dictionary
  * (`Dic_us.txt`) into the flat word->ARPABET JSON format Qlatt's CMU dictionary
- * uses (`public/cmu-dictionary.json`).
+ * uses (the English frontend's declared CMU lexicon).
  *
  * This is a BUILD TOOL (like build-cmudict.ts), not pipeline/runtime code. It
  * produces a DATA ASSET (`public/dectalk-dictionary.json`). It does NOT wire

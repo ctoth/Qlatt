@@ -9,7 +9,7 @@
 #   - its own segment inventory (resources.inventory): this voice's acoustic
 #     targets. The symbol conventions and each target's type, phonological
 #     features and dac are not repeated there: the inventory names
-#     qlatt-english/phonology.yaml as its phonology_path.
+#     /rules/languages/english/phonology.yaml as its phonology_path.
 #   - its own pipeline.yaml: the phase list (rules by name, including the
 #     voice-quality rules in `formant`), three voice-quality tags, the
 #     string_sets, a Segment relation that replaces english's whole, and the

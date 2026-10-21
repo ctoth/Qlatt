@@ -26,6 +26,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as yaml from "js-yaml";
+import { isPlainObject } from "../src/yaml-loader";
 
 type Finding = {
   file: string;
@@ -109,8 +110,18 @@ for (const name of fs.readdirSync(phasesDir).filter((file) => file.endsWith(".ya
 
 // Policy values: report each cited value whose citation names one phrase.
 const frontendPath = path.join(frontendDir, "frontend.yaml");
+let ltsPath: string | undefined;
 if (fs.existsSync(frontendPath)) {
   const source = fs.readFileSync(frontendPath, "utf8");
+  const frontend = yaml.load(source);
+  if (
+    isPlainObject(frontend) &&
+    isPlainObject(frontend.resources) &&
+    typeof frontend.resources.lts === "string" &&
+    frontend.resources.lts.endsWith(".yaml")
+  ) {
+    ltsPath = path.resolve(repoRoot, "public", frontend.resources.lts.replace(/^\/+/, ""));
+  }
   const walk = (value: unknown, trail: string[]): void => {
     if (!value || typeof value !== "object" || Array.isArray(value)) return;
     const record = value as Record<string, unknown>;
@@ -130,12 +141,11 @@ if (fs.existsSync(frontendPath)) {
     }
     for (const [key, child] of Object.entries(record)) walk(child, [...trail, key]);
   };
-  walk(yaml.load(source), []);
+  walk(frontend, []);
 }
 
 // LTS: whole-word entries justified by an oracle phrase in the preceding comment.
-const ltsPath = path.join(frontendDir, "lts-rules.yaml");
-if (fs.existsSync(ltsPath)) {
+if (ltsPath && fs.existsSync(ltsPath)) {
   // Found by structure, not by comment wording: an entry of two or more
   // letters whose left and right contexts are both a word boundary spells one
   // whole word. The comment above it, if any, is shown so a reader can tell a
@@ -148,7 +158,7 @@ if (fs.existsSync(ltsPath)) {
     if (!/^\s*right:\s*' '\s*$/.test(lines[i + 2])) continue;
     const comment = /^\s*#/.test(lines[i - 1] ?? "") ? lines[i - 1].trim() : "(no comment)";
     findings.push({
-      file: "lts-rules.yaml",
+      file: path.relative(frontendDir, ltsPath).replace(/\\/g, "/"),
       line: i + 1,
       rule: letters,
       kind: "lts_whole_word",

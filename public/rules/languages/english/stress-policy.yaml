@@ -1,6 +1,6 @@
 id: english-hayes-1982
 model: hayes-1982
-phonotactics_path: /rules/frontends/qlatt-english/phonotactics.yaml
+phonotactics_path: /rules/languages/english/phonotactics.yaml
 # ARPAbet does not encode all underlying distinctions required by Hayes (1982), p. 237.
 # This mapping is an engineering estimate; supplied underlying syllables take precedence.
 long_vowels: [AA, AO, ER, EY, IY, OW, UW, AY, AW, OY]

@@ -8,8 +8,8 @@
  * follows them, as its phoneme log (`say.exe -lp`) prints it.
  *
  * Word list, chosen without looking at any result:
- *   - every word of public/cmu-dictionary.json that is 3 to 10 lowercase
- *     letters and is not a key of public/dectalk-dictionary.json, in
+ *   - every word of the declared Qlatt lexicon that is 3 to 10 lowercase
+ *     letters and is not a key of the declared DECtalk lexicon, in
  *     alphabetical order, every Nth one so that about `--count` remain
  *     (default 400);
  *   - plus the words the oracle gate lists as letter-to-sound gaps.
@@ -30,6 +30,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -52,10 +53,15 @@ const GATE_WORDS = [
   "thieves", "thrilled", "tapped", "bark", "yak", "yell", "lorry", "zone",
 ]; // biome-ignore format: a word list
 
-const readKeys = (file: string): string[] =>
-  Object.keys(JSON.parse(fs.readFileSync(path.join(repoRoot, "public", file), "utf8")) as object);
-const inDectalkDictionary = new Set(readKeys("dectalk-dictionary.json"));
-const candidates = readKeys("cmu-dictionary.json")
+const readKeys = (frontendId: string): string[] => {
+  const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+    path.join(repoRoot, "public", "rules", "frontends", frontendId, "frontend.yaml"),
+  );
+  const file = path.resolve(repoRoot, "public", frontend.resources.lexicon.replace(/^\/+/, ""));
+  return Object.keys(JSON.parse(fs.readFileSync(file, "utf8")) as object);
+};
+const inDectalkDictionary = new Set(readKeys("dectalk-english"));
+const candidates = readKeys("qlatt-english")
   .map((word) => word.toLowerCase())
   .filter((word) => /^[a-z]{3,10}$/.test(word) && !inDectalkDictionary.has(word))
   .sort();
@@ -105,7 +111,7 @@ fs.writeFileSync(
       schemaVersion: "v1",
       source: "DECtalk 4.63 say.exe -lp, voice default, one comma-separated clause per word",
       selection: {
-        from: "public/cmu-dictionary.json keys, 3-10 lowercase letters, not in public/dectalk-dictionary.json",
+        from: "Declared qlatt-english lexicon keys, 3-10 lowercase letters, not in the declared dectalk-english lexicon",
         everyNth: step,
         candidates: candidates.length,
         gateWords: GATE_WORDS,

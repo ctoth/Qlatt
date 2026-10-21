@@ -19,6 +19,7 @@ interface ExplainPayload {
   decisions: DecisionRecord[];
   tooling: {
     ruleSources: Record<string, YamlDocumentSpan>;
+    vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
       { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
@@ -395,6 +396,58 @@ describe("explain phrase cli", () => {
     expect(text.stdout).toContain(
       `compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
     );
+  });
+
+  it("locates actual vocabulary values with dotted keys in text, JSON, and why output", async () => {
+    const result = await runCli(["--phrase", "Dr. Smith", "--format", "json"]);
+    expect(result.code).toBe(0);
+    const payload = parseExplainPayload(result.stdout);
+    const lookup = payload.decisions.find(
+      (decision) => decision.vocabularyLookup?.table === "tn_abbreviations",
+    )!;
+    expect(lookup.vocabularyLookup).toMatchObject({ key: "dr.", value: "doctor" });
+    expect(lookup.citations.length).toBeGreaterThan(0);
+    const span = payload.tooling.vocabularySources[lookup.id];
+    expect(span).toMatchObject({
+      resource: lookup.vocabularyLookup!.resource,
+      path: ["maps", "tn_abbreviations", "dr."],
+      line: 7,
+      column: 10,
+    });
+    expect(span.resource).toMatch(/normalization\/lexical.yaml$/);
+    const why = await runCli([
+      "--phrase",
+      "Dr. Smith",
+      "--format",
+      "json",
+      "--why",
+      lookup.id,
+      "--verify-replay",
+    ]);
+    expect(why.code).toBe(0);
+    const whyPayload = parseExplainPayload(why.stdout);
+    expect(whyPayload.decisions.find((decision) => decision.id === lookup.id)).toEqual(lookup);
+    expect(whyPayload.tooling.vocabularySources[lookup.id]).toEqual(span);
+    expect(whyPayload.tooling.replay?.matches).toBe(true);
+    const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
+    expect(
+      Object.keys(whyPayload.tooling.vocabularySources).every((id) => selectedIds.has(id)),
+    ).toBe(true);
+    const text = await runCli(["--phrase", "Dr. Smith", "--why", lookup.id, "--verbose"]);
+    expect(text.code).toBe(0);
+    expect(text.stdout.split("\n").find((line) => line.startsWith(`#${lookup.seq} `))).toContain(
+      ` | vocabulary: ${span.resource}:${span.line}:${span.column}`,
+    );
+    const filtered = await runCli([
+      "--phrase",
+      "Dr. Smith",
+      "--format",
+      "json",
+      "--stage",
+      "transcribe",
+    ]);
+    expect(filtered.code).toBe(0);
+    expect(parseExplainPayload(filtered.stdout).tooling.vocabularySources).toEqual({});
   });
 
   it("uses diagnostic symbol pronunciation for explicit segment lists", async () => {

@@ -23,7 +23,8 @@ Use these documents as the main entry points into the codebase:
 
 For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.
 
-Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`; literal origins and macro-body ancestry are not included.
+Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`.
+Executed vocabulary reads also show exact authored map-value locations in text and `tooling.vocabularySources`, including dotted map keys. Other literal origins and macro-body ancestry are not included.
 
 Use `--format dot --out decisions.dot` to export the selected provenance DAG for Graphviz.
 DOT uses current-run IDs and stage colors, and reports parent links omitted by selection.

@@ -16,6 +16,7 @@ import {
   type ProvenanceCollector,
   type ProvenanceStage,
 } from "../../provenance";
+import { compileFeatureSchema } from "./feature-schema";
 import { Item } from "./item";
 import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { Relation } from "./relation";
@@ -43,50 +44,6 @@ import type {
 } from "./types";
 import { UndoLog } from "./undo-log";
 
-function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
-  switch (schema.kind) {
-    case "string":
-      return Object.freeze({
-        kind: "string",
-        ...(schema.values ? { values: Object.freeze([...schema.values]) } : {}),
-      });
-    case "number":
-    case "boolean":
-    case "null":
-      return Object.freeze({ kind: schema.kind });
-    case "literal":
-      return Object.freeze({ kind: "literal", value: schema.value });
-    case "array":
-      return Object.freeze({ kind: "array", items: cloneFeatureSchema(schema.items) });
-    case "object": {
-      const fields: Record<string, FeatureSchema> = {};
-      for (const [name, fieldSchema] of Object.entries(schema.fields)) {
-        fields[name] = cloneFeatureSchema(fieldSchema);
-      }
-      const optional = schema.optional ? Object.freeze([...schema.optional]) : undefined;
-      if (optional?.some((name) => !Object.hasOwn(fields, name))) {
-        throw new Error(
-          "E_HRG_SCHEMA_OPTIONAL_FIELD: optional fields must be declared object fields",
-        );
-      }
-      return Object.freeze({
-        kind: "object",
-        fields: Object.freeze(fields),
-        ...(optional ? { optional } : {}),
-        ...(schema.additional ? { additional: cloneFeatureSchema(schema.additional) } : {}),
-      });
-    }
-    case "union":
-      if (schema.variants.length === 0) {
-        throw new Error("E_HRG_SCHEMA_UNION_EMPTY: a feature union requires at least one variant");
-      }
-      return Object.freeze({
-        kind: "union",
-        variants: Object.freeze(schema.variants.map(cloneFeatureSchema)),
-      });
-  }
-}
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -96,7 +53,7 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
   for (const [itemType, itemSchema] of Object.entries(input.itemTypes)) {
     const features: Record<string, FeatureSchema> = {};
     for (const [feature, featureSchema] of Object.entries(itemSchema.features)) {
-      features[feature] = cloneFeatureSchema(featureSchema);
+      features[feature] = compileFeatureSchema(featureSchema);
     }
     // An Item of any type may be in a parameter scope (parameter-scope.ts).
     features[PARAMETER_SCOPE_FEATURE] ??= { kind: "string" };

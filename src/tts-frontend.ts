@@ -141,60 +141,6 @@ const CONTROL_WINDOW_SCHEMA: FeatureSchema = {
   ],
 };
 
-function schemaForValue(value: unknown): FeatureSchema | null {
-  if (value === null) return { kind: "null" };
-  if (typeof value === "string") return { kind: "string" };
-  if (typeof value === "number") return Number.isFinite(value) ? { kind: "number" } : null;
-  if (typeof value === "boolean") return { kind: "boolean" };
-  if (Array.isArray(value)) {
-    const variants = value
-      .map(schemaForValue)
-      .filter((entry): entry is FeatureSchema => entry !== null);
-    const items =
-      variants.length === 0 ? ({ kind: "string" } satisfies FeatureSchema) : mergeSchemas(variants);
-    return { kind: "array", items };
-  }
-  if (!isPlainObject(value)) return null;
-  const fields: Record<string, FeatureSchema> = {};
-  for (const [key, nested] of Object.entries(value)) {
-    const schema = schemaForValue(nested);
-    if (schema) fields[key] = schema;
-  }
-  return { kind: "object", fields };
-}
-
-function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
-  if (schemas.length > 0 && schemas.every((schema) => schema.kind === "array")) {
-    return {
-      kind: "array",
-      items: mergeSchemas(schemas.map((schema) => schema.items)),
-    };
-  }
-  if (schemas.length > 0 && schemas.every((schema) => schema.kind === "object")) {
-    const objects = schemas;
-    const keys = new Set(objects.flatMap((schema) => Object.keys(schema.fields)));
-    const fields: Record<string, FeatureSchema> = {};
-    const optional: string[] = [];
-    for (const key of keys) {
-      const observed = objects.flatMap((schema) =>
-        schema.fields[key] ? [schema.fields[key]] : [],
-      );
-      fields[key] = mergeSchemas(observed);
-      if (
-        observed.length !== objects.length ||
-        objects.some((schema) => schema.optional?.includes(key))
-      ) {
-        optional.push(key);
-      }
-    }
-    return optional.length > 0 ? { kind: "object", fields, optional } : { kind: "object", fields };
-  }
-  const unique = new Map<string, FeatureSchema>();
-  for (const schema of schemas) unique.set(JSON.stringify(schema), schema);
-  const variants = [...unique.values()];
-  return variants.length === 1 ? variants[0] : { kind: "union", variants };
-}
-
 /**
  * A Segment feature the rulepack declares with a type:
  * `name: { kind: number | string | boolean, nullable?: true, values?: [...] }`.
@@ -289,17 +235,8 @@ function buildUtteranceSchema(
   }
   for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
   const targetFeatureExclusions = new Set(inventory.target_feature_exclusions);
-  for (const target of Object.values(inventory.phoneme_targets)) {
-    for (const [key, value] of Object.entries(target)) {
-      if (targetFeatureExclusions.has(key)) continue;
-      const observed = schemaForValue(value);
-      const schema =
-        observed?.kind === "boolean" ? mergeSchemas([observed, { kind: "null" }]) : observed;
-      if (!schema) continue;
-      segmentFeatures[key] = segmentFeatures[key]
-        ? mergeSchemas([segmentFeatures[key], schema])
-        : schema;
-    }
+  for (const [key, schema] of Object.entries(inventory.target_features)) {
+    if (!targetFeatureExclusions.has(key)) segmentFeatures[key] = schema;
   }
   const pointFeatures = {
     value: { kind: "number" },

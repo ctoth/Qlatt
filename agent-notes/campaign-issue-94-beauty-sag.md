@@ -12,8 +12,8 @@ Delete the unused sag block and summary wording. Preserve the inheritance test's
 
 # Surprises
 
-None.
+Hosted quality job119068857665 rejected the changed assertion's line formatting. Applied its exact three-line formatter output; no behavior change or local CI rerun.
 
 # Next step
 
-Scoped edits complete. No local tests or CI steps run. Commit/publish for hosted CI and Claude review. Supervisor owns merge; #94 remains open.
+Scoped edits and hosted formatter correction complete. No local tests or CI steps run. Push correction for replacement hosted CI and Claude review. Supervisor owns merge; #94 remains open.

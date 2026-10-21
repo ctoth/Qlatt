@@ -28,5 +28,7 @@ Updated only the stale catalogue/inference statements in tracked AGENTS.md and d
 
 Replacement eb1e30f9 quality/native/node checks passed; runtime shards were pending at response. Final response commit requires its own hosted checks. Review covered initial3adab60d against mergebase6a39902f; the supervisor separately checks formatting and this response delta.
 
+Initial runtime shard1 job119367299711 later completed with one failure: I replaced the old DECtalk catalogue path in place, leaving the ten package paths after /rules/frontends rather than first. Its audit had the same 48 paths as the recorder but the wrong order. The existing recorder returns stop().sort(); moved those entries to the front through apply_patch. Qlatt/Beauty audit equality and the other three initial runtime shards passed. No new check or runtime change.
+
 # Next step
 Publish for hosted CI and full Claude review, respond to actual findings, and send the exact final head for supervisor verification/merge. Keep #76 open until its acceptance is checked; nested URL ownership, portable identities, graph metadata reconciliation and artifacts remain separately owned.

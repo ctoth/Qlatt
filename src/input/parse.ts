@@ -291,8 +291,9 @@ function normalizeRange(a: number, b: number): TokenRange {
 // Lowering
 // ---------------------------------------------------------------------------
 
-const EMPHASIS_CITATION = "Pierrehumbert_1980";
-const BREAK_CITATION = "Crystal_House_1988";
+const EMPHASIS_CITATION =
+  "Engineering convention: Direction Track records the authored emphasis label";
+const BREAK_CITATION = "Engineering convention: Direction Track records the authored break request";
 
 /** Parse + lower a DirectionInput into typed directions and provenance. */
 export function parseDirectionInput(
@@ -317,7 +318,9 @@ export function parseDirectionInput(
         `Voice identity${global.voice.name ? ` '${global.voice.name}'` : ""}` +
         `${global.voice.sex ? ` (${global.voice.sex})` : ""}` +
         `${global.voice.baseF0Hz ? ` baseF0=${global.voice.baseF0Hz}Hz` : ""}`,
-      citations: ["Cahn_1990"],
+      citations: [
+        "Engineering convention: Direction Track records authored voice identity metadata",
+      ],
     });
     directions.push({
       id: decision.id,

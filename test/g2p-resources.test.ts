@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, it } from "vitest";
 import { Utterance } from "../src/declarative-frontend/hrg";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
@@ -46,7 +46,7 @@ it("retains YAML rule-list decoding and cache identity", () => {
 it("honors an explicit pronunciation document at the same source path", () => {
   const spec = loadBundledRulepackSpec("qlatt-english");
   const resources = loadFrontendResources(spec);
-  const options = { compiledSpec: spec, dictionaryMap: {} };
+  const options = { compiledSpec: spec, resources, dictionaryMap: {} };
   expect(
     transcribeText("blorf", options).some(
       (token) => token.phoneme !== resources.inventory.silence_symbol,

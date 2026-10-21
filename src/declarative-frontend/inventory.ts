@@ -1,45 +1,19 @@
-import {
-  type CmuDictionary,
-  loadCmuDictionaryFromPathSync,
-  preloadCmuDictionaryFromPath,
-} from "../cmu-dictionary-loader";
-import {
-  type SpeakerDefinitionContext,
-  type VoiceDocument,
-  type VoiceRegistry,
-  voiceNameInRegistry,
-  voiceRuleRegistry,
-} from "../dectalk-voice";
+import type { CmuDictionary } from "../cmu-dictionary-loader";
+import type { SpeakerDefinitionContext } from "../dectalk-voice";
 import type { Diagnostics } from "../diagnostics";
 import type { LtsContext } from "../g2p/lts-document";
-import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
-import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
-import type { PhonotacticsData } from "../g2p/syllabify";
-import { isLtsTableDocument } from "../g2p/table-lts-pronounce";
-import {
-  type AffectLibrary,
-  parseAffectPresets,
-  validateAffectPresetChannels,
-} from "../input/affect-presets";
-import { type InlineMarkers, parseInlineMarkers } from "../input/inline";
-import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
-import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
+import type { MorphologyContext } from "../g2p/morphology";
+import type { StressContext } from "../g2p/stress-policy";
+import type { AffectLibrary } from "../input/affect-presets";
+import type { InlineMarkers } from "../input/inline";
+import type { RdPolicy } from "../input/rd-policy";
+import type { VoiceQualityChannel } from "../input/vq-channels";
 import type { AreaFunctionDerivation } from "../provenance";
-import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
-import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
-import { parseTextParserConfig, type TextParserConfig } from "../text-parser/frontend";
+import type { SourceContourSpec } from "../source-contour";
+import type { SpeakerProfileSpec } from "../speaker-profile";
+import type { TextParserConfig } from "../text-parser/frontend";
 import type { TextParserTable } from "../text-parser/interpreter";
-import {
-  cloneValue,
-  isPlainObject,
-  isYamlNotFoundError,
-  loadYamlDocument,
-  loadYamlDocumentSync,
-  loadYamlSource,
-  loadYamlSourceSync,
-  parseYamlString,
-} from "../yaml-loader";
-import { parseRecognitionConfig } from "./recognition-config";
+import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
 
 export type InventorySpec = {
   silence_symbol: string;
@@ -76,7 +50,7 @@ export function parseInventorySymbol(
  * Resources loaded from a frontend.yaml spec.
  * Every path originates in the frontend spec — no hardcoded defaults.
  */
-export type FrontendResources = {
+export type FrontendResources = Readonly<{
   inventory: InventorySpec;
   inventoryPath: string;
   /**
@@ -101,14 +75,7 @@ export type FrontendResources = {
   };
   affectPresets?: { path: string; library: AffectLibrary };
   inlineMarkers?: InlineMarkers;
-};
-
-const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
-const FRONTEND_ASSET_CACHE = new Map<string, unknown>();
-
-export function listBundledInventoryPaths(): string[] {
-  return [...BUNDLED_INVENTORY_CACHE.keys()].sort();
-}
+}>;
 
 function normalizeBaseParams(node: unknown): Record<string, number> {
   if (!isPlainObject(node)) {
@@ -291,6 +258,11 @@ function parseInventoryDocument(source: string): Record<string, unknown> {
   return raw;
 }
 
+/** Declared dependency for the resource owner; parsing performs no acquisition. */
+export function inventoryPhonologyReference(source: string): string | undefined {
+  return declaredPhonologyPath(parseInventoryDocument(source));
+}
+
 function declaredPhonologyPath(raw: Record<string, unknown>): string | undefined {
   if (!Object.hasOwn(raw, "phonology_path")) return undefined;
   const path = raw.phonology_path;
@@ -298,10 +270,6 @@ function declaredPhonologyPath(raw: Record<string, unknown>): string | undefined
     throw new Error("E_INVENTORY_PHONOLOGY_PATH: phonology_path must be a non-empty path");
   }
   return path;
-}
-
-function phonologyUnreadable(path: string, cause: unknown): Error {
-  return new Error(`E_INVENTORY_PHONOLOGY_PATH: '${path}' could not be loaded`, { cause });
 }
 
 /**
@@ -484,72 +452,6 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
     secondary_stress_fallback: normalizeSecondaryFallback(raw.secondary_stress_fallback),
     phoneme_targets: phonemeTargets,
   };
-}
-
-/**
- * The error for an inventory that could not be loaded: "path unknown" when the
- * file does not exist, and the loader's own error for anything else.
- */
-function inventoryPathUnknown(specPath: string, cause: unknown): unknown {
-  if (!isYamlNotFoundError(cause)) return cause;
-  const known = listBundledInventoryPaths();
-  return new Error(
-    `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    { cause },
-  );
-}
-
-export function loadInventorySpecFromPath(specPath: string): InventorySpec {
-  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
-  if (cached) return cached;
-
-  let source = "";
-  try {
-    source = loadYamlSourceSync(specPath);
-  } catch (cause) {
-    throw inventoryPathUnknown(specPath, cause);
-  }
-
-  const phonologyPath = declaredPhonologyPath(parseInventoryDocument(source));
-  let phonologySource: string | undefined;
-  if (phonologyPath !== undefined) {
-    try {
-      phonologySource = loadYamlSourceSync(phonologyPath);
-    } catch (cause) {
-      throw phonologyUnreadable(phonologyPath, cause);
-    }
-  }
-  const spec = parseInventorySpec(source, phonologySource);
-  BUNDLED_INVENTORY_CACHE.set(specPath, spec);
-  return spec;
-}
-
-export async function preloadInventorySpecFromPath(specPath: string): Promise<InventorySpec> {
-  const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
-  if (cached) return cached;
-
-  let source = "";
-  try {
-    source = await loadYamlSource(specPath);
-  } catch (cause) {
-    throw inventoryPathUnknown(specPath, cause);
-  }
-
-  // The phonology document is fetched here, so that nothing is read
-  // synchronously on this path.
-  const phonologyPath = declaredPhonologyPath(parseInventoryDocument(source));
-  let phonologySource: string | undefined;
-  if (phonologyPath !== undefined) {
-    try {
-      phonologySource = await loadYamlSource(phonologyPath);
-    } catch (cause) {
-      throw phonologyUnreadable(phonologyPath, cause);
-    }
-  }
-  const spec = parseInventorySpec(source, phonologySource);
-  BUNDLED_INVENTORY_CACHE.set(specPath, spec);
-  return spec;
 }
 
 // --- Rule Functions ---
@@ -785,480 +687,4 @@ export function materializePhonemeTarget(
   }
 
   return payload;
-}
-
-// ---------------------------------------------------------------------------
-// FrontendResources loader
-// ---------------------------------------------------------------------------
-
-/** Acquire the actual requested voice, including names in an open registry. */
-export function loadFrontendVoiceDocument(
-  registry: VoiceRegistry,
-  voiceName: string,
-): VoiceDocument {
-  const name = voiceNameInRegistry(registry, voiceName);
-  const path = `${registry.dir}/${name}.yaml`;
-  if (!FRONTEND_ASSET_CACHE.has(path)) {
-    FRONTEND_ASSET_CACHE.set(path, loadYamlDocumentSync(path));
-  }
-  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
-}
-
-/** Prepare a selected voice without making a synchronous request. */
-export async function preloadFrontendVoiceDocument(
-  registry: VoiceRegistry,
-  voiceName: string,
-): Promise<VoiceDocument> {
-  const name = voiceNameInRegistry(registry, voiceName);
-  const path = `${registry.dir}/${name}.yaml`;
-  if (!FRONTEND_ASSET_CACHE.has(path)) {
-    FRONTEND_ASSET_CACHE.set(path, await loadYamlDocument(path));
-  }
-  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
-}
-
-/** Raw programmatic specs need only their declared voice rule documents here. */
-export function loadVoiceRuleDocuments(source: unknown): ReadonlyMap<string, VoiceDocument> {
-  const registry = voiceRuleRegistry(source);
-  const documents = new Map<string, VoiceDocument>();
-  if (!registry) return documents;
-  for (const name of new Set([registry.default, ...registry.voices])) {
-    const path = `${registry.dir}/${name}.yaml`;
-    if (!FRONTEND_ASSET_CACHE.has(path)) {
-      FRONTEND_ASSET_CACHE.set(path, loadYamlDocumentSync(path));
-    }
-    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
-  }
-  return documents;
-}
-
-/** Async compilation acquires the same documents through the same owner cache. */
-export async function preloadVoiceRuleDocuments(
-  source: unknown,
-): Promise<ReadonlyMap<string, VoiceDocument>> {
-  const registry = voiceRuleRegistry(source);
-  const documents = new Map<string, VoiceDocument>();
-  if (!registry) return documents;
-  for (const name of new Set([registry.default, ...registry.voices])) {
-    const path = `${registry.dir}/${name}.yaml`;
-    if (!FRONTEND_ASSET_CACHE.has(path)) {
-      FRONTEND_ASSET_CACHE.set(path, await loadYamlDocument(path));
-    }
-    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
-  }
-  return documents;
-}
-
-/** Acquire the contour asynchronously for browser vocabulary checks. */
-export async function preloadFrontendSourceContour(
-  spec: unknown,
-): Promise<FrontendResources["sourceContour"]> {
-  if (!isPlainObject(spec)) {
-    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
-  }
-  const path = isPlainObject(spec.resources) ? spec.resources.source_contour : undefined;
-  if (path == null) return undefined;
-  if (typeof path !== "string" || !path.trim()) {
-    throw new Error("E_FRONTEND_CONFIG: source_contour is required");
-  }
-  try {
-    if (!FRONTEND_ASSET_CACHE.has(path)) {
-      FRONTEND_ASSET_CACHE.set(path, parseSourceContourDocument(await loadYamlDocument(path)));
-    }
-  } catch (cause) {
-    throw new Error(`E_FRONTEND_CONFIG: source_contour could not load '${path}'`, { cause });
-  }
-  return { path, spec: FRONTEND_ASSET_CACHE.get(path) as SourceContourSpec };
-}
-
-/**
- * Load inventory and resource paths from a parsed frontend.yaml spec.
- * Every resource path originates in the spec — no hardcoded defaults.
- */
-export function loadFrontendResources(spec: unknown): FrontendResources {
-  if (!isPlainObject(spec)) {
-    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
-  }
-  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
-  const inventoryPath = declaredResources.inventory;
-  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
-    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
-  }
-  const requireAsset = (
-    value: unknown,
-    name: string,
-    load: (path: string) => unknown = loadYamlDocumentSync,
-  ): string => {
-    if (typeof value !== "string" || !value.trim()) {
-      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
-    }
-    try {
-      if (!FRONTEND_ASSET_CACHE.has(value)) {
-        FRONTEND_ASSET_CACHE.set(value, load(value));
-      }
-    } catch (cause) {
-      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
-      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
-    }
-    return value;
-  };
-  // Pronunciation and number normalization consume this same parsed document.
-  const ltsPath = requireAsset(declaredResources.lts, "lts", (path) => {
-    const document: unknown = path.endsWith(".json")
-      ? JSON.parse(loadYamlSourceSync(path))
-      : loadYamlDocumentSync<unknown>(path);
-    if (document === null || document === undefined) {
-      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
-    }
-    return document;
-  });
-  const tablePronouncer =
-    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
-  let morphology: MorphologyContext | undefined;
-  if (!tablePronouncer || declaredResources.morphology != null) {
-    const path = requireAsset(declaredResources.morphology, "morphology");
-    const data = FRONTEND_ASSET_CACHE.get(path);
-    const phonotacticsPath = requireAsset(
-      isPlainObject(data) ? data.phonotactics_path : undefined,
-      "morphology.phonotactics_path",
-    );
-    morphology = {
-      path,
-      data: data as MorphologyData,
-      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
-    };
-  }
-  let stress: StressContext | undefined;
-  if (!tablePronouncer || declaredResources.stress_policy != null) {
-    const path = requireAsset(declaredResources.stress_policy, "stress_policy", (path) => {
-      const raw = loadYamlDocumentSync(path);
-      const phonotacticsPath = requireAsset(
-        isPlainObject(raw) ? raw.phonotactics_path : undefined,
-        "stress_policy.phonotactics_path",
-      );
-      const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
-      try {
-        return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
-      } catch (cause) {
-        throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
-      }
-    });
-    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
-  }
-  validateFrontendRuntimeConfig(spec);
-  const inventory = loadInventorySpecFromPath(inventoryPath);
-  const speakerProfilePath =
-    declaredResources.speaker_profile == null
-      ? undefined
-      : requireAsset(declaredResources.speaker_profile, "speaker_profile", (path) =>
-          parseSpeakerProfileDocument(loadYamlDocumentSync(path)),
-        );
-  const sourceContourPath =
-    declaredResources.source_contour == null
-      ? undefined
-      : requireAsset(declaredResources.source_contour, "source_contour", (path) =>
-          parseSourceContourDocument(loadYamlDocumentSync(path)),
-        );
-  const textParserConfig = parseTextParserConfig(spec);
-  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
-  const speakerDefinitionPath =
-    speakers.definition_path == null
-      ? undefined
-      : requireAsset(speakers.definition_path, "speakers.definition_path");
-  if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
-  const lexiconReference = declaredResources.lexicon;
-  const lexiconPath =
-    lexiconReference == null
-      ? undefined
-      : requireAsset(lexiconReference, "lexicon", loadCmuDictionaryFromPathSync);
-  const affectPresetsPath =
-    declaredResources.affect_presets == null
-      ? undefined
-      : requireAsset(declaredResources.affect_presets, "affect_presets", (path) =>
-          parseAffectPresets(loadYamlDocumentSync(path)),
-        );
-  const vqChannelsPath =
-    declaredResources.vq_channels == null
-      ? undefined
-      : requireAsset(declaredResources.vq_channels, "vq_channels", (path) => {
-          const document = loadYamlDocumentSync(path);
-          return {
-            channels: parseVoiceQualityChannels(document),
-            rdPolicy: readRdPolicy(document),
-          };
-        });
-  return assembleFrontendResources(spec, inventory, {
-    inventoryPath,
-    ltsPath,
-    morphology,
-    stress,
-    speakerProfilePath,
-    sourceContourPath,
-    speakerDefinitionPath,
-    textParserConfig,
-    lexiconPath,
-    affectPresetsPath,
-    vqChannelsPath,
-  });
-}
-
-/** Acquire the complete declared runtime resources using only async loaders. */
-export async function preloadFrontendResources(spec: unknown): Promise<FrontendResources> {
-  if (!isPlainObject(spec)) {
-    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
-  }
-  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
-  const inventoryPath = declaredResources.inventory;
-  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
-    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
-  }
-  const requireAsset = async (
-    value: unknown,
-    name: string,
-    load: (path: string) => Promise<unknown> = loadYamlDocument,
-  ): Promise<string> => {
-    if (typeof value !== "string" || !value.trim()) {
-      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
-    }
-    try {
-      if (!FRONTEND_ASSET_CACHE.has(value)) {
-        FRONTEND_ASSET_CACHE.set(value, await load(value));
-      }
-    } catch (cause) {
-      if (cause instanceof Error && cause.message.startsWith("E_FRONTEND_CONFIG:")) throw cause;
-      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
-    }
-    return value;
-  };
-  const ltsPath = await requireAsset(declaredResources.lts, "lts", async (path) => {
-    const document: unknown = path.endsWith(".json")
-      ? JSON.parse(await loadYamlSource(path))
-      : await loadYamlDocument(path);
-    if (document === null || document === undefined) {
-      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
-    }
-    return document;
-  });
-  const tablePronouncer =
-    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
-  let morphology: MorphologyContext | undefined;
-  if (!tablePronouncer || declaredResources.morphology != null) {
-    const path = await requireAsset(declaredResources.morphology, "morphology");
-    const data = FRONTEND_ASSET_CACHE.get(path);
-    const phonotacticsPath = await requireAsset(
-      isPlainObject(data) ? data.phonotactics_path : undefined,
-      "morphology.phonotactics_path",
-    );
-    morphology = {
-      path,
-      data: data as MorphologyData,
-      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
-    };
-  }
-  let stress: StressContext | undefined;
-  if (!tablePronouncer || declaredResources.stress_policy != null) {
-    const path = await requireAsset(
-      declaredResources.stress_policy,
-      "stress_policy",
-      async (path) => {
-        const raw = await loadYamlDocument(path);
-        const phonotacticsPath = await requireAsset(
-          isPlainObject(raw) ? raw.phonotactics_path : undefined,
-          "stress_policy.phonotactics_path",
-        );
-        const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
-        try {
-          return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
-        } catch (cause) {
-          throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
-        }
-      },
-    );
-    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
-  }
-  validateFrontendRuntimeConfig(spec);
-  const inventory = await preloadInventorySpecFromPath(inventoryPath);
-  const speakerProfilePath =
-    declaredResources.speaker_profile == null
-      ? undefined
-      : await requireAsset(declaredResources.speaker_profile, "speaker_profile", async (path) =>
-          parseSpeakerProfileDocument(await loadYamlDocument(path)),
-        );
-  const sourceContourPath =
-    declaredResources.source_contour == null
-      ? undefined
-      : await requireAsset(declaredResources.source_contour, "source_contour", async (path) =>
-          parseSourceContourDocument(await loadYamlDocument(path)),
-        );
-  const textParserConfig = parseTextParserConfig(spec);
-  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
-  const speakerDefinitionPath =
-    speakers.definition_path == null
-      ? undefined
-      : await requireAsset(speakers.definition_path, "speakers.definition_path");
-  if (textParserConfig) await requireAsset(textParserConfig.tablePath, "text_parser.table_path");
-  const lexiconPath =
-    declaredResources.lexicon == null
-      ? undefined
-      : await requireAsset(declaredResources.lexicon, "lexicon", preloadCmuDictionaryFromPath);
-  const affectPresetsPath =
-    declaredResources.affect_presets == null
-      ? undefined
-      : await requireAsset(declaredResources.affect_presets, "affect_presets", async (path) =>
-          parseAffectPresets(await loadYamlDocument(path)),
-        );
-  const vqChannelsPath =
-    declaredResources.vq_channels == null
-      ? undefined
-      : await requireAsset(declaredResources.vq_channels, "vq_channels", async (path) => {
-          const document = await loadYamlDocument(path);
-          return {
-            channels: parseVoiceQualityChannels(document),
-            rdPolicy: readRdPolicy(document),
-          };
-        });
-  return assembleFrontendResources(spec, inventory, {
-    inventoryPath,
-    ltsPath,
-    morphology,
-    stress,
-    speakerProfilePath,
-    sourceContourPath,
-    speakerDefinitionPath,
-    textParserConfig,
-    lexiconPath,
-    affectPresetsPath,
-    vqChannelsPath,
-  });
-}
-
-function validateFrontendRuntimeConfig(spec: Record<string, unknown>): void {
-  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
-  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
-    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
-  if (!parseRecognitionConfig(spec))
-    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
-  const punctuationTokens = isPlainObject(spec.transcription)
-    ? spec.transcription.punctuation_tokens
-    : undefined;
-  if (
-    !Array.isArray(punctuationTokens) ||
-    !punctuationTokens.length ||
-    !punctuationTokens.every(
-      (token): token is string => typeof token === "string" && token.length > 0,
-    )
-  ) {
-    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
-  }
-}
-
-/** Assemble already acquired documents; no loader or fallback is called here. */
-function assembleFrontendResources(
-  spec: Record<string, unknown>,
-  inventory: InventorySpec,
-  {
-    inventoryPath,
-    ltsPath,
-    morphology,
-    stress,
-    speakerProfilePath,
-    sourceContourPath,
-    speakerDefinitionPath,
-    textParserConfig,
-    lexiconPath,
-    affectPresetsPath,
-    vqChannelsPath,
-  }: {
-    inventoryPath: string;
-    ltsPath: string;
-    morphology?: MorphologyContext;
-    stress?: StressContext;
-    speakerProfilePath?: string;
-    sourceContourPath?: string;
-    speakerDefinitionPath?: string;
-    textParserConfig: TextParserConfig | null;
-    lexiconPath?: string;
-    affectPresetsPath?: string;
-    vqChannelsPath?: string;
-  },
-): FrontendResources {
-  const phonologyPath = inventoryPhonologyPath(inventory);
-  const vqChannels =
-    vqChannelsPath === undefined
-      ? undefined
-      : {
-          path: vqChannelsPath,
-          ...(FRONTEND_ASSET_CACHE.get(vqChannelsPath) as {
-            channels: readonly VoiceQualityChannel[];
-            rdPolicy: RdPolicy;
-          }),
-        };
-  const affectLibrary =
-    affectPresetsPath === undefined
-      ? undefined
-      : (FRONTEND_ASSET_CACHE.get(affectPresetsPath) as AffectLibrary);
-  if (affectLibrary && vqChannels) {
-    validateAffectPresetChannels(affectLibrary, vqChannels.channels);
-  }
-  return {
-    inventory,
-    ...(Object.hasOwn(spec, "inline_markers")
-      ? { inlineMarkers: parseInlineMarkers(spec.inline_markers) }
-      : {}),
-    inventoryPath,
-    inventoryDocuments:
-      phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
-    lts: { path: ltsPath, document: FRONTEND_ASSET_CACHE.get(ltsPath) },
-    ...(morphology === undefined ? {} : { morphology }),
-    ...(stress === undefined ? {} : { stress }),
-    ...(speakerDefinitionPath === undefined
-      ? {}
-      : {
-          speakerDefinition: {
-            path: speakerDefinitionPath,
-            data: FRONTEND_ASSET_CACHE.get(speakerDefinitionPath),
-          },
-        }),
-    ...(lexiconPath === undefined
-      ? {}
-      : {
-          lexicon: {
-            path: lexiconPath,
-            dictionary: FRONTEND_ASSET_CACHE.get(lexiconPath) as CmuDictionary,
-          },
-        }),
-    ...(affectPresetsPath === undefined || !affectLibrary
-      ? {}
-      : {
-          affectPresets: {
-            path: affectPresetsPath,
-            library: affectLibrary,
-          },
-        }),
-    ...(vqChannels ? { vqChannels } : {}),
-    ...(textParserConfig === null
-      ? {}
-      : {
-          textParser: {
-            config: textParserConfig,
-            table: FRONTEND_ASSET_CACHE.get(textParserConfig.tablePath) as TextParserTable,
-          },
-        }),
-    ...(sourceContourPath === undefined
-      ? {}
-      : {
-          sourceContour: {
-            path: sourceContourPath,
-            spec: FRONTEND_ASSET_CACHE.get(sourceContourPath) as SourceContourSpec,
-          },
-        }),
-    ...(speakerProfilePath === undefined
-      ? {}
-      : {
-          speakerProfile: {
-            path: speakerProfilePath,
-            spec: FRONTEND_ASSET_CACHE.get(speakerProfilePath) as SpeakerProfileSpec,
-          },
-        }),
-  };
 }

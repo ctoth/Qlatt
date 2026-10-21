@@ -1,5 +1,7 @@
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 
 const lexicon = loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).lexicon;
 if (!lexicon) throw new Error("E_FRONTEND_CONFIG: dectalk-english requires resources.lexicon");

@@ -9,6 +9,7 @@ import {
 import {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
+  loadFrontendResources,
   loadRulepackSpecFromPath,
 } from "../src/declarative-frontend/rule-pack";
 import {
@@ -60,6 +61,7 @@ describe("source-backed recognition", () => {
     transcribeText(normalizeSourceItems(utterance, spec), {
       utterance,
       compiledSpec: spec,
+      resources: loadFrontendResources(spec),
       dictionaryMap: { hello: "HH EH1 L OW0" },
     });
     const pronunciation = utterance.provenance

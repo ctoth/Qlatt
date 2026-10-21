@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
 
 // Load inventory from the qlatt-english frontend (no globals).
 const INVENTORY = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");

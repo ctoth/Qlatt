@@ -2,8 +2,10 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { compileAffect } from "../src/input/affect";
 import { parseAffectPresets, validateAffectPresetChannels } from "../src/input/affect-presets";
 import { parseDirectionInput } from "../src/input/parse";
@@ -24,7 +26,7 @@ describe("declarative affect presets", () => {
     expect(english.affectPresets?.path).toBe(
       "/rules/frontends/qlatt-english/policy/affect-presets.yaml",
     );
-    expect(english.affectPresets?.library.presets.has("tender")).toBe(true);
+    expect(english.affectPresets?.library.presets.tender).toBeDefined();
     expect(beauty.affectPresets?.library).toBe(english.affectPresets?.library);
     const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
     expect(dectalk.affectPresets).toBeUndefined();
@@ -56,7 +58,7 @@ describe("declarative affect presets", () => {
 
   it("uses the supplied library's names and degree curve through direction parsing", () => {
     const selected = parseAffectPresets({
-      presets: [{ ...library.presets.get("tender"), name: "selected" }],
+      presets: [{ ...library.presets.tender, name: "selected" }],
       variants: {},
       degree: {
         points: [
@@ -83,7 +85,7 @@ describe("declarative affect presets", () => {
   });
 
   it("preserves every preset's dimensions, channels, and citations at boundary and intermediate degrees", () => {
-    const values = [...library.presets.keys()].flatMap((name) =>
+    const values = Object.keys(library.presets).flatMap((name) =>
       [-1, 0, 0.25, 0.7, 1, 2].map((degree) => {
         const { dimensions, vq, citations } = compileAffect(library, channels, name, degree);
         return { name, degree, dimensions, vq, citations };
@@ -95,7 +97,7 @@ describe("declarative affect presets", () => {
   it("loads the complete cited library from YAML", () => {
     const source = readFileSync(`public${affectResource.path}`, "utf8");
     const document = load(source) as { presets: { name: string; citations: string[] }[] };
-    expect(document.presets.map((preset) => preset.name)).toEqual([...library.presets.keys()]);
+    expect(document.presets.map((preset) => preset.name)).toEqual(Object.keys(library.presets));
     expect(document.presets.every((preset) => preset.citations.length > 0)).toBe(true);
     expect(source.includes("# engineering estimate")).toBe(true);
   });

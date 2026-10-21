@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import * as inventory from "../src/declarative-frontend/inventory";
+import * as inventory from "../src/declarative-frontend/rule-pack";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
@@ -16,8 +16,8 @@ describe("speaker formant capabilities", () => {
       },
     };
     const resourceSpy = vi
-      .spyOn(inventory, "loadFrontendResources")
-      .mockReturnValue(extendedResources);
+      .spyOn(inventory, "resolveFrontend")
+      .mockReturnValue({ spec: qlattRulepack, resources: extendedResources, voices: {} });
     try {
       const result = textToKlattTrackDetailed("hello", 110, 30, {
         speaker: { formant_scale: 1.2 },

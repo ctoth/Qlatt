@@ -9,14 +9,13 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { inventoryPhonologyPath, parseInventorySpec } from "../src/declarative-frontend/inventory";
 import {
-  inventoryPhonologyPath,
+  loadBundledRulepackSpec,
   loadFrontendResources,
   loadInventorySpecFromPath,
-  parseInventorySpec,
   preloadInventorySpecFromPath,
-} from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+} from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 

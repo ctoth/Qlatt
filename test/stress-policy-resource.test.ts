@@ -1,6 +1,8 @@
 import { expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { decomposeWord } from "../src/g2p/morphology";
 import { createProvenanceCollector } from "../src/provenance";
@@ -52,6 +54,7 @@ it("keeps DECtalk table suffix pronunciation without shared contexts", () => {
   const provenance = createProvenanceCollector();
   transcribeText("cats", {
     compiledSpec: spec,
+    resources: loadFrontendResources(spec),
     frontendId: "dectalk-english",
     dictLookup: lookup,
     provenance,
@@ -66,6 +69,7 @@ it("requires shared contexts when an explicit non-table override consumes them",
   const shared = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
   const options = {
     compiledSpec: spec,
+    resources: loadFrontendResources(spec),
     frontendId: "dectalk-english",
     dictionaryMap: {},
     lts: shared.lts,
@@ -150,7 +154,7 @@ it("honors explicitly supplied parsed transcription contexts", () => {
   if (!resources.stress) throw new Error("Qlatt fixture requires stress context");
   const stress = structuredClone(resources.stress);
   stress.policy.longVowels = ["NOT_A_VOWEL"];
-  expect(() => transcribeText("blorf", { compiledSpec: spec, dictionaryMap: {}, stress })).toThrow(
-    /E_STRESS_PHONOTACTICS/,
-  );
+  expect(() =>
+    transcribeText("blorf", { compiledSpec: spec, resources, dictionaryMap: {}, stress }),
+  ).toThrow(/E_STRESS_PHONOTACTICS/);
 });

@@ -11,8 +11,10 @@
  * Cross-checks dictionary-sourced words against the selected frontend's raw lexicon.
  * Read-only. Does NOT modify any baselines.
  */
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { readFileFromFsSync } from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";

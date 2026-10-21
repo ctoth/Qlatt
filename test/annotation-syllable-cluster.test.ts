@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Item } from "../src/declarative-frontend/hrg";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import {
   basePhonemeSymbol,
   parseSyllabificationTables,

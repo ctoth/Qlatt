@@ -3,8 +3,10 @@
  * Run via test/lexical-stress-evaluation.test.ts for the repository's Vite resource initialization.
  * Reference: bundled CMU dictionary. Baseline: e3e8b4cf src/g2p/stress.ts count/hint rule.
  */
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { applyLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
 import { getStressHintForWord } from "../src/g2p/morphology";

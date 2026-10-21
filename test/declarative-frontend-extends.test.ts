@@ -3,15 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import {
-  loadFrontendResources,
-  loadFrontendVoiceDocument,
-} from "../src/declarative-frontend/inventory";
 import { ForeachExpansionError } from "../src/declarative-frontend/parser";
 import {
   type CompiledRulepack,
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  loadFrontendResources,
+  loadFrontendVoiceDocument,
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,

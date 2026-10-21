@@ -11,13 +11,13 @@ import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import { FRAME_VALUES_SCHEMA } from "../src/declarative-frontend/hrg/frame-program";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendVoiceDocument,
   loadVoiceRuleDocuments,
   preloadFrontendVoiceDocument,
   preloadVoiceRuleDocuments,
-} from "../src/declarative-frontend/inventory";
-import * as rulepack from "../src/declarative-frontend/rule-pack";
+} from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
 import * as paths from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";
@@ -363,11 +363,17 @@ describe("voice rule fields in rules", () => {
 });
 
 describe("voice rule fields in the frontend", () => {
-  const fixtureFrontend = () =>
-    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
+  const fixtureFrontend = () => {
+    const spec = {
       ...qlattRulepack,
       speakers: SPEAKERS,
+    };
+    return vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec,
+      resources: rulepack.loadFrontendResources(spec),
+      voices: {},
     });
+  };
 
   it("records the selected voice's fields with the voice's and the fields' citations", () => {
     const spy = fixtureFrontend();

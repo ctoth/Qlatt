@@ -1,6 +1,8 @@
 import { expect } from "vitest";
-import { loadFrontendResources } from "../../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../../src/declarative-frontend/rule-pack";
 
 export interface Frame {
   time: number;

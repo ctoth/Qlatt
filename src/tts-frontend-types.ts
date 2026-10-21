@@ -1,4 +1,5 @@
 import type { Utterance } from "./declarative-frontend/hrg";
+import type { FrontendResources } from "./declarative-frontend/inventory";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
 import type { LtsContext } from "./g2p/lts-document";
 import type { MorphologyContext } from "./g2p/morphology";
@@ -158,6 +159,8 @@ export type TranscriptionConfig = {
 };
 
 export type TranscriptionOptions = {
+  /** Already acquired selected resources; transcription performs no acquisition. */
+  resources: FrontendResources;
   /** Selected frontend identity for resource diagnostics. */
   frontendId?: string;
   diagnostics?: import("./diagnostics").Diagnostics | null;

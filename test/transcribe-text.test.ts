@@ -1,6 +1,8 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import {
   getDiagnosticSymbolPronunciation,
@@ -15,6 +17,7 @@ const resources = loadFrontendResources(compiledSpec);
 const selected = {
   frontendId: "qlatt-english",
   compiledSpec,
+  resources: loadFrontendResources(compiledSpec),
   dictionaryMap: resources.lexicon?.dictionary,
 };
 
@@ -58,7 +61,11 @@ describe("transcribe-text", () => {
         skip_dictionary: true,
       };
       expect(loadFrontendResources(noLexicon).lexicon).toBeUndefined();
-      const options = { compiledSpec: noLexicon, frontendId: "no-lexicon" };
+      const options = {
+        compiledSpec: noLexicon,
+        resources: loadFrontendResources(noLexicon),
+        frontendId: "no-lexicon",
+      };
       const tokens = transcribeText("adl tabatabai", { ...options, diagnostics });
       expect(tokens).toEqual(transcribeText("adl tabatabai", { ...options, dictionaryMap: {} }));
       expect(new Set(tokens.map((token) => token.word))).toEqual(new Set(["adl", "tabatabai"]));

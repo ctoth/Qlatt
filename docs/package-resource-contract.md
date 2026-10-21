@@ -48,6 +48,10 @@ owned by a dependency even when its own `frontends` array is empty. A dependency
 alone grants no compatibility. A frontend's default must be a supported pair;
 an explicitly requested unsupported pair fails with `E_SYNTH_PAIRING`, naming
 both endpoints, before rendering. There is no id-equality or baseline fallback.
+Retain an explicitly selected compatible backend; the default applies only when
+the backend is omitted and no selection exists. The target baseline default
+moves the existing CLI/server policy into the manifest under #76. Today's
+`qlatt-english` harness helper has no default (`frontend-vocabulary.test.ts:81–82`).
 
 An inherited backend may omit documents supplied by its parent. A root source
 backend supplies graph, registry and semantics. An artifact-only distribution
@@ -57,8 +61,8 @@ separately checked distribution. No field implies that raw source is checked.
 
 Discovery supplies records `{id, version, baseUrl, manifest}`. `baseUrl` is an
 absolute directory URL ending in `/`; manifest paths resolve from that directory.
-The selected dependency's version must equal the requesting record's exact
-version. Missing packages or conflicting selected versions fail before loading
+The selected dependency's version must equal the version named in the requesting
+manifest's `dependsOn`. Missing packages or conflicting selected versions fail before loading
 dependent entries. Consumers do not choose another version, fetch a substitute,
 or silently select a second version under the same id.
 
@@ -106,7 +110,7 @@ where the existing composition contract expressly permits inheritance.
 | `speakers.dir`, `speakers.definition_path` | Voice document directory and speaker-definition schema; #141. |
 | Inventory `phonology_path` | Phonology document relative to the inventory declaring it; #141. |
 | Morphology/stress `phonotactics_path` | Nested dependency relative to that policy document; #141. |
-| Graph `meta.primitives[]`, `meta.semantics` | Declared registry layers/semantics documents; Bacon/source preparation owns resolution, not native execution. |
+| Graph `meta.primitives` (string or array), `meta.semantics` | Authored registry/semantics references; #251 reconciles them with manifest-selected documents. Current Qlatt preparation uses manifest `extends`, not these fields. |
 
 Speaker names select existing entries under the declared voice directory; they
 are not arbitrary paths. Ordinary strings, CEL expressions, citation text,
@@ -124,6 +128,10 @@ Current frontend acquisition binds resource/nested paths before composition
 Beauty currently relies on that fallback for inherited phase files. Migration
 must make those inherited references explicit under the declaring-owner rule,
 preserving selected rules and order; simply changing URL joining is insufficient.
+DECtalk, Stevens and Steinecke graphs also name `../klatt80-baseline/registry.yaml`
+in `meta.primitives`. #251 must reconcile those existing references with the
+manifest-selected registry layers under explicit `qlatt-english` ownership;
+portable native consumers must not independently acquire a second closure.
 
 ## Three package examples
 
@@ -155,7 +163,9 @@ Full DECtalk synthesizer, with both supported backends and an inherited backend:
 }
 ```
 
-Backend-only package with an explicit external frontend pairing:
+Backend-only package with an explicit external frontend pairing target:
+the current `klsyn88` vocabulary rejects columns emitted by `qlatt-english`
+(`frontend-vocabulary.ts:22–43`); #76/#254 must resolve that before admitting it.
 
 ```json
 {
@@ -201,11 +211,11 @@ shared-before-variety ordering. It does not introduce per-rule merging.
 
 | Package | Owned frontend(s) / backend(s) | Explicit dependencies / supported pairing |
 |---|---|---|
-| `qlatt-english` | `qlatt-english` / `klatt80-baseline` | `english`; its own pair, baseline default. |
+| `qlatt-english` | `qlatt-english` / `klatt80-baseline` | `english`; its own pair, target baseline default replacing the current CLI/server policy. |
 | `dectalk-english` | `dectalk-english` / `dectalk-english`, `dectalk-vtm` | `qlatt-english`, `english`; both own pairs, VTM default. |
 | `qlatt-beauty` | `qlatt-beauty` / `qlatt-beauty` | `qlatt-english`, `english`; its own pair/default. |
-| `klsyn88` | none / `klsyn88` | `qlatt-english`; external English frontend pair. |
-| `stevens91` | none / `stevens91` | `qlatt-english`; external English frontend pair, preparation currently rejects invalid inherited definitions. |
+| `klsyn88` | none / `klsyn88` | `qlatt-english`; external pair target, currently rejected by vocabulary checks. |
+| `stevens91` | none / `stevens91` | `qlatt-english`; inherited baseline and external pair target, preparation currently rejects invalid inherited definitions. |
 | `laine88` | none / `laine88` | `qlatt-english`; inherited baseline and external English frontend pair. |
 | `steinecke95` | none / `steinecke95` | `qlatt-english`; inherited baseline and external English frontend pair. |
 | `english` (language owner) | no synthesizer entries | Shared linguistic resources under the adopted language boundary; not an eighth synthesizer. |
@@ -260,7 +270,7 @@ not an unimplemented AST encoding or a second compiler.
 |---|---|
 | Manifest discovery, exact dependency selection, explicit external pairing, missing dependency, unsupported pair/default | #76 |
 | File/HTTP, Windows escaping, browser subpath, changed CWD and relocated package with unchanged source identity | #78 |
-| Optional versus malformed/missing declared resources; nested frontend/voice dependency closure | #141/#78 |
+| Optional versus malformed/missing declared resources; nested frontend/voice closure; update recorded `resources.json` audit fixtures after relocation (not browser warmup inputs) | #141/#78 |
 | Multi-generation inherited references, replacement origins, deterministic plain-data round trip | #251 |
 | Expanded graph/semantic binding rejection with authored spans before audio allocation | #252 |
 | Backend format/version/capability rejection and resolved bundle execution | #89; all-model conformance #258 |

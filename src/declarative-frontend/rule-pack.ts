@@ -81,7 +81,9 @@ function mergeParameterOrigins(
     return true;
   }
   return Object.freeze([
-    ...(origins.get(base) ?? NO_PARAMETER_ORIGINS).filter((entry) => !replaced(sourceLookupPath(entry))),
+    ...(origins.get(base) ?? NO_PARAMETER_ORIGINS).filter(
+      (entry) => !replaced(sourceLookupPath(entry)),
+    ),
     ...(origins.get(child) ?? NO_PARAMETER_ORIGINS),
   ]);
 }
@@ -522,7 +524,8 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
           rule: cloneValue(rule),
           origin: baseOrigins[name] as string,
           spans: (RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
-            (entry) => sourceLookupPath(entry)[0] === "rules" && sourceLookupPath(entry)[1] === name,
+            (entry) =>
+              sourceLookupPath(entry)[0] === "rules" && sourceLookupPath(entry)[1] === name,
           ),
         },
       ]),

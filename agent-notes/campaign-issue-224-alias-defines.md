@@ -12,6 +12,8 @@ Use the loader's actual aliasTarget and direct map children. Preserve the alias 
 
 # Surprises
 
+Quality job119189525150 requested five formatting corrections in source and fixture. Applied its exact wrapping; semantics unchanged and no local CI.
+
 Other agents own normalization resource moves and loader acquisition. Preserve their changes.
 
 # Next step

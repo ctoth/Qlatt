@@ -723,7 +723,9 @@ describe("macro source ancestry", () => {
           },
         });
         const resource = join(dir, "pipeline.yaml").replace(/\\/g, "/");
-        const authored = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource));
+        const authored = yamlDocumentSpans(
+          parseYamlString(readFileSync(resource, "utf8"), resource),
+        );
         const source = authored.find(
           (entry) => entry.value.path.join(".") === "rules.fixture_anchor.define.check",
         )!;
@@ -790,10 +792,13 @@ describe("macro source ancestry", () => {
         (entry) => entry.compiledPath?.join(".") === `rules.${aliasName}.define.wpm`,
       )!;
       expect(projected.value.path).toEqual(["rules", name, "define", "wpm"]);
-      expect(projected.value.resource).toBe("/rules/frontends/dectalk-english/phases/duration.yaml");
+      expect(projected.value.resource).toBe(
+        "/rules/frontends/dectalk-english/phases/duration.yaml",
+      );
       expect(
         spans.find(
-          (entry) => !entry.compiledPath && entry.value.path.join(".") === `rules.${name}.define.wpm`,
+          (entry) =>
+            !entry.compiledPath && entry.value.path.join(".") === `rules.${name}.define.wpm`,
         )?.value.resource,
       ).toBe(join(dir, "phases/duration.yaml").replace(/\\/g, "/"));
     } finally {

@@ -245,14 +245,17 @@ class SynthDriver(SynthDriver):
                 pass
         flush()
         self.cancel()
-        self._cancelled.clear()
-        self._thread = threading.Thread(target=self._speak_chunks, args=(chunks,), daemon=True)
+        # Each worker keeps its own event: replacing speech must not revive an
+        # older worker that is still waiting for its render or playback.
+        cancelled = threading.Event()
+        self._cancelled = cancelled
+        self._thread = threading.Thread(target=self._speak_chunks, args=(chunks, cancelled), daemon=True)
         self._thread.start()
 
-    def _speak_chunks(self, chunks):
+    def _speak_chunks(self, chunks, cancelled):
         with self._lock:
             for text, index, rate_setting, pitch_setting in chunks:
-                if self._cancelled.is_set():
+                if cancelled.is_set():
                     break
                 if text:
                     try:
@@ -262,15 +265,17 @@ class SynthDriver(SynthDriver):
                     except Exception:
                         log.exception("qlatt render failed for %r", text)
                         pcm = b""
-                    if pcm and not self._cancelled.is_set():
+                    if pcm and not cancelled.is_set():
                         self._player.feed(pcm)
-                if index is not None and not self._cancelled.is_set():
+                if index is not None and not cancelled.is_set():
                     # Raise the index once everything queued so far has played.
                     self._player.sync()
-                    synthIndexReached.notify(synth=self, index=index)
-            if not self._cancelled.is_set():
+                    if not cancelled.is_set():
+                        synthIndexReached.notify(synth=self, index=index)
+            if not cancelled.is_set():
                 self._player.idle()
-                synthDoneSpeaking.notify(synth=self)
+                if not cancelled.is_set():
+                    synthDoneSpeaking.notify(synth=self)
 
     def cancel(self):
         self._cancelled.set()

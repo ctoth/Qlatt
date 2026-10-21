@@ -71,7 +71,7 @@ params:
 constants:
   tree: { nested: { keep: 2, change: 3 }, list: [1, 2], cleared: { x: 1 }, scalar: 9 }
 realize:
-  localResult: { expr: local, deps: [local] }
+  localResult: { expr: local, deps: [local], citations: ["engineering estimate: parent fixture"] }
 realize_each:
   - index: n
     over: [1, 2]

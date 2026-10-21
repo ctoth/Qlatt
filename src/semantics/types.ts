@@ -25,6 +25,8 @@ export interface EvaluationContext {
 /** Realization rule */
 export interface RealizationRule {
   expr: CelExpression;
+  /** Authored sources; optional while existing semantics documents migrate. */
+  citations?: string[];
   deps?: string[];
   /** When true, use linearRampToValueAtTime instead of the document default. */
   ramp?: boolean;

@@ -497,6 +497,46 @@ describe("input contract — anchor resolution + span precedence", () => {
 });
 
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
+  it("attributes authored voice, emphasis, and break records to host conventions", () => {
+    const voice = { name: "authored", sex: "female" as const, baseF0Hz: 123 };
+    const result = parseDirectionInput({
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        global: { voice },
+        spans: [
+          {
+            id: "request",
+            anchor: { unit: "word", start: 0 },
+            emphasis: { level: "strong" },
+            break: { strength: 3, timeMs: 150 },
+          },
+        ],
+      },
+    });
+    expect(
+      result.directions.map((direction) => [direction.kind, direction.hrgRelation, direction.label]),
+    ).toEqual([
+      ["voice_identity", "Affect", "authored"],
+      ["emphasis", "Intonation", "strong"],
+      ["break", "Break", "strength_3"],
+    ]);
+    expect(result.directions[0].voice).toEqual(voice);
+    expect(result.decisions.map((decision) => decision.subject)).toEqual([
+      "utterance",
+      "token:0",
+      "token:0",
+    ]);
+    expect(result.decisions[2].reason).toContain("Break strength 3 (150ms)");
+    for (const direction of result.directions) {
+      expect(direction.decision.stage).toBe("frontend");
+      expect(direction.decision.parents ?? []).toEqual([]);
+      expect(direction.citations).toEqual(direction.decision.citations);
+      expect(direction.citations).toHaveLength(1);
+      expect(direction.citations[0]).toMatch(/^Engineering convention: Direction Track records/);
+    }
+  });
+
   it("attributes pitch, rate, and VQ to only their selected configured channel entries", () => {
     const configured = parseVoiceQualityChannels({
       channels: channels.map((row) => ({
@@ -672,6 +712,14 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
   });
 
   it("a local affect span chains its decision to the global affect (parents[])", () => {
+    const configured = parseAffectPresets({
+      degree: library.degree,
+      variants: {},
+      presets: [...library.presets.values()].map((preset) => ({
+        ...preset,
+        citations: [`configured:${preset.name}`],
+      })),
+    });
     const input: DirectionInput = {
       score: { text: "no not ever" },
       directionTrack: {
@@ -686,7 +734,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         ],
       },
     };
-    const result = parseDirectionInput(input, affectOptions);
+    const result = parseDirectionInput(input, { ...affectOptions, affectLibrary: configured });
     const globalDir = result.directions.find((d) => d.kind === "global_affect")!;
     const localDir = result.directions.find((d) => d.kind === "local_affect")!;
 
@@ -694,6 +742,21 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
     expect(localDir.decision.parents).toContain(globalDir.decision.id);
     expect(localDir.scope).toEqual({ startToken: 1, endToken: 1 });
     expect(localDir.decision.subject).toBe("token:1");
+    for (const [direction, name] of [
+      [globalDir, "sad"],
+      [localDir, "angry"],
+    ] as const) {
+      const preset = result.decisions.find(
+        (decision) =>
+          decision.type === "affect_preset_applied" && decision.subject === direction.decision.subject,
+      )!;
+      expect(preset.reason).toContain(`'${name}' resolved to '${name}'`);
+      expect(preset.citations).toEqual([`configured:${name}`]);
+      expect(direction.citations).toEqual(preset.citations);
+      expect(direction.decision.parents).toEqual(
+        direction === globalDir ? [preset.id] : [globalDir.decision.id, preset.id],
+      );
+    }
   });
 
   it("a clinical global affect requires voice.sex and resolves sex-specifically", () => {

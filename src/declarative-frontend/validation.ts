@@ -4665,6 +4665,7 @@ export function assertValidSpec(
     // Semantic and syntax diagnostics share these expression leaf paths.
     // A diagnostic code alone cannot distinguish an expression from a field name.
     const expressionPath =
+      /^relations\.[^.]+\.scalars\.[^.]+\.floor_fallback\.value$/.test(diagnostic.path) ||
       /^patterns\.[^.]+\.(?:sequence\[\d+\]\.where|constraint)(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?$/.test(
         diagnostic.path,
       ) ||

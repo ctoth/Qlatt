@@ -252,6 +252,24 @@ describe("loadYamlDocumentOrNull", () => {
     expect(requested).toEqual(["/experiments/child/graph.yaml"]);
   });
 
+  it.each(["http", "https"])("preserves %s URLs on both YAML load paths", async (scheme) => {
+    const remote = `${scheme}://assets.example.test/a%20b.yaml?source=x%2Fy`;
+    const sync = `${remote}&mode=sync`;
+    const missing = `${remote}&mode=missing`;
+    const failed = `${remote}&mode=failed`;
+    const loader = await browserLoader({
+      [remote]: { status: 200, contentType: "text/yaml", body: "value: 43\n" },
+      [sync]: { status: 200, contentType: "text/yaml", body: "value: 44\n" },
+      [failed]: new Error("transport failed"),
+    });
+    expect(await loader.loadYamlDocumentOrNull(remote)).toEqual({ value: 43 });
+    expect(loader.loadYamlDocumentSync(sync)).toEqual({ value: 44 });
+    expect(await loader.loadYamlDocumentOrNull(missing)).toBeNull();
+    await expect(loader.loadYamlDocumentOrNull(failed)).rejects.toThrow("E_YAML_FETCH:");
+    expect(loader.requested).toEqual([remote, missing, failed]);
+    expect(loader.requestedSync).toEqual([sync]);
+  });
+
   it("is null when the server answers 200 with an HTML page (the Vite dev server's fallback)", async () => {
     const { loadYamlDocumentOrNull } = await browserLoader({
       "/experiments/child/graph.yaml": {

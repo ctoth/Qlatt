@@ -5,13 +5,16 @@ import url from "node:url";
 /**
  * Normalize a resource path for both browser and Node environments.
  *
+ * - Preserves explicit HTTP(S) URLs after trimming whitespace
  * - Strips leading "/public" prefix (Vite serves public/ at root)
  * - Prepends BASE_URL for subpath deployments (e.g. GitHub Pages at /Qlatt/)
  * - Converts backslashes to forward slashes
  */
 export function normalizePath(rawPath: string): string {
+  const trimmed = rawPath.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
   const base = (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/";
-  let normalized = rawPath.trim().replace(/\\/g, "/");
+  let normalized = trimmed.replace(/\\/g, "/");
   if (normalized.startsWith("/public/")) {
     normalized = normalized.slice("/public".length);
   }

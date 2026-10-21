@@ -600,12 +600,6 @@ parameters:
         citations:
           - "Pierrehumbert 1980 Rule 9 / upstep formula (a ≈ 0.2)"
           - "Ladd 2008 Ch.3 (H% final rise modeled as local upstep)"
-      # --- Final lowering ---
-      final_lowering_factor:
-        value: 0.85
-        citations:
-          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
-          - "Pierrehumbert 1980 (final lowering as separate effect)"
       # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
         value: 1.08

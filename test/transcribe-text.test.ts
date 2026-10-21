@@ -64,13 +64,17 @@ describe("transcribe-text", () => {
       expect(pronunciation.parents?.length).toBeGreaterThan(0);
       const stressRecords = records.filter((record) => record.subject.includes(":stress:"));
       expect(stressRecords.length).toBeGreaterThan(0);
-      expect(stressRecords.every((record) => record.parents?.includes(pronunciation.id))).toBe(true);
+      expect(stressRecords.every((record) => record.parents?.includes(pronunciation.id))).toBe(
+        true,
+      );
       expect(
         diagnostics.getEntries().some((entry) => entry.code === "G2P_DICTIONARY_FALLBACK"),
       ).toBe(false);
       const ordinary = createDiagnostics();
       transcribeText("blorf", { ...selected, dictionaryMap: {}, diagnostics: ordinary });
-      expect(ordinary.getEntries().some((entry) => entry.code === "G2P_DICTIONARY_FALLBACK")).toBe(true);
+      expect(ordinary.getEntries().some((entry) => entry.code === "G2P_DICTIONARY_FALLBACK")).toBe(
+        true,
+      );
     });
 
     it("forwards the selected collector and original case to YAML LTS", () => {

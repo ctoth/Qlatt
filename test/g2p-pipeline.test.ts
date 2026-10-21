@@ -80,14 +80,16 @@ describe("pronounce() pipeline order", () => {
     ["dictionary", "dictionary", "morphology", "lts"],
     ["dictionary", "lts"],
   ])("rejects invalid layer order %j", (...order) => {
-    expect(() => parsePronunciationLayers({ order, citations: ["fixture"] })).toThrow("E_G2P_LAYERS");
+    expect(() => parsePronunciationLayers({ order, citations: ["fixture"] })).toThrow(
+      "E_G2P_LAYERS",
+    );
   });
 
   it("requires declared fallback resources even when the dictionary would succeed", () => {
     const lookup = makeDict({ cat: ["K", "AE1", "T"] });
-    expect(() =>
-      pronounceSelected("cat", lookup, { ...resources, morphology: undefined }),
-    ).toThrow("requires morphology");
+    expect(() => pronounceSelected("cat", lookup, { ...resources, morphology: undefined })).toThrow(
+      "requires morphology",
+    );
     expect(() => pronounceSelected("cat", lookup, { ...resources, stress: undefined })).toThrow(
       "requires stress_policy",
     );

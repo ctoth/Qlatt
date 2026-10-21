@@ -13,4 +13,4 @@ Smallest plan: 100–140 production additions/~40 removals, 5–8 YAML lines, 90
 The explicit non-table override fixture selects DECtalk resources but supplies shared YAML LTS. It now supplies the matching declared generic layer policy while retaining its missing-morphology/stress error assertions. An attempted merge before committing refused the dirty inventory file without changing it; commit first, then integrate normally and preserve the separately merged inventory schema.
 
 ## Next step
-Publish, then hosted CI and private Claude review/response. Preserve other work.
+PR442 published. Hosted quality job119244443660 reported four formatting/import-order errors in the generic engine and two fixtures; applied its exact corrections without behavior changes. Claude full-range review running against initial96809452; await report and replacement hosted CI. Preserve other work.

@@ -62,9 +62,9 @@ import {
 import { stripSuffixes } from "./table-suffix";
 import {
   type DictLookup,
-  parsePronunciationLayers,
   type PronunciationLayers,
   type PronunciationResult,
+  parsePronunciationLayers,
 } from "./types";
 
 /** The control symbols numberWords carries (INCLUDE/l_com_ph.h). */
@@ -1103,7 +1103,8 @@ function pronounceGeneric(
       `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "unspecified"}' requires stress_policy`,
     );
   }
-  if (!options.lts.path) throw new Error(`E_LTS_PATH_MISSING: word '${word}' has no ltsPath configured`);
+  if (!options.lts.path)
+    throw new Error(`E_LTS_PATH_MISSING: word '${word}' has no ltsPath configured`);
   const lts = parseLtsRulesData(options.lts.document);
   for (const layer of policy.order) {
     let selected: PronunciationResult | null = null;
@@ -1134,7 +1135,12 @@ function pronounceGeneric(
       hint: getStressHintForWord(lowerWord, options.morphology),
       morphology: selected.morphology,
     });
-    return { ...selected, phonemes: lexicalStress.phonemes, lexicalStress, pronunciationLayer: layer };
+    return {
+      ...selected,
+      phonemes: lexicalStress.phonemes,
+      lexicalStress,
+      pronunciationLayer: layer,
+    };
   }
   throw new Error("E_G2P_LAYERS: no pronunciation layer selected");
 }

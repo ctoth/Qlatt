@@ -3,10 +3,8 @@
  * Print an experiment's final `realize` map as stable, key-sorted JSON.
  *
  * The experiment is loaded the way the app loads it (`loadExperimentConfig`:
- * manifest lookup, per-document load, parent/child `extends` merge). Two maps
- * are reported: `loaded` is the merged document's realize map, and
- * `afterFormantBanks` is the map after `expandFormantBanks`, which is what
- * the runtime evaluates. `evaluated` holds the realized values and errors for
+ * manifest lookup, inheritance, macro expansion and validation). `prepared`
+ * is the checked realize map the runtime evaluates. `evaluated` holds values and errors for
  * a few probe frames. Diff two runs to prove a semantics.yaml refactor leaves
  * the realize rules and their values unchanged.
  *
@@ -16,7 +14,6 @@
  */
 import { writeFileSync } from "node:fs";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
-import { expandFormantBanks } from "../src/formant-bank";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
 
 type ParsedArgs = {
@@ -123,12 +120,10 @@ function undeclaredRealizeDeps(realize: Record<string, unknown>): Record<string,
 
 async function main(argv: string[]): Promise<number> {
   const args = parseArgv(argv);
-  const { graph, semantics } = await loadExperimentConfig(args.experimentId);
-  const loaded = structuredClone(semantics.realize ?? {});
+  const { semantics } = await loadExperimentConfig(args.experimentId);
   // Report any top-level key that is not a plain realize consumer's input, so
   // a load-time construct that failed to expand shows up in the diff.
   const topLevelKeys = Object.keys(semantics).sort();
-  expandFormantBanks(graph, semantics);
 
   const { topoEvaluator } = createConfiguredEvaluator();
   const evaluated: Record<string, unknown> = {};
@@ -143,8 +138,7 @@ async function main(argv: string[]): Promise<number> {
   const report = sortKeys({
     experiment: args.experimentId,
     topLevelKeys,
-    loaded,
-    afterFormantBanks: semantics.realize ?? {},
+    prepared: semantics.realize ?? {},
     evaluated,
     // Arrays keep their order. Authored key order and the derived evaluation
     // order are reported only on request: moving a rule changes both without

@@ -22,10 +22,10 @@ describe("checkVocabulary", () => {
     });
   });
 
-  it("expands bank inputs without mutating the original config", async () => {
+  it("reads already-expanded bank inputs without mutating the prepared config", async () => {
     const config = await loadExperimentConfig("klatt80-baseline");
     const before = structuredClone(config);
-    expect(config.semantics.params).not.toHaveProperty("F1");
+    expect(config.semantics.params).toHaveProperty("F1");
     expect(checkVocabulary(["F1", "B1", "A1"], config)).toEqual({
       undeclaredColumns: [],
       missingRequiredParams: [],

@@ -10,9 +10,7 @@ export const state = {
   newRuntime: null,
   newRuntimeInitPromise: null,
   newInterpreter: null,
-  newRuntimeGraph: null,
-  newRuntimeSemantics: null,
-  newRuntimeRegistry: null,
+  newRuntimeConfig: null,
 
   // Experiment
   currentExperimentId: null,

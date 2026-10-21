@@ -74,9 +74,7 @@
         const runtime = await createKlattRuntime({
           diagnostics,
           audioContext: ctx,
-          graph: config.graph,
-          semantics: config.semantics,
-          registry: config.registry,
+          config,
           workletBasePath: `${import.meta.env.BASE_URL}worklets/`,
         });
         runtime.connectToDestination();

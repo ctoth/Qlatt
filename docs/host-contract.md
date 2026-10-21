@@ -398,13 +398,20 @@ render host includes these events in its diagnostic report.
 Failed CEL realization reporting is separate from these structural diagnostics.
 Normal default selection and its provenance are unchanged.
 
-All five experiment graphs pass `bacon check` against their declared registry
-layers (`meta.primitives` is a list merged in order, later entries winning per
-primitive). Qlatt extension data (`formantBanks`, including its
-`connections` to bank-generated nodes) lives under the graph's `meta:` key, so
-the static documents validate without knowledge of Qlatt's macros. Audio-rate
-connections into node parameters are first-class in the schema
-(`to: { node, param }`).
+Authored graphs may reference macro-generated nodes and do not necessarily pass
+standalone `bacon check`. `loadExperimentConfig` resolves inheritance, then
+`prepareExperimentConfig` clones the result, expands Qlatt macros, checks Bacon
+structure and Qlatt semantic references/bindings, and derives realization order
+from expression references. The runtime consumes that prepared plain config;
+it does not expand it again. Audio-rate parameter destinations remain
+`to: { node, param }`. Invalid static bindings fail before audio allocation;
+failures caused by runtime input values retain their existing diagnostics.
+
+Run `node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node
+scripts/check-experiments.ts` to check every manifest entry, including inherited
+experiments. The report lists unreachable definitions and their owners without
+pruning them. Source attribution follows authored documents through composition
+and expansion. This does not define #248's portable envelope or URL identities.
 
 Each `meta.formantBanks.*.formants[]` entry with `parallelSource` must declare
 `ampRange: [minimum, maximum]` and `ampDefault`, alongside `ndbScale` and `sign`.

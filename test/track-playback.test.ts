@@ -173,9 +173,7 @@ describe("runs of the dectalk-vtm node on the Speak path", () => {
       const runtime = await createKlattRuntime({
         diagnostics,
         audioContext: ctx as unknown as AudioContext,
-        graph: config.graph,
-        semantics: config.semantics,
-        registry: config.registry,
+        config,
         assetLoader,
         audioWorkletNodeCtor: NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
       });

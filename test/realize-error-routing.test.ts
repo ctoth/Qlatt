@@ -1,6 +1,7 @@
+import { createPreparedRuntime } from "./runtime-fixture";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDiagnostics, type Diagnostics } from "../src/diagnostics";
-import { type BaconGraph, createKlattRuntime, type Registry } from "../src/klatt-runtime";
+import { type BaconGraph, type Registry } from "../src/klatt-runtime";
 import type { SemanticsDocument } from "../src/semantics/types";
 
 // Mock AudioContext for testing (same pattern as klatt-runtime.test.ts)
@@ -65,10 +66,10 @@ describe("realize error routing", () => {
     const semantics: SemanticsDocument = {
       name: "test-broken-realize",
       params: {
-        volume: { type: "float", default: 0.5 },
+        volume: { type: "float", default: "invalid" },
       },
       realize: {
-        brokenValue: "undefinedFn(volume)", // undefinedFn does not exist
+        brokenValue: "sqrt(volume)", // invalid dynamic input fails at evaluation
       },
     };
 
@@ -82,7 +83,7 @@ describe("realize error routing", () => {
     // Spy on console.warn to verify it's not the ONLY place errors appear
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    await createKlattRuntime({
+    await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -99,7 +100,7 @@ describe("realize error routing", () => {
           affected: [
             expect.objectContaining({
               rule: "brokenValue",
-              error: expect.stringContaining("undefinedFn"),
+              error: expect.stringContaining("sqrt"),
               last: expect.objectContaining({
                 outcome: "no bound write; evaluation value retained",
               }),
@@ -116,11 +117,11 @@ describe("realize error routing", () => {
     const semantics: SemanticsDocument = {
       name: "test-fallthrough",
       params: {
-        rawInput: { type: "float", default: 100 },
+        rawInput: { type: "float", default: "invalid" },
       },
       realize: {
-        // This rule fails — nonExistentFunction is not registered
-        derivedGain: "nonExistentFunction(rawInput)",
+        // This rule fails — sqrt rejects a nonnumeric runtime input
+        derivedGain: "sqrt(rawInput)",
       },
     };
 
@@ -134,7 +135,7 @@ describe("realize error routing", () => {
     // Suppress console.warn noise
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -171,11 +172,11 @@ describe("realize error routing", () => {
       name: "test-setinputs-fallthrough",
       params: {
         F0: { type: "float", default: 100 },
-        AV: { type: "float", default: 60 },
+        AV: { type: "float", default: "invalid" },
       },
       realize: {
-        // This will fail — nonExistentFunction is not registered
-        derivedAV: "nonExistentFunction(AV)",
+        // This will fail — sqrt rejects a nonnumeric runtime input
+        derivedAV: "sqrt(AV)",
       },
     };
 
@@ -188,7 +189,7 @@ describe("realize error routing", () => {
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -197,7 +198,7 @@ describe("realize error routing", () => {
     });
 
     // Now call setInputs — this triggers evaluate() + applyValues() again
-    runtime.setInputs({ AV: 50 });
+    runtime.setInputs({ AV: "still invalid" });
 
     warnSpy.mockRestore();
 

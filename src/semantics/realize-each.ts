@@ -28,6 +28,7 @@
  * on its template.
  */
 
+import { withYamlDocumentSpans, yamlDocumentSpans } from "../yaml-loader";
 import type {
   AuthoredSemanticsDocument,
   CelExpression,
@@ -154,6 +155,7 @@ export function expandRealizeEach(
   const realize: Record<string, RealizationRule | CelExpression> = { ...authored };
   // Where each generated name came from, for the collision message.
   const generatedBy = new Map<string, string>();
+  const spans = [...yamlDocumentSpans(document)];
 
   for (const [entryIndex, entry] of entries.entries()) {
     const entryPath = `${root}[${entryIndex}]`;
@@ -242,9 +244,17 @@ export function expandRealizeEach(
         }
         generatedBy.set(name, rulePath);
         realize[name] = instantiateRule(rule, index, value, rulePath);
+        const prefix = ["realize_each", entryIndex, "rules", nameTemplate];
+        for (const span of yamlDocumentSpans(document)) {
+          if (prefix.every((part, index) => span.value.path[index] === part)) {
+            spans.push({ ...span, value: {
+              ...span.value, path: ["realize", name, ...span.value.path.slice(prefix.length)],
+            } });
+          }
+        }
       }
     }
   }
 
-  return { ...rest, realize };
+  return withYamlDocumentSpans({ ...rest, realize }, spans);
 }

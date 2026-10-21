@@ -7,13 +7,13 @@
 
 import { applyParamValue, getAudioParam } from "./audio-param-utils";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
-import { expandFormantBanks } from "./formant-bank";
+import type { PreparedExperimentConfig } from "./experiments/prepare-experiment-config";
 import type { ProvenanceCollector } from "./provenance";
 import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
 import type { RuntimeAssetLoader } from "./runtime-assets/types";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
 import { createRealizationDiagnostics } from "./semantics/realization-diagnostics";
-import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
+import type { EvaluationContext, ParamValue } from "./semantics/types";
 
 // =============================================================================
 // Registry Types
@@ -326,9 +326,7 @@ export interface KlattRuntimeOptions {
   /** Records successful graph connections, without playback time or signal ancestry. */
   provenance?: ProvenanceCollector;
   audioContext: AudioContext;
-  semantics: SemanticsDocument;
-  graph: BaconGraph;
-  registry: Registry; // Registry defining primitives (required)
+  config: PreparedExperimentConfig;
   workletBasePath?: string; // Base path for worklet JS files, defaults to '/worklets/'
   assetLoader?: RuntimeAssetLoader; // Host-specific worklet and WASM loader
   audioWorkletNodeCtor?: AudioWorkletNodeConstructor; // Host-specific AudioWorkletNode constructor
@@ -390,9 +388,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   };
   const {
     audioContext,
-    semantics,
-    graph,
-    registry,
+    config,
     workletBasePath = `${
       (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/"
     }worklets/`,
@@ -404,6 +400,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     telemetryHandler,
     diagnostics = createDiagnostics(),
   } = options;
+  const { semantics, graph, registry } = config;
 
   function fail(code: string, message: string, data: Record<string, unknown>): never {
     diagnostics.error(message, { ...data, consequence: "operation rejected" }, code);
@@ -447,10 +444,6 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       }
     }
   }
-
-  // Expand formant bank declarations into concrete nodes, connections, and rules.
-  // Must happen before node/WASM detection, defaults init, and binding-map build.
-  expandFormantBanks(graph, semantics);
 
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     const primitive = registry.primitives[nodeDef.type];
@@ -1086,7 +1079,7 @@ const NATIVE_NODE_CONSTRUCTORS = new Map<string, (ctx: AudioContext) => AudioNod
   ],
 ]);
 
-function getNativeNodeConstructor(
+export function getNativeNodeConstructor(
   native: string | undefined,
   type: string,
   log: (msg: string) => void,

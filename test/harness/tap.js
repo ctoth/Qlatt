@@ -62,7 +62,7 @@ let events = [];
 function outputNodeOf(runtime) {
   // As the spectrogram finds it (harness/runtime.js): the named output of the
   // formant graphs, or the first output the graph declares.
-  const firstOutput = state.newRuntimeGraph?.outputs?.[0];
+  const firstOutput = state.newRuntimeConfig?.graph?.outputs?.[0];
   const firstOutputId = typeof firstOutput === "string" ? firstOutput : firstOutput?.node;
   return (
     runtime.getNode("masterGain") ??

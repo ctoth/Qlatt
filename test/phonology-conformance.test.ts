@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import {
   FULL_PIPELINE_WORD_CASES,
@@ -9,6 +11,12 @@ import {
   getTrackWordOccurrence,
   getTranscriptionWordOccurrence,
 } from "./utils/phonology-conformance";
+
+const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+const selected = {
+  compiledSpec,
+  dictionaryMap: loadFrontendResources(compiledSpec).lexicon?.dictionary,
+};
 
 describe("phonology conformance", () => {
   describe("normalization", () => {
@@ -29,7 +37,7 @@ describe("phonology conformance", () => {
     for (const testCase of FULL_PIPELINE_WORD_CASES) {
       it(testCase.name, () => {
         const normalized = normalizeText(testCase.input);
-        const transcription = transcribeText(normalized);
+        const transcription = transcribeText(normalized, selected);
         const track = textToKlattTrack(testCase.input, 110);
         const occurrence = testCase.occurrence ?? 0;
 

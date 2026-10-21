@@ -110,6 +110,7 @@ it("warns when an empty dictionary pronunciation becomes SIL, with an exact look
   const diagnostics = createDiagnostics();
   const tokens = transcribeText("hello lost", {
     diagnostics,
+    dictionaryMap: {},
     dictLookup: (word) => (word === "hello" ? ["HH", "EH1", "L", "OW0"] : []),
   });
   expect(tokens.at(-1)).toMatchObject({

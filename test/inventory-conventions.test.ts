@@ -44,6 +44,7 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
   const tokens = transcribeText("hello", {
     provenance,
     diagnostics,
+    dictionaryMap: {},
     dictLookup: () => ["HH", "bad!", "OW1"],
   });
   expect(tokens.map((token) => token.phoneme)).toEqual(["HH", "OW"]);
@@ -131,7 +132,10 @@ it("transcribes a Unicode alphabet and custom stress markers without altering ph
     .spyOn(inventoryModule, "loadFrontendResources")
     .mockReturnValue({ ...resources, inventory });
   try {
-    const result = transcribeText("hello .", { dictLookup: () => ["ə_strong", "ŋ"] });
+    const result = transcribeText("hello .", {
+      dictionaryMap: {},
+      dictLookup: () => ["ə_strong", "ŋ"],
+    });
     expect(result.map(({ phoneme, stress }) => ({ phoneme, stress }))).toEqual([
       { phoneme: "ə", stress: 1 },
       { phoneme: "ŋ", stress: null },

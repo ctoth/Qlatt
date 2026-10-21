@@ -1,10 +1,21 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { createDiagnostics } from "../src/diagnostics";
 import {
   getDiagnosticSymbolPronunciation,
   isPunctuationToken,
   shouldUseDiagnosticSymbolMode,
   transcribeText,
 } from "../src/transcribe-text";
+
+const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+const resources = loadFrontendResources(compiledSpec);
+const selected = {
+  frontendId: "qlatt-english",
+  compiledSpec,
+  dictionaryMap: resources.lexicon?.dictionary,
+};
 
 describe("transcribe-text", () => {
   const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -14,8 +25,59 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
+    it("uses each frontend's declared lexicon and inherits Qlatt's selection", () => {
+      const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
+      const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+      expect(resources.lexicon?.path).toBe("/cmu-dictionary.json");
+      expect(beauty.lexicon?.dictionary).toBe(resources.lexicon?.dictionary);
+      expect(dectalk.lexicon?.path).toBe("/dectalk-dictionary.json");
+      expect(dectalk.lexicon?.dictionary).not.toBe(resources.lexicon?.dictionary);
+    });
+
+    it("uses LTS without an implicit CMU lookup when no lexicon is supplied", () => {
+      const diagnostics = createDiagnostics();
+      const noLexicon = {
+        ...compiledSpec,
+        resources: {},
+        dictionary_path: null,
+        skip_dictionary: true,
+      };
+      expect(loadFrontendResources(noLexicon).lexicon).toBeUndefined();
+      const options = { compiledSpec: noLexicon, frontendId: "no-lexicon" };
+      const tokens = transcribeText("adl tabatabai", { ...options, diagnostics });
+      expect(tokens).toEqual(transcribeText("adl tabatabai", { ...options, dictionaryMap: {} }));
+      expect(new Set(tokens.map((token) => token.word))).toEqual(new Set(["adl", "tabatabai"]));
+      expect(diagnostics.getEntries()).toContainEqual(
+        expect.objectContaining({
+          code: "I_FRONTEND_NO_LEXICON",
+          data: { frontendId: "no-lexicon" },
+        }),
+      );
+    });
+
+    it("uses the supplied map for compound recovery and preserves lookup overrides", () => {
+      const options = { ...selected, dictionaryMap: { "adl-tabatabai": "K AE1 T" } };
+      const tokens = transcribeText("adl tabatabai", options);
+      expect(new Set(tokens.map((token) => token.word))).toEqual(new Set(["adl-tabatabai"]));
+      expect(tokens.map((token) => token.phoneme)).toEqual(["K", "AE", "T"]);
+      const overridden = transcribeText("hello", {
+        ...options,
+        dictLookup: () => ["B", "IY1"],
+      });
+      expect(overridden.map((token) => token.phoneme)).toEqual(["B", "IY"]);
+    });
+
+    it("rejects a declared lexicon that cannot load instead of using CMU", () => {
+      expect(() =>
+        loadFrontendResources({
+          ...compiledSpec,
+          resources: { lexicon: "/missing-declared-lexicon.json" },
+        }),
+      ).toThrow("E_FRONTEND_CONFIG: lexicon could not load '/missing-declared-lexicon.json'");
+    });
+
     it("transcribes a simple word into phoneme tokens", () => {
-      const result = transcribeText("hello");
+      const result = transcribeText("hello", selected);
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       for (const token of result) {
@@ -28,7 +90,7 @@ describe("transcribe-text", () => {
 
     it("handles punctuation tokens", () => {
       for (const punct of [".", ",", "?", "!", ";", ":"]) {
-        const result = transcribeText(punct);
+        const result = transcribeText(punct, selected);
         expect(result.length).toBe(1);
         const token = result[0];
         expect(token.phoneme).toBe("SIL");
@@ -40,7 +102,7 @@ describe("transcribe-text", () => {
     });
 
     it("handles diagnostic symbol mode", () => {
-      const result = transcribeText("/b/");
+      const result = transcribeText("/b/", selected);
       expect(result.length).toBe(1);
       expect(result[0].phoneme).toBe("B");
       expect(result[0].stress).toBeNull();
@@ -49,6 +111,7 @@ describe("transcribe-text", () => {
     it("rejects missing transcription tables instead of falling back to TS defaults", () => {
       expect(() =>
         transcribeText("/b/", {
+          ...selected,
           transcriptionConfig: {
             diagnostic_symbols: {},
             letter_names: {},
@@ -59,12 +122,12 @@ describe("transcribe-text", () => {
     });
 
     it("handles empty/whitespace input", () => {
-      expect(transcribeText("")).toEqual([]);
-      expect(transcribeText("   ")).toEqual([]);
+      expect(transcribeText("", selected)).toEqual([]);
+      expect(transcribeText("   ", selected)).toEqual([]);
     });
 
     it("associates tokens with their source words", () => {
-      const result = transcribeText("hello world");
+      const result = transcribeText("hello world", selected);
       const helloTokens = result.filter((t) => t.word === "hello");
       const worldTokens = result.filter((t) => t.word === "world");
       expect(helloTokens.length).toBeGreaterThan(0);
@@ -72,7 +135,7 @@ describe("transcribe-text", () => {
     });
 
     it("produces tokens with correct TranscriptionToken shape", () => {
-      const result = transcribeText("cat");
+      const result = transcribeText("cat", selected);
       for (const token of result) {
         // Required fields
         expect("phoneme" in token).toBe(true);
@@ -82,7 +145,7 @@ describe("transcribe-text", () => {
     });
 
     it("handles mixed words and punctuation", () => {
-      const result = transcribeText("hello , world .");
+      const result = transcribeText("hello , world .", selected);
       const punctTokens = result.filter((t) => t.isPunctuation === true);
       const wordTokens = result.filter((t) => !t.isPunctuation);
       expect(punctTokens.length).toBe(2);
@@ -91,7 +154,7 @@ describe("transcribe-text", () => {
 
     it("recovers hyphenated CMUdict entries split by normalization", () => {
       warnSpy.mockClear();
-      const result = transcribeText("adl tabatabai");
+      const result = transcribeText("adl tabatabai", selected);
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["adl-tabatabai"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
@@ -102,7 +165,7 @@ describe("transcribe-text", () => {
 
     it("recovers multi-token hyphenated compounds", () => {
       warnSpy.mockClear();
-      const result = transcribeText("kebab n kurry");
+      const result = transcribeText("kebab n kurry", selected);
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["kebab-n-kurry"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
@@ -113,7 +176,7 @@ describe("transcribe-text", () => {
 
     it("recovers longer multi-token hyphenated compounds", () => {
       warnSpy.mockClear();
-      const result = transcribeText("trente et quarante");
+      const result = transcribeText("trente et quarante", selected);
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["trente-et-quarante"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
@@ -124,7 +187,7 @@ describe("transcribe-text", () => {
 
     it("recovers apostrophe-linked compounds split by normalization", () => {
       warnSpy.mockClear();
-      const result = transcribeText("rock'n roll");
+      const result = transcribeText("rock'n roll", selected);
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["rock'n'roll"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
@@ -135,7 +198,7 @@ describe("transcribe-text", () => {
 
     it("supports elided dictionary entries without leading apostrophe in input", () => {
       warnSpy.mockClear();
-      const result = transcribeText("cuse");
+      const result = transcribeText("cuse", selected);
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
         String(args[0]).includes('Word "cuse" not found in dictionary'),
@@ -145,7 +208,7 @@ describe("transcribe-text", () => {
 
     it("supports colloquial trailing-elision forms without apostrophe in input", () => {
       warnSpy.mockClear();
-      const result = transcribeText("comin");
+      const result = transcribeText("comin", selected);
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
         String(args[0]).includes('Word "comin" not found in dictionary'),
@@ -155,7 +218,7 @@ describe("transcribe-text", () => {
 
     it("recovers dictionary entries that keep trailing periods", () => {
       warnSpy.mockClear();
-      const result = transcribeText("cr");
+      const result = transcribeText("cr", selected);
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
         String(args[0]).includes('Word "cr" not found in dictionary'),
@@ -165,7 +228,7 @@ describe("transcribe-text", () => {
 
     it("recovers tokens with trailing apostrophe by stripping when needed", () => {
       warnSpy.mockClear();
-      const result = transcribeText("s'");
+      const result = transcribeText("s'", selected);
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
         String(args[0]).includes('Word "s\'" not found in dictionary'),

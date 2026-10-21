@@ -1,3 +1,4 @@
+import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
@@ -72,13 +73,8 @@ export type FrontendResources = {
   ltsPath: string;
   morphologyPath: string;
   stressPolicyPath: string;
-  /**
-   * Optional per-frontend pronunciation dictionary path (JSON, flat
-   * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
-   * lookup against this file instead of the global CMU default. Generic:
-   * a path -> a map -> lookup. Frontends without it keep the global behavior.
-   */
-  dictionaryPath?: string;
+  /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
+  lexicon?: { path: string; dictionary: CmuDictionary };
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
   sourceContour?: { path: string; spec: SourceContourSpec };
   textParser?: { config: TextParserConfig; table: TextParserTable };
@@ -873,6 +869,11 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const textParserConfig = parseTextParserConfig(spec);
   if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
   const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const lexiconReference = declaredResources.lexicon ?? spec.dictionary_path;
+  const lexiconPath =
+    lexiconReference == null
+      ? undefined
+      : requireAsset(lexiconReference, "lexicon", loadCmuDictionaryFromPathSync);
   const affectPresetsPath =
     declaredResources.affect_presets == null
       ? undefined
@@ -914,7 +915,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     ltsPath,
     morphologyPath,
     stressPolicyPath,
-    dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(lexiconPath === undefined
+      ? {}
+      : {
+          lexicon: {
+            path: lexiconPath,
+            dictionary: FRONTEND_ASSET_CACHE.get(lexiconPath) as CmuDictionary,
+          },
+        }),
     ...(affectPresetsPath === undefined || !affectLibrary
       ? {}
       : {

@@ -1,4 +1,3 @@
-import { loadCmuDictionaryFromPathSync } from "./cmu-dictionary-loader";
 import {
   type FeatureSchema,
   type HrgSchema,
@@ -735,8 +734,7 @@ export function normalizeText(text: string, frontendId = "qlatt-english"): strin
   const resources = loadFrontendResources(spec);
   const textParser = resources.textParser;
   if (!textParser) return normalizeGraphText(text, spec);
-  const dictionaryPath = resources.dictionaryPath;
-  const dictionary = dictionaryPath ? loadCmuDictionaryFromPathSync(dictionaryPath) : undefined;
+  const dictionary = resources.lexicon?.dictionary;
   const parsed = runTextParser(
     textParser.config,
     textParser.table,
@@ -777,13 +775,11 @@ function buildTextToKlattTrackDetailed(
     utterance.relation(relationName);
   }
 
-  const dictionary = resources.dictionaryPath
-    ? loadCmuDictionaryFromPathSync(resources.dictionaryPath)
-    : undefined;
+  const dictionary = resources.lexicon?.dictionary;
   if (dictionary) {
     options.diagnostics?.info(
-      `Loaded per-frontend dictionary '${resources.dictionaryPath}' (${Object.keys(dictionary).length} entries)`,
-      { dictionaryPath: resources.dictionaryPath, entries: Object.keys(dictionary).length },
+      `Loaded per-frontend dictionary '${resources.lexicon?.path}' (${Object.keys(dictionary).length} entries)`,
+      { dictionaryPath: resources.lexicon?.path, entries: Object.keys(dictionary).length },
       "I_FRONTEND_DICTIONARY_LOADED",
     );
   }
@@ -1061,6 +1057,7 @@ function buildTextToKlattTrackDetailed(
   const normalized = normalizeSourceItems(utterance, specWithModes, { captureTooling });
   onStage?.("normalization phases");
   const transcribed = transcribeText(normalized, {
+    frontendId: options.frontendPath ?? frontendId,
     captureTooling,
     ...(textModeSpans ? { textModeSpans } : {}),
     provenance,
@@ -1072,7 +1069,6 @@ function buildTextToKlattTrackDetailed(
     stressPolicyPath: resources.stressPolicyPath,
     diagnostics: options.diagnostics,
     dictionaryMap: dictionary,
-    dictLookup: dictionary == null && spec.skip_dictionary ? () => null : undefined,
   });
 
   onStage?.("transcription");

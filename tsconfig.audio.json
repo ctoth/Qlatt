@@ -2,24 +2,8 @@
   "extends": "./tsconfig.json",
   "include": [
     "src/worklets/audio-worklet-globals.d.ts",
-    "src/worklets/noise-source-processor.ts",
-    "src/worklets/impulse-train-processor.ts",
-    "src/worklets/glottal-mod-processor.ts",
-    "src/worklets/differentiator-processor.ts",
-    "src/worklets/resonator-processor.ts",
-    "src/worklets/antiresonator-processor.ts",
-    "src/worklets/lf-source-processor.ts",
-    "src/worklets/edge-detector-processor.ts",
-    "src/worklets/decay-envelope-processor.ts",
-    "src/worklets/signal-switch-processor.ts",
-    "src/worklets/impulsive-source-processor.ts",
-    "src/worklets/square-source-processor.ts",
-    "src/worklets/triangular-source-processor.ts",
-    "src/worklets/pitch-sync-mod-processor.ts",
-    "src/worklets/tilt-filter-processor.ts",
-    "src/worklets/fujisaki-resonator-processor.ts",
-    "src/worklets/oversampled-glottal-source-processor.ts",
-    "src/worklets/aerodynamic-model-processor.ts"
+    "src/worklets/wasm-utils.ts",
+    "src/worklets/*-processor.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

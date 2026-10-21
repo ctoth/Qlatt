@@ -3,12 +3,13 @@
  * Uses @marcbachmann/cel-js for expression parsing and evaluation.
  */
 
-import { Environment } from "@marcbachmann/cel-js";
+import { type ASTNode, Environment, type ParseResult } from "@marcbachmann/cel-js";
 import type { CelExpression, EvaluationContext, ParamValue } from "./types";
 
 export interface CelEvaluator {
   evaluate(expr: CelExpression, context: EvaluationContext): ParamValue;
   registerFunction(name: string, fn: (...args: ParamValue[]) => ParamValue): void;
+  references(expr: CelExpression): string[][];
 }
 
 /**
@@ -47,9 +48,9 @@ export function createCelEvaluator(): CelEvaluator {
   env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
 
   // Cache compiled expressions for reuse
-  const exprCache = new Map<string, (ctx?: Record<string, unknown>) => unknown>();
+  const exprCache = new Map<string, ParseResult>();
 
-  function compileExpr(expr: string): (ctx?: Record<string, unknown>) => unknown {
+  function compileExpr(expr: string): ParseResult {
     let cached = exprCache.get(expr);
     if (cached) return cached;
 
@@ -59,6 +60,48 @@ export function createCelEvaluator(): CelEvaluator {
   }
 
   return {
+    references(expr): string[][] {
+      const parsed = compileExpr(expr);
+      const checked = parsed.check();
+      if (!checked.valid) throw checked.error ?? new Error("Invalid semantic expression");
+      const result: string[][] = [];
+      const path = (node: ASTNode): string[] | undefined => {
+        if (node.op === "id") return [node.args];
+        if (node.op === "." || node.op === ".?") {
+          const parent = path(node.args[0]);
+          return parent && [...parent, node.args[1]];
+        }
+        if ((node.op === "[]" || node.op === "[?]") && node.args[1].op === "value") {
+          const parent = path(node.args[0]);
+          return parent && [...parent, String(node.args[1].args)];
+        }
+        return undefined;
+      };
+      const visit = (value: unknown, locals = new Set<string>()): void => {
+        if (Array.isArray(value)) {
+          for (const child of value) visit(child, locals);
+        } else if (value && typeof value === "object" && "op" in value) {
+          const node = value as ASTNode;
+          const reference = path(node);
+          if (reference) {
+            if (!locals.has(reference[0])) result.push(reference);
+            return;
+          }
+          if (
+            node.op === "rcall" &&
+            ["map", "filter", "all", "exists", "exists_one"].includes(node.args[0])
+          ) {
+            visit(node.args[1], locals);
+            const [binding, ...body] = node.args[2];
+            const scope = new Set(locals);
+            if (binding?.op === "id") scope.add(binding.args);
+            visit(body, scope);
+          } else visit(node.args, locals);
+        }
+      };
+      visit(parsed.ast);
+      return result;
+    },
     evaluate(expr: CelExpression, context: EvaluationContext): ParamValue {
       // Merge params and constants into context for variable access
       // This enables nested constant access like ndbScale.AV in expressions

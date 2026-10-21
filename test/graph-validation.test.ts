@@ -1,5 +1,5 @@
 /**
- * Tests for graph validation in createKlattRuntime.
+ * Tests for graph validation in createPreparedRuntime.
  *
  * Verifies that inline expression param specs ({ expr: "..." }) are rejected
  * at graph load time rather than silently dropped at runtime.
@@ -9,8 +9,8 @@
  */
 import { describe, expect, it } from "vitest";
 import type { BaconGraph, Registry } from "../src/klatt-runtime";
-import { createKlattRuntime } from "../src/klatt-runtime";
 import type { SemanticsDocument } from "../src/semantics/types";
+import { createPreparedRuntime } from "./runtime-fixture";
 
 // ---------------------------------------------------------------------------
 // Minimal mocks — validation fires before any AudioContext/worklet methods
@@ -53,17 +53,18 @@ function createFullMockAudioContext(): AudioContext {
 }
 
 const minimalRegistry: Registry = {
+  bacon: "0.1",
   primitives: {
     gain: {
       native: "GainNode",
-      params: { gain: { type: "a-rate", default: 1 } },
+      params: { gain: { type: "float", default: 1 } },
     },
   },
 };
 
 const minimalSemantics: SemanticsDocument = {
   name: "test",
-  params: {},
+  params: { voiceGain: { default: 1 } },
   realize: {},
 };
 
@@ -86,7 +87,7 @@ describe("graph param spec validation", () => {
     };
 
     await expect(
-      createKlattRuntime({
+      createPreparedRuntime({
         audioContext: createMockAudioContext(),
         semantics: minimalSemantics,
         graph,
@@ -108,21 +109,14 @@ describe("graph param spec validation", () => {
       },
     };
 
-    // Should not throw during validation.
-    // It will likely fail later (no real AudioContext), but that's fine —
-    // the point is it does NOT throw with an "expr not supported" error.
-    try {
-      await createKlattRuntime({
-        audioContext: createMockAudioContext(),
+    await expect(
+      createPreparedRuntime({
+        audioContext: createFullMockAudioContext(),
         semantics: minimalSemantics,
         graph,
         registry: minimalRegistry,
-      });
-    } catch (e: unknown) {
-      // Any error here should NOT be about expr specs
-      const msg = e instanceof Error ? e.message : String(e);
-      expect(msg).not.toMatch(/expr.*not supported/i);
-    }
+      }),
+    ).resolves.toBeDefined();
   });
 
   it("accepts literal number param spec without error", async () => {
@@ -138,18 +132,14 @@ describe("graph param spec validation", () => {
       },
     };
 
-    // Should not throw during validation
-    try {
-      await createKlattRuntime({
-        audioContext: createMockAudioContext(),
+    await expect(
+      createPreparedRuntime({
+        audioContext: createFullMockAudioContext(),
         semantics: minimalSemantics,
         graph,
         registry: minimalRegistry,
-      });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      expect(msg).not.toMatch(/expr.*not supported/i);
-    }
+      }),
+    ).resolves.toBeDefined();
   });
 });
 
@@ -180,7 +170,7 @@ describe("connectToDestination", () => {
       outputs: ["outputGain"],
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx,
       semantics: minimalSemantics,
       graph,
@@ -201,7 +191,7 @@ describe("connectToDestination", () => {
       // no outputs field
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx,
       semantics: minimalSemantics,
       graph,
@@ -221,7 +211,7 @@ describe("connectToDestination", () => {
       outputs: [],
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx,
       semantics: minimalSemantics,
       graph,
@@ -241,13 +231,13 @@ describe("connectToDestination", () => {
       outputs: ["nonExistentNode"],
     };
 
-    const runtime = await createKlattRuntime({
-      audioContext: ctx,
-      semantics: minimalSemantics,
-      graph,
-      registry: minimalRegistry,
-    });
-
-    expect(() => runtime.connectToDestination()).toThrow(/not found/i);
+    await expect(
+      createPreparedRuntime({
+        audioContext: ctx,
+        semantics: minimalSemantics,
+        graph,
+        registry: minimalRegistry,
+      }),
+    ).rejects.toThrow(/nonExistentNode/);
   });
 });

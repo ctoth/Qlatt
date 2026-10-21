@@ -3,7 +3,6 @@ import {
   preloadBundledRulepackSpec,
   preloadFrontendSourceContour,
 } from "../declarative-frontend/rule-pack";
-import { expandFormantBanks } from "../formant-bank";
 import type { ExperimentConfig } from "./load-experiment-config";
 
 export interface VocabularyMismatch {
@@ -16,8 +15,7 @@ export function checkVocabulary(
   columns: readonly string[],
   experimentConfig: Pick<ExperimentConfig, "graph" | "semantics">,
 ): VocabularyMismatch {
-  const { graph, semantics } = structuredClone(experimentConfig);
-  expandFormantBanks(graph, semantics);
+  const { semantics } = experimentConfig;
   const params = semantics.params ?? {};
   const emitted = new Set(columns);
   return {

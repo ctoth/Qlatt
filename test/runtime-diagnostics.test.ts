@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
-import { createKlattRuntime, type KlattRuntimeOptions } from "../src/klatt-runtime";
+import type { KlattRuntimeOptions } from "../src/klatt-runtime";
 import { createProvenanceCollector } from "../src/provenance";
+import { createPreparedRuntime, type RuntimeFixtureOptions } from "./runtime-fixture";
 
 function fixture() {
   const diagnostics = createDiagnostics();
@@ -12,7 +13,7 @@ function fixture() {
     connect: vi.fn(),
     disconnect: vi.fn(),
   };
-  const options: KlattRuntimeOptions = {
+  const options: RuntimeFixtureOptions = {
     diagnostics,
     audioContext: {
       createGain: () => node,
@@ -20,7 +21,10 @@ function fixture() {
       audioWorklet: { addModule: vi.fn() },
     } as unknown as AudioContext,
     graph: { bacon: "0.1", nodes: { out: { type: "gain" } }, outputs: ["out"] },
-    registry: { primitives: { gain: { native: "GainNode" } } },
+    registry: {
+      bacon: "0.1",
+      primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } },
+    },
     semantics: { name: "test", params: {} },
   };
   return { options, diagnostics, node };
@@ -32,7 +36,7 @@ describe("runtime structural diagnostics", () => {
     options.semantics.params = {
       nasalCouplingArea: { default: 0, range: [0, 2.5], diagnoseRange: true },
     };
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     runtime.setInputs({ nasalCouplingArea: 5 });
     expect(diagnostics.getEntries()).toEqual([
       expect.objectContaining({ code: "W_SEMANTICS_PARAM_RANGE" }),
@@ -41,7 +45,7 @@ describe("runtime structural diagnostics", () => {
   it("reports unsupported native bindings before construction", async () => {
     const { options, diagnostics, node } = fixture();
     options.registry.primitives.gain.native = "UnknownNode";
-    await expect(createKlattRuntime(options)).rejects.toThrow(/Unsupported native binding/);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/Unsupported native binding/);
     expect(node.connect).not.toHaveBeenCalled();
     expect(diagnostics.getEntries()[0]).toMatchObject({
       code: "runtime.invalid_primitive",
@@ -81,7 +85,7 @@ describe("runtime structural diagnostics", () => {
     options.graph.nodes.source = { type: "source" };
     options.audioWorkletNodeCtor =
       Worklet as unknown as KlattRuntimeOptions["audioWorkletNodeCtor"];
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     expect(constructed).toHaveBeenCalledWith(
       options.audioContext,
       "source",
@@ -111,50 +115,20 @@ describe("runtime structural diagnostics", () => {
     options.graph.connections = [["out", "out"]];
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
     options.semantics.params = { volume: { type: "float", default: 0.5 } };
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     runtime.connectToDestination();
     expect(node.gain.value).toBe(0.5);
     expect(node.connect).toHaveBeenCalledTimes(2);
     expect(diagnostics.getEntries()).toEqual([]);
   });
 
-  it("reports omitted unknown nodes and each dropped edge with endpoints", async () => {
+  it("rejects unknown nodes and edges before allocation", async () => {
     const { options, diagnostics, node } = fixture();
-    options.provenance = createProvenanceCollector();
     options.graph.nodes.lost = { type: "unknown" };
-    options.graph.connections = [
-      ["lost", "out"],
-      { from: "out", to: { node: "absent", param: "gain" } },
-    ];
-    const runtime = await createKlattRuntime(options);
-    expect(runtime.getAllNodeIds()).toEqual(["out"]);
+    options.graph.connections = [["lost", "out"]];
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/unknown/);
     expect(node.connect).not.toHaveBeenCalled();
-    expect(options.provenance.getDecisions()).toEqual([]);
-    expect(diagnostics.getEntries()).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          code: "runtime.node_omitted",
-          level: "warn",
-          data: expect.objectContaining({
-            nodeId: "lost",
-            primitive: "unknown",
-            consequence: "node omitted",
-          }),
-        }),
-        expect.objectContaining({
-          code: "runtime.connection_dropped",
-          data: expect.objectContaining({
-            from: "lost",
-            to: "out",
-            consequence: "connection dropped",
-          }),
-        }),
-        expect.objectContaining({
-          code: "runtime.connection_dropped",
-          data: expect.objectContaining({ to: { node: "absent", param: "gain" } }),
-        }),
-      ]),
-    );
+    expect(diagnostics.getEntries()[0].level).toBe("error");
   });
 
   it("reports missing WASM without constructing the omitted worklet", async () => {
@@ -164,7 +138,7 @@ describe("runtime structural diagnostics", () => {
     options.wasmModules = {};
     options.registry.primitives.source = { worklet: "source.js", wasm: "source.wasm" };
     options.graph.nodes.source = { type: "source" };
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     expect(runtime.getNode("source")).toBeUndefined();
     expect(ctor).not.toHaveBeenCalled();
     expect(diagnostics.getEntries()).toContainEqual(
@@ -183,9 +157,10 @@ describe("runtime structural diagnostics", () => {
   it("reports absent destination AudioParams for edges and bindings", async () => {
     const { options, diagnostics, node } = fixture();
     options.graph.connections = [{ from: "out", to: { node: "out", param: "missing" } }];
+    options.registry.primitives.gain.params!.missing = { type: "float", default: 1 };
     options.graph.nodes.out.params = { missing: { bind: "volume" } };
     options.semantics.params = { volume: { type: "float", default: 0.5 } };
-    await createKlattRuntime(options);
+    await createPreparedRuntime(options);
     expect(node.connect).not.toHaveBeenCalled();
     expect(diagnostics.getEntries().map((e) => e.code)).toEqual([
       "runtime.connection_dropped",
@@ -195,8 +170,9 @@ describe("runtime structural diagnostics", () => {
 
   it("retains the observed value for unresolved bindings and bounds repeated updates", async () => {
     const { options, diagnostics, node } = fixture();
+    options.semantics.params = { volume: { type: "float" } };
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     for (let i = 0; i < 300; i++) runtime.setInputs({ volume: "invalid" });
     expect(node.gain.value).toBe(1);
     expect(diagnostics.getEntries()).toHaveLength(1);
@@ -219,7 +195,7 @@ describe("runtime structural diagnostics", () => {
   it.each([-1, 0.5, NaN, "missing", 1])("rejects invalid supplied port %s", async (port) => {
     const { options, diagnostics, node } = fixture();
     options.graph.connections = [{ from: { node: "out", port }, to: "out" }];
-    await expect(createKlattRuntime(options)).rejects.toThrow(/port/i);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/port/i);
     expect(node.connect).not.toHaveBeenCalled();
     expect(diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({ code: "runtime.invalid_port", level: "error" }),
@@ -229,7 +205,7 @@ describe("runtime structural diagnostics", () => {
   it.each([-1, 0.5, NaN])("rejects invalid supplied count %s", async (inputs) => {
     const { options, diagnostics } = fixture();
     options.registry.primitives.gain.inputs = inputs;
-    await expect(createKlattRuntime(options)).rejects.toThrow(/inputs/i);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/inputs/i);
     expect(diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({ code: "runtime.invalid_count", level: "error" }),
     );
@@ -238,7 +214,7 @@ describe("runtime structural diagnostics", () => {
   it("reports missing graph outputs when destination connection is requested", async () => {
     const { options, diagnostics } = fixture();
     delete options.graph.outputs;
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     expect(() => runtime.connectToDestination()).toThrow(/outputs/);
     expect(diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({ code: "runtime.invalid_output", level: "error" }),
@@ -256,7 +232,7 @@ describe("runtime structural diagnostics", () => {
       { from: { node: "out", port: "second" }, to: "out" },
       { from: { node: "out", port: 0 }, to: { node: "out", param: "gain" } },
     ];
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     runtime.connectToDestination();
     expect(node.connect).toHaveBeenCalledWith(node, 1, 0);
     expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
@@ -285,7 +261,7 @@ describe("runtime structural diagnostics", () => {
       const { options, diagnostics } = fixture();
       options.registry.primitives.gain.ports = { named: declaration };
       options.graph.outputs = [{ node: "out", port: "named" }];
-      await expect(createKlattRuntime(options)).rejects.toThrow(/port/);
+      await expect(createPreparedRuntime(options)).rejects.toThrow(/port/);
       expect(diagnostics.getEntries()[0].code).toBe("runtime.invalid_port");
     },
   );
@@ -293,7 +269,7 @@ describe("runtime structural diagnostics", () => {
   it("rejects a missing required worklet declaration", async () => {
     const { options, diagnostics } = fixture();
     options.registry.primitives.gain = { category: "wasm-worklet", wasm: "missing.wasm" };
-    await expect(createKlattRuntime(options)).rejects.toThrow(/declaration/);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/declaration/);
     expect(diagnostics.getEntries()[0].code).toBe("runtime.invalid_primitive");
   });
 
@@ -304,7 +280,7 @@ describe("runtime structural diagnostics", () => {
       resolveWorkletModule: (file) => file,
       loadWasmModule: vi.fn().mockRejectedValue(new Error("unavailable")),
     };
-    await expect(createKlattRuntime(options)).rejects.toThrow(/unavailable/);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/unavailable/);
     expect(diagnostics.getEntries()[0]).toMatchObject({
       code: "runtime.wasm_load_failed",
       data: {
@@ -321,7 +297,7 @@ describe("runtime structural diagnostics", () => {
     node.connect.mockImplementation(() => {
       throw new Error("host port mismatch");
     });
-    await expect(createKlattRuntime(options)).rejects.toThrow(/host port mismatch/);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/host port mismatch/);
     expect(options.provenance.getDecisions()).toEqual([]);
     expect(node.disconnect).toHaveBeenCalledOnce();
     expect(diagnostics.getEntries()[0]).toMatchObject({
@@ -337,9 +313,10 @@ describe("runtime structural diagnostics", () => {
       connect: vi.fn(),
       disconnect: vi.fn(),
     })) as unknown as AudioContext["createGain"];
+    options.semantics.params = { volume: { type: "float" } };
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
     options.graph.connections = [{ from: "out", to: { node: "out", param: "gain" } }];
-    const runtime = await createKlattRuntime(options);
+    const runtime = await createPreparedRuntime(options);
     expect(runtime.getDiagnostics()).toBe(diagnostics);
     expect(diagnostics.getEntries().map((e) => e.code)).toEqual([
       "runtime.connection_dropped",
@@ -352,7 +329,7 @@ describe("runtime structural diagnostics", () => {
     const { options, diagnostics, node } = fixture();
     options.provenance = createProvenanceCollector();
     options.graph.connections = [{ from: "out", to: { node: "out", param: "gain" } }];
-    await createKlattRuntime(options);
+    await createPreparedRuntime(options);
     expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
     expect(options.provenance.getDecisions()).toHaveLength(1);
     expect(options.provenance.getDecisions()[0].reason).toBe(
@@ -364,7 +341,7 @@ describe("runtime structural diagnostics", () => {
   it("rejects worklets with no inputs and no outputs", async () => {
     const { options, diagnostics } = fixture();
     options.registry.primitives.gain = { worklet: "source.js", inputs: 0, outputs: 0 };
-    await expect(createKlattRuntime(options)).rejects.toThrow(/inputs or outputs/);
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/inputs or outputs/);
     expect(diagnostics.getEntries()[0].code).toBe("runtime.invalid_count");
   });
 
@@ -375,34 +352,30 @@ describe("runtime structural diagnostics", () => {
     ]) {
       const { options, diagnostics } = fixture();
       options.graph.connections = [{ from: "out", to }];
-      await expect(createKlattRuntime(options)).rejects.toThrow(/port/i);
+      await expect(createPreparedRuntime(options)).rejects.toThrow(/port/i);
       expect(diagnostics.getEntries()[0].code).toBe("runtime.invalid_port");
     }
   });
 
-  it("rejects an omitted output node when connecting to destination", async () => {
+  it("rejects a missing output node during preparation", async () => {
     const { options, diagnostics } = fixture();
     options.graph.outputs = ["absent"];
-    const runtime = await createKlattRuntime(options);
-    expect(() => runtime.connectToDestination()).toThrow(/not found/);
-    expect(diagnostics.getEntries()[0]).toMatchObject({
-      code: "runtime.invalid_output",
-      data: { nodeId: "absent" },
-    });
+    await expect(createPreparedRuntime(options)).rejects.toThrow(/absent/);
+    expect(diagnostics.getEntries()[0].level).toBe("error");
   });
 
   it("retains nonfinite requested values and distinct affected binding contexts", async () => {
     const { options, diagnostics, node } = fixture();
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
     options.graph.nodes.other = { type: "gain", params: { gain: { bind: "volume" } } };
-    options.semantics.params = { volume: { type: "float", default: Infinity } };
-    const runtime = await createKlattRuntime(options);
+    options.semantics.params = { volume: { type: "float", default: 0.5 } };
+    const runtime = await createPreparedRuntime(options);
     runtime.setInputs({ volume: Infinity });
-    expect(node.gain.value).toBe(1);
+    expect(node.gain.value).toBe(0.5);
     expect(diagnostics.getEntries()).toHaveLength(2);
     expect(diagnostics.getEntries().map((e) => e.data)).toEqual([
-      expect.objectContaining({ nodeId: "out", requestedValue: Infinity, appliedValue: 1 }),
-      expect.objectContaining({ nodeId: "other", requestedValue: Infinity, appliedValue: 1 }),
+      expect.objectContaining({ nodeId: "out", requestedValue: Infinity, appliedValue: 0.5 }),
+      expect.objectContaining({ nodeId: "other", requestedValue: Infinity, appliedValue: 0.5 }),
     ]);
   });
 });

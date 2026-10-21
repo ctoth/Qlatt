@@ -156,8 +156,8 @@ async function main(): Promise<void> {
   // 4. Render the affected track to WAV via the offline node runtime.
   const totalTime = (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
   const length = Math.max(1, Math.ceil(totalTime * sampleRate));
-  const ctx = new OfflineAudioContext(1, length, sampleRate);
   const config = await loadExperimentConfig(experimentId, frontendId);
+  const ctx = new OfflineAudioContext(1, length, sampleRate);
   const assetLoader = await createNodeRuntimeAssetLoader(path.join(repoRoot, "public", "worklets"));
   try {
     const workletProcessorOptionsByNodeId = buildWorkletProcessorOptionsByNodeId(
@@ -166,9 +166,7 @@ async function main(): Promise<void> {
     );
     const runtime = await createKlattRuntime({
       audioContext: ctx as unknown as AudioContext,
-      graph: config.graph,
-      semantics: config.semantics,
-      registry: config.registry,
+      config,
       assetLoader,
       audioWorkletNodeCtor: NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
       workletProcessorOptionsByNodeId,

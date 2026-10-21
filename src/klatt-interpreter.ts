@@ -80,7 +80,7 @@ export type PreparedTrack = {
 };
 
 export interface KlattScheduleCompilerOptions {
-  /** Records compiled mode selection, not playback time or value ancestry. */
+  /** Records cited realization results and compiled mode selection, without playback time or value ancestry. */
   provenance?: ProvenanceCollector;
   sampleRate: number;
   semantics: SemanticsDocument;

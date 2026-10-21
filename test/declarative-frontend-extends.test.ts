@@ -993,7 +993,8 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
             () => null,
             (thrown: Error) => thrown,
           );
-        expect(error?.message).toMatch(/^E_YAML_READ: '.*\/phases\/duration\.yaml' exists at /);
+        expect(error?.message).toMatch(/^E_YAML_READ: '.*\/phases\/duration\.yaml' could not be read via /);
+        expect(error?.cause).toBeInstanceOf(Error);
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }

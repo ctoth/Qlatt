@@ -1136,6 +1136,10 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  pronunciation_layers:
+    order: [dictionary, clitic, morphology, lts]
+    citations:
+      - 'Engineering compatibility policy: preserve dictionary, clitic, morphology, then LTS priority'
   compound_recovery:
     max_span: 4
     joiners: ["-", "'"]

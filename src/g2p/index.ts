@@ -5,7 +5,7 @@
  * Elovitz LTS rules + the frontend's cited lexical stress policy into a single
  * pronounce() function.
  *
- * Layer priority:
+ * The selected frontend declares generic layer priority. Bundled order:
  *   1. Dictionary lookup (highest accuracy)
  *   2. Configured clitic handling (dict base + shared suffix allomorph)
  *   3. Morphological decomposition (affix stripping + dict root)
@@ -27,7 +27,7 @@ import {
   PHONEMIC_CLASS_WORD_OPEN,
 } from "../text-parser/phonemes";
 import type { LtsContext } from "./lts-document";
-import { applyLtsRules, type LtsRulesData } from "./lts-engine";
+import { applyLtsRules, parseLtsRulesData } from "./lts-engine";
 import type { MorphologyContext } from "./morphology";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
@@ -60,7 +60,12 @@ import {
   storeSyntacticMarkers,
 } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
-import type { DictLookup, PronunciationResult } from "./types";
+import {
+  type DictLookup,
+  type PronunciationLayers,
+  type PronunciationResult,
+  parsePronunciationLayers,
+} from "./types";
 
 /** The control symbols numberWords carries (INCLUDE/l_com_ph.h). */
 const WORD_SYMBOLS: ReadonlySet<number> = new Set([
@@ -84,6 +89,7 @@ export function pronounce(
   dictLookup: DictLookup,
   options: {
     lts: LtsContext;
+    pronunciationLayers?: PronunciationLayers;
     morphology?: MorphologyContext;
     stress?: StressContext;
     frontendId?: string;
@@ -102,6 +108,7 @@ export function pronounce(
     options.lts.path.endsWith(".json") && isLtsTableDocument(options.lts.document)
       ? options.lts.document
       : null;
+  if (!table) return pronounceGeneric(word, dictLookup, options);
   const context = options.context ?? loneWordContext();
   // A table that records form classes gives every word a list, empty for a
   // word it does not know. A fixed class wins over the dictionary's
@@ -869,7 +876,7 @@ export function pronounce(
   // table's own order: suffix stripping against the dictionary, then the
   // rules. The stress comes from the dictionary root or from the table's
   // passes; neither the shared morphology nor the stress policy runs.
-  if (table) {
+  {
     const { suffixIndex, suffixTable } = table;
     const strip = (lookup: DictLookup) =>
       suffixIndex && suffixTable
@@ -1077,50 +1084,65 @@ export function pronounce(
       ...(byRules.boundaryAfter.length > 0 ? { boundaryAfterAt: byRules.boundaryAfter } : {}),
     };
   }
+}
 
-  // 2. Apply configured clitics using their shared suffix allomorph rules
+function pronounceGeneric(
+  word: string,
+  dictLookup: DictLookup,
+  options: Parameters<typeof pronounce>[2],
+): PronunciationResult {
+  const policy = parsePronunciationLayers(options.pronunciationLayers);
+  const lowerWord = word.toLowerCase();
   if (!options.morphology) {
     throw new Error(
       `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "unspecified"}' requires morphology`,
     );
   }
-  const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphology);
-  if (cliticResult) {
-    return cliticResult;
-  }
-
-  // 3. Try morphological decomposition (affix stripping + dict root)
-  let generated = decomposeWord(lowerWord, dictLookup, options.morphology);
-  if (!generated) {
-    if (!options.lts.path) {
-      throw new Error(
-        `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
-      );
-    }
-    generated = {
-      phonemes: applyLtsRules(word, options.lts.document as LtsRulesData, {
-        diagnostics: options.diagnostics,
-        frontendId: options.frontendId,
-        resource: options.lts.path,
-      }),
-      source: "lts-rules",
-      word: lowerWord,
-    };
-  }
-  // Both generated sources reach the same lexical stage before inventory materialization.
-  const stressHint = getStressHintForWord(lowerWord, options.morphology);
   if (!options.stress) {
     throw new Error(
       `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "unspecified"}' requires stress_policy`,
     );
   }
-  const lexicalStress = stressPronunciation(generated.phonemes, {
-    stress: options.stress,
-    wordId: lowerWord,
-    hint: stressHint,
-    morphology: generated.morphology,
-  });
-  return { ...generated, phonemes: lexicalStress.phonemes, lexicalStress };
+  if (!options.lts.path)
+    throw new Error(`E_LTS_PATH_MISSING: word '${word}' has no ltsPath configured`);
+  const lts = parseLtsRulesData(options.lts.document);
+  for (const layer of policy.order) {
+    let selected: PronunciationResult | null = null;
+    if (layer === "dictionary") {
+      const phonemes = dictLookup(lowerWord);
+      if (phonemes) selected = { phonemes, source: "dictionary", word: lowerWord };
+    } else if (layer === "clitic") {
+      selected = decomposeClitic(lowerWord, dictLookup, options.morphology);
+    } else if (layer === "morphology") {
+      selected = decomposeWord(lowerWord, dictLookup, options.morphology);
+    } else {
+      selected = {
+        phonemes: applyLtsRules(word, lts, {
+          diagnostics: options.diagnostics,
+          frontendId: options.frontendId,
+          resource: options.lts.path,
+        }),
+        source: "lts-rules",
+        word: lowerWord,
+      };
+    }
+    if (!selected) continue;
+    if (layer === "dictionary" || layer === "clitic")
+      return { ...selected, pronunciationLayer: layer };
+    const lexicalStress = stressPronunciation(selected.phonemes, {
+      stress: options.stress,
+      wordId: lowerWord,
+      hint: getStressHintForWord(lowerWord, options.morphology),
+      morphology: selected.morphology,
+    });
+    return {
+      ...selected,
+      phonemes: lexicalStress.phonemes,
+      lexicalStress,
+      pronunciationLayer: layer,
+    };
+  }
+  throw new Error("E_G2P_LAYERS: no pronunciation layer selected");
 }
 
 /**
@@ -1138,6 +1160,7 @@ export function pronounceClause(
   dictLookup: DictLookup,
   options: {
     lts: LtsContext;
+    pronunciationLayers?: PronunciationLayers;
     morphology?: MorphologyContext;
     stress?: StressContext;
     frontendId?: string;

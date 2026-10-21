@@ -4,6 +4,7 @@ import type { Diagnostics } from "../diagnostics";
 import type { LtsContext } from "../g2p/lts-document";
 import type { MorphologyContext } from "../g2p/morphology";
 import type { StressContext } from "../g2p/stress-policy";
+import type { PronunciationLayers } from "../g2p/types";
 import type { AffectLibrary } from "../input/affect-presets";
 import type { InlineMarkers } from "../input/inline";
 import type { RdPolicy } from "../input/rd-policy";
@@ -64,6 +65,7 @@ export type FrontendResources = Readonly<{
    */
   inventoryDocuments: readonly string[];
   lts: LtsContext;
+  pronunciationLayers?: PronunciationLayers;
   morphology?: MorphologyContext;
   stress?: StressContext;
   /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */

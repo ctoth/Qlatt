@@ -9,9 +9,11 @@
  * Citation: Allen, Hunnicutt & Klatt (1987), From Text to Speech: The MITalk System.
  */
 
-import { describe, expect, it } from "vitest";
-import type { DictLookup } from "../src/g2p/types";
-import { applyLtsRules, assignStress, pronounce } from "./g2p-fixture";
+import { describe, expect, it, vi } from "vitest";
+import { pronounce as pronounceSelected } from "../src/g2p";
+import * as stress from "../src/g2p/stress";
+import { type DictLookup, parsePronunciationLayers } from "../src/g2p/types";
+import { applyLtsRules, assignStress, pronounce, resources } from "./g2p-fixture";
 
 // --- Helper dict factories ---
 
@@ -26,6 +28,79 @@ function makeDict(entries: Record<string, string[]>): DictLookup {
 // --- Block 1: Pipeline Order Tests ---
 
 describe("pronounce() pipeline order", () => {
+  it("selects morphology before a successful dictionary entry and stresses it once", () => {
+    const lookup = makeDict({ running: ["R", "AH2", "N", "IH0", "NG"], run: ["R", "AH1", "N"] });
+    const spy = vi.spyOn(stress, "stressPronunciation");
+    try {
+      const dictionary = pronounce("running", lookup);
+      expect(dictionary.phonemes).toEqual(["R", "AH2", "N", "IH0", "NG"]);
+      expect(dictionary.pronunciationLayer).toBe("dictionary");
+      expect(spy).not.toHaveBeenCalled();
+      const result = pronounceSelected("running", lookup, {
+        ...resources,
+        pronunciationLayers: {
+          order: ["morphology", "dictionary", "clitic", "lts"],
+          citations: ["fixture order"],
+        },
+      });
+      expect(result).toMatchObject({
+        source: "morphology",
+        pronunciationLayer: "morphology",
+        rootWord: "run",
+      });
+      expect(result.morphology?.length).toBeGreaterThan(0);
+      expect(result.lexicalStress).toBeDefined();
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockClear();
+      const clitic = pronounce("fox's", makeDict({ fox: ["F", "AA1", "K", "S"] }));
+      expect(clitic).toMatchObject({
+        source: "dictionary",
+        pronunciationLayer: "clitic",
+        rootWord: "fox",
+      });
+      expect(clitic.phonemes).toEqual(["F", "AA1", "K", "S", "IH0", "Z"]);
+      expect(clitic.lexicalStress).toBeUndefined();
+      expect(spy).not.toHaveBeenCalled();
+      const lts = pronounceSelected("cat", lookup, {
+        ...resources,
+        pronunciationLayers: {
+          order: ["lts", "dictionary", "clitic", "morphology"],
+          citations: ["fixture order"],
+        },
+      });
+      expect(lts.pronunciationLayer).toBe("lts");
+      expect(spy).toHaveBeenCalledTimes(1);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it.each([
+    ["dictionary", "clitic", "morphology", "unknown"],
+    ["dictionary", "dictionary", "morphology", "lts"],
+    ["dictionary", "lts"],
+  ])("rejects invalid layer order %j", (...order) => {
+    expect(() => parsePronunciationLayers({ order, citations: ["fixture"] })).toThrow(
+      "E_G2P_LAYERS",
+    );
+  });
+
+  it("requires declared fallback resources even when the dictionary would succeed", () => {
+    const lookup = makeDict({ cat: ["K", "AE1", "T"] });
+    expect(() => pronounceSelected("cat", lookup, { ...resources, morphology: undefined })).toThrow(
+      "requires morphology",
+    );
+    expect(() => pronounceSelected("cat", lookup, { ...resources, stress: undefined })).toThrow(
+      "requires stress_policy",
+    );
+    expect(() =>
+      pronounceSelected("cat", lookup, { ...resources, lts: { ...resources.lts, path: "" } }),
+    ).toThrow("E_LTS_PATH_MISSING");
+    expect(() =>
+      pronounceSelected("cat", lookup, { ...resources, lts: { ...resources.lts, document: {} } }),
+    ).toThrow("E_LTS_POLICY");
+  });
+
   it("uses dictionary pronunciation when word is in dict", () => {
     const dict = makeDict({ hello: ["HH", "AH0", "L", "OW1"] });
     const result = pronounce("hello", dict);

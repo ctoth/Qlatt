@@ -263,7 +263,9 @@ describe("explain phrase cli", () => {
     expect([...dot.stdout.matchAll(/^ {2}"(d\d+)" \[label=/gm)].map((match) => match[1])).toEqual([
       ...ids,
     ]);
-    expect(dot.stdout.split("\n").filter((line) => line.includes(" -> "))).toEqual(expectedEdges);
+    expect(dot.stdout.split("\n").filter((line) => /^ {2}"d\d+" -> "d\d+";$/.test(line))).toEqual(
+      expectedEdges,
+    );
     expect(dot.stdout).toContain(`omitted external parent links: ${omitted}`);
   });
 

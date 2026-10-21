@@ -32,6 +32,51 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
+    it("attributes LTS-first selection without inventing a dictionary miss and preserves stress parents", () => {
+      const diagnostics = createDiagnostics();
+      const provenance = createProvenanceCollector();
+      const alternate = loadFrontendResources({
+        ...compiledSpec,
+        transcription: {
+          ...transcriptionConfig,
+          pronunciation_layers: {
+            order: ["lts", "dictionary", "clitic", "morphology"],
+            citations: ["fixture LTS first"],
+          },
+        },
+      });
+      const tokens = transcribeText("cat", {
+        ...selected,
+        resources: alternate,
+        dictionaryMap: { cat: "D AO1 G" },
+        diagnostics,
+        provenance,
+      });
+      expect(tokens.map((token) => token.phoneme)).toEqual(["K", "AE", "T"]);
+      const records = provenance.getDecisions();
+      const pronunciation = records.find(
+        (record) => record.type === "fallback_pronunciation_selected",
+      )!;
+      expect(pronunciation.reason).toContain("before dictionary lookup");
+      expect(pronunciation.reason).toContain("selected layer lts");
+      expect(pronunciation.reason).not.toContain("not in dictionary");
+      expect(pronunciation.citations).toContain("fixture LTS first");
+      expect(pronunciation.parents?.length).toBeGreaterThan(0);
+      const stressRecords = records.filter((record) => record.subject.includes(":stress:"));
+      expect(stressRecords.length).toBeGreaterThan(0);
+      expect(stressRecords.every((record) => record.parents?.includes(pronunciation.id))).toBe(
+        true,
+      );
+      expect(
+        diagnostics.getEntries().some((entry) => entry.code === "G2P_DICTIONARY_FALLBACK"),
+      ).toBe(false);
+      const ordinary = createDiagnostics();
+      transcribeText("blorf", { ...selected, dictionaryMap: {}, diagnostics: ordinary });
+      expect(ordinary.getEntries().some((entry) => entry.code === "G2P_DICTIONARY_FALLBACK")).toBe(
+        true,
+      );
+    });
+
     it("forwards the selected collector and original case to YAML LTS", () => {
       const document = structuredClone(resources.lts.document) as LtsRulesData;
       document.input_policy.case_mode = "preserve";

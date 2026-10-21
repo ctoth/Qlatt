@@ -340,7 +340,7 @@ function renderDot(payload: ExplainPayload): string {
 }
 
 function renderHtml(payload: ExplainPayload): string {
-  const escape = (value: string) =>
+  const escapeHtml = (value: string) =>
     value
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -370,28 +370,28 @@ function renderHtml(payload: ExplainPayload): string {
       const x2 = child.x + 110;
       const y2 = child.y;
       edges.push(
-        `<path data-parent="${escape(parentId)}" data-child="${escape(decision.id)}" d="M${x1},${y1} C${x1},${y1 + 20} ${x2},${y2 - 20} ${x2},${y2}" fill="none" stroke="#555" marker-end="url(#arrow)"/>`,
+        `<path data-parent="${escapeHtml(parentId)}" data-child="${escapeHtml(decision.id)}" d="M${x1},${y1} C${x1},${y1 + 20} ${x2},${y2 - 20} ${x2},${y2}" fill="none" stroke="#555" marker-end="url(#arrow)"/>`,
       );
     }
   }
   const nodes = decisions.map((decision) => {
     const { x, y } = positions.get(decision.id)!;
-    return `<a href="#detail-${escape(decision.id)}" aria-label="Details for ${escape(decision.id)}">
-<title>${escape(`${decision.id}: ${decision.type} — ${decision.subject}`)}</title>
+    return `<a href="#detail-${escapeHtml(decision.id)}" aria-label="Details for ${escapeHtml(decision.id)}">
+<title>${escapeHtml(`${decision.id}: ${decision.type} — ${decision.subject}`)}</title>
 <rect x="${x}" y="${y}" width="220" height="48" rx="4" fill="${STAGE_COLORS[decision.stage]}" stroke="#333"/>
-<text x="${x + 8}" y="${y + 18}">${escape(decision.id)}</text>
-<text x="${x + 8}" y="${y + 36}">${escape(decision.type.slice(0, 26))}</text></a>`;
+<text x="${x + 8}" y="${y + 18}">${escapeHtml(decision.id)}</text>
+<text x="${x + 8}" y="${y + 36}">${escapeHtml(decision.type.slice(0, 26))}</text></a>`;
   });
   const details = decisions.map((decision) => {
     const parents = (decision.parents ?? []).map((parent) =>
       positions.has(parent)
-        ? `<a href="#detail-${escape(parent)}">${escape(parent)}</a>`
-        : `${escape(parent)} (outside selection)`,
+        ? `<a href="#detail-${escapeHtml(parent)}">${escapeHtml(parent)}</a>`
+        : `${escapeHtml(parent)} (outside selection)`,
     );
-    return `<li id="detail-${escape(decision.id)}">
-<h3>${escape(`${decision.id} — ${decision.stage}: ${decision.type}`)}</h3>
-<p>Subject: ${escape(decision.subject)}</p><p>${escape(decision.reason)}</p>
-<p>Citations: ${escape(decision.citations.join("; ") || "(none)")}</p>
+    return `<li id="detail-${escapeHtml(decision.id)}">
+<h3>${escapeHtml(`${decision.id} — ${decision.stage}: ${decision.type}`)}</h3>
+<p>Subject: ${escapeHtml(decision.subject)}</p><p>${escapeHtml(decision.reason)}</p>
+<p>Citations: ${escapeHtml(decision.citations.join("; ") || "(none)")}</p>
 <p>Parents: ${parents.join(", ") || "(none)"}</p></li>`;
   });
   return `<!doctype html>
@@ -402,7 +402,7 @@ body { font-family: system-ui, sans-serif; color: #222; background: white; margi
 svg text { font: 13px monospace; fill: #222; }
 a:focus { outline: 3px solid #005fcc; } li:target { outline: 3px solid #005fcc; }
 li { padding: .5rem; overflow-wrap: anywhere; } p { white-space: pre-wrap; }
-</style></head><body><h1>Provenance decisions</h1><p>${escape(payload.phrase)}</p>
+</style></head><body><h1>Provenance decisions</h1><p>${escapeHtml(payload.phrase)}</p>
 <p>Selected decision subset: ${decisions.length}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}.
 IDs belong to this run. Columns show stages; rows follow decision sequence, not elapsed time. Arrows point from parent to child.</p>
 <p><a href="#details">Skip graph to decision details</a></p><div class="graph" tabindex="0" role="region" aria-label="Scrollable decision graph">

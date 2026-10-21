@@ -91,7 +91,8 @@ realize:
   localResult: 'local * 2'
   generated1: 'local * 3'
 `,
-        "/experiments/grandchild/registry.yaml": "primitives:\n  local: { native: OscillatorNode }\n",
+        "/experiments/grandchild/registry.yaml":
+          "primitives:\n  local: { native: OscillatorNode }\n",
         "/experiments/grandchild/graph.yaml": "bacon: '0.1'\nnodes: { local: { type: local } }\n",
       },
       "grandchild",
@@ -103,16 +104,25 @@ realize:
     expect(config.registry.primitives.local).toEqual({ native: "OscillatorNode" });
     expect(config.graph.nodes).toEqual({ local: { type: "local" } });
     expect(config.semantics.constants?.tree).toEqual({
-      nested: { keep: 2, change: 5 }, list: [7], cleared: null, scalar: { x: 8 },
+      nested: { keep: 2, change: 5 },
+      list: [7],
+      cleared: null,
+      scalar: { x: 8 },
     });
     // Nested maps, arrays and null reach the actual CEL consumer unchanged.
     const cel = createCelEvaluator();
-    expect(cel.evaluate("tree.nested.keep + tree.list[0] + tree.scalar.x", {
-      params: {}, constants: config.semantics.constants ?? {},
-    })).toBe(17);
-    expect(cel.evaluate("tree.cleared == null", {
-      params: {}, constants: config.semantics.constants ?? {},
-    })).toBe(true);
+    expect(
+      cel.evaluate("tree.nested.keep + tree.list[0] + tree.scalar.x", {
+        params: {},
+        constants: config.semantics.constants ?? {},
+      }),
+    ).toBe(17);
+    expect(
+      cel.evaluate("tree.cleared == null", {
+        params: {},
+        constants: config.semantics.constants ?? {},
+      }),
+    ).toBe(true);
   });
 
   it("inherits through an intermediate experiment with no documents", async () => {
@@ -129,7 +139,9 @@ realize:
     const config = await loadChild(
       { "semantics.yaml": "constants:\n  a: [1, 2]\n  b: { keep: 1 }\n  c: { keep: 2 }\n" },
       [{ id: "grandchild", extends: "child" }],
-      { "/experiments/grandchild/semantics.yaml": "constants:\n  a: { own: 3 }\n  b: [4]\n  c: 5\n" },
+      {
+        "/experiments/grandchild/semantics.yaml": "constants:\n  a: { own: 3 }\n  b: [4]\n  c: 5\n",
+      },
       "grandchild",
     );
     expect(config.semantics.constants).toMatchObject({ a: { own: 3 }, b: [4], c: 5 });
@@ -139,11 +151,20 @@ realize:
     await expect(loadChild({}, [], {}, "unknown")).rejects.toThrow(
       "E_EXPERIMENT_UNKNOWN: '/experiments/manifest.json': unknown",
     );
-    await expect(loadChild({}, [{ id: "grandchild", extends: "missing" }], {}, "grandchild"))
-      .rejects.toThrow("grandchild -> missing");
-    await expect(loadChild({}, [
-      { id: "a", extends: "b" }, { id: "b", extends: "a" },
-    ], {}, "a")).rejects.toThrow("E_EXPERIMENT_CYCLE: '/experiments/manifest.json': a -> b -> a");
+    await expect(
+      loadChild({}, [{ id: "grandchild", extends: "missing" }], {}, "grandchild"),
+    ).rejects.toThrow("grandchild -> missing");
+    await expect(
+      loadChild(
+        {},
+        [
+          { id: "a", extends: "b" },
+          { id: "b", extends: "a" },
+        ],
+        {},
+        "a",
+      ),
+    ).rejects.toThrow("E_EXPERIMENT_CYCLE: '/experiments/manifest.json': a -> b -> a");
   });
 
   it("rejects duplicate experiment IDs instead of choosing the first", async () => {

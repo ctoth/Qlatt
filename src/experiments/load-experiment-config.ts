@@ -99,7 +99,9 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
       throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' requires nonempty experiment IDs`);
     }
     if (entries.has(entry.id)) {
-      throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' duplicate experiment '${entry.id}'`);
+      throw new Error(
+        `E_EXPERIMENT_MANIFEST: '${manifestPath}' duplicate experiment '${entry.id}'`,
+      );
     }
     if (
       entry.extends !== undefined &&

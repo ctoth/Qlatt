@@ -14,6 +14,9 @@ Implemented recursive resolution and constants folding; fixtures cover three
 generations, whole-entry replacements, absent intermediate documents, arrays/null,
 CEL consumption, source isolation, identity errors and realize_each ordering.
 Local tests/CI were not run; this fresh worktree has no installed dependencies.
+PR #327: first quality job reported two formatting diagnostics; applied its exact
+printed formatting to the loader and focused fixtures. Replacement CI and Claude
+review remain pending; no behavior changes in the formatter response.
 
 ## Decisions and why
 Load manifest once, validate IDs, then resolve each single-parent chain bottom-up.

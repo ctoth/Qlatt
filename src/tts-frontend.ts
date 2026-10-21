@@ -1393,7 +1393,7 @@ function buildTextToKlattTrackDetailed(
       },
       {
         provenance,
-        frontendId,
+        frontendId: options.frontendPath ?? frontendId,
         affectLibrary: resources.affectPresets?.library,
         vqChannels: resources.vqChannels?.channels,
       },

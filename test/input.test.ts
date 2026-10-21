@@ -10,7 +10,7 @@ import {
   resolveAffectPreset,
 } from "../src/input/affect";
 import { parseAffectPresets } from "../src/input/affect-presets";
-import type { DirectionInput, DirectionTrack } from "../src/input/direction-track";
+import type { DirectionInput, DirectionSpan, DirectionTrack } from "../src/input/direction-track";
 import {
   NEUTRAL_DIMENSIONS,
   neutralVoiceQualityDelta,
@@ -246,6 +246,7 @@ describe("input contract — authored syllable stress", () => {
           version: "1",
           spans: [
             { id: "meter", anchor: { unit: "syllable", word: 0, start: 0 }, stress: { level: 1 } },
+            { id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { semitones: 1 } },
           ],
         },
       });
@@ -257,6 +258,10 @@ describe("input contract — authored syllable stress", () => {
         )!;
       expect(nucleus.get("stress")).toBe(1);
       expect(nucleus.get("isAccentCarrier")).toBe(false);
+      const pitch = result.utterance.provenance
+        .getDecisions()
+        .find((decision) => decision.type === "pitch");
+      expect(pitch?.reason).toContain(`frontend '${frontendPath}' vq_channels entries: f0Scale`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -492,6 +497,89 @@ describe("input contract — anchor resolution + span precedence", () => {
 });
 
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
+  it("attributes pitch, rate, and VQ to only their selected configured channel entries", () => {
+    const configured = parseVoiceQualityChannels({
+      channels: channels.map((row) => ({
+        ...row,
+        citations: [`authored:${row.channel}`, "shared"],
+      })),
+    });
+    const cases: { fields: Partial<DirectionSpan>; keys: string[]; kind: string }[] = [
+      { fields: { pitch: { semitones: 12 } }, keys: ["f0Scale"], kind: "pitch" },
+      { fields: { pitch: { rangeScale: 1.5 } }, keys: ["f0VarianceScale"], kind: "pitch" },
+      {
+        fields: { pitch: { semitones: 12, rangeScale: 1.5 } },
+        keys: ["f0Scale", "f0VarianceScale"],
+        kind: "pitch",
+      },
+      { fields: { rate: 2 }, keys: ["durationScale"], kind: "rate" },
+      { fields: { voiceQuality: { rdDelta: 0.2 } }, keys: ["rdDelta"], kind: "voice_quality" },
+    ];
+    for (const { fields, keys, kind } of cases) {
+      const input: DirectionInput = {
+        score: { text: "hello" },
+        directionTrack: {
+          version: "1",
+          spans: [{ id: "configured", anchor: { unit: "word", start: 0 }, ...fields }],
+        },
+      };
+      const direction = parseDirectionInput(input, {
+        ...affectOptions,
+        frontendId: "alternate",
+        vqChannels: configured,
+      }).directions[0];
+      const control = parseDirectionInput(input, affectOptions).directions[0];
+      expect(direction.kind).toBe(kind);
+      expect(direction.delta).toEqual(control.delta);
+      expect(direction.deltaFields).toEqual(keys);
+      expect(direction.decision.subject).toBe("token:0");
+      expect(direction.decision.stage).toBe("frontend");
+      expect(direction.decision.parents).toEqual(control.decision.parents);
+      expect(direction.citations).toEqual(direction.decision.citations);
+      expect(
+        direction.citations.filter((citation) => !citation.startsWith("Engineering convention:")),
+      ).toEqual([...new Set(keys.flatMap((key) => [`authored:${key}`, "shared"]))]);
+      expect(
+        direction.citations.some((citation) => citation.startsWith("Engineering convention:")),
+      ).toBe(true);
+      expect(direction.decision.reason.split("; frontend ").at(-1)).toBe(
+        `'alternate' vq_channels entries: ${keys.join(", ")}`,
+      );
+    }
+  });
+
+  it("preserves empty and unknown-only overrides without claiming channel evidence", () => {
+    const cases: Partial<DirectionSpan>[] = [
+      { pitch: {} },
+      { voiceQuality: {} },
+      { voiceQuality: { unknownChannel: 2 } },
+    ];
+    for (const fields of cases) {
+      const result = parseDirectionInput(
+        {
+          score: { text: "hello" },
+          directionTrack: {
+            version: "1",
+            spans: [{ id: "noop", anchor: { unit: "word", start: 0 }, ...fields }],
+          },
+        },
+        affectOptions,
+      );
+      expect(result.directions[0].delta).toEqual(NEUTRAL_VQ);
+      expect(result.directions[0].citations).toHaveLength(1);
+      expect(result.directions[0].citations[0]).toMatch(/^Engineering convention:/);
+      expect(result.directions[0].decision.reason).toContain("vq_channels entries: none");
+    }
+  });
+
+  it("rejects missing channel attribution at the existing resource boundary", () => {
+    for (const citations of [undefined, [], [" "]]) {
+      expect(() =>
+        parseVoiceQualityChannels({ channels: [{ ...channels[0], citations }] }),
+      ).toThrow(/E_VQ_CHANNEL_SCHEMA:.*citations/);
+    }
+  });
+
   it("routes pitch semitones to mean F0", () => {
     const input: DirectionInput = {
       score: { text: "hello" },

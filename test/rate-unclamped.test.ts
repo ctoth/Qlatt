@@ -34,6 +34,101 @@ function ratePolicy(spec: rulepack.CompiledRulepack) {
   ).rate;
 }
 
+function durationPolicy(spec: rulepack.CompiledRulepack) {
+  return (spec.parameters.policy as { duration: Record<string, unknown> }).duration;
+}
+
+describe("reference rate normalization", () => {
+  const citations = ["Engineering fixture: reference multiplier"];
+
+  it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+    "%s shares the cited normalized rate across downstream consumers",
+    (frontendId) => {
+      const speak = (rate: number, phrase = "hello world") =>
+        textToKlattTrackDetailed(phrase, undefined, undefined, { frontendId, rate });
+      const control = speak(0.5);
+      expect(
+        control.utterance.provenance
+          .getDecisions()
+          .some((d) => d.type === "speaking_rate_normalized"),
+      ).toBe(false);
+      const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
+      durationPolicy(spec).rate_reference = { value: 2, citations };
+      vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+      const lower = vi.spyOn(hrg, "lowerToFrames");
+      const normalized = speak(1);
+      expect(frameValues(normalized.track)).toEqual(frameValues(control.track));
+      expect(lower.mock.lastCall?.[1].transitions.default_transition_ms.value).toBe(
+        frontendId === "dectalk-english" ? 30 : 60,
+      );
+      expect(
+        normalized.utterance.provenance
+          .getDecisions()
+          .filter((d) => d.type === "speaking_rate_normalized"),
+      ).toEqual([
+        expect.objectContaining({
+          reason: "Initial request/parser rate: requested=1, reference=2, applied=0.5",
+          citations,
+        }),
+      ]);
+      if (frontendId === "dectalk-english") {
+        expect(frameValues(speak(1, "[:ra] hello world").track)).toEqual(
+          frameValues(control.track),
+        );
+        const command = speak(1, "[:ra 180] hello world");
+        durationPolicy(spec).rate_reference = { value: 1, citations };
+        const unchanged = speak(1);
+        expect(frameValues(command.track)).toEqual(frameValues(unchanged.track));
+        expect(
+          command.utterance.provenance.getDecisions().some((d) => d.type === "text_parser_command"),
+        ).toBe(true);
+      }
+      durationPolicy(spec).rate_reference = { value: 1, citations };
+      expect(
+        speak(1)
+          .utterance.provenance.getDecisions()
+          .some((d) => d.type === "speaking_rate_normalized"),
+      ).toBe(false);
+    },
+  );
+
+  it.each([
+    undefined,
+    null,
+    2,
+    { value: 0, citations },
+    { value: -1, citations },
+    { value: Number.NaN, citations },
+    { value: Number.POSITIVE_INFINITY, citations },
+    { citations },
+    { value: 2 },
+    { value: 2, citations: [] },
+    { value: 2, citations: [""] },
+    { value: 2, citations: ["  "] },
+    { value: 2, citations: [1] },
+    { value: 2, citations: "uncited scalar" },
+  ])("rejects malformed supplied reference %j", (reference) => {
+    const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
+    durationPolicy(spec).rate_reference = reference;
+    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+    expect(() => textToKlattTrack("hello", undefined, undefined, { rate: 1 })).toThrow(
+      "E_RATE_REFERENCE_INVALID",
+    );
+  });
+
+  it.each([
+    [Number.MAX_VALUE, Number.MIN_VALUE],
+    [Number.MIN_VALUE, Number.MAX_VALUE],
+  ])("rejects normalization of %s by %s outside finite positive numbers", (rate, reference) => {
+    const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
+    durationPolicy(spec).rate_reference = { value: reference, citations };
+    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+    expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
+      "E_RATE_INVALID",
+    );
+  });
+});
+
 describe("frontend rate defaults", () => {
   it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
     "%s uses a changed cited default and preserves explicit overrides",

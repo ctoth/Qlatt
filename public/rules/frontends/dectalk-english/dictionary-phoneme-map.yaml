@@ -215,13 +215,15 @@ fixups:
 stress:
   default: "0"
   marks: {"'": "1", "`": "2"}
-  citations: ["Engineering compatibility: preserve primary and secondary dictionary stress separately"]
+  citations:
+    - "DECtalk 4.63 dic/dic.c:447–448 (primary S1 and secondary S2 marks)"
+    - "Engineering compatibility: preserve primary and secondary dictionary stress separately"
 controls:
   block_rules: "~"
   morpheme_boundary: ["#", "*"]
   word_boundary: " "
-  citations: ["DECtalk 4.63 INCLUDE/phonlist.h; PH/ph_sort.c:1611–1612; PH/ph_aloph.c:563–567"]
+  citations: ["DECtalk 4.63 dic/dic.c:444–456; INCLUDE/phonlist.h:181–191; PH/ph_sort.c:1611–1612; PH/ph_aloph.c:563–567"]
 skip:
   - character: q
-    reason: "Engineering compatibility: retain the existing converter omission of glottal-stop q."
-    citations: ["DECtalk 4.63 INCLUDE/l_us_ph.h:112 (Q); Qlatt dictionary converter compatibility"]
+    reason: "Engineering compatibility: the selected Klatt inventory has no Q segment, so retain the converter's adjacent-vowel treatment instead of emitting q. CMU also omits Q for minutiae; this does not claim the same vowel sequence or DECtalk glottal-stop behavior."
+    citations: ["DECtalk 4.63 INCLUDE/l_us_ph.h:112 (Q); Qlatt dectalk-english inventory; CMU Pronouncing Dictionary entry minutiae"]

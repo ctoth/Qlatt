@@ -96,14 +96,6 @@ type CliIo = {
   stderr: (text: string) => void;
 };
 
-const COMPACT_PRIORITY_TYPES = new Set([
-  "fallback_pronunciation_selected",
-  "rule_rewrite_applied",
-  "semantics_rule_error_fallback",
-  "schedule_mode_selected",
-  "binding_resolved",
-]);
-
 function defaultIo(): CliIo {
   return {
     stdout: (text) => process.stdout.write(text),
@@ -286,7 +278,12 @@ function selectCompactDecisions(decisions: DecisionRecord[]): {
   displayed: DecisionRecord[];
   truncated: number;
 } {
-  const prioritized = decisions.filter((decision) => COMPACT_PRIORITY_TYPES.has(decision.type));
+  const prioritized = decisions.filter(
+    (decision) =>
+      decision.type === "fallback_pronunciation_selected" ||
+      (decision.type === "feature_overwrite" &&
+        (decision.stage === "rules" || decision.stage === "prosody")),
+  );
   const base = prioritized.length > 0 ? prioritized : decisions.slice(0, 20);
   const limit = 40;
   const displayed = base.slice(0, limit);

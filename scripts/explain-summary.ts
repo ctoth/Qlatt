@@ -71,20 +71,6 @@ function toInline(entries: Array<[string, number]>): string {
   return entries.map(([name, count]) => `${name}:${count}`).join(", ");
 }
 
-function countRewriteRules(decisions: ExplainDecision[], topN: number): Array<[string, number]> {
-  const counts = new Map<string, number>();
-  for (const decision of decisions) {
-    if (decision.type !== "rule_rewrite_applied") continue;
-    const reason = typeof decision.reason === "string" ? decision.reason : "";
-    const marker = " rewrite in phase ";
-    const idx = reason.indexOf(marker);
-    const ruleName = idx >= 0 ? reason.slice(0, idx).trim() : reason.trim();
-    const key = ruleName.length > 0 ? ruleName : "<unknown-rule>";
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, topN);
-}
-
 function main(): number {
   try {
     const { inputPath, topN } = parseArgs(process.argv.slice(2));
@@ -100,7 +86,6 @@ function main(): number {
     console.log(`decisions ${decisionCount} uncited ${uncitedCount} total ${totalDecisionCount}`);
     console.log(`byStage ${toInline(topEntries(summary.byStage, topN))}`);
     console.log(`topTypes ${toInline(topEntries(summary.byType, topN))}`);
-    console.log(`topRuleRewrites ${toInline(countRewriteRules(decisions, topN))}`);
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

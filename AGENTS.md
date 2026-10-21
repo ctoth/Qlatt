@@ -107,7 +107,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 
 | Flag | Description |
 |------|-------------|
-| `--format text\|json` | Output format (default: text) |
+| `--format text\|json\|dot` | Output format (default: text); DOT exports selected decisions and parent edges with stage colors. |
 | `--verbose` | Show all decisions in text mode (default shows ~40) |
 | `--stage <stages>` | Comma-separated filter: `transcribe`, `rules`, `prosody`, `semantics`, `interpreter`, `runtime`, `frontend` |
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |

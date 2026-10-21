@@ -83,8 +83,8 @@ describe("the frontend's own base F0, which the empty box leaves in force", () =
     expect(overridden.track).not.toEqual(none.track);
   });
 
-  // DECtalk 4.63 Paul's average pitch is 122 Hz (dectalk-english frontend.yaml
-  // policy.speaker.base_f0_hz); 110 passed in replaces it and moves every F0.
+  // DECtalk 4.63 Paul's average pitch is 122 Hz (dectalk-english speakers/paul.yaml
+  // base_f0_hz); 110 passed in replaces it and moves every F0.
   it("dectalk-english: none is Paul's 122, and 110 is a different track", () => {
     const none = speak("dectalk-english", undefined, "paul");
     const overridden = speak("dectalk-english", 110, "paul");

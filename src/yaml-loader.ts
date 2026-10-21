@@ -328,13 +328,18 @@ export function parseYamlString<T = unknown>(
 
 /**
  * Resolve a relative include path against the directory of the parent YAML file.
- * Absolute paths (starting with "/") are returned as-is.
- * Relative paths are resolved against the parent file's directory.
+ * Explicit URL parents use standard URL resolution. Otherwise absolute paths
+ * are retained and relative paths use the parent file's directory.
  *
  * @example resolveIncludePath("/rules/frontends/qlatt-english/frontend.yaml", "phases/duration.yaml") → "/rules/frontends/qlatt-english/phases/duration.yaml"
  * @example resolveIncludePath("/rules/frontends/qlatt-english/frontend.yaml", "/shared/common.yaml") → "/shared/common.yaml"
  */
 export function resolveIncludePath(parentPath: string, includePath: string): string {
+  if (/^(https?:\/\/|file:)/i.test(includePath)) return includePath;
+  if (/^[A-Za-z]:[\\/]/.test(includePath)) return includePath;
+  if (/^(https?:\/\/|file:)/i.test(parentPath)) {
+    return new URL(includePath, parentPath).href;
+  }
   if (includePath.startsWith("/")) return includePath;
   const parentDir = parentPath.substring(0, parentPath.lastIndexOf("/"));
   return parentDir + "/" + includePath;

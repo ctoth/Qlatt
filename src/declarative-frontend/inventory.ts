@@ -4,6 +4,8 @@ import { loadStressPolicy } from "../g2p/stress-policy";
 import type { AreaFunctionDerivation } from "../provenance";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
+import { parseTextParserConfig, type TextParserConfig } from "../text-parser/frontend";
+import type { TextParserTable } from "../text-parser/interpreter";
 import {
   cloneValue,
   isPlainObject,
@@ -71,6 +73,7 @@ export type FrontendResources = {
   dictionaryPath?: string;
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
   sourceContour?: { path: string; spec: SourceContourSpec };
+  textParser?: { config: TextParserConfig; table: TextParserTable };
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -844,6 +847,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
       : requireAsset(spec.source_contour_path, "source_contour", (path) =>
           parseSourceContourDocument(loadYamlDocumentSync(path)),
         );
+  const textParserConfig = parseTextParserConfig(spec);
+  if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
   return {
     inventory,
     inventoryPath,
@@ -853,6 +858,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(textParserConfig === null
+      ? {}
+      : {
+          textParser: {
+            config: textParserConfig,
+            table: FRONTEND_ASSET_CACHE.get(textParserConfig.tablePath) as TextParserTable,
+          },
+        }),
     ...(sourceContourPath === undefined
       ? {}
       : {

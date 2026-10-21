@@ -12,7 +12,6 @@
 
 import type { ProvenanceCollector } from "../provenance";
 import type { TextScopeSource } from "../text-scopes";
-import { loadYamlDocumentSync } from "../yaml-loader";
 import { clauseTexts, PUNCTUATION_PASS, readClauses } from "./clauses";
 import { commandScopes } from "./command-scopes";
 import { newCommandSlots, optionIndex, type ReadCommand } from "./commands";
@@ -80,18 +79,6 @@ export function parseTextParserConfig(spec: object): TextParserConfig | null {
     ending: raw.ending,
     commandsWithoutClauseEnd: without as string[],
   };
-}
-
-const tables = new Map<string, TextParserTable>();
-
-/** The rule table at `path`, parsed once. */
-export function textParserTableAt(path: string): TextParserTable {
-  let table = tables.get(path);
-  if (!table) {
-    table = loadYamlDocumentSync<TextParserTable>(path);
-    tables.set(path, table);
-  }
-  return table;
 }
 
 /** Windows-1252's characters at 0x80 to 0x9F; the rest of the page is Latin-1. */
@@ -289,6 +276,7 @@ export interface TextParserRunOptions {
  */
 export function runTextParser(
   config: TextParserConfig,
+  table: TextParserTable,
   text: string,
   hasWord: (lowerCaseWord: string) => boolean,
   provenance: ProvenanceCollector,
@@ -303,7 +291,6 @@ export function runTextParser(
     read: readonly ReadCommand[];
     phonemes?: { read: ReadPhonemes; speak: boolean };
   }> = [];
-  const table = textParserTableAt(config.tablePath);
   const marks = new Set([
     table.clauses.phonesOn,
     table.clauses.phonesOff,

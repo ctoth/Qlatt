@@ -10,14 +10,18 @@
  * letter-to-sound stage, character for character.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   INDEX_COMMAND_FIXTURE,
   recordedClauses,
   textParserPort,
 } from "../scripts/oracle/text-parser-port";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
+import { runTextParser } from "../src/text-parser/frontend";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import * as yaml from "../src/yaml-loader";
 
 const recorded = Object.entries(recordedClauses()).filter(
   (entry): entry is [string, string[]] => entry[1] !== null && entry[1].length > 0,
@@ -72,6 +76,38 @@ describe("dectalk text parser", () => {
 });
 
 describe("dectalk-english runs its text parser first", () => {
+  it("reuses the resource-owned table and executes without acquiring YAML", () => {
+    const spec = loadBundledRulepackSpec("dectalk-english");
+    const parser = loadFrontendResources(spec).textParser;
+    expect(parser).toBeDefined();
+    if (!parser) throw new Error("DECtalk fixture must declare a text parser");
+    const provenance = createProvenanceCollector();
+    const load = vi.spyOn(yaml, "loadYamlDocumentSync").mockImplementation(() => {
+      throw new Error("unexpected YAML acquisition");
+    });
+    try {
+      expect(loadFrontendResources(spec).textParser?.table).toBe(parser.table);
+      const result = runTextParser(
+        parser.config,
+        parser.table,
+        "Dr. Smith is here.",
+        () => true,
+        provenance,
+      );
+      expect(result.text).toContain("Doctor Smith");
+      const input = provenance.getDecisions().find((entry) => entry.type === "text_parser_input");
+      expect(input?.citations).toEqual([parser.config.tablePath]);
+      expect(load).not.toHaveBeenCalled();
+    } finally {
+      load.mockRestore();
+    }
+  });
+
+  it("leaves the parser absent for a frontend that does not declare it", () => {
+    const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+    expect(resources.textParser).toBeUndefined();
+  });
+
   const decisionsFor = (text: string, frontendId: string) => {
     const provenance = createProvenanceCollector();
     textToKlattTrackDetailed(text, undefined, 30, { frontendId, provenance });

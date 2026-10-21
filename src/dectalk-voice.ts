@@ -46,6 +46,11 @@ export type VoiceRuleFieldSpec =
 
 export type VoiceRuleFields = Record<string, number | string | null>;
 
+export interface SpeakerDefinitionContext {
+  path: string;
+  data: unknown;
+}
+
 export interface VoiceRegistry {
   dir: string;
   default: string;
@@ -267,20 +272,20 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
  * setspdef() does after setparam() (src/dectalk-speaker-definition.ts).
  */
 function withDefinitionChanges(
-  registry: VoiceRegistry,
+  context: SpeakerDefinitionContext | undefined,
   docPath: string,
   doc: Record<string, unknown>,
   changes: readonly DefinitionChange[],
 ): Record<string, unknown> {
-  if (registry.definitionPath === undefined) {
+  if (context === undefined) {
     throw new Error(
-      "E_VOICE_DEFINITION: the frontend declares no speakers.definition_path, so a voice's definition cannot be changed",
+      "E_VOICE_DEFINITION: selected speaker-definition context was not supplied, so a voice's definition cannot be changed",
     );
   }
-  const data = loadYamlDocumentSync<unknown>(registry.definitionPath);
+  const data = context.data;
   if (!isSpeakerDefinitionData(data)) {
     throw new Error(
-      `E_VOICE_DEFINITION: '${registry.definitionPath}' does not hold the names and limits of a speaker definition`,
+      `E_VOICE_DEFINITION: '${context.path}' does not hold the names and limits of a speaker definition`,
     );
   }
   if (!isSpeakerDefinition(doc.definition)) {
@@ -320,6 +325,7 @@ export function resolveVoice(
   profileSpec: SpeakerProfileSpec,
   /** Changes to the voice's speaker definition, in the order they were asked. */
   definitionChanges: readonly DefinitionChange[] = [],
+  definitionContext?: SpeakerDefinitionContext,
 ): ResolvedVoice {
   const name = voiceName.trim().toLowerCase();
   if (registry.voices.length > 0 && !registry.voices.includes(name)) {
@@ -332,7 +338,7 @@ export function resolveVoice(
   const [docPath, loaded] = loadVoiceDocument(registry, name);
   const doc =
     definitionChanges.length > 0
-      ? withDefinitionChanges(registry, docPath, loaded, definitionChanges)
+      ? withDefinitionChanges(definitionContext, docPath, loaded, definitionChanges)
       : loaded;
 
   const params = toNumberRecord(doc);

@@ -45,6 +45,7 @@ import {
   isExact,
   readVoiceCorpus,
 } from "../scripts/oracle/dectalk-voice-compare";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadRulepackSpecFromPath } from "../src/declarative-frontend/rule-pack";
 import {
   changeDefinition,
@@ -99,7 +100,9 @@ const run = (text: string, speaker = "paul") => {
 const spec = loadRulepackSpecFromPath("/rules/frontends/dectalk-english/frontend.yaml");
 const registry = getVoiceRegistry(spec);
 if (!registry?.definitionPath) throw new Error("the frontend declares no speaker definition data");
-const data = loadYamlDocumentSync<SpeakerDefinitionData>(registry.definitionPath);
+const definitionContext = loadFrontendResources(spec).speakerDefinition;
+if (!definitionContext) throw new Error("the frontend supplies no speaker definition context");
+const data = definitionContext.data as SpeakerDefinitionData;
 const at = (name: string): number => data.names.indexOf(name);
 
 describe("a speaker definition and the voice setspdef() makes of it", () => {
@@ -140,16 +143,30 @@ describe("a speaker definition and the voice setspdef() makes of it", () => {
   });
 
   it("derives the pitch floor and range from AP and PR", () => {
-    const changed = resolveVoice(registry, "paul", profileSpec, [
-      { index: at("AP"), value: 200 },
-      { index: at("PR"), value: 50 },
-    ]);
+    const changed = resolveVoice(
+      registry,
+      "paul",
+      profileSpec,
+      [
+        { index: at("AP"), value: 200 },
+        { index: at("PR"), value: 50 },
+      ],
+      definitionContext,
+    );
     // f0_minimum = (AP - 12) * 10, f0_scale_factor = PR * 41 (ph_vset.c:675-685).
     expect(changed.params.f0_minimum).toBe(1880);
     expect(changed.params.f0_scale_factor).toBe(2050);
     expect(changed.params.base_f0_hz).toBe(200);
     // The voice as it is without a change.
     expect(resolveVoice(registry, "paul", profileSpec).params.f0_minimum).toBe(1100);
+  });
+
+  it("requires definition context only for changes and reuses owner data", () => {
+    expect(loadFrontendResources(spec).speakerDefinition?.data).toBe(data);
+    expect(() => resolveVoice(registry, "paul", profileSpec)).not.toThrow();
+    expect(() =>
+      resolveVoice(registry, "paul", profileSpec, [{ index: at("AP"), value: 200 }]),
+    ).toThrow(/E_VOICE_DEFINITION: selected speaker-definition context was not supplied/);
   });
 });
 

@@ -1,4 +1,5 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
+import type { SpeakerDefinitionContext } from "../dectalk-voice";
 import type { Diagnostics } from "../diagnostics";
 import type { LtsContext } from "../g2p/lts-document";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
@@ -78,6 +79,7 @@ export type FrontendResources = {
   /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
   lexicon?: { path: string; dictionary: CmuDictionary };
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
+  speakerDefinition?: SpeakerDefinitionContext;
   sourceContour?: { path: string; spec: SourceContourSpec };
   textParser?: { config: TextParserConfig; table: TextParserTable };
   vqChannels?: {
@@ -884,6 +886,11 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
           parseSourceContourDocument(loadYamlDocumentSync(path)),
         );
   const textParserConfig = parseTextParserConfig(spec);
+  const speakers = isPlainObject(spec.speakers) ? spec.speakers : {};
+  const speakerDefinitionPath =
+    speakers.definition_path == null
+      ? undefined
+      : requireAsset(speakers.definition_path, "speakers.definition_path");
   if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
   const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
   const lexiconReference = declaredResources.lexicon ?? spec.dictionary_path;
@@ -936,6 +943,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
       phonotactics: FRONTEND_ASSET_CACHE.get(morphologyPhonotacticsPath) as PhonotacticsData,
     },
     stress: FRONTEND_ASSET_CACHE.get(stressPolicyPath) as StressContext,
+    ...(speakerDefinitionPath === undefined
+      ? {}
+      : {
+          speakerDefinition: {
+            path: speakerDefinitionPath,
+            data: FRONTEND_ASSET_CACHE.get(speakerDefinitionPath),
+          },
+        }),
     ...(lexiconPath === undefined
       ? {}
       : {

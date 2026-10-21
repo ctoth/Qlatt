@@ -898,6 +898,7 @@ function buildTextToKlattTrackDetailed(
         // Entries of the voice's speaker definition that commands before any
         // spoken text changed (src/text-parser/frontend.ts).
         parsedText?.initial.definition ?? [],
+        resources.speakerDefinition,
       )
     : null;
   const speakerOverride: SpeakerProfileOverride | undefined =
@@ -1267,7 +1268,13 @@ function buildTextToKlattTrackDetailed(
             {
               voices: registry.voices,
               resolveVoice: (name, definition) =>
-                resolveVoice(registry, name, speakerProfile, definition),
+                resolveVoice(
+                  registry,
+                  name,
+                  speakerProfile,
+                  definition,
+                  resources.speakerDefinition,
+                ),
               ...(rateUnit === undefined
                 ? {}
                 : {

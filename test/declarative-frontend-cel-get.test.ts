@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { parseDslSpec } from "../src/declarative-frontend/parser";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
+import { describe, expect, it } from "vitest";
 import {
   evaluateExpression,
   validateExpressionSyntax,
 } from "../src/declarative-frontend/cel-expressions";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
 
 /**
  * #47: the safe optional-field accessor.
@@ -59,12 +59,20 @@ describe("get CEL accessor", () => {
       apply: Array<{ field: string; dispatch: Array<{ default?: string }> }>;
     };
     expect(rule.apply.map((effect) => effect.field)).toEqual([
-      "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8",
+      "A9",
+      "A10",
     ]);
     for (const effect of rule.apply) {
       const expression = effect.dispatch.find((entry) => entry.default !== undefined)!.default!;
       expect(validateExpressionSyntax(expression)).toBeNull();
-      const oldExpression = `has(current.${effect.field}) ? current.${effect.field} : 0`;
+      const oldExpression = `has(current.?${effect.field}) ? current.${effect.field} : 0`;
       for (const value of [undefined, 0, 42]) {
         const current = value === undefined ? {} : { [effect.field]: value };
         expect(evaluateExpression(expression, { current })).toBe(value ?? 0);

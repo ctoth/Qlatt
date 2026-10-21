@@ -18,4 +18,4 @@ Implemented: one burst-template YAML expression and 43 lines of requested covera
 Local master was stale; implementation starts from fetched origin/master. Issue 132's rule is gone; most issue 134 formant defaults already migrated.
 
 ## Next step
-Commit/push/open PR, then respond to Claude review. PR CI owns validation; no local CI runs.
+PR #323 received Claude review: production change accepted; the comparison fixture omitted the optional-access question mark from the removed expression. Restored that exact old expression. Hosted quality feedback requested import ordering and multiline array formatting; applied those edits directly. No extra guards or local CI reruns. Push the response and await replacement CI before supervisor merge.

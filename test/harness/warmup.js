@@ -16,6 +16,7 @@
 // user has just chosen a frontend, not when they press Speak.
 
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
+import { createBrowserRuntimeAssetLoader } from "../../src/runtime-assets/browser-loader.ts";
 import { takeSynchronousFetches } from "../../src/sync-resource-cache.ts";
 import { loadNewRuntimeConfig } from "./experiment.js";
 import { state } from "./state.js";
@@ -38,7 +39,7 @@ async function warm(frontendId, loadRuntimeModule) {
 
   const { warmFrontend } = await loadRuntimeModule();
   mark("runtimeModule");
-  await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
+  await preloadF0Filters(createBrowserRuntimeAssetLoader(state.WORKLET_BASE_PATH));
   mark("f0Filters");
 
   // An idle moment or a time limit, whichever is first (warmup-wait.js).

@@ -14,6 +14,7 @@
  */
 
 import { isNodeRuntime, readBinaryFromFsSync } from "./path-utils";
+import type { RuntimeAssetLoader } from "./runtime-assets/types";
 import { initWasmModuleSync } from "./worklets/wasm-utils";
 
 export interface F0FilterExports {
@@ -79,18 +80,11 @@ export function isF0FilterLoaded(): boolean {
  * synchronous `textToKlattTrack` / `renderLayeredF0`. In Node the filesystem
  * path is used automatically and this is unnecessary.
  *
- * @param wasmUrl URL to `f0-filters.wasm` (e.g. `${BASE_URL}worklets/f0-filters.wasm`).
+ * @param assetLoader Selected worklet asset loader; owns fetching and load errors.
  */
-export async function preloadF0Filters(wasmUrl: string): Promise<void> {
+export async function preloadF0Filters(assetLoader: RuntimeAssetLoader): Promise<void> {
   if (isF0FilterLoaded()) return;
-  if (typeof fetch !== "function") {
-    throw new Error("preloadF0Filters requires fetch; in Node the filesystem path is used.");
-  }
-  const response = await fetch(wasmUrl);
-  if (!response.ok) {
-    throw new Error(`preloadF0Filters: failed to fetch ${wasmUrl} (HTTP ${response.status})`);
-  }
-  const bytes = await response.arrayBuffer();
+  const bytes = await assetLoader.loadWasmModule("f0-filters.wasm");
   setF0FilterWasmBytes(bytes);
 }
 

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { loadExperimentConfig } from "../../src/experiments/load-experiment-config";
+import { expandFormantBanks } from "../../src/formant-bank";
 import {
   type DisplayState,
   formatDisplay,
@@ -337,7 +339,9 @@ describe("display-formatter", () => {
     expect(text).toContain("LF modes:");
   });
 
-  it("gain_derivation formats computed gain ranges", () => {
+  it("gain_derivation formats computed gain ranges", async () => {
+    const { graph, semantics } = await loadExperimentConfig("klatt80-baseline");
+    expandFormantBanks(graph, semantics);
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -350,10 +354,23 @@ describe("display-formatter", () => {
     const section: DisplaySection = { id: "gains", source: "gain_derivation" };
     const text = formatSection(
       section,
-      makeState({ run, sliderParams: { parallelGainScale: 1, masterGain: 1 } }),
+      makeState({ run, semantics, sliderParams: { parallelGainScale: 1, masterGain: 1 } }),
     ).join("\n");
     expect(text).toContain("fricGain:");
     expect(text).toContain("parallelScale=1.000");
+  });
+
+  it("gain_derivation reports missing semantics after checking for track data", () => {
+    const section: DisplaySection = { id: "gains", source: "gain_derivation" };
+    expect(formatSection(section, makeState())).toEqual(["(no track data)"]);
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0, params: { AF: 55 } }],
+    };
+    expect(formatSection(section, makeState({ run }))).toEqual(["(no experiment semantics)"]);
   });
 
   it("voicing_issues reports clean track when none found", () => {

@@ -26,8 +26,15 @@ describe("track conformance authority", () => {
     expect(analyzeStopReleases(track, [{ relTime: 0 }])[0].issues[0]).toContain("dur:");
   });
 
-  it("does not promote aspiration into frication in parallel mode", () => {
-    const analysis = analyzeTrackGains([{ time: 0, params: { SW: 1, AF: 0, AH: 60 } }], {});
+  it("does not promote aspiration into frication in parallel mode", async () => {
+    const { graph, semantics } = await loadExperimentConfig("klatt80-baseline");
+    expandFormantBanks(graph, semantics);
+    const analysis = analyzeTrackGains(
+      [{ time: 0, params: { SW: 1, AF: 0, AH: 60 } }],
+      {},
+      48000,
+      semantics,
+    );
     expect(analysis?.ranges.fricGain?.max).toBe(0);
     expect(analysis?.ranges.aspGain?.max).toBeGreaterThan(0);
   });

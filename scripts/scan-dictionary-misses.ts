@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 type ParsedArgs = {
@@ -101,12 +102,6 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
     console.warn = (...warnArgs: unknown[]) => {
       const text = warnArgs.map((arg) => String(arg)).join(" ");
       logger.warn(text);
-      const missMatch = text.match(/Word "([^"]+)" not found in dictionary/);
-      if (missMatch) {
-        missCount += 1;
-        const missWord = missMatch[1];
-        missWordCounts.set(missWord, (missWordCounts.get(missWord) ?? 0) + 1);
-      }
     };
 
     try {
@@ -123,13 +118,26 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
 
       let processed = 0;
       for (const word of words) {
+        const provenance = createProvenanceCollector();
         try {
-          textToKlattTrack(word);
+          textToKlattTrack(word, undefined, undefined, { provenance });
         } catch (error) {
           errorCount += 1;
           logger.warn(
             `[dict-miss] error word="${word}" reason="${error instanceof Error ? error.message : String(error)}"`,
           );
+        } finally {
+          // Count configured G2P fallbacks, not all non-dictionary sources.
+          for (const decision of provenance.getDecisions()) {
+            if (
+              decision.stage !== "transcribe" ||
+              decision.type !== "fallback_pronunciation_selected"
+            )
+              continue;
+            const missWord = decision.subject.slice("word:".length);
+            missCount += 1;
+            missWordCounts.set(missWord, (missWordCounts.get(missWord) ?? 0) + 1);
+          }
         }
         processed += 1;
         if (processed % args.progressEvery === 0) {

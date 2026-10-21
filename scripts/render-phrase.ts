@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createDiagnostics } from "../src/diagnostics.ts";
 import { selectRenderBackend } from "../src/rendering/select-backend.ts";
 import type { RenderRequest } from "../src/rendering/types.ts";
 import { writeWav } from "../src/rendering/write-wav.ts";
@@ -104,13 +105,19 @@ payload.engine = engine;
 payload.frontendId = frontendId;
 payload.experimentId = experimentId;
 
+if (persistWav) {
+  const diagnostics = createDiagnostics();
+  const stats = writeWav(outWav, payload.samples, payload.sampleRate, diagnostics);
+  payload.wavEncoding = { path: outWav, ...stats };
+  payload.diagnostics = [
+    ...(Array.isArray(payload.diagnostics) ? payload.diagnostics : []),
+    ...diagnostics.getEntries(),
+  ];
+}
+
 if (persistJson) {
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
   fs.writeFileSync(outJson, JSON.stringify(payload, jsonSafeReplacer, 2));
-}
-
-if (persistWav) {
-  writeWav(outWav, payload.samples, payload.sampleRate);
 }
 
 if (!persistWav || !compareGolden) {

@@ -5,6 +5,12 @@ export interface RenderMetrics {
   peak: number;
 }
 
+export interface WavEncodingStats {
+  finitePeak: number;
+  clippedSamples: number;
+  invalidSamples: number;
+}
+
 export interface RenderTrackSummary {
   events: number;
   totalTime: number;
@@ -38,6 +44,8 @@ export interface RenderPayload
   tailTime: number;
   length: number;
   metrics: RenderMetrics;
+  /** Present only after WAV encoding; absence does not certify unclipped audio. */
+  wavEncoding?: WavEncodingStats & { path: string };
   trackSummary: RenderTrackSummary;
   diagnostics?: unknown;
   track?: unknown;

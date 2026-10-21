@@ -16,8 +16,12 @@ describe("harness runtime replacement", () => {
       getElementById: (id: string) =>
         id === "frontendSelect" ? frontend : id === "experimentSelect" ? experiment : null,
     });
-    const { applyFrontendDefault, onExperimentChange, loadExperimentManifest, loadFrontendManifest } =
-      await import("./harness/experiment.js");
+    const {
+      applyFrontendDefault,
+      onExperimentChange,
+      loadExperimentManifest,
+      loadFrontendManifest,
+    } = await import("./harness/experiment.js");
     await loadExperimentManifest();
     await loadFrontendManifest();
     expect(experiment.selectedIndex).toBe(-1);

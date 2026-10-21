@@ -99,7 +99,9 @@ export async function loadExperimentConfig(
   return config;
 }
 
-export async function loadExperimentManifest(): Promise<{ experiments: ExperimentManifestEntry[] }> {
+export async function loadExperimentManifest(): Promise<{
+  experiments: ExperimentManifestEntry[];
+}> {
   const manifestPath = "/experiments/manifest.json";
   const manifest = await loadJsonDocument<ExperimentManifest>(manifestPath);
   if (!Array.isArray(manifest?.experiments)) {

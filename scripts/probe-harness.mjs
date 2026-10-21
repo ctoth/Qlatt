@@ -103,10 +103,9 @@ try {
 
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForFunction(() => window.__qlatt != null, { timeout: 60000 });
-  await page.waitForFunction(
-    () => document.getElementById("experimentSelect")?.value,
-    { timeout: 60000 },
-  );
+  await page.waitForFunction(() => document.getElementById("experimentSelect")?.value, {
+    timeout: 60000,
+  });
 
   await page.selectOption("#frontendSelect", frontendId);
   if (experimentId !== undefined) await page.selectOption("#experimentSelect", experimentId);

@@ -1048,10 +1048,7 @@ export function listBundledFrontendIds(): string[] {
 }
 
 export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
-  return catalogueRulepackPath(
-    cataloguePaths(loadBundledFrontendManifest()),
-    frontendId,
-  );
+  return catalogueRulepackPath(cataloguePaths(loadBundledFrontendManifest()), frontendId);
 }
 
 /** Discover without blocking and retain source for subsequent synchronous TTS. */

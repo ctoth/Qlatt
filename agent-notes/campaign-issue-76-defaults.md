@@ -2,7 +2,7 @@
 Move generic backend defaults to existing manifests for the bounded #76 slice. Full package discovery and explicit supported pairs remain separate.
 
 # State
-Implementation ready in isolated branch from 2df87ed3: shared catalogue/experiment readers, explicit declared defaults and all actual generic callers migrated, with existing fixture coverage. Approved #248/#76/#74 issue additions published and read back exactly; #248 closed for its contract delivery, encoding implementation remains #227/#241. Owned #464 tree/local/remote branch cleaned. No local CI; preparing PR for hosted validation.
+PR #467 opened at 46781820 from 2df87ed3. Claude full-range review active, session 4cf44832-38e2-4b4e-9495-e0a5453db94d. Hosted quality job119347971292 reported four formatter differences (probe, rule-pack, manifest return type, lifecycle destructuring); applied its exact formatting, with no behavior change. Native/Node passed; runtime shards pending. Approved #248/#76/#74 issue additions read back exactly; #248 closed contract-only. Owned #464 cleanup complete; no local CI.
 
 # Decisions and why
 - Smallest approved change: 140–210 production lines plus 60–100 existing fixture lines. Reuse existing frontend catalogue parser/source readers and experiment manifest reader; no second parser/cache/package registry or artifact changes.

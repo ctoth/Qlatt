@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import {
   evaluateExpression,
   validateExpressionSyntax,
@@ -47,4 +50,44 @@ describe("get CEL accessor", () => {
   it("passes function-surface validation", () => {
     expect(validateExpressionSyntax("get(current, 'stress', 0) > 0")).toBeNull();
   });
+
+  it("preserves every expanded burst amplitude fallback for missing, zero and nonzero fields", () => {
+    const spec = parseDslSpec(
+      readFileSync("public/rules/frontends/qlatt-english/phases/formant.yaml", "utf8"),
+    );
+    const rule = spec.rules.burst_spectral_template as {
+      apply: Array<{ field: string; dispatch: Array<{ default?: string }> }>;
+    };
+    expect(rule.apply.map((effect) => effect.field)).toEqual([
+      "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10",
+    ]);
+    for (const effect of rule.apply) {
+      const expression = effect.dispatch.find((entry) => entry.default !== undefined)!.default!;
+      expect(validateExpressionSyntax(expression)).toBeNull();
+      const oldExpression = `has(current.${effect.field}) ? current.${effect.field} : 0`;
+      for (const value of [undefined, 0, 42]) {
+        const current = value === undefined ? {} : { [effect.field]: value };
+        expect(evaluateExpression(expression, { current })).toBe(value ?? 0);
+        expect(evaluateExpression(expression, { current })).toBe(
+          evaluateExpression(oldExpression, { current }),
+        );
+      }
+    }
+  });
+
+  it.each(["qlatt-english", "qlatt-beauty"])(
+    "%s burst amplitudes cannot widen the numeric HRG schema to null",
+    (frontend) => {
+      // buildUtteranceSchema starts these fields as numbers from base_params,
+      // then merges types observed in targets. Check both real consumers of
+      // the inherited burst rule rather than assuming targets cannot add null.
+      const inventory = loadInventorySpecFromPath(`/rules/frontends/${frontend}/inventory.yaml`);
+      for (const field of ["A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"]) {
+        expect(Number.isFinite(inventory.base_params[field])).toBe(true);
+        for (const target of Object.values(inventory.phoneme_targets)) {
+          if (Object.hasOwn(target, field)) expect(Number.isFinite(target[field])).toBe(true);
+        }
+      }
+    },
+  );
 });

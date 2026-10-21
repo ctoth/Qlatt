@@ -36,7 +36,7 @@ type ParsedArgs = {
   rangeRaw: string | null;
   outPath: string | null;
   baseF0: number | undefined;
-  transitionMs: number;
+  transitionMs?: number;
   verbose: boolean;
   whyDecisionId: string | null;
   frontendId: string;
@@ -159,9 +159,9 @@ function parseArgv(argv: string[]): ParsedArgs {
     throw new Error(`Invalid --base-f0 '${baseF0Raw}'`);
   }
 
-  const transitionMsRaw = flags.get("transition-ms") ?? "30";
-  const transitionMs = Number(transitionMsRaw);
-  if (!Number.isFinite(transitionMs) || transitionMs < 0) {
+  const transitionMsRaw = flags.get("transition-ms");
+  const transitionMs = transitionMsRaw === undefined ? undefined : Number(transitionMsRaw);
+  if (transitionMs !== undefined && (!Number.isFinite(transitionMs) || transitionMs < 0)) {
     throw new Error(`Invalid --transition-ms '${transitionMsRaw}'`);
   }
 

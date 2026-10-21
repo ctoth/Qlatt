@@ -61,7 +61,8 @@ export interface RenderRequest
   experimentId: string;
   engine: string;
   rate: number;
-  transitionMs: number;
+  /** Absent: the selected frontend's cited transition default. */
+  transitionMs?: number;
   sampleRate: number;
   leadTime: number;
   tailTime: number;

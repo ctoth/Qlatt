@@ -746,7 +746,7 @@ export { transcribeText } from "./transcribe-text";
 function buildTextToKlattTrackDetailed(
   inputText: string,
   baseF0: number | undefined,
-  transitionMs: number,
+  transitionMs: number | undefined,
   options: TextToKlattTrackOptions,
 ): TextToKlattTrackDetailedResult {
   const frontendId = options.frontendId ?? "qlatt-english";
@@ -1577,12 +1577,17 @@ function buildTextToKlattTrackDetailed(
     citations: [...resources.inventoryDocuments],
     parents: [inventoryDecision.id],
   });
-  const scaledTransition = transitionMs * rate ** -transitionExponent;
+  const requestedTransition =
+    transitionMs === undefined ? lowering.transitions.default_transition_ms.value : transitionMs;
+  const scaledTransition = requestedTransition * rate ** -transitionExponent;
   const lowerOptions = {
     ...lowering,
     transitions: {
       ...lowering.transitions,
-      default_transition_ms: { value: scaledTransition },
+      default_transition_ms: {
+        ...lowering.transitions.default_transition_ms,
+        value: scaledTransition,
+      },
     },
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
@@ -1607,7 +1612,7 @@ function buildTextToKlattTrackDetailed(
 export function textToKlattTrackDetailed(
   inputText: string,
   baseF0: number | undefined = undefined,
-  transitionMs = 30,
+  transitionMs?: number,
   options: TextToKlattTrackOptions = {},
 ): TextToKlattTrackDetailedResult {
   return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options);
@@ -1616,7 +1621,7 @@ export function textToKlattTrackDetailed(
 export function textToKlattTrack(
   inputText: string,
   baseF0: number | undefined = undefined,
-  transitionMs = 30,
+  transitionMs?: number,
   options: TextToKlattTrackOptions = {},
 ): KlattFrame[] {
   return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).track;

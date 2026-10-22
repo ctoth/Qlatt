@@ -1,0 +1,34 @@
+{
+  "version": "0.1.0",
+  "id": "laine88",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    }
+  ],
+  "backends": [
+    {
+      "id": "laine88",
+      "name": "Laine 1988 Higher-Pole Correction",
+      "description": "Four-formant cascade with Laine's tract-length-controlled all-zero correction",
+      "extends": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      },
+      "semantics": "../experiments/laine88/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "qlatt-english",
+        "id": "qlatt-english"
+      },
+      "backend": {
+        "package": "laine88",
+        "id": "laine88"
+      }
+    }
+  ]
+}

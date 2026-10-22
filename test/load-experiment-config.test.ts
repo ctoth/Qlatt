@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { createCelEvaluator } from "../src/semantics/cel-evaluator";
@@ -31,24 +32,46 @@ describe("loadExperimentConfig with a child that extends klatt80-baseline", () =
    * text); the parent and everything else are the files on disk.
    */
   async function loadChild(
-    childFiles: Record<string, string>,
+    childFiles: Record<string, string | null>,
     extraEntries: Array<{ id: string; extends?: string }> = [],
     extraFiles: Record<string, string> = {},
     selected = "child",
   ) {
-    const files: Record<string, string> = {
+    const files: Record<string, string | null> = {
       ...extraFiles,
-      "/experiments/manifest.json": JSON.stringify({
-        experiments: [
-          { id: "klatt80-baseline" },
-          { id: "child", extends: "klatt80-baseline" },
-          ...extraEntries,
-        ],
-      }),
     };
     for (const [name, text] of Object.entries(childFiles)) {
       files[`/experiments/child/${name}`] = text;
     }
+    const index = JSON.parse(readFileSync("public/packages/manifest.json", "utf8"));
+    index.packages.push({
+      id: "fixture",
+      version: "0.1.0",
+      baseUrl: "./",
+      manifest: "packages/fixture.json",
+    });
+    files["/packages/manifest.json"] = JSON.stringify(index);
+    files["/packages/fixture.json"] = JSON.stringify({
+      id: "fixture",
+      version: "0.1.0",
+      dependsOn: [{ id: "qlatt-english", version: "0.1.0" }],
+      backends: [{ id: "child", extends: "klatt80-baseline" }, ...extraEntries].map((entry) => ({
+        id: entry.id,
+        ...(entry.extends
+          ? {
+              extends: {
+                package: entry.extends === "klatt80-baseline" ? "qlatt-english" : "fixture",
+                id: entry.extends,
+              },
+            }
+          : {}),
+        ...Object.fromEntries(
+          ["graph", "registry", "semantics"]
+            .filter((role) => Object.hasOwn(files, `/experiments/${entry.id}/${role}.yaml`))
+            .map((role) => [role, `../experiments/${entry.id}/${role}.yaml`]),
+        ),
+      })),
+    });
     vi.resetModules();
     vi.doMock("../src/path-utils", async (importOriginal) => {
       const actual = await importOriginal<typeof import("../src/path-utils")>();
@@ -154,11 +177,11 @@ realize:
 
   it("reports unknown identities and complete missing-parent/cycle chains", async () => {
     await expect(loadChild({}, [], {}, "unknown")).rejects.toThrow(
-      "E_EXPERIMENT_UNKNOWN: '/experiments/manifest.json': unknown",
+      "E_PACKAGE_ENDPOINT: backend 'unknown' is unknown",
     );
     await expect(
       loadChild({}, [{ id: "grandchild", extends: "missing" }], {}, "grandchild"),
-    ).rejects.toThrow("grandchild -> missing");
+    ).rejects.toThrow("unknown backends endpoint 'fixture/missing'");
     await expect(
       loadChild(
         {},
@@ -169,12 +192,12 @@ realize:
         {},
         "a",
       ),
-    ).rejects.toThrow("E_EXPERIMENT_CYCLE: '/experiments/manifest.json': a -> b -> a");
+    ).rejects.toThrow("E_EXPERIMENT_CYCLE: fixture/a -> fixture/b -> fixture/a");
   });
 
   it("rejects duplicate experiment IDs instead of choosing the first", async () => {
     await expect(loadChild({}, [{ id: "child" }])).rejects.toThrow(
-      "E_EXPERIMENT_MANIFEST: '/experiments/manifest.json' duplicate experiment 'child'",
+      "E_PACKAGE_MANIFEST: fixture: duplicate backend 'child'",
     );
   });
 
@@ -195,6 +218,12 @@ realize:
     const child = await loadChild({});
 
     expect(child.semantics).toEqual(parent.semantics);
+  });
+
+  it("does not inherit a document declared by the child but missing from storage", async () => {
+    await expect(loadChild({ "graph.yaml": null })).rejects.toThrow(
+      /\/experiments\/child\/graph.yaml/,
+    );
   });
 
   it("throws on a YAML syntax error in the child's semantics.yaml, naming the path", async () => {

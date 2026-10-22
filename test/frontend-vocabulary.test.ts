@@ -1,8 +1,9 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { defaultExperimentFor, type FrontendManifest } from "../src/experiments/frontend-pairing";
+import { loadBundledFrontendManifest } from "../src/declarative-frontend/rule-pack";
+import { defaultExperimentFor } from "../src/experiments/frontend-pairing";
 import { assertFrontendVocabulary, checkVocabulary } from "../src/experiments/frontend-vocabulary";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
+import { loadBundledPackages } from "../src/package-discovery";
 
 describe("checkVocabulary", () => {
   it("reports all unknown columns and required inputs, preserving falsy defaults", async () => {
@@ -47,9 +48,9 @@ describe("checkVocabulary", () => {
 });
 
 describe("frontend/experiment pairing", () => {
-  it("rejects DECtalk columns that the baseline does not declare", async () => {
+  it("rejects an undeclared pair before vocabulary preparation", async () => {
     await expect(loadExperimentConfig("klatt80-baseline", "dectalk-english")).rejects.toThrow(
-      /E_FRONTEND_VOCABULARY.*breathiness/,
+      /E_SYNTH_PAIRING.*dectalk-english.*klatt80-baseline/,
     );
   });
 
@@ -58,18 +59,18 @@ describe("frontend/experiment pairing", () => {
     ["dectalk-english", "dectalk-english"],
     ["dectalk-english", "dectalk-vtm"],
     ["qlatt-beauty", "qlatt-beauty"],
+    ["qlatt-english", "laine88"],
+    ["qlatt-english", "steinecke95"],
   ])("accepts shipped pair %s / %s", async (frontendId, experimentId) => {
     await expect(loadExperimentConfig(experimentId, frontendId)).resolves.toBeDefined();
   });
 
-  const frontendManifest = JSON.parse(
-    readFileSync("public/rules/frontends/manifest.json", "utf8"),
-  ) as FrontendManifest;
-  const experimentIds = (
-    JSON.parse(readFileSync("public/experiments/manifest.json", "utf8")) as {
-      experiments: { id: string }[];
-    }
-  ).experiments.map((experiment) => experiment.id);
+  it.each(["klsyn88", "stevens91"])("does not advertise an unsupported %s pair", async (id) => {
+    await expect(loadExperimentConfig(id, "qlatt-english")).rejects.toThrow(/E_SYNTH_PAIRING/);
+  });
+
+  const frontendManifest = loadBundledFrontendManifest();
+  const experimentIds = loadBundledPackages().backends.map((entry) => entry.id);
 
   it("uses only declared manifest defaults, with no same-id inference", () => {
     expect(defaultExperimentFor("dectalk-english", frontendManifest, experimentIds)).toBe(

@@ -1,17 +1,15 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import {
   type ExperimentConfig,
   loadExperimentConfig,
 } from "../src/experiments/load-experiment-config";
 import { prepareExperimentConfig } from "../src/experiments/prepare-experiment-config";
+import { loadBundledPackages } from "../src/package-discovery";
 import { loadSemanticsDocumentSync } from "../src/semantics/load-semantics";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 import { createPreparedRuntime } from "./runtime-fixture";
 
-const manifest = JSON.parse(readFileSync("public/experiments/manifest.json", "utf8")) as {
-  experiments: { id: string }[];
-};
+const manifest = { experiments: loadBundledPackages().backends };
 const authored = (): ExperimentConfig => ({
   graph: {
     bacon: "0.1",

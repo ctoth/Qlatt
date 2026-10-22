@@ -67,8 +67,8 @@ Promise.all([loadExperimentManifest(), loadFrontendManifest()]).then(() => {
   }
   // Apply defaults only after both manifests are available.
   document.getElementById("frontendSelect")?.addEventListener("change", () => {
-    applyFrontendDefault();
     refreshSpeakerOptions().then(warmSelectedFrontend);
+    applyFrontendDefault();
   });
   // Auto-pair frontend -> experiment on load and populate the voice dropdown,
   // then prepare the frontend with the voice the dropdown shows.

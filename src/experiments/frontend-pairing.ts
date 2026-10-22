@@ -2,8 +2,8 @@
  * Which experiment (synthesizer backend) a frontend is played through when
  * the user has not chosen one.
  *
- * The pairing is data: a frontend's entry in
- * `public/rules/frontends/manifest.json` may name a `defaultExperiment`.
+ * The pairing is package-owned data. The existing string-ID view exposes
+ * each selected frontend's default backend as `defaultExperiment`.
  * No id equality or baseline fallback supplies an undeclared default.
  * Callers retain an explicitly selected experiment instead of applying a default.
  */
@@ -15,6 +15,8 @@ export interface FrontendManifestEntry {
   entryPoint?: string;
   /** Id of the experiment this frontend is paired with by default. */
   defaultExperiment?: string;
+  /** Derived from the selected backend owners' explicit supported pairs. */
+  supportedExperiments?: string[];
 }
 
 export interface FrontendManifest {

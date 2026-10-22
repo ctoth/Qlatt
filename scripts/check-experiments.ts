@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs";
-import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
+import {
+  loadExperimentConfig,
+  loadExperimentManifest,
+} from "../src/experiments/load-experiment-config.ts";
 
-const manifest = JSON.parse(readFileSync("public/experiments/manifest.json", "utf8")) as {
-  experiments: { id: string }[];
-};
+const manifest = await loadExperimentManifest();
 for (const { id } of manifest.experiments) {
   try {
     const config = await loadExperimentConfig(id);

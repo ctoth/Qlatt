@@ -1,0 +1,34 @@
+{
+  "version": "0.1.0",
+  "id": "qlatt-core-fixtures",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    }
+  ],
+  "backends": [
+    {
+      "id": "test-inherit",
+      "name": "Inherit Test",
+      "description": "Test fixture for experiment inheritance",
+      "extends": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      },
+      "semantics": "../experiments/test-inherit/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "qlatt-english",
+        "id": "qlatt-english"
+      },
+      "backend": {
+        "package": "qlatt-core-fixtures",
+        "id": "test-inherit"
+      }
+    }
+  ]
+}

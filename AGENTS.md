@@ -195,7 +195,7 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 
 Configuration lives in `public/experiments/<experiment-id>/` (e.g.
 `public/experiments/klatt80-baseline/`; experiments may `extends` a parent via
-`public/experiments/manifest.json`):
+their backend entry in `public/packages/<package-id>.json`):
 
 - **`registry.yaml`**: Primitive node definitions (resonator, gain, etc.)
 - **`graph.yaml`**: Audio graph topology (nodes + connections); Qlatt macro

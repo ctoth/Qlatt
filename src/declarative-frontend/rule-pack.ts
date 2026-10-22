@@ -26,9 +26,14 @@ import {
 import { parseInlineMarkers } from "../input/inline";
 import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
 import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
+import {
+  findPackageEntry,
+  loadBundledPackages,
+  type PackageDiscovery,
+  preloadBundledPackages,
+} from "../package-discovery";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
-import { keepSyncResource } from "../sync-resource-cache";
 import { parseTextParserConfig, type TextParserConfig } from "../text-parser/frontend";
 import type { TextParserTable } from "../text-parser/interpreter";
 import {
@@ -300,7 +305,6 @@ function hasNonEmptyValue(value: unknown): boolean {
 }
 
 export const DEFAULT_FRONTEND_ID = "qlatt-english";
-const FRONTEND_MANIFEST_PATH = "/rules/frontends/manifest.json";
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -986,49 +990,50 @@ export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   return spec;
 }
 
-/** The existing bundled catalogue, not a package dependency/pairing registry. */
+/** String-ID view of the selected package endpoints for existing callers. */
 type BundledFrontendManifest = { frontends: (FrontendManifestEntry & { entryPoint: string })[] };
 
-function frontendCatalogue(source: string): BundledFrontendManifest {
-  const manifest: unknown = JSON.parse(source);
-  if (!isPlainObject(manifest) || !Array.isArray(manifest.frontends)) {
-    throw new Error(`E_FRONTEND_MANIFEST: '${FRONTEND_MANIFEST_PATH}' requires frontends`);
-  }
-  const entries = new Map<string, FrontendManifestEntry & { entryPoint: string }>();
-  for (const entry of manifest.frontends) {
-    if (
-      !isPlainObject(entry) ||
-      typeof entry.id !== "string" ||
-      !entry.id.trim() ||
-      typeof entry.entryPoint !== "string" ||
-      !entry.entryPoint.trim()
-    ) {
-      throw new Error(`E_FRONTEND_MANIFEST: each frontend requires nonempty id and entryPoint`);
-    }
-    if (entries.has(entry.id)) {
-      throw new Error(`E_FRONTEND_MANIFEST: duplicate frontend '${entry.id}'`);
-    }
-    entries.set(entry.id, { ...entry, id: entry.id, entryPoint: entry.entryPoint });
-  }
-  return { frontends: [...entries.values()] };
+function frontendCatalogue(discovery: PackageDiscovery): BundledFrontendManifest {
+  return {
+    frontends: discovery.frontends.map((entry) => {
+      findPackageEntry(discovery.frontends, entry.id, "frontend");
+      const backend = findPackageEntry(discovery.backends, entry.defaultBackend, "backend");
+      findPackageEntry(discovery.backends, backend.id, "backend");
+      const supportedExperiments = discovery.packages
+        .flatMap((pkg) => pkg.supportedPairs)
+        .filter(
+          (pair) =>
+            pair.frontend.package === entry.endpoint.package && pair.frontend.id === entry.id,
+        )
+        .map((pair) => {
+          const supported = findPackageEntry(discovery.backends, pair.backend, "backend");
+          findPackageEntry(discovery.backends, supported.id, "backend");
+          return supported.id;
+        });
+      return {
+        id: entry.id,
+        name: entry.name,
+        description: entry.description,
+        entryPoint: entry.source,
+        defaultExperiment: backend.id,
+        supportedExperiments,
+      };
+    }),
+  };
 }
 
 export function loadBundledFrontendManifest(): BundledFrontendManifest {
-  return frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH));
+  return frontendCatalogue(loadBundledPackages());
 }
 
 export async function preloadBundledFrontendManifest(): Promise<BundledFrontendManifest> {
-  const source = await loadYamlSource(FRONTEND_MANIFEST_PATH);
-  const manifest = frontendCatalogue(source);
-  keepSyncResource(FRONTEND_MANIFEST_PATH, source);
-  return manifest;
+  return frontendCatalogue(await preloadBundledPackages());
 }
 
 function cataloguePaths(manifest: BundledFrontendManifest): Map<string, string> {
   const paths = new Map<string, string>();
   for (const entry of manifest.frontends) {
-    const directory = resolveIncludePath(FRONTEND_MANIFEST_PATH, `${entry.id}/`);
-    paths.set(entry.id, resolveIncludePath(directory, entry.entryPoint));
+    paths.set(entry.id, entry.entryPoint);
   }
   return paths;
 }

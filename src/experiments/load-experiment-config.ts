@@ -1,8 +1,14 @@
 import type { BaconGraph, Registry } from "../klatt-runtime";
-import { normalizePath, readFileFromFsSync } from "../path-utils";
-import { loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
+import {
+  assertSupportedPair,
+  findPackageEntry,
+  type PackageDiscovery,
+  type PackageEndpoint,
+  preloadBundledPackages,
+} from "../package-discovery";
+import { loadSemanticsDocument } from "../semantics/load-semantics";
 import type { SemanticsConstants, SemanticsDocument } from "../semantics/types";
-import { isPlainObject, loadYamlDocumentOrNull } from "../yaml-loader";
+import { isPlainObject, loadYamlDocument } from "../yaml-loader";
 import { assertFrontendVocabulary } from "./frontend-vocabulary";
 import {
   type ConfigSources,
@@ -19,10 +25,6 @@ type ExperimentManifestEntry = {
   extends?: string;
   name?: string;
   description?: string;
-};
-
-type ExperimentManifest = {
-  experiments?: ExperimentManifestEntry[];
 };
 
 export interface ExperimentConfig {
@@ -72,29 +74,35 @@ function mergeSemantics(
   return merged;
 }
 
-async function loadJsonDocument<T>(specPath: string): Promise<T> {
-  const fromFs = readFileFromFsSync(specPath);
-  if (typeof fromFs === "string") {
-    return JSON.parse(fromFs) as T;
-  }
-
-  if (typeof fetch === "function") {
-    const url = normalizePath(specPath);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to load '${specPath}' (${response.status})`);
-    }
-    return (await response.json()) as T;
-  }
-
-  throw new Error(`Unable to load JSON resource '${specPath}'`);
+export async function assertExperimentPair(
+  frontendId: string,
+  experimentId: string,
+): Promise<void> {
+  const discovery = await preloadBundledPackages();
+  assertSupportedPair(
+    discovery,
+    findPackageEntry(discovery.frontends, frontendId, "frontend").endpoint,
+    findPackageEntry(discovery.backends, experimentId, "backend").endpoint,
+  );
 }
 
 export async function loadExperimentConfig(
   experimentId: string,
   frontendId?: string,
 ): Promise<PreparedExperimentConfig> {
-  const config = prepareExperimentConfig(await loadConfig(experimentId), experimentId);
+  const discovery = await preloadBundledPackages();
+  const backend = findPackageEntry(discovery.backends, experimentId, "backend");
+  if (frontendId !== undefined) {
+    assertSupportedPair(
+      discovery,
+      findPackageEntry(discovery.frontends, frontendId, "frontend").endpoint,
+      backend.endpoint,
+    );
+  }
+  const config = prepareExperimentConfig(
+    await loadConfig(discovery, backend.endpoint),
+    experimentId,
+  );
   if (frontendId !== undefined) await assertFrontendVocabulary(frontendId, config);
   return config;
 }
@@ -102,55 +110,47 @@ export async function loadExperimentConfig(
 export async function loadExperimentManifest(): Promise<{
   experiments: ExperimentManifestEntry[];
 }> {
-  const manifestPath = "/experiments/manifest.json";
-  const manifest = await loadJsonDocument<ExperimentManifest>(manifestPath);
-  if (!Array.isArray(manifest?.experiments)) {
-    throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' requires experiments`);
-  }
-  const entries = new Map<string, ExperimentManifestEntry>();
-  for (const entry of manifest.experiments) {
-    if (!isPlainObject(entry) || typeof entry.id !== "string" || !entry.id.trim()) {
-      throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' requires nonempty experiment IDs`);
-    }
-    if (entries.has(entry.id)) {
-      throw new Error(
-        `E_EXPERIMENT_MANIFEST: '${manifestPath}' duplicate experiment '${entry.id}'`,
-      );
-    }
-    if (
-      entry.extends !== undefined &&
-      (typeof entry.extends !== "string" || !entry.extends.trim())
-    ) {
-      throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' invalid parent for '${entry.id}'`);
-    }
-    entries.set(entry.id, entry);
-  }
-  return { experiments: [...entries.values()] };
+  const discovery = await preloadBundledPackages();
+  return {
+    experiments: discovery.backends.map((entry) => {
+      findPackageEntry(discovery.backends, entry.id, "backend");
+      return {
+        id: entry.id,
+        name: entry.name,
+        description: entry.description,
+        ...(entry.extends
+          ? { extends: findPackageEntry(discovery.backends, entry.extends, "backend").id }
+          : {}),
+      };
+    }),
+  };
 }
 
-async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
-  const manifestPath = "/experiments/manifest.json";
-  const manifest = await loadExperimentManifest();
-  const entries = new Map(manifest.experiments.map((entry) => [entry.id, entry]));
-
-  async function resolve(id: string, ancestors: readonly string[]): Promise<ExperimentConfig> {
+async function loadConfig(
+  discovery: PackageDiscovery,
+  selected: PackageEndpoint,
+): Promise<ExperimentConfig> {
+  async function resolve(
+    point: PackageEndpoint,
+    ancestors: readonly string[],
+  ): Promise<ExperimentConfig> {
+    const id = `${point.package}/${point.id}`;
     const chain = [...ancestors, id];
-    const context = `'${manifestPath}': ${chain.join(" -> ")}`;
+    const context = chain.join(" -> ");
     if (ancestors.includes(id)) throw new Error(`E_EXPERIMENT_CYCLE: ${context}`);
-    const entry = entries.get(id);
-    if (!entry) throw new Error(`E_EXPERIMENT_UNKNOWN: ${context}`);
+    const entry = findPackageEntry(discovery.backends, point, "backend");
     const parent = entry.extends === undefined ? null : await resolve(entry.extends, chain);
-    const basePath = `/experiments/${id}`;
+    const paths = entry.documents;
 
     const [childGraph, childSemantics, childRegistry] = await Promise.all([
-      loadYamlDocumentOrNull<BaconGraph>(`${basePath}/graph.yaml`),
-      loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
-      loadYamlDocumentOrNull<Registry>(`${basePath}/registry.yaml`),
+      paths.graph === undefined ? null : loadYamlDocument<BaconGraph>(paths.graph),
+      paths.semantics === undefined ? null : loadSemanticsDocument(paths.semantics),
+      paths.registry === undefined ? null : loadYamlDocument<Registry>(paths.registry),
     ]);
     const sources: ConfigSources = {
-      graph: documentSources(childGraph, `${basePath}/graph.yaml`),
-      semantics: documentSources(childSemantics, `${basePath}/semantics.yaml`),
-      registry: documentSources(childRegistry, `${basePath}/registry.yaml`),
+      graph: childGraph ? documentSources(childGraph, paths.graph!) : {},
+      semantics: childSemantics ? documentSources(childSemantics, paths.semantics!) : {},
+      registry: childRegistry ? documentSources(childRegistry, paths.registry!) : {},
     };
 
     if (!parent) {
@@ -199,5 +199,5 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
     };
   }
 
-  return resolve(experimentId, []);
+  return resolve(selected, []);
 }

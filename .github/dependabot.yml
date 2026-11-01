@@ -5,10 +5,10 @@ updates:
     schedule:
       interval: weekly
     # ts-node and check-registry-bindings use the pre-7 JavaScript compiler API.
-    # Migrate both consumers before accepting the native compiler's new API.
+    # Remove this 7.x ignore once both consumers support TypeScript 7's API.
     ignore:
       - dependency-name: typescript
-        versions: [">=7"]
+        versions: ["7.x"]
     groups:
       npm-development:
         dependency-type: development

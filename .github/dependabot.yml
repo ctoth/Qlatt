@@ -4,6 +4,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # ts-node and check-registry-bindings use the pre-7 JavaScript compiler API.
+    # Migrate both consumers before accepting the native compiler's new API.
+    ignore:
+      - dependency-name: typescript
+        versions: [">=7"]
     groups:
       npm-development:
         dependency-type: development
